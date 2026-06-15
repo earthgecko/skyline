@@ -14,7 +14,11 @@ from functions.redis.get_metric_redistimeseries import get_metric_redistimeserie
 # @added 20210525 - Branch #1444: thunder
 #                   Task #4030: refactoring
 # Add a global method to get a metric timeseries from Redis
-def get_metric_timeseries(current_skyline_app, metric_name, from_timestamp=None, until_timestamp=None, log=True):
+# @modified 20250326 - Feature #5611: custom_algorithm_only
+# Allow derivative_metrics to be passed
+def get_metric_timeseries(
+        current_skyline_app, metric_name, from_timestamp=None,
+        until_timestamp=None, derivative_metrics=[], log=True):
     """
     Return a metric time series as a list e.g.
     [[ts, value], [ts, value], ..., [ts, value]]
@@ -97,26 +101,30 @@ def get_metric_timeseries(current_skyline_app, metric_name, from_timestamp=None,
         current_logger.error('error :: failed to unpack %s time series from Redis data - %s' % (metric_name, e))
         timeseries = []
 
-    try:
-        redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
-    except Exception as e:
-        if not log:
-            current_skyline_app_logger = current_skyline_app + 'Log'
-            current_logger = logging.getLogger(current_skyline_app_logger)
-        current_logger.error('error :: %s :: failed to connect to Redis to get derivative_metrics - %s' % (
-            function_str, e))
-    derivative_metrics = []
-    try:
-        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
-        # derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
-        derivative_metrics = list(redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
-    except Exception as e:
-        if not log:
-            current_skyline_app_logger = current_skyline_app + 'Log'
-            current_logger = logging.getLogger(current_skyline_app_logger)
-        current_logger.error('error :: %s :: failed to connect to Redis for smembers of derivative_metrics - %s' % (
-            function_str, e))
+    # @modified 20250326 - Feature #5611: custom_algorithm_only
+    # Only get from Redis if derivative_metrics is not         
+    if not derivative_metrics:
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+        except Exception as e:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: failed to connect to Redis to get derivative_metrics - %s' % (
+                function_str, e))
         derivative_metrics = []
+        try:
+            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+            # derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
+            derivative_metrics = list(redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
+        except Exception as e:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: failed to connect to Redis for smembers of derivative_metrics - %s' % (
+                function_str, e))
+            derivative_metrics = []
+
     if metric_name in derivative_metrics:
         if len(timeseries) > 3:
             try:

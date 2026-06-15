@@ -104,6 +104,9 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
         db_all_metric_ids_with_names = {}
         for metric in list(db_all_metric_names_with_ids.keys()):
             db_all_metric_ids_with_names[db_all_metric_names_with_ids[metric]] = metric
+        logger.info('%s :: len(db_all_metric_ids_with_names): %s' % (
+            function_str, str(len(db_all_metric_ids_with_names))))
+
         is_shard_metric_failures = 0
         if HORIZON_SHARDS:
             logger.info('%s :: found %s all_metric_names before removing metrics not belonging to this shard' % (
@@ -392,7 +395,7 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
                 try:
                     redis_active_metric_ids.append(db_all_metric_names_with_ids[unique_base_name])
                 except Exception as err:
-                    errors.append(['failed to find id for unique_base_name', unique_base_name])
+                    errors.append(['failed to find id for unique_base_name', unique_base_name, err])
         if errors:
             logger.error('error :: %s :: %s errors encountered determining ids from unique_base_names, last error - %s' % (
                 function_str, str(len(errors)), str(errors[-1])))
@@ -591,8 +594,9 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
                     err_msg = 'failed to determine metric for metric id: %s' % str(metric_id)
                     inactive_metric_names_with_ids_errors.append([err_msg, err])
             if inactive_metric_names_with_ids_errors:
-                logger.error('error :: %s :: creating inactive_metric_names_with_ids reports errors, last 3 reported: %s' % (
-                    function_str, str(inactive_metric_names_with_ids_errors[-3:])))
+                logger.error('error :: %s :: creating inactive_metric_names_with_ids reports %s errors, last 3 reported: %s' % (
+                    function_str, str(len(inactive_metric_names_with_ids_errors)),
+                    str(inactive_metric_names_with_ids_errors[-3:])))
         if inactive_metric_names_with_ids:
             try:
                 # @modified 20231223 - Task #5188: Optimise redis renames

@@ -530,6 +530,37 @@ def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=Fa
                 function_str, parent_namespace, str(len(parent_namespace_metrics)),
                 str(unfiltered_parent_namespace_metrics_count)))
 
+        # @added 20260429 - Task #5732: thunder.stale_metrics handle no timeseries
+        # Handle when no timeseries data
+        metrics_no_timeseries_data = {}
+        try:
+            metrics_no_timeseries_data = redis_conn_decoded.hgetall('thunder.stale_metrics.no_timeseries_data')
+        except Exception as err:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: hgetall failed on thunder.stale_metrics.no_timeseries_data, err: %s' % (
+                function_str, str(err)))
+        metrics_no_timeseries_data_to_remove = []
+        for base_name, timestamp_str in metrics_no_timeseries_data.items():
+            added_ts = int(timestamp_str)
+            if (added_ts + 86800) < now:
+                metrics_no_timeseries_data_to_remove.append(base_name)
+        if len(metrics_no_timeseries_data_to_remove) > 0:
+            try:
+                redis_conn_decoded.hdel('thunder.stale_metrics.no_timeseries_data', *set(metrics_no_timeseries_data_to_remove))
+            except Exception as err:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error('error :: %s :: hdel failed on thunder.stale_metrics.no_timeseries_data, err: %s' % (
+                    function_str, str(err)))
+            for base_name in metrics_no_timeseries_data_to_remove:
+                try:
+                    del metrics_no_timeseries_data[base_name]
+                except:
+                    pass
+
         # Now check metrics that are default STALE_PERIOD metrics and are not
         # CUSTOM_STALE_PERIOD metrics
         last_error = None
@@ -537,6 +568,12 @@ def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=Fa
         for base_name, timestamp in stale_period_parent_namespace_metrics:
             if base_name in sparsely_populated_metrics:
                 continue
+
+            # @added 20260429 - Task #5732: thunder.stale_metrics handle no timeseries
+            # Handle when no timeseries data
+            if base_name in metrics_no_timeseries_data.keys():
+                continue
+
             try:
                 # Only alert once on stale metrics and identify as recovered
                 if base_name in alerted_on_stale_metrics:
@@ -566,13 +603,28 @@ def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=Fa
                                     if not log:
                                         current_skyline_app_logger = current_skyline_app + 'Log'
                                         current_logger = logging.getLogger(current_skyline_app_logger)
-                                    current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                                    current_logger.error('error :: %s :: get_sparsity failed in stale_period_parent_namespace_metrics for %s - %s' % (
                                         function_str, base_name, str(success)))
+                                # @added 20260429 - Task #5732: thunder.stale_metrics handle no timeseries
+                                # Handle when no timeseries data
+                                if success == 'no timeseries data':
+                                    try:
+                                        redis_conn_decoded.hset('thunder.stale_metrics.no_timeseries_data', base_name, now)
+                                        if log:
+                                            current_logger.info('%s :: added %s to thunder.stale_metrics.no_timeseries_data to not check for 86400 seconds' % (
+                                                function_str, base_name))
+                                    except Exception as err:
+                                        if not log:
+                                            current_skyline_app_logger = current_skyline_app + 'Log'
+                                            current_logger = logging.getLogger(current_skyline_app_logger)
+                                        current_logger.error('error :: %s :: hset failed to add %s to thunder.stale_metrics.no_timeseries_data, err: %s' % (
+                                            function_str, base_name, str(err)))
+  
                         except Exception as e:
                             if not log:
                                 current_skyline_app_logger = current_skyline_app + 'Log'
                                 current_logger = logging.getLogger(current_skyline_app_logger)
-                            current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                            current_logger.error('error :: %s :: get_sparsity failed in stale_period_parent_namespace_metrics for %s - %s' % (
                                 function_str, base_name, e))
 
                     namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name] = timestamp
@@ -598,6 +650,11 @@ def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=Fa
         for base_name, timestamp in custom_stale_period_parent_namespace_metrics:
             if base_name in sparsely_populated_metrics:
                 continue
+            # @added 20260429 - Task #5732: thunder.stale_metrics handle no timeseries
+            # Handle when no timeseries data
+            if base_name in metrics_no_timeseries_data.keys():
+                continue
+
             try:
                 # Only alert once on stale metrics and identify as recovered
                 if base_name in alerted_on_stale_metrics:
@@ -629,13 +686,28 @@ def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=Fa
                                     if not log:
                                         current_skyline_app_logger = current_skyline_app + 'Log'
                                         current_logger = logging.getLogger(current_skyline_app_logger)
-                                    current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                                    current_logger.error('error :: %s :: get_sparsity failed in custom_stale_period_parent_namespace_metrics for %s - %s' % (
                                         function_str, base_name, str(success)))
+                                # @added 20260429 - Task #5732: thunder.stale_metrics handle no timeseries
+                                # Handle when no timeseries data
+                                if success == 'no timeseries data':
+                                    try:
+                                        redis_conn_decoded.hset('thunder.stale_metrics.no_timeseries_data', base_name, now)
+                                        if log:
+                                            current_logger.info('%s :: added %s to thunder.stale_metrics.no_timeseries_data to not check for 86400 seconds' % (
+                                                function_str, base_name))
+                                    except Exception as err:
+                                        if not log:
+                                            current_skyline_app_logger = current_skyline_app + 'Log'
+                                            current_logger = logging.getLogger(current_skyline_app_logger)
+                                        current_logger.error('error :: %s :: hset failed to add %s to thunder.stale_metrics.no_timeseries_data, err: %s' % (
+                                            function_str, base_name, str(err)))
+
                         except Exception as e:
                             if not log:
                                 current_skyline_app_logger = current_skyline_app + 'Log'
                                 current_logger = logging.getLogger(current_skyline_app_logger)
-                            current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                            current_logger.error('error :: %s :: get_sparsity failed in custom_stale_period_parent_namespace_metrics for %s - %s' % (
                                 function_str, base_name, e))
 
                     namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name] = timestamp

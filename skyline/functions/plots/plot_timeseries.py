@@ -31,7 +31,9 @@ def plot_timeseries(
         current_skyline_app, metric, timeseries, output_file,
         plot_parameters={
             'title': None, 'line_color': 'blue', 'bg_color': 'black',
-            'figsize': (8, 4)
+            'figsize': (8, 4),
+            # @added 20250121 - Feature #5588: snab.process_algorithm
+            'linewidth': 1, 'plot_legend': True,
         }):
     """
     Creates a png graph image using the time series data and returns the path
@@ -123,6 +125,16 @@ def plot_timeseries(
         # Plot match
         rcParams['figure.figsize'] = 8, 4
 
+        # @added 20250121 - Feature #5588: snab.process_algorithm
+        if 'figsize' in plot_parameters:
+            rcParams['figure.figsize'] = plot_parameters['figsize']
+        lw = 1
+        if 'linewidth' in plot_parameters:
+            lw = plot_parameters['linewidth']
+        plot_legend = True
+        if 'plot_legend' in plot_parameters:
+            plot_legend = plot_parameters['plot_legend']
+
         # @added 20230713 - Task #4996: Improve matplotlib performance
         # Improve matplotlib render performance
         rcParams['path.simplify_threshold'] = 1.0
@@ -143,12 +155,20 @@ def plot_timeseries(
             use_label = textwrap.fill(metric, width=140, break_long_words=True)
             fontsize = 'xx-small'
 
+        # @added 20250121 - Feature #5588: snab.process_algorithm
+        try:
+            use_label = plot_parameters['use_label']
+        except KeyError:
+            pass
+
         ax.set_title(graph_title, fontsize=title_fontsize)
         if hasattr(ax, 'set_facecolor'):
             ax.set_facecolor(plot_parameters['bg_color'])
         else:
             ax.set_axis_bgcolor(plot_parameters['bg_color'])
-        datetimes = [dt.datetime.utcfromtimestamp(int(item[0])) for item in timeseries]
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #datetimes = [dt.datetime.utcfromtimestamp(int(item[0])) for item in timeseries]
+        datetimes = [dt.datetime.fromtimestamp(int(item[0]), tz=dt.timezone.utc) for item in timeseries]
         plt.xticks(rotation=0, horizontalalignment='center')
         if timeseries_duration <= 86400:
             xfmt = DateFormatter('%H:%M:%S')
@@ -171,7 +191,9 @@ def plot_timeseries(
 
         ax.plot(
             datetimes, values, label=use_label,
-            color=plot_parameters['line_color'], lw=1,
+            # @modified 20250121 - Feature #5588: snab.process_algorithm
+            #color=plot_parameters['line_color'], lw=1,
+            color=plot_parameters['line_color'], lw=lw,
             linestyle='solid')
         ax.tick_params(axis='both', labelsize='small')
         try:
@@ -186,14 +208,19 @@ def plot_timeseries(
         box = ax.get_position()
         ax.set_position([box.x0, box.y0 + box.height * 0.1,
                          box.width, box.height * 0.9])
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
-                  fancybox=True, shadow=True, ncol=2, fontsize=fontsize)
+        # @modified 20250121 - Feature #5588: snab.process_algorithm
+        # Allow the legend to not be added
+        if plot_legend:
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+                    fancybox=True, shadow=True, ncol=2, fontsize=fontsize)
         plt.rc('lines', lw=1, color='black')
         plt.grid(True)
         # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
         #                      Task #4778: v4.0.0 - update dependencies
         # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
-        if matplotlib_version < '3.7.0':
+        # @modified 20250610 - Task #5627: v5.0.0 update dependencies
+        #if matplotlib_version < '3.7.0':
+        if matplotlib_version == 'deprecated':
             ax.grid(b=True, which='both', axis='both', color='lightgray',
                     linestyle='solid', alpha=0.5, linewidth=0.6)
         else:
@@ -215,5 +242,9 @@ def plot_timeseries(
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: failed to create %s' % (function_str, output_file))
         return (False, None)
+
+    # @added 20250121 - Feature #5588: snab.process_algorithm
+    if os.path.isfile(output_file):
+        os.chmod(output_file, mode=0o644)
 
     return (True, output_file)

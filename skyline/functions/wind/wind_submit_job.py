@@ -73,11 +73,16 @@ def wind_submit_job(current_skyline_app, work_dict):
         except Exception as err:
             current_logger.error('error :: %s :: failed to determine response status_code, err: %s' % (
                 function_str, err))
-        try:
-            response = r.json()
-        except Exception as err:
-            current_logger.error('error :: %s :: failed to read response - %s' % (
-                function_str, err))
+        # @modified 20250923 - Feature #5644: ionosphere.learn_self_validation 
+        # Only check the response if the response code is not equal to 204 which
+        # has no json payload, other non 202 codes will error as normal if no
+        # response is present.
+        if status_code != 204:
+            try:
+                response = r.json()
+            except Exception as err:
+                current_logger.error('error :: %s :: failed to read response, err: %s' % (
+                    function_str, err))
     results_dict['status_code'] = status_code
     results_dict['response'] = response
 

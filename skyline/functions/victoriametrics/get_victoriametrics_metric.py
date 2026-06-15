@@ -1,5 +1,5 @@
 """
-get_victoriametrics_metric
+get_victoriametrics_metric.py
 """
 import logging
 import json
@@ -9,7 +9,10 @@ import urllib.parse
 import requests
 
 import settings
-from skyline_functions import get_redis_conn_decoded, mkdir_p
+from skyline_functions import (
+    get_redis_conn_decoded, mkdir_p,
+    # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    nonNegativeDerivative)
 
 # @added 20220728 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
@@ -20,6 +23,13 @@ from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_ba
 
 # @added 20230102 - Feature #4776: Handle multiple metrics in victoriametrics response
 from functions.prometheus.metric_name_labels_parser import metric_name_labels_parser
+
+# @added 20241227 - Feature #5585: boundary - functions - tsdb_function
+from functions.victoriametrics.extract_metric_and_labels import extract_metric_and_labels
+
+# @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+from functions.timeseries.downsample import downsample_timeseries
 
 try:
     VICTORIAMETRICS_ENABLED = settings.VICTORIAMETRICS_ENABLED
@@ -60,7 +70,9 @@ for key in list(skyline_metric_types.keys()):
 # Added do_not_type
 def get_victoriametrics_metric(
     current_skyline_app, metric, from_timestamp, until_timestamp, data_type,
-        output_object, metric_data={}, plot_parameters={}, do_not_type=False):
+        output_object, metric_data={}, plot_parameters={}, do_not_type=False,
+        # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        export=True):
     """
     Fetch data from victoriametrics and return it as object, a graph image or
     save it as file
@@ -74,6 +86,7 @@ def get_victoriametrics_metric(
                           object, the object is returned
     :param metric_data: metric data dict
     :param do_not_type: whether to not use the known type
+    :param export: whether to use export or query_range
     :type current_skyline_app: str
     :type metric: str
     :type from_timestamp: str
@@ -81,8 +94,10 @@ def get_victoriametrics_metric(
     :type data_type: str
     :type output_object: str
     :type metric_data: dict
-    :return: timeseries, ``True``, ``False``
-    :rtype: str or bool
+    :type do_not_type: bool
+    :type export: bool
+    :return: timeseries, ``False``
+    :rtype: list or bool
 
     """
 
@@ -120,12 +135,28 @@ def get_victoriametrics_metric(
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+            current_logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s, err: %s' % (
                 function_str, metric, err))
             return timeseries
 
     if log:
         current_logger.info('%s :: %s' % (function_str, metric))
+
+    # @added 20241227 - Feature #5585: boundary - functions - tsdb_function
+    # If a metric is passed that is wrapped in functions extract the metric
+    # from the query string
+    metric_from_function = None
+    try:
+        metric_from_function = extract_metric_and_labels(metric)
+        if metric_from_function:
+            if metric_from_function != metric:
+                base_name = str(metric_from_function)
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: extract_metric_and_labels failed for %s, err: %s' % (
+            function_str, metric, err))
 
     if not metric_id:
         try:
@@ -190,8 +221,12 @@ def get_victoriametrics_metric(
     response_dict = {}
     encoded_metric = urllib.parse.quote(metric)
     if metric_type == 'COUNTER':
-        rate_metric = 'rate(%s[10m])' % metric
-        encoded_metric = urllib.parse.quote(rate_metric)
+        # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        if not export:
+            rate_metric = 'rate(%s[10m])' % metric
+            encoded_metric = urllib.parse.quote(rate_metric)
+        else:
+            encoded_metric = urllib.parse.quote(metric)
     else:
         encoded_metric = urllib.parse.quote(metric)
 
@@ -203,23 +238,75 @@ def get_victoriametrics_metric(
     if timeseries_duration <= 86401:
         step = 60
 
+    # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    r = None
+
     # Use a step of 600 which is effectively the same as summarise at 10m in
     # terms of the number of data points returned
-    url = '%s/prometheus/api/v1/query_range?query=%s&start=%s.000&end=%s.000&step=%s&nocache=1' % (
-        vm_url, encoded_metric, str(from_timestamp), str(until_timestamp),
-        str(step))
+    # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    # Although query_range and step 600 work the majority of the time to give a
+    # fair representative of a metric, there are edge cases where there are
+    # periodic changes in the data at > step and depending on the time the
+    # query_range is called you could have different datapoints skipped or
+    # returned.  If peaks that align at say every 30 m, may be returned for a
+    # period but if there is any change in them say were constant at 30 m steps
+    # and changed to 01 and 31, they may not be returned.  Where the step 600
+    # generally returns time series of 1008 length, the export of raw data is
+    # generally 10080 data points which will be downsampled with the normal
+    # downsample_timeseries function which keeps input consistent across all
+    # things.
+    if not export:
+        url = '%s/prometheus/api/v1/query_range?query=%s&start=%s.000&end=%s.000&step=%s&nocache=1' % (
+            vm_url, encoded_metric, str(from_timestamp), str(until_timestamp),
+            str(step))
+    else:
+        url = '%s/prometheus/api/v1/export?match[]=%s&start=%s.000&end=%s.000&nocache=1' % (
+            vm_url, encoded_metric, str(from_timestamp), str(until_timestamp))
+        # @added 20260222 - Task #5713: Test CentOS Stream 10
+        # I am glad to see that VictoriaMetrics have decided the same and now I
+        # see in version 1.133.0 they actually make the point of advising the
+        # user of this.
+        # https://github.com/VictoriaMetrics/VictoriaMetrics/commit/cd0ad293fe2a3fe0776454a7f1ed121a96fea047
+        #This page provides a dedicated view for querying and displaying raw samples from VictoriaMetrics.
+        #It expects only time series selector as a query argument.
+        #Deduplication can only be disabled if it was previously enabled on the server (-dedup.minScrapeInterval).
+        #Users often assume that the Query API returns data exactly as stored, but data samples and timestamps may be modified by the API.
+
     if log:
         current_logger.info('%s :: url: %s' % (function_str, url))
 
     try:
         r = requests.get(url, timeout=use_timeout)
-        response_dict = r.json()
+        # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        # Only if query_range method
+        if not export:
+            response_dict = r.json()
     except Exception as err:
         current_logger.error('error :: %s :: request failed for %s - %s' % (
             function_str, url, err))
 
     result = []
-    if response_dict:
+    # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    decoded_content = None
+    if export and r:
+        try:
+            decoded_content = r.content.decode('utf-8')  # Convert bytes to string
+        except Exception as err:
+            current_logger.error('error :: %s :: request failed for %s - %s' % (
+                function_str, url, err))
+    if decoded_content:
+        try:
+            parsed_lines = [json.loads(line) for line in decoded_content.strip().split('\n')]
+            for item in parsed_lines:
+                result.append(item)
+            response_dict['data'] = {'result': result}
+        except Exception as err:
+            current_logger.error('error :: %s :: request failed for %s - %s' % (
+                function_str, url, err))
+
+    # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    # if response_dict:
+    if response_dict and not result:
         try:
             result = response_dict['data']['result']
         except Exception as err:
@@ -276,7 +363,9 @@ def get_victoriametrics_metric(
         current_logger.info('%s :: using data from result_index: %s' % (
             function_str, str(result_index)))
 
-    if result:
+    # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    #if result:
+    if result and not export:
         try:
             # @modified 20230102 - Feature #4776: Handle multiple metrics in victoriametrics response
             # timeseries = response_dict['data']['result'][0]['values']
@@ -285,6 +374,22 @@ def get_victoriametrics_metric(
             current_logger.error('error :: %s :: unexpected response for %s response_dict: %s - %s' % (
                 function_str, metric, str(response_dict), err))
 
+    # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if result and export:
+        timeseries = []
+        try:
+            timestamps = response_dict['data']['result'][result_index]['timestamps']
+            values = response_dict['data']['result'][result_index]['values']
+            timeseries = [[int(ts / 1000), values[index]] for index, ts in enumerate(timestamps)]
+        except Exception as err:
+            current_logger.error('error :: %s :: failed to interpolate timeseries from timestamps and values, err: - %s' % (
+                function_str, err))
+        if not timeseries:
+            current_logger.info('warning :: %s :: no time series for %s' % (
+                function_str, metric))
+            timeseries = []
+            return False
+
     converted = []
     for datapoint in timeseries:
         try:
@@ -292,6 +397,7 @@ def get_victoriametrics_metric(
             converted.append(new_datapoint)
         except:  # nosec
             continue
+    timeseries = list(converted)
 
     # @modified 20230518 - Task #2732: Prometheus to Skyline
     #                      Branch #4300: prometheus
@@ -312,7 +418,11 @@ def get_victoriametrics_metric(
         except Exception as err:
             current_logger.error('error :: %s :: hset skyline.labelled_metrics.id.type failed - %s' % (
                 function_str, err))
-        if metric_type == 'COUNTER':
+
+        # @modified 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        # Do not requery if exported_raw_data is used
+        #if metric_type == 'COUNTER':
+        if metric_type == 'COUNTER' and not export:
             rate_metric = 'rate(%s[10m])' % metric
             encoded_metric = urllib.parse.quote(rate_metric)
             url = '%s/prometheus/api/v1/query_range?query=%s&start=%s.000&end=%s.000&step=%s&nocache=1' % (
@@ -386,7 +496,43 @@ def get_victoriametrics_metric(
                     converted.append(new_datapoint)
                 except:  # nosec
                     continue
+            timeseries = list(converted)
 
+    # @added 20250121 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if export and timeseries:
+        full_duration = int(int(timeseries[-1][0]) - int(timeseries[0][0]))
+        if full_duration > 88000:
+            # Downsample before applying nonNegativeDerivative if it is a
+            # counter metric
+            metric_resolution = 60
+            try:
+                metric_resolution = determine_data_frequency(current_skyline_app, timeseries, False)
+                if isinstance(metric_resolution, tuple):
+                    metric_resolution = metric_resolution[0]
+            except Exception as err:
+                current_logger.error('error :: %s :: determine_data_frequency failed for %s, err: %s' % (
+                    function_str, metric, err))
+                metric_resolution = 60
+
+            # @added 20250623 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if metric_resolution == 0:
+                metric_resolution = 60
+
+            try:
+                downsampled_timeseries = downsample_timeseries(current_skyline_app, timeseries, metric_resolution, 600, 'mean', 'end')
+                if downsampled_timeseries:
+                    timeseries = list(downsampled_timeseries)
+            except Exception as err:
+                current_logger.error('error :: %s :: downsample_timeseries failed for %s, metric_resolution: %s, err: %s' % (
+                    function_str, metric, str(metric_resolution), err))
+        if metric_type == 'COUNTER':
+            try:
+                # Apply derivative function after any downsampling
+                timeseries = nonNegativeDerivative(timeseries)
+            except Exception as err:
+                current_logger.error('error :: %s :: nonNegativeDerivative failed for %s, err: %s' % (
+                    function_str, metric, err))
+        
     if data_type == 'image':
 
         if log:
@@ -416,19 +562,22 @@ def get_victoriametrics_metric(
                     'output_object_path - %s' % str(output_object_path))
             except Exception as err:
                 current_logger.error(
-                    'error :: failed to create output_object_path - %s - %s' %
-                    str(output_object_path))
+                    'error :: failed to create output_object_path - %s, err: %s' %
+                    str(output_object_path), err)
                 return False
 
         with open(output_object, 'w') as f:
-            f.write(json.dumps(converted))
+            #f.write(json.dumps(converted))
+            f.write(json.dumps(timeseries))
         os.chmod(output_object, mode=0o644)
         return output_object
     else:
         if data_type == 'list':
-            return converted
+            #return converted
+            return timeseries
         if data_type == 'json':
-            timeseries_json = json.dumps(converted)
+            #timeseries_json = json.dumps(converted)
+            timeseries_json = json.dumps(timeseries)
             return timeseries_json
 
     return timeseries

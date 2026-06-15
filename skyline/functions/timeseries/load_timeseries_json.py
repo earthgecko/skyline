@@ -27,6 +27,16 @@ def load_timeseries_json(current_skyline_app, anomaly_json):
         with open((anomaly_json), 'r') as f:
             raw_timeseries = f.read()
         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        if 'nan' in timeseries_array_str:
+            try:
+                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+            except Exception as err:
+                skyline_app_logger = '%sLog' % current_skyline_app
+                logger = logging.getLogger(skyline_app_logger)
+                logger.error('error :: %s :: failed to replace nan with None, err: %s' % (
+                    function_str, err))
+
         del raw_timeseries
         anomalous_timeseries = literal_eval(timeseries_array_str)
         del timeseries_array_str

@@ -14,7 +14,9 @@ import copy
 from sqlalchemy import (
     Column, Table, Integer, MetaData)
 from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.sql import select
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added insert
+from sqlalchemy.sql import select, insert
 
 
 import settings
@@ -41,6 +43,8 @@ from skyline_functions import get_graphite_metric, get_redis_conn_decoded
 #                   Branch #4300: prometheus
 # Handle labelled_metric name added metric id
 from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
 
 
 # @added 20241011 - Feature #5481: ionosphere.copy_features_profile
@@ -225,12 +229,23 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             raise
         return fp_created_via_copy
 
+    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+    tenant_id = 0
+    try:
+        tenant_id = get_tenant_id(current_skyline_app, metric_id=metric_id, base_name=None, log=False)
+    except Exception as err:
+        current_logger.error('error :: create_features_profile :: get_tenant_id failed, err: %s' % (
+            err))
+        tenant_id = 0
+
     # Create DB ionosphere record
     new_fp_id = False
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = ionosphere_table.insert().values(
             metric_id=int(target_metric_id),
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id=tenant_id,
             full_duration=int(fp_id_row['full_duration']),
             anomaly_timestamp=int(fp_id_row['anomaly_timestamp']),
             enabled=1, tsfresh_version=fp_id_row['tsfresh_version'],
@@ -243,9 +258,16 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             echo_fp=fp_id_row['echo_fp'],
             #created_timestamp=db_created_timestamp,
             user_id=user_id, label=label, alias_id=alias_fp_id)
-        result = connection.execute(ins)
-        connection.close()
-        new_fp_id = result.inserted_primary_key[0]
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_fp_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_fp_id = int(result.rowcount)
+
         current_logger.info('create_features_profile :: new ionosphere fp_id: %s' % str(new_fp_id))
     except Exception as err:
         trace = traceback.format_exc()
@@ -329,9 +351,14 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
         #     (str(new_fp_id), fp_table_name))
 
     try:
-        connection = engine.connect()
-        connection.execute(fp_metric_table.insert(), insert_statement)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(fp_metric_table.insert(), insert_statement)
+        #connection.close()
+        with engine.begin() as connection:
+            connection.execute(insert(fp_metric_table), insert_statement)
+
         current_logger.info('create_features_profile :: fp_id - %s - feature values inserted into %s' % (str(new_fp_id), fp_table_name))
     except:
         trace = traceback.format_exc()
@@ -430,6 +457,14 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if 'nan' in timeseries_array_str:
+        try:
+            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+        except Exception as err:
+            current_logger.error('error :: failed to replace nan with None, err: %s' % (
+                err))
+
     del raw_timeseries
     timeseries = literal_eval(timeseries_array_str)
 
@@ -440,7 +475,7 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             new_datapoint = [str(int(datapoint[0])), float(datapoint[1])]
             validated_timeseries.append(new_datapoint)
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             continue
 

@@ -122,7 +122,9 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
             base_name = item[1]
             timeseries = []
             try:
-                timeseries = get_victoriametrics_metric(skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object', metric_data={}, plot_parameters={}, do_not_type=True)
+                # @modified 20250128 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                # Added export
+                timeseries = get_victoriametrics_metric(skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object', metric_data={}, plot_parameters={}, do_not_type=True, export=True)
             except Exception as err:
                 errors.append(['get_victoriametrics_metric', base_name, err])
                 continue

@@ -24,7 +24,10 @@ def normalized_variance(timeseries):
         norm_np_values = (np_values - np_min) / (np_max - np_min)
         normalized_var = np.var(norm_np_values)
         if not np.isnan(normalized_var):
-            normalized_var = round(normalized_var, 4)
+            # @modified 20251019 - Feature #5519: functions.skyline.coerce_to_valid_json
+            #                      Bug #5518: custom_algorithms_results - invalid JSON
+            # Wrapped in float to coerce np.float64
+            normalized_var = float(round(normalized_var, 4))
     except Exception as err:
         normalized_var = {'error': err}
     return normalized_var

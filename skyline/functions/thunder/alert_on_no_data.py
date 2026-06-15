@@ -166,7 +166,14 @@ def alert_on_no_data(self, level, message, parent_namespace, data):
 
                 with_subject = subject.replace(level, '')
                 title = title + with_subject
-                alert_sent = thunder_alert(alert_via, title, use_body)
+
+                # modified 20250413 - Branch #1444: thunder
+                # Handle DO_NOT_ALERT_ON_STALE_METRICS as external_settings can
+                # override this before here, so parent_namespaces reach here
+                if parent_namespace not in settings.DO_NOT_ALERT_ON_STALE_METRICS:
+                    alert_sent = thunder_alert(alert_via, title, use_body)
+                else:
+                    alert_sent = True                    
                 if alert_sent:
                     alerts_sent_dict[alert_via] = True
                     alerts_sent += 1
