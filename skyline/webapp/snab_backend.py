@@ -10,6 +10,11 @@ import skyline_version
 
 from sqlalchemy.sql import select
 
+# @added 20250108 - Feature #5588: snab.process_algorithm
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import or_, text
+
 # @added 20230719 - Feature #5010: snab - save training_data
 import requests
 
@@ -119,11 +124,25 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
     determined_result = False
     existing_result = None
     try:
-        if not connection:
-            connection = engine.connect()
-        stmt = select([snab_table]).\
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #if not connection:
+        #    connection = engine.connect()
+
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([snab_table]).\
+        stmt = select(snab_table).\
             where(snab_table.c.id == snab_id)
-        result = connection.execute(stmt)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             tP_set = row['tP']
             if tP_set:
@@ -157,10 +176,10 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
         fail_msg = 'error :: update_snab_result :: could not determine current result values for snab id %s' % (
             str(snab_id))
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise
 
@@ -172,8 +191,11 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
             str(snab_id), str(existing_result)))
 
     try:
-        if not connection:
-            connection = engine.connect()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #if not connection:
+        #    connection = engine.connect()
+
         if snab_result == 'tP':
             stmt = snab_table.update().\
                 values(tP=1, fP=None, tN=None, fN=None, unsure=None).\
@@ -204,7 +226,13 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
                 values(tP=None, fP=None, tN=None, fN=None, unsure=None).\
                 where(snab_table.c.id == int(snab_id)).\
                 where(snab_table.c.anomaly_id == int(anomaly_id))
-        connection.execute(stmt)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection.execute(stmt)
+        with engine.begin() as connection:
+            connection.execute(stmt)
+
         snab_result_updated = True
         logger.info('update_snab_result :: updated result for snab id %s with anomaly id %s and result %s' % (
             str(snab_id), str(anomaly_id), str(snab_result)))
@@ -216,10 +244,10 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
         fail_msg = 'error :: update_snab_result :: could not update result for snab id %s with anomaly id %s and result %s' % (
             str(snab_id), str(anomaly_id), str(snab_result))
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             try:
                 snab_engine_disposal(engine)
             except Exception as err:
@@ -235,10 +263,10 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
         logger.error(traceback.format_exc())
         logger.error('error :: update_snab_result :: failed to get metrics_table meta for %s' % str(base_name))
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     try:
@@ -249,19 +277,32 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
         logger.error(traceback.format_exc())
         logger.error('error :: update_snab_result :: failed to get anomalies_table meta')
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     metric_id = None
     try:
-        if not connection:
-            connection = engine.connect()
-        stmt = select([anomalies_table]).\
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #if not connection:
+        #    connection = engine.connect()
+
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).\
+        stmt = select(anomalies_table).\
             where(anomalies_table.c.id == anomaly_id)
-        result = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             metric_id = row['metric_id']
             anomaly_timestamp = row['anomaly_timestamp']
@@ -275,18 +316,31 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
             str(anomaly_id))
         logger.error('%s' % fail_msg)
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     if metric_id:
         try:
-            if not connection:
-                connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.id == int(metric_id))
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #if not connection:
+            #    connection = engine.connect()
+
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id == int(metric_id))
+            stmt = select(metrics_table).where(metrics_table.c.id == int(metric_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 base_name = row['metric']
         except:
@@ -294,18 +348,20 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
             logger.error(trace)
             fail_msg = 'error :: could not determine metric id from metrics table'
             if engine:
-                try:
-                    connection.close()
-                except:
-                    pass
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
                 snab_engine_disposal(engine)
             raise
 
-    if connection:
-        try:
-            connection.close()
-        except:
-            pass
+    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #if connection:
+    #    try:
+    #        connection.close()
+    #    except:
+    #        pass
 
     if engine:
         snab_engine_disposal(engine)
@@ -373,7 +429,7 @@ def update_snab_result(snab_id, anomaly_id, snab_result, save_training_data=Fals
             # evaluated, not the normal algo evaluation to ensure that the
             # training_data label reflects the evaluation of the SNAB algo.
             if algorithm_id and current_snab_algo_ids:
-                if not algorithm_id in current_snab_algo_ids:
+                if algorithm_id not in current_snab_algo_ids:
                     do_save_training = False
 
     # @modified 20230924 - Feature #4988: Allow snab to return and save results
@@ -486,12 +542,22 @@ def get_snab_algorithms(algorithms):
 
     warnings = []
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # Only include algorithms with an algorithm_id as the three-sigma (or
         # current primary algorithm has no id)
-        stmt = select([snab_table.c.algorithm_id]).\
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([snab_table.c.algorithm_id]).\
+        stmt = select(snab_table.c.algorithm_id).\
             where(snab_table.c.algorithm_id > 0)
-        result = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             try:
                 algorithm_id = row['algorithm_id']
@@ -499,10 +565,10 @@ def get_snab_algorithms(algorithms):
                 snab_algorithms[algorithm_id] = algorithm
             except Exception as err:
                 warnings.append([str(dict(row)), err])
-        try:
-            connection.close()
-        except:
-            pass
+        #try:
+        #    connection.close()
+        #except:
+        #    pass
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: get_snab_algorithms :: to query snab table')
@@ -516,3 +582,180 @@ def get_snab_algorithms(algorithms):
         snab_engine_disposal(engine)
 
     return snab_algorithms
+
+# @added 20250108 - Feature #5588: snab.process_algorithm
+def algorithm_group_validations(all_algorithm_groups_by_id):
+    """
+    A function to determine what algorithm groups have SNAB validations and
+    return a dict keyed on algorithm_group_id with algorithm_group and
+    validation count keys for each.
+    
+    :param all_algorithm_groups_by_id: all_algorithm_groups_by_id.
+    :type all_algorithm_groups_by_id: dict
+    :return: algorithm_groups_validated
+    :rtype: dict
+
+    """
+    algorithm_groups_validated = {}
+
+    function_str = 'snab_backend.algorithm_group_validations'
+    
+    logger.info('%s :: determining algorithm_groups with validations' % function_str)
+    try:
+        engine, fail_msg, trace = get_snab_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('%s' % fail_msg)
+        logger.error('error :: snab_backend.algorithm_group_validations :: could not get a MySQL engine to get update snab table')
+        raise  # to webapp to return in the UI
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: snab_backend.algorithm_group_validations :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+    try:
+        snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('snab_backend.algorithm_group_validations :: snab_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: snab_backend.algorithm_group_validations :: failed to get snab_table meta')
+        if engine:
+            snab_engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    app_ids = []
+    try:
+        #connection = engine.connect()
+        # @modified 20250111 - Feature #5588: snab.process_algorithm
+        # Although there may be evaluated analyzer anomalies they are not
+        # included because they were analysed with Redis data at full_duration.
+        # This data no longer exists and if pulled from Graphite would be at
+        # downsampled at SECOND_ORDER_RESOLUTION_HOURS
+        #stmt = "SELECT id FROM apps WHERE app in ('analyzer', 'analyzer_batch', 'mirage')"
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = "SELECT id FROM apps WHERE app in ('mirage')"
+        #result = connection.execute(stmt)
+        stmt = text("SELECT id FROM apps WHERE app in ('mirage')")
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
+        for row in result:
+            app_ids.append(row['id'])
+        #connection.close()
+    except Exception as err:
+        logger.error('error :: snab_backend.algorithm_group_validations :: failed to app_ids, err: %s' % str(err))
+
+    warnings = []
+    algorithm_group_ids_with_validations = []
+    try:
+        #connection = engine.connect()
+        # Only include algorithm_group_ids that have validations from mirage,
+        # analyzer or analyzer_batch validated anomalies
+        stmt = select(snab_table.c.algorithm_group_id.distinct()).\
+            where(
+                or_(
+                    snab_table.c.tP.isnot(None),
+                    snab_table.c.fP.isnot(None),
+                    snab_table.c.tN.isnot(None),
+                    snab_table.c.fN.isnot(None)
+                )
+            ).\
+            where(snab_table.c.app_id.in_(app_ids))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
+        for row in result:
+            try:
+                algorithm_group_ids_with_validations.append(row['algorithm_group_id'])
+            except Exception as err:
+                warnings.append([str(dict(row)), err])
+        #try:
+        #    connection.close()
+        #except:
+        #    pass
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: snab_backend.algorithm_group_validations :: failed to query snab table, err: %s' % err)
+        if engine:
+            snab_engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    if warnings:
+        logger.info('warning :: snab_backend.algorithm_group_validations :: failed to determine distinct algorithm_group_id, last 3 warnings - %s' % (
+            str(warnings[-3:])))
+
+    warnings = []
+    for algorithm_group_id, algorithm_group in all_algorithm_groups_by_id.items():
+        if algorithm_group_id not in algorithm_group_ids_with_validations:
+            continue
+        algo_dict = {}
+        try:
+            #connection = engine.connect()
+            # Only include algorithms with an algorithm_id as the three-sigma (or
+            # current primary algorithm has no id)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table.c.algorithm_id]).\
+            stmt = select(snab_table.c.algorithm_id).\
+                where(snab_table.c.algorithm_id > 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
+                where(
+                    (snab_table.c.algorithm_group_id == algorithm_group_id) &
+                    or_(
+                        snab_table.c.tP.isnot(None),
+                        snab_table.c.fP.isnot(None),
+                        snab_table.c.tN.isnot(None),
+                        snab_table.c.fN.isnot(None)
+                    )
+                )
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
+            for row in result:
+                try:
+                    snab_id = row['id']
+                    algo_dict[snab_id] = dict(row)
+                except Exception as err:
+                    warnings.append([str(dict(row)), err])
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
+            if len(algo_dict) > 14:
+                algorithm_groups_validated[algorithm_group_id] = {
+                    'algorithm_group_id': algorithm_group_id,
+                    'algorithm_group': algorithm_group,
+                    'validated_count': len(algo_dict)
+                }
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: snab_backend.algorithm_group_validations :: failed to query snab table, err: %s' % err)
+            if engine:
+                snab_engine_disposal(engine)
+            raise  # to webapp to return in the UI
+    if warnings:
+        logger.info('warning :: snab_backend.algorithm_group_validations :: failed to determine validated_count from some ids, last 3 warnings - %s' % (
+            str(warnings[-3:])))
+    if engine:
+        snab_engine_disposal(engine)
+
+    return algorithm_groups_validated
+
