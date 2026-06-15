@@ -40,7 +40,7 @@ def insert_snab_results_algorithms(current_skyline_app, data):
         return new_row
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         if data['consensus_achieved']:
             ins = snab_results_algorithms_table.insert().values(
                 snab_id=data['snab_id'],
@@ -56,9 +56,17 @@ def insert_snab_results_algorithms(current_skyline_app, data):
                 algorithm_id=data['algorithm_id'],
                 anomalyScore=data['anomalyScore'],
                 runtime=float(data['runtime']))
-        result = connection.execute(ins)
-        connection.close()
-        new_row = dict(data)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_row = dict(data)
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            _row = result.fetchone()
+            new_row = dict(_row._mapping) if _row is not None else None
+
     except Exception as err:
         current_logger.error('error :: %s :: could not insert into snab_results_algorithms_table: %s - %s' % (
             function_str, str(data), err))
