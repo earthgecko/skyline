@@ -81,7 +81,7 @@
 <!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
 {% elif motif_matches %}
 		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
-{% elif unvalidated_motif_annihilation_fps %}
+{% elif unvalidated_common_motifs_fps %}
 		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">to validate</span></span></li>
 {% else %}
   {% if metric_files %}
@@ -96,6 +96,22 @@
 {% endif %}
   </div>
 </ol>
+{% endif %}
+
+{% if ionosphere_dawn_expiry_date or ionosphere_learn_dawn_expiry_date or ionosphere_learn_repetitive_patterns_dawn_expiry_date %}
+<div class="alert alert-warning">
+  <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+  {% if ionosphere_dawn_expiry_date %}
+  <center><h4><span class="logo"><span class="re">Ionosphere cannot be trained until {{ ionosphere_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+  <center><h4><span class="logo"><span class="re">Ionosphere will not attempt to match patterns until {{ ionosphere_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+  {% endif %}
+  {% if ionosphere_learn_dawn_expiry_date %}
+  <center><h4><span class="logo"><span class="re">Ionosphere learn will not attempt to learn normal patterns until {{ ionosphere_learn_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+  {% endif %}
+  {% if ionosphere_learn_repetitive_patterns_dawn_expiry_date %}
+  <center><h4><span class="logo"><span class="re">Ionosphere learn_repetitive_pattens and common_motifs will not attempt to learn normal patterns until {{ ionosphere_learn_repetitive_patterns_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+  {% endif %}
+</div>
 {% endif %}
 
 {% if fp_view %}
@@ -121,8 +137,8 @@
 <!-- # @added 20221018 - Feature #4650: ionosphere.bulk.training -->
 {% elif bulk_training %}
     {% include "bulk_training.html" %}
-{% elif validate_motif_annihilation_fps %}
-    {% include "validate_motif_annihilations.html" %}
+{% elif validate_common_motifs_fps %}
+    {% include "validate_common_motifs.html" %}
 {% else %}
     {% include "training_data.html" %}
 {% endif %}

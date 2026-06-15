@@ -121,7 +121,7 @@
             <input type="checkbox" id="{{ algorithm }}" name="{{ algorithm }}" value="{{ algorithm }}"> <strong><a target='_blank' href="/static/docs/skyline.custom_algorithms.html#module-custom_algorithms.{{ algorithm }}">{{ algorithm }}</a></strong> ::
     {% for parameter in vortex_algorithms[algorithm]['algorithm_parameters'] %}
       {% set value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
-        {% if parameter == 'return_results' %}
+      {% if parameter == 'return_results' %}
 	      <input type="hidden" name="{{ algorithm }}_{{ parameter }}" value="true">
         {% elif parameter == 'realtime_analysis' %}
 	      <input type="hidden" name="{{ algorithm }}_{{ parameter }}" value="false">
@@ -139,24 +139,23 @@
           {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="true">true</option>
             <option value="false">false</option></select> 
         {% elif parameter == 'macd_parameters' %}
-        {% for i_parameter in vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
-          {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
-          {% if i_parameter == 'feature' %}
-            {{ parameter }} {{ i_parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="macd">macd</option>
-              <option value="macd_signal">macd_signal</option><option value="macd_histogram">macd_histogram</option></select> 
-          {% else %}
+          {% for i_parameter in vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
             {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
+            {% if i_parameter == 'feature' %}
+              {{ parameter }} {{ i_parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="macd">macd</option>
+                <option value="macd_signal">macd_signal</option><option value="macd_histogram">macd_histogram</option></select> 
+            {% else %}
+              {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
+              {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
+            {% endif %}
             {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
-          {% endif %}
-          {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
-        {% endfor %}
-
+          {% endfor %}
         {% elif parameter == 'gamma' and algorithm == 'one_class_svm' %}
-        {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}">
-                        <option value="scale">scale</option>
-                        <option value="auto">auto</option>    
-          {% else %}
-        {{ parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}" value="{{ value }}" step="any" size="5" />
+          {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}">
+                          <option value="scale">scale</option>
+                          <option value="auto">auto</option></select>
+        {% else %}
+          {{ parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}" value="{{ value }}" step="any" size="5" />
       {% endif %}
     {% endfor %}
 

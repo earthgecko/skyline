@@ -244,14 +244,6 @@
     {% endif %}
 If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
 below.<br>
-Please note: be advised that tracking the timestamp and metric through Flask
-and Jinja templating was <b>very hard to achieve</b>.  However it was done to help <b>you</b>
-as if there are multiple training data sets below and you came here by a list by
-date route, it is highly probable that you would not know the date you selected
-once you were presented with a multiple choice.  Please take the appropriate
-amount of time to appreciate this seemingly, insignificant feature that was
-<b>painstakingly</b> added for your benefit.<br>
-Also note:
   	<table class="table table-hover">
   		<thead>
   			<tr>
@@ -387,7 +379,7 @@ Also note:
         {% endif %}
       {% endif %}
     {% else %}
-		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span> (aka: "That's not what I call an anomaly")</h4>
+		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span> only if the entire period can be considered normal</h4>
     {% endif %}
 
     {% if ionosphere_metric == True %}
@@ -484,7 +476,7 @@ already matched a training data set -->
   		<div class="container-fluid">
 
   		  <h4><span class="logo"><span class="sky">Similarity ::</span> <span class="re">search</span></span></h4>
-You can run this training data through the similarilty search to determine if similar patterns/shapelets (motifs) have been trained on.<br>
+Before deciding to train, you can run this training data through the similarilty search to determine if similar patterns/shapelets (motifs) have been trained on.<br>
 Due to how long this can take run through all the training data the results are only a <strong>sample</strong> of the possible similar and
 not similar enough motifs.<br>
 The run time is capped at <strong>25 seconds</strong> and what has been discovered at that point will be return.<br>
@@ -652,7 +644,8 @@ Image file: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['image'] }}<br
 		      <tr>
 		        <td>Create features profile and <b><span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Then create the extracted features profile as <strong>NOT anomalous</strong>
-            and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong> or,</td>
+            and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong>
+            <br>if <strong>everything</strong> at {{ ((metric_full_duration_in_hours / 24) | int) }} days is considered as normal or,</td>
   {% if extracted_features %}
     {% if not features_profile_id %}
 <!--
@@ -696,7 +689,8 @@ Image file: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['image'] }}<br
 		      <tr>
 		        <td>Create features profile and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Or create a features profile as <strong>NOT anomalous</strong>
-            and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong></td>
+            and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong>
+            <br>if <strong>everything</strong> at {{ ((metric_full_duration_in_hours / 24) | int) }} and {{ use_full_duration_days }} days can be considered as normal.</td>
     {% if not features_profile_id %}
       {% if extracted_features %}
 <!--
@@ -1128,6 +1122,11 @@ you need to try and be quicker next time.
 	  </div>
 
   {% endif %}
+
+  {% if shost != None %}
+  <h4><span class="logo"><span class="sky">Shard ::</span> <span class="re"> host ::</span> this metric is sharded to <code>{{ shost }}</code></span></h4>
+  {% endif %}
+
 <!-- # @modified 20190510 - Feature #2990: Add metrics id to relevant Ionosphere pages
 # Added the metric id -->
       <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span> {{ use_for_metric }} with metrics id {{ metric_id }}</h4>

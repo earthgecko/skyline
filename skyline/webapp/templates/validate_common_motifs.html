@@ -1,0 +1,277 @@
+{% block validate_common_motifs_block %}
+<!-- BEGIN /ionosphere>?fp_validate=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere validate_common_motifs block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a>
+    </li>
+  </ul>
+</div>
+<br>
+
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="re">Search</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC"><span class="logo"><span class="re">Matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link"  href="/ionosphere?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC"><span class="logo"><span class="sky">Motif</span> <span class="re">matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_validate=true&metric=all"><span class="logo"><span class="sky">Validate</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="?validate_common_motifs=true&limit=10"><span class="logo"><span class="re">Validate</span> <span class="sky">common_motifs</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">List</span> <span class="re">by metrics</span></span></a>
+    </li>
+-->
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?performance=true"><span class="logo"><span class="re">Performance</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?fp_view=true&a_dated_list=true"><span class="logo"><span class="sky">List</span> <span class="re">by date</span></span></a>
+    </li>
+-->
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
+		  <li ><a href="?fp_validate=true&metric=all">Validate</a></li>
+		  <li class="active"><a href="?validate_common_motifs=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re">common_motifs</span></span></a></li>
+		  <li><a href="?performance=true">Performance</a></li>
+		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		</ul>
+{% endif %}
+
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">common_motifs features profiles to validate</span></span></h4>
+  {% if limited_common_motifs_fps|length > 0 %}
+    {% if version == dev_ver %}
+        <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#search_options">Show search options</button>
+    {% else %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+    {% endif %}
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Validate common_motifs features profile search</td>
+  		        <td><select name="validate_common_motifs">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>State</td>
+  		        <td><select name="state">
+                <option value="unvalidated">unvalidated</option>
+                <option value="validated">validated</option>
+                <option value="invalid">invalid (disabled)</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespace:</td>
+  		        <td><input type="text" name="namespace" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+                <td>limit</td>
+                <td><input type="number" name="limit" min="0" max="100" value="15" /> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Show graphs</td>
+  		        <td><select name="show_graphs">
+                <option value="pw5">pw5 time series</option>
+                <option value="pw5_derived">pw5 and derived common motifs</option>
+                <option value="pw5_fp">pw5 and features profile (removed time series)</option>
+                <option value="derived_fp">derived common motifs and features profile (removed time series)</option>
+                <option value="pw5_derived_fp">pw5, derived common motifs and features profile (removed time series)</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if limited_common_motifs_fps %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+
+  {% if (limited_common_motifs_fps|length == 0) and show_graphs %}
+  <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">common_motifs features profiles :: </span></span>
+    no common_motifs features profiles found for query</h4>
+  {% endif %}
+
+{% if limited_common_motifs_fps %}
+	  <div class="tab-pane active" id="validate">
+  {% if state == 'unvalidated' %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">common_motifs features profiles :: </span></span>
+          for namespace {{ namespace }}, limited by {{ limit_to }} features profiles of a total {{ common_motifs_fps|length }} fps to validate</h4>
+  {% endif %}
+  {% if state == 'validated' %}
+  <h4><span class="logo"><span class="sky">Validated ::</span> <span class="re">common_motifs features profiles :: </span></span>
+    for namespace {{ namespace }}, limited by {{ limit_to }} features profiles of a total {{ common_motifs_fps|length }} fps have been validated</h4>
+  {% endif %}
+  {% if state == 'invalid' %}
+  <h4><span class="logo"><span class="re">INVALID ::</span> <span class="sky">common_motifs features profiles :: </span></span>
+    for namespace {{ namespace }}, limited by {{ limit_to }} features profiles of a total {{ common_motifs_fps|length }} fps have been <span class="logo"><span class="re"></span>INVALIDATED</span></span>.</h4>
+  {% endif %}
+			<table class="table table-hover">
+      The below table shows the pw5_timeseries graphs.  The blue portion is the
+      4 weeks prior to the anomalous period and the green portion is the potentially
+      anomalous section of the data.  The green section represents the time series
+      from which the features profile was generated.  common_motifs managed
+      to remove all parts of the green section with common motifs (and micro
+      motifs) that were derived from the blue section of the pw5_timeseries.<br>
+				<thead>
+					<tr>
+            <th>fp id</th>
+            <th>metric</th>
+            <th>created</th>
+            <th>disable</th>
+            <th>validate</th>
+            <th>graphs</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for fp_id in limited_common_motifs_fps %}
+    {% if '_tenant_id="' in limited_common_motifs_fps[fp_id]['metric'] %}
+      {% set use_metric = 'labelled_metrics.' + limited_common_motifs_fps[fp_id]['metric_id']|string %}
+    {% else %}
+      {% set use_metric = limited_common_motifs_fps[fp_id]['metric'] %}
+    {% endif %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ fp_id }}&metric={{ use_metric }}'">
+              <a href="?fp_view=true&fp_id={{ fp_id }}&metric={{ use_metric }}">{{ fp_id }}</a>
+            </td>
+            {% if '_tenant_id="' in limited_common_motifs_fps[fp_id]['metric'] %}
+            <td><div style='width: 250px;'><code>{{ use_metric }}</code><br><smallcode>{{ limited_common_motifs_fps[fp_id]['metric'] }}</smallcode></div></td>
+            {% else %}
+            <td><code>{{ use_metric }}</code></td>
+            {% endif %}
+            <td>{{ limited_common_motifs_fps[fp_id]['created_timestamp'] }}</td>
+            <td>
+<!--              <input type="checkbox" name="disable" />&nbsp;-->
+              <a href="?fp_view=true&fp_id={{ fp_id }}&metric={{ use_metric }}&disable_fp={{ fp_id }}" target="_blank">
+              <button type="button">Disable</button></a>
+            </td>
+            <td>
+<!--              <input type="checkbox" name="validate" />&nbsp;-->
+            {% if state == 'unvalidated' %}
+              <a href="{{ limited_common_motifs_fps[fp_id]['validation_uri'] }}" target="_blank">
+              <button type="button">Validate</button></a>
+            {% endif %}
+            {% if state == 'validated' %}
+              <button type="button" disabled><span class="logo"><span class="sky"></span>VALIDATED</span></span></button></a>
+            {% endif %}
+            {% if state == 'invalid' %}
+            <button type="button" disabled><span class="logo"><span class="re"></span>INVALID</span></span></button></a>
+            {% endif %}
+            </td>
+            <td>
+    {% if 'pw5' in show_graphs %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> pw5_timeseries:<br>
+              <img src="{{ limited_common_motifs_fps[fp_id]['graphs']['pw5_timeseries'] }}" loading="lazy" alt="{{ use_metric }} pw5_timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endif %}
+    {% if 'derived' in show_graphs %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> derived common motifs:<br>
+              <img src="{{ limited_common_motifs_fps[fp_id]['graphs']['derived'] }}" loading="lazy" alt="{{ use_metric }} derived common motifs graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endif %}
+    {% if 'fp' in show_graphs %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">features profile</span></span>:<br>
+              <img src="{{ limited_common_motifs_fps[fp_id]['graphs']['features_profile'] }}" loading="lazy" alt="{{ use_metric }} features profile graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endif %}
+            </td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+{% endif %}
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere?fp_validate=true block -->
+{% endblock %}

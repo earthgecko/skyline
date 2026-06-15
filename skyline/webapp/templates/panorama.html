@@ -159,6 +159,33 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
   <div class="col-md-12 main_container">
 -->
 
+  {% if panorama_dawn_expiry_date %}
+  <div class="alert alert-warning">
+    <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+    <center><h4><span class="logo"><span class="re">On a new install Analyzer will not analyze or report any anomalies until at least 100 minutes of metric data is available as per <code>settings.MIN_TOLERABLE_LENGTH</code></span></span></h4></center>
+    <center><h4><span class="logo"><span class="re">Panorama will then record the first 9 anomalies and stop until about {{ panorama_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+  </div>
+  {% endif %}
+  {% if analyzer_dawn_expiry_date %}
+  <div class="alert alert-warning">
+    <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+    <center><h4><span class="logo"><span class="re">Analyzer will not submit any further anomalies or analyze metrics until {{ analyzer_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+    {% if mirage_dawn_expiry_date %}
+    <center><h4><span class="logo"><span class="re">Mirage will not analyze metrics until {{ mirage_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% if mirage_dawn_expiry_date %}
+    {% if not analyzer_dawn_expiry_date %}
+  <div class="alert alert-warning">
+    <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+    <center><h4><span class="logo"><span class="re">Mirage will not analyze metrics until {{ mirage_dawn_expiry_date }} when there will be sufficient data</span></span></h4></center>
+    <center>Panorama is currently only recording Analyzer anomalies triggered with basic 3-sigma analysis until Mirage has sufficient data to reduce the volume of anomalies</center>
+    {% endif %}
+  </div>
+  {% endif %}
+
+
   <div class="container-fluid">
   <div class="container-fluid search_container">
             <h4><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></h4>

@@ -374,10 +374,10 @@
     {% else %}
       {% if labelled_metric_name %}
       <a href="?timestamp={{ timestamp }}&metric={{ labelled_metric_name }}&requested_timestamp={{ timestamp }}&show_pearson_correlations=true{{ use_fp_view }}">
-      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while
+      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while - <strong>The page will reload with them.</strong>
       {% else %}
       <a href="?timestamp={{ timestamp }}&metric={{ use_for_metric }}&requested_timestamp={{ timestamp }}&show_pearson_correlations=true{{ use_fp_view }}">
-      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while
+      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while - <strong>The page will reload with them.</strong>
       {% endif %}
     {% endif %}
   {% endif %}

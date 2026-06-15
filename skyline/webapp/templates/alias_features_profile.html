@@ -137,6 +137,7 @@
   <h4><span class="logo"><span class="sky">STEP ::</span> <span class="re">1 of 2</span></span> Determine candidate metrics for the <code>metric_pattern</code> with features profiles</h4>
   {% else %}
   <h4><span class="logo"><span class="sky">STEP ::</span> <span class="re">2 of 2</span></span> Add any excluded patterns and submit</h4>
+  If lots of features profiles are to be imported this process will timeout in the browser however the webapp thread will not timeout and will complete the operation.
   {% endif %}
   {% if all_alias_fps_preexist|string == 'True' %}
   <h2><span class="logo"><span class="sky">ALL alias fps exist nothing to do</span></span></h2>
@@ -170,7 +171,15 @@
               </select> The metric pattern
             </td>
   {% else %}
-  		      <td><input type="text" name="metric_pattern" value="{{ metric_pattern }}" /> The metric pattern for the features profiles you want to alias to another namespace, this is the src pattern  e.g. skyline-server-1</td>
+  		      <td><input type="text" name="metric_pattern" value="{{ metric_pattern }}" />
+              The metric pattern for the features profiles you want to alias to another namespace, this is the src pattern  e.g. <code>skyline-server-1</code>
+              It is possible to use a single * wildcard in the metric_pattern e.g. <code>skyline.*.skyline-server-1</code>, the pattern must be dot separated
+              but the dots are not regex dots, they are namespace element separators.  With labelled metrics you must still use a dotted metric
+              pattern so for instance to match:
+              <code>vm_rows_added_to_storage_total{alias="VictoriaMetrics", cluster="victoriametrics-cluster-1-eu", component="vmstorage", instance="victoriametrics-prod:8482", job="victoriametrics-cluster-1-eu-vmstorage"}</code>
+              You could use a metric_pattern of <code>vm_rows_added_to_storage_total.victoriametrics-prod-1:8482</code> with labelled metrics, each
+              metric_name, label and value is considered a namespace element.
+            </td>
   {% endif %}
   		    </tr>
   		    <tr>
@@ -181,7 +190,9 @@
               <option value="{{ replace_pattern }}">{{ replace_pattern }}</option>
               </select> The replace pattern</td>
   {% else %}
-            <td><input type="text" name="replace_pattern" value="{{ replace_pattern }}" /> The replacement/alias pattern to alias features profiles to, this is the destination pattern e.g. skyline-server-2</td>
+            <td><input type="text" name="replace_pattern" value="{{ replace_pattern }}" /> The replacement/alias pattern to alias features profiles to, this is the destination pattern e.g. <code>skyline-server-2</code>
+              The use of a wildcard and labelled metrics are handled the same in replace_pattern as specified above for metric_pattern.
+            </td>
   		    </tr>
   {% endif %}
   {% if candidate_metrics|length > 0 %}
@@ -230,7 +241,7 @@
               </select> The exclude_patterns
             </td>
     {% else %}
-            <td><input type="text" name="exclude_patterns" value="" /> A comma separated list of patterns to EXCLUDE from creating alias on e.g. telegraf,_tenant_id</td>
+            <td><input type="text" name="exclude_patterns" value="_tenant_id" /> A comma separated list of patterns to EXCLUDE from creating alias on e.g. telegraf,_tenant_id.  Currently excludes must be passed</td>
     {% endif %}
 			    </tr>
 			    <tr>

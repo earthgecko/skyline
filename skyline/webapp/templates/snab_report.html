@@ -38,6 +38,9 @@
     <li class="nav-item">
       <a class="nav-link active" data-bs-toggle="tab" href="/snab?report=true" role="tab" aria-controls="results" aria-selected="true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a>
     </li>
+	<li class="nav-item">
+		<a class="nav-link" data-bs-toggle="tab" href="/snab?process_algorithm=true" role="tab" aria-controls="process_algorithm" aria-selected="false"><span class="logo"><span class="sky">SNAB</span> <span class="re">process algorithm</span></span></a>
+	</li>  
   </ul>
 </div>
 <br>
@@ -51,6 +54,7 @@
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
 		  <li><a href="/snab"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
 		  <li class="active"><a href="/snab?report=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a></li>
+		  <li><a href="/snab?process_algorithm=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">process_algorithm</span></span></a></li>
 
 		</ul>
 		<div class="tab-content">
@@ -105,9 +109,54 @@
   {% for algorithm in algorithms %}
                 <option value="{{ algorithm }}">{{ algorithm }}</option>
   {% endfor %}
+                <option value="all">all</option>
               </select><br>
   		      </tr>
-  		    </tbody>
+			  <tr>
+				<td>Report on algorithm only</td>
+				<td>
+					<select name="algorithm_only">
+						<option value="true">true</option>
+						<option value="false">false</option>
+					</select>
+				</td>
+			  </tr>
+			  <tr>
+				<td>compare_algorithm_group</td>
+				<td><select name="compare_algorithm_group">
+				  <option value="None">None</option>
+					{% for algorithm_group in algorithm_groups_validated %}
+				  <option value="{{ algorithm_groups_validated[algorithm_group]['algorithm_group_id'] }}">{{ algorithm_groups_validated[algorithm_group]['algorithm_group'] }} ({{ algorithm_groups_validated[algorithm_group]['validated_count'] }} SNAB evaluations)</option>
+  {% endfor %}
+				</select><br>
+				Select the algorithm_group that represents the previous SNAB evaluated anomalies you wish to compare results of the selected algorithm with.
+  {% if algorithm_groups_validated|length == 0 %}
+			  <div class="alert alert-warning">
+				<strong>There are no SNAB evaluations for any algorithm_group</strong>.
+			  </div>
+  {% endif %}
+				</td>
+				  </tr>
+  
+				<tr>
+					<td>Include algorithms report</td>
+					<td>
+						<select name="algorithms_report">
+							<option value="false">false</option>
+							<option value="true">true</option>
+						</select> (only applicable for consensus based algorithms)
+					</td>
+			  </tr>
+			  <tr>
+				<td>Include consensus report</td>
+				<td>
+					<select name="consensuses_report">
+						<option value="false">false</option>
+						<option value="true">true</option>
+					</select> (only applicable for consensus based algorithms)
+				</td>
+			  </tr>
+			</tbody>
   		  </table>
         <br>
         <input type="submit" value="Get report">
@@ -148,6 +197,7 @@
   {% if snab_report %}
 	  {% set algorithm = snab_report['algorithm'] %}
 	  {% set snab_algorithm = snab_report['algorithm'] %}
+	  {% set use_algorithm_headers = snab_report['use_algorithm_headers'] %}
 	  {% set red_keys = ['fP', 'fP %', 'fN', 'fN %'] %}
 	  {% set green_keys = ['tP', 'tP %', 'tN', 'tN %'] %}
 	  {% set ad_metric_keys = ['f1_score', 'precision', 'recall', 'accuracy', 'fP_rate', 'fN_rate', 'tP_rate', 'tN_rate', 'auc_roc'] %}
@@ -167,8 +217,8 @@
 			<thead>
 			  <tr>
 				<th>Algorithm</th>
-    {% for key in snab_report['results'][algorithm] %}
-	    {% set anomaly_detection_metrics_keys = snab_report['results'][algorithm]['anomaly_detection_metrics'] %}	
+    {% for key in snab_report['results'][use_algorithm_headers] %}
+	    {% set anomaly_detection_metrics_keys = snab_report['results'][use_algorithm_headers]['anomaly_detection_metrics'] %}	
       {% if not 'heatmap_html_color_code_' in key %}
         {% if key != 'algorithm_group_name' %}
           {% if key != 'anomaly_detection_metrics' %}
@@ -176,7 +226,7 @@
           {% endif %}
         {% endif %}
     	{% elif key == 'anomaly_detection_metrics' %}
-		    {% for ad_key in snab_report['results'][algorithm]['anomaly_detection_metrics'] %}
+		    {% for ad_key in snab_report['results'][use_algorithm_headers]['anomaly_detection_metrics'] %}
 			    {% if ad_key in ad_metric_keys %}
 				<th style="word-wrap: break-word; min-width: 10px; max-width: 100px;">{{ ad_key }}</th>
 			    {% endif %}
@@ -196,19 +246,21 @@
             <td>{{ algo }}</td>
 	    {% for key in snab_report['results'][algo] %}
 	      {% set value = snab_report['results'][algo][key] %}
-		    {% set color_key = 'heatmap_html_color_code_' + key %}
+			  {% set color_key = 'heatmap_html_color_code_' + key %}
         {% if color_key in snab_report['results'][algo] %}
           {% set td_color = snab_report['results'][algo][color_key] %}
         {% else %}
           {% set td_color = '#f5f5f1' %}
         {% endif %}
         {% if key == 'anomaly_detection_metrics' %}
-          {% for ad_key in snab_report['results'][algorithm]['anomaly_detection_metrics'] %}
-            {% if ad_key in ad_metric_keys %}
-			<td style="background-color: {{ td_color }};">{{ snab_report['results'][algorithm]['anomaly_detection_metrics'][ad_key] }}</td>
-      			{% endif %}
-		      {% endfor %}
-	      {% endif %}
+          {% if algorithm != 'all' %}
+            {% for ad_key in snab_report['results'][algo]['anomaly_detection_metrics'] %}
+              {% if ad_key in ad_metric_keys %}
+			<td style="background-color: {{ td_color }};">{{ snab_report['results'][algo]['anomaly_detection_metrics'][ad_key] }}</td>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endif %}
 
         {% if not 'heatmap_html_color_code_' in key %}
           {% if (key == 'accuracy % ((tP+tN)/(evaluated-unsure)*100)') or (key == 'fN penalty accuracy % ((tP+tN)/(evaluated-unsure)*100)-fN%') %}
@@ -254,6 +306,7 @@
 		</table>
 		</div>
 
+{% if algorithms_report == True %}
 	{% if snab_report['algorithm_results'] %}
 	<h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">algorithms report ::</span></span> performance per algorithm run with <strong>{{ snab_algorithm }}</strong></h4>
     {% if version == dev_ver %}
@@ -328,8 +381,9 @@
 	</div>
 
 	{% endif %}
+{% endif %}
 
-
+{% if consensuses_report == True %}
 	{% if snab_report['consensuses'] %}
 	<h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">consensuses report ::</span></span> performance per consensus run with <strong>{{ snab_algorithm }}</strong></h4>
     {% if version == dev_ver %}
@@ -405,6 +459,7 @@
 	</div>
 
 	{% endif %}
+{% endif %}
 
   {% endif %}
 

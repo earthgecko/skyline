@@ -24,6 +24,20 @@
 	</ol>
 {% endif %}
 
+{% if panorama_dawn_expiry_date %}
+  <div class="alert alert-warning">
+    <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+    <center><h4><span class="logo"><span class="re">On a new install Analyzer will not analyze or report any more anomalies until at least 100 minutes of metric data is available as per <code>settings.MIN_TOLERABLE_LENGTH</code></span></span></h4></center>
+  </div>
+{% endif %}
+
+{% if dawn_expiry_date %}
+  <div class="alert alert-warning">
+    <center><h3><span class="logo"><span class="re">NEW INSTALL</span></span></h3></center>
+    <center><h4><span class="logo"><span class="re">Analyzer will not analyze metrics or record further anomalies until {{ dawn_expiry_date }} when there is sufficient data</span></span></h4></center>
+  </div>
+{% endif %}
+
 <!--  <div class="container main_container">-->
   <div class="container main_container">
       <div id="title_container">
