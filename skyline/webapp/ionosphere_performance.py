@@ -166,8 +166,11 @@ def get_ionosphere_performance(
     # end_timestamp_str = str(end_timestamp)
 
     if timezone_str == 'UTC':
-        begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
-        end_date = datetime.datetime.utcfromtimestamp(end_timestamp).strftime('%Y-%m-%d')
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+        #end_date = datetime.datetime.utcfromtimestamp(end_timestamp).strftime('%Y-%m-%d')
+        begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+        end_date = datetime.datetime.fromtimestamp(int(end_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
     else:
         if determine_timezone_start_date:
             logger.info('get_ionosphere_performance - determine_timezone_start_date - True')
@@ -178,10 +181,16 @@ def get_ionosphere_performance(
             begin_date = tz_from_timestamp_datetime_obj.strftime('%Y-%m-%d')
             logger.info('get_ionosphere_performance - begin_date with %s timezone applied - %s' % (timezone_str, str(begin_date)))
         else:
-            begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+            begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+
         if determine_timezone_end_date:
             logger.info('get_ionosphere_performance - determine_timezone_end_date - True')
-            non_tz_end_datetime_object = datetime.datetime.utcfromtimestamp(end_timestamp)
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #non_tz_end_datetime_object = datetime.datetime.utcfromtimestamp(end_timestamp)
+            non_tz_end_datetime_object = datetime.datetime.fromtimestamp(int(end_timestamp), tz=datetime.timezone.utc)
+
             logger.info('get_ionosphere_performance - non_tz_end_datetime_object - %s' % str(non_tz_end_datetime_object))
             tz_end_datetime_object = utc_timezone.localize(non_tz_end_datetime_object).astimezone(user_timezone)
             logger.info('get_ionosphere_performance - tz_end_datetime_object - %s' % str(tz_end_datetime_object))
@@ -189,7 +198,9 @@ def get_ionosphere_performance(
             logger.info('get_ionosphere_performance - end_date with %s timezone applied - %s' % (timezone_str, str(end_date)))
         else:
             logger.info('get_ionosphere_performance - determine_timezone_end_date - False')
-            end_date = datetime.datetime.utcfromtimestamp(end_timestamp).strftime('%Y-%m-%d')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #end_date = datetime.datetime.utcfromtimestamp(end_timestamp).strftime('%Y-%m-%d')
+            end_date = datetime.datetime.fromtimestamp(int(end_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
 
     original_begin_date = begin_date
 
@@ -206,7 +217,10 @@ def get_ionosphere_performance(
         if period == 'monthly':
             frequency = 'M'
             extended_end_timestamp = end_timestamp + (86400 * 30)
-    extended_end_date = datetime.datetime.utcfromtimestamp(extended_end_timestamp).strftime('%Y-%m-%d')
+
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #extended_end_date = datetime.datetime.utcfromtimestamp(extended_end_timestamp).strftime('%Y-%m-%d')
+    extended_end_date = datetime.datetime.fromtimestamp(int(extended_end_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
 
     remove_prefix = False
     try:
@@ -232,7 +246,10 @@ def get_ionosphere_performance(
     # for cache key
     yesterday_timestamp = end_timestamp - 86400
 
-    yesterday_end_date = datetime.datetime.utcfromtimestamp(yesterday_timestamp).strftime('%Y-%m-%d')
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #yesterday_end_date = datetime.datetime.utcfromtimestamp(yesterday_timestamp).strftime('%Y-%m-%d')
+    yesterday_end_date = datetime.datetime.fromtimestamp(int(yesterday_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+
     metric_like_str = str(metric_like)
     metric_like_wildcard = metric_like_str.replace('.%', '')
     # @modified 20210202 - Feature #3934: ionosphere_performance
@@ -278,7 +295,9 @@ def get_ionosphere_performance(
         if timezone_str == 'UTC':
             new_from_timestamp = time.mktime(datetime.datetime.strptime(new_from, '%Y-%m-%d %H:%M:%S').timetuple())
             start_timestamp = int(new_from_timestamp) + 1
-            begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+            begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
         else:
             tz_new_from_timestamp_datetime_obj = datetime.datetime.strptime(new_from, '%Y-%m-%d %H:%M:%S')
             tz_offset = pytz.timezone(timezone_str).localize(tz_new_from_timestamp_datetime_obj).strftime('%z')
@@ -334,15 +353,32 @@ def get_ionosphere_performance(
         for i_metric_like in metric_likes:
             metric_like_str = str(i_metric_like)
             logger.info('get_ionosphere_performance - metric_like - %s' % metric_like_str)
-            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
+            metrics_like_query = text(metrics_like_text)
+
             metric_like_wildcard = metric_like_str.replace('.%', '')
             # request_key = '%s.%s.%s.%s' % (metric_like_wildcard, begin_date, end_date, frequency)
             # plot_title = '%s - %s' % (metric_like_wildcard, period)
             # logger.info('get_ionosphere_performance - metric like query, cache key being generated from request key - %s' % request_key)
             try:
-                connection = engine.connect()
-                result = connection.execute(metrics_like_query, like_string=metric_like_str)
-                connection.close()
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(metrics_like_query, like_string=metric_like_str)
+                #connection.close()
+                with engine.connect() as connection:
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query, like_string=metric_like_str)
+                    result = connection.execute(metrics_like_query)
+
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     m_id = row['id']
                     metric_ids.append(int(m_id))
@@ -362,11 +398,27 @@ def get_ionosphere_performance(
             if re.search(pattern, metric_likes[0]):
                 metric_label_like_str = '%%_tenant_id="%s",%%' % metric_like_wildcard
                 logger.info('get_ionosphere_performance - getting labelled metrics metric_label_like_str - %s' % metric_label_like_str)
-                metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+
+                # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+                metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_label_like_str}'"
+                metrics_like_query = text(metrics_like_text)
+
                 try:
-                    connection = engine.connect()
-                    result = connection.execute(metrics_like_query, like_string=metric_label_like_str)
-                    connection.close()
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #result = connection.execute(metrics_like_query, like_string=metric_label_like_str)
+                    #connection.close()
+                    with engine.connect() as connection:
+                        # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(metrics_like_query, like_string=metric_label_like_str)
+                        result = connection.execute(metrics_like_query)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                     for row in result:
                         m_id = row['id']
                         metric_ids.append(int(m_id))
@@ -385,20 +437,36 @@ def get_ionosphere_performance(
             logger.info('get_ionosphere_performance - determining start_timestamp_str')
             created_dates = []
             try:
-                connection = engine.connect()
-                # stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)
+                # stmt = select(metrics_table.c.created_timestamp, metrics_table.c.id.in_(metric_ids)).limit(1)
                 # @modified 20240216 - Task #5088: Change membership of the list checks to sets
                 #                      Feature #3934: ionosphere_performance
-                #stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ##stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+                #stmt = select(metrics_table.c.created_timestamp, metrics_table.c.id.in_(metric_ids))
                 min_metric_id = min(metric_ids)
-                stmt = select([metrics_table.c.created_timestamp]).where(metrics_table.c.id == min_metric_id)
-                result = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table.c.created_timestamp]).where(metrics_table.c.id == min_metric_id)
+                stmt = select(metrics_table.c.created_timestamp).where(metrics_table.c.id == min_metric_id)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
 
                 for row in result:
                     # start_timestamp_date = row['created_timestamp']
                     created_dates.append(row['created_timestamp'])
                     # break
-                connection.close()
+                #connection.close()
 
                 # @modified 20220308 - handle no created_dates
                 if created_dates:
@@ -415,7 +483,11 @@ def get_ionosphere_performance(
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(start_timestamp_str, '%Y-%m-%d %H:%M:%S').timetuple())
                 start_timestamp = int(new_from_timestamp)
                 logger.info('get_ionosphere_performance - determined start_timestamp - %s' % str(start_timestamp))
-                begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+
+                # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+                begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+
                 logger.info('get_ionosphere_performance - determined begin_date - %s' % str(begin_date))
 
                 # @added 20210203 - Feature #3934: ionosphere_performance
@@ -444,7 +516,10 @@ def get_ionosphere_performance(
     logger.info('get_ionosphere_performance - metric_ids length - %s' % str(len(metric_ids)))
 
     if not metric_ids:
-        # stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        ## stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+        # stmt = select(metrics_table).where(metrics_table.c.id > 0)
         if metric == 'all':
             request_key = 'all.%s.%s.%s' % (begin_date, end_date, frequency)
             plot_title = 'All metrics - %s' % period
@@ -452,19 +527,32 @@ def get_ionosphere_performance(
             # If the from_timestamp is 0 or all
             if determine_start_timestamp:
                 try:
-                    connection = engine.connect()
-                    stmt = select([metrics_table.c.created_timestamp]).limit(1)
-                    result = connection.execute(stmt)
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([metrics_table.c.created_timestamp]).limit(1)
+                    stmt = select(metrics_table.c.created_timestamp).limit(1)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                     for row in result:
                         start_timestamp_date = row['created_timestamp']
                         break
-                    connection.close()
+                    #connection.close()
                     start_timestamp_str = str(start_timestamp_date)
                     logger.info('get_ionosphere_performance - determined start_timestamp_str - %s' % start_timestamp_str)
                     new_from_timestamp = time.mktime(datetime.datetime.strptime(start_timestamp_str, '%Y-%m-%d %H:%M:%S').timetuple())
                     start_timestamp = int(new_from_timestamp)
                     logger.info('get_ionosphere_performance - determined start_timestamp - %s' % str(start_timestamp))
-                    begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+                    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                    #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+                    begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+
                     logger.info('get_ionosphere_performance - determined begin_date - %s' % str(begin_date))
 
                     # @added 20210203 - Feature #3934: ionosphere_performance
@@ -494,14 +582,24 @@ def get_ionosphere_performance(
                 request_key = '%s.%s.%s.%s' % (metric, begin_date, end_date, frequency)
                 plot_title = '%s - %s' % (use_metric_name, period)
                 logger.info('get_ionosphere_performance - metric all query, cache key being generated from request key - %s' % request_key)
-                connection = engine.connect()
-                stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-                result = connection.execute(stmt)
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+                stmt = select(metrics_table).where(metrics_table.c.id > 0)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     metric_id_str = row['id']
                     r_metric_id = int(metric_id_str)
                     metric_ids.append(r_metric_id)
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: get_ionosphere_performance - could not determine metric ids from metrics - %s' % e)
@@ -515,13 +613,23 @@ def get_ionosphere_performance(
                 request_key = '%s.%s.%s.%s' % (metric, begin_date, end_date, frequency)
                 plot_title = '%s - %s' % (use_metric_name, period)
                 logger.info('get_ionosphere_performance - metric query, cache key being generated from request key - %s' % request_key)
-                connection = engine.connect()
-                stmt = select([metrics_table]).where(metrics_table.c.metric == str(metric))
-                result = connection.execute(stmt)
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table]).where(metrics_table.c.metric == str(metric))
+                stmt = select(metrics_table).where(metrics_table.c.metric == str(metric))
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     metric_id_str = row['id']
                     metric_id = int(metric_id_str)
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: get_ionosphere_performance - could not determine metric id from metrics - %s' % e)
@@ -538,19 +646,32 @@ def get_ionosphere_performance(
 
             if determine_start_timestamp and metric_id:
                 try:
-                    connection = engine.connect()
-                    stmt = select([metrics_table.c.created_timestamp]).where(metrics_table.c.metric == str(metric))
-                    result = connection.execute(stmt)
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([metrics_table.c.created_timestamp]).where(metrics_table.c.metric == str(metric))
+                    stmt = select(metrics_table.c.created_timestamp).where(metrics_table.c.metric == str(metric))
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                     for row in result:
                         start_timestamp_date = row['created_timestamp']
                         break
-                    connection.close()
+                    #connection.close()
                     start_timestamp_str = str(start_timestamp_date)
                     logger.info('get_ionosphere_performance - determined start_timestamp_str - %s' % start_timestamp_str)
                     new_from_timestamp = time.mktime(datetime.datetime.strptime(start_timestamp_str, '%Y-%m-%d %H:%M:%S').timetuple())
                     start_timestamp = int(new_from_timestamp)
                     logger.info('get_ionosphere_performance - determined start_timestamp - %s' % str(start_timestamp))
-                    begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+                    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                    #begin_date = datetime.datetime.utcfromtimestamp(start_timestamp).strftime('%Y-%m-%d')
+                    begin_date = datetime.datetime.fromtimestamp(int(start_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d')
+
                     logger.info('get_ionosphere_performance - determined begin_date - %s' % str(begin_date))
                     request_key = '%s.%s.%s.%s' % (metric, begin_date, end_date, frequency)
                     logger.info('get_ionosphere_performance - metric query, determine_start_timestamp cache key being generated from request key - %s' % request_key)
@@ -616,7 +737,7 @@ def get_ionosphere_performance(
                 engine_disposal(skyline_app, engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             # @modified 20230418 - Feature #3934: ionosphere_performance
             # Allow for a minimum full_duration to differential between analyzer and
             # mirage anomalies. Added min_full_duration
@@ -624,34 +745,67 @@ def get_ionosphere_performance(
                 # @modified 20240216 - Task #5088: Change membership of the list checks to sets
                 #                      Feature #3934: ionosphere_performance
                 # Faster query and less iteration of results
-                # stmt = select([anomalies_table.c.id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
-                stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([anomalies_table.c.id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                # stmt = select(anomalies_table.c.id, anomalies_table.c.anomaly_timestamp, anomalies_table.c.metric_id.in_(metric_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
+                    where(anomalies_table.c.metric_id.in_(metric_ids)).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
                     where(anomalies_table.c.full_duration >= min_full_duration)
                 logger.info('get_ionosphere_performance - stmt: %s' % str(stmt))
                 start_stmt = time.time()
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
 
                 # @added 20240216 - Task #5088: Change membership of the list checks to sets
                 #                   Feature #3934: ionosphere_performance
-                rows = result.all()
-                result = rows
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #rows = result.all()
+                #result = rows
                 logger.info('get_ionosphere_performance - stmt completed with %s results in %s seconds' % (
                     str(len(result)),str(time.time() - start_stmt)))
             elif metric_id:
-                stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
                     where(anomalies_table.c.metric_id == int(metric_id)).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
                     where(anomalies_table.c.full_duration >= min_full_duration)
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
             else:
-                stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
                     where(anomalies_table.c.full_duration >= min_full_duration)
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
             for row in result:
                 r_metric_id = row['metric_id']
                 append_result = False
@@ -668,7 +822,7 @@ def get_ionosphere_performance(
                     anomalies.append(int(anomaly_timestamp))
                     # anomalies_ts.append([datetime.datetime.fromtimestamp(int(anomaly_timestamp)), int(anomaly_id)])
                     anomalies_ts.append([int(anomaly_timestamp), int(anomaly_id)])
-            connection.close()
+            #connection.close()
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine anomaly ids - %s' % err)
@@ -683,27 +837,60 @@ def get_ionosphere_performance(
         if len(anomalies_ts) == 0:
             logger.info('get_ionosphere_performance - no anomalies found trying without min_full_duration')
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 if metric_ids:
                     # @modified 20240216 - Task #5088: Change membership of the list checks to sets
                     #                      Feature #3934: ionosphere_performance
                     # Faster query and less iteration of results
-                    # stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
-                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    # stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                    stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
+                        where(anomalies_table.c.metric_id.in_(metric_ids)).\
                         where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                         where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
-                    result = connection.execute(stmt)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                 elif metric_id:
-                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
                         where(anomalies_table.c.metric_id == int(metric_id)).\
                         where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                         where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
-                    result = connection.execute(stmt)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
                 else:
-                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp).\
                         where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                         where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
-                    result = connection.execute(stmt)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                 for row in result:
                     r_metric_id = row['metric_id']
                     append_result = False
@@ -717,7 +904,7 @@ def get_ionosphere_performance(
                         anomaly_timestamp = row['anomaly_timestamp']
                         anomalies.append(int(anomaly_timestamp))
                         anomalies_ts.append([int(anomaly_timestamp), int(anomaly_id)])
-                connection.close()
+                #connection.close()
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not determine anomaly ids - %s' % err)
@@ -791,68 +978,127 @@ def get_ionosphere_performance(
             raise  # to webapp to return in the UI
         try:
             logger.info('get_ionosphere_performance - determining fp ids of type %s' % fp_type)
-            connection = engine.connect()
+            #connection = engine.connect()
             if metric_ids:
                 if fp_type == 'user':
-                    # stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # stmt = select(ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp, ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation <= 1)
                 elif fp_type == 'learnt':
-                    # stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # stmt = select(ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp, ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation >= 2)
                 else:
-                    # stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # stmt = select(ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp, ionosphere_table.c.metric_id.in_(metric_ids)).\
                     # @modified 20240216 - Task #5088: Change membership of the list checks to sets
                     #                      Feature #3934: ionosphere_performance
                     # Faster query and less iteration of results
-                    # stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
+                        where(ionosphere_table.c.metric_id.in_(metric_ids)).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp)
                 logger.info('get_ionosphere_performance - determining fp ids of type %s for metric_ids' % fp_type)
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
             elif metric_id:
                 if fp_type == 'user':
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.metric_id == int(metric_id)).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation <= 1)
                 elif fp_type == 'learnt':
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.metric_id == int(metric_id)).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation >= 2)
                 else:
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.metric_id == int(metric_id)).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp)
                 logger.info('get_ionosphere_performance - determining fp ids for metric_id')
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
             else:
                 if fp_type == 'user':
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation <= 1)
                 elif fp_type == 'learnt':
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp).\
                         where(ionosphere_table.c.generation >= 2)
                 else:
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp)
                 logger.info('get_ionosphere_performance - determining fp ids for all metrics')
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
             for row in result:
                 r_metric_id = row['metric_id']
                 append_result = False
@@ -865,7 +1111,7 @@ def get_ionosphere_performance(
                     anomaly_timestamp = row['anomaly_timestamp']
                     fp_ids.append(int(fp_id))
                     fp_ids_ts.append([int(anomaly_timestamp), int(fp_id)])
-            connection.close()
+            #connection.close()
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: get_ionosphere_performance - could not determine fp_ids - %s' % err)
@@ -930,13 +1176,23 @@ def get_ionosphere_performance(
         start_matched = time.time()
 
         try:
-            connection = engine.connect()
-            # stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+            # stmt = select(ionosphere_matched_table.c.id, ionosphere_matched_table.c.metric_timestamp, ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
             # @modified 20240216 - Task #5088: Change membership of the list checks to sets
             #                      Feature #3934: ionosphere_performance
             # Faster query and less iteration of results
-            # stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
-            stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+            # stmt = select(ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+            stmt = select(ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp).\
+                where(ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
                 where(ionosphere_matched_table.c.metric_timestamp >= start_timestamp).\
                 where(ionosphere_matched_table.c.metric_timestamp <= end_timestamp)
             # @modified 20240216 - Task #5088: Change membership of the list checks to sets
@@ -944,9 +1200,14 @@ def get_ionosphere_performance(
             # result = connection.execute(stmt)
             logger.info('get_ionosphere_performance - stmt: %s' % str(stmt))
             start_stmt = time.time()
-            result = connection.execute(stmt)
-            rows = result.all()
-            result = rows
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             logger.info('get_ionosphere_performance - stmt completed with %s results in %s seconds' % (
                 str(len(result)),str(time.time() - start_stmt)))
 
@@ -965,7 +1226,7 @@ def get_ionosphere_performance(
                     matched_id = row['id']
                     metric_timestamp = row['metric_timestamp']
                     fps_matched_ts.append([int(metric_timestamp), int(matched_id)])
-            connection.close()
+            #connection.close()
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: get_ionosphere_performance - could not determine timestamps from ionosphere_matched')
@@ -997,16 +1258,33 @@ def get_ionosphere_performance(
     layers_matched_ts = []
     if fp_ids:
         try:
-            connection = engine.connect()
-            # stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+            # stmt = select(ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.anomaly_timestamp, ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
             # @modified 20240216 - Task #5088: Change membership of the list checks to sets
             #                      Feature #3934: ionosphere_performance
             # Faster query and less iteration of results
-            # stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
-            stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+            # stmt = select(ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+            stmt = select(ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp).\
+                where(ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
                 where(ionosphere_layers_matched_table.c.anomaly_timestamp >= start_timestamp).\
                 where(ionosphere_layers_matched_table.c.anomaly_timestamp <= end_timestamp)
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 append_result = False
                 if metric == 'all' and metric_like == 'all':
@@ -1022,7 +1300,7 @@ def get_ionosphere_performance(
                     matched_layers_id = row['id']
                     matched_timestamp = row['anomaly_timestamp']
                     layers_matched_ts.append([int(matched_timestamp), int(matched_layers_id)])
-            connection.close()
+            #connection.close()
         except Exception as e:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -1142,11 +1420,20 @@ def get_ionosphere_performance(
             raise  # to webapp to return in the UI
 
     date_list = pd.date_range(begin_date, end_date, freq=frequency)
-    date_list = date_list.format(formatter=lambda x: x.strftime('%Y-%m-%d'))
+    # @modified 20260422 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    # The format() method was removed from DatetimeIndex in pandas 3.0.0
+    #date_list = date_list.format(formatter=lambda x: x.strftime('%Y-%m-%d'))
+    date_list = date_list.strftime('%Y-%m-%d').tolist()
+
     use_end_date = end_date
     if not date_list:
         date_list = pd.date_range(begin_date, extended_end_date, freq=frequency)
-        date_list = date_list.format(formatter=lambda x: x.strftime('%Y-%m-%d'))
+
+        # @modified 20260422 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        # The format() method was removed from DatetimeIndex in pandas 3.0.0
+        #date_list = date_list.format(formatter=lambda x: x.strftime('%Y-%m-%d'))
+        date_list = date_list.strftime('%Y-%m-%d').tolist()
+
         use_end_date = extended_end_date
     # logger.debug('debug :: get_ionosphere_performance - date_list - %s' % str(date_list))
 
@@ -1212,7 +1499,15 @@ def get_ionosphere_performance(
         else:
             performance_df = pd.merge(performance_df, fps_total_df, how='outer', on='date')
         performance_df.sort_values('date')
-        performance_df['fps_total_count'].fillna(method='ffill', inplace=True)
+
+        # @modified 20260422 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        # The method was changed https://pandas.pydata.org/docs/dev/whatsnew/v3.0.0.html
+        # Methods that can operate in-place (replace(), fillna(), ffill(), bfill(),
+        # interpolate(), where(), mask(), clip()) now return the modified DataFrame
+        # or Series (self) instead of None when inplace=True (GH 63207)
+        #performance_df['fps_total_count'].fillna(method='ffill', inplace=True)
+        performance_df['fps_total_count'] = performance_df['fps_total_count'].ffill()
+
         logger.info('get_ionosphere_performance - second step of creating performance_df complete, dataframe length - %s' % str(len(performance_df)))
 
     if len(fps_total_df) == 0 and report_total_fps:
@@ -1227,7 +1522,11 @@ def get_ionosphere_performance(
                 yesterday_fps_total_count = yesterday_data[yesterday_end_date]['fps_total_count']
             except Exception as err:
                 logger.info('get_ionosphere_performance - could not determine fps_total_count from yesterday_data, err: %s' % err)
-        performance_fps_total_count = performance_df['fps_total_count'][-1]
+        # @modified 20260422 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        # Stricter pandas with DatetimeIndex no longer possible to slice this way
+        #performance_fps_total_count = performance_df['fps_total_count'][-1]
+        performance_fps_total_count = performance_df['fps_total_count'].iloc[-1]
+
         if yesterday_fps_total_count:
             if performance_fps_total_count == 0:
                 replace_total_fps = True
@@ -1353,11 +1652,17 @@ def get_ionosphere_performance(
         # the last x days of the period being 0 because the cumsum of new_fps_count
         # is 0.  Recalculate the fps_total_count on the cumsum of new_fps_count
         # of the merged df
-        # @modified 20240322
+        # @modified 20240322 - Feature #3934: ionosphere_performance
         # Only use cumsum if fps_total_count is 0
         # performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
-        if performance_df['fps_total_count'][-1] == 0:
-            performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
+        # @modified 20260208 - Feature #3934: ionosphere_performance
+        #if performance_df['fps_total_count'][-1] == 0:
+        if 'fps_total_count' in performance_df.columns:
+            # @modified 20260422 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            # Stricter pandas with DatetimeIndex no longer possible to slice this way
+            #if performance_df['fps_total_count'][-1] == 0:
+            if performance_df['fps_total_count'].iloc[-1] == 0:
+                performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
 
     plot_png = None
     if output_format != 'json':
