@@ -186,15 +186,30 @@ def get_metrics_db_object(base_name):
             logger.error('error :: failed to get metrics_table meta for %s' % base_name)
 
         try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-            result = connection.execute(stmt)
-            try:
-                result
-            except:
-                logger.error(traceback.format_exc())
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #try:
+            #    result
+            #except:
+            #    logger.error(traceback.format_exc())
+            #    logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
+            #row = result.fetchone()
+            row = {}
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                _row = result.fetchone()
+                row = dict(_row._mapping) if _row is not None else None
+
+            if not row:
                 logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
-            row = result.fetchone()
+
             # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
             # @modified - 20180524 - Task #2132: Optimise Ionosphere DB usage
             # Feature #2378: Add redis auth to Skyline and rebrow
@@ -217,7 +232,7 @@ def get_metrics_db_object(base_name):
             else:
                 logger.info('could not determine metric id for %s' % base_name)
 
-            connection.close()
+            #connection.close()
 
         except:
             logger.error(traceback.format_exc())
