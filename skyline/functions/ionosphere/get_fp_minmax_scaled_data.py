@@ -2,6 +2,8 @@
 get_fp_minmax_scaled_data.py
 """
 import logging
+# @added 20250829 - Feature #4708: ionosphere - store and cache fp minmax data
+from time import time
 
 from settings import MEMCACHE_ENABLED
 
@@ -71,7 +73,29 @@ def get_fp_minmax_scaled_data(current_skyline_app, fp_id):
         fp_minmax_scaled_dict['data_source'] = 'database'
         # Set in memcache
         if MEMCACHE_ENABLED:
+
+            # @added 20250829 - Feature #4708: ionosphere - store and cache fp minmax data
+            # Coerce types - add the added_to_memcache timestamp
+            fp_minmax_scaled_dict['added_to_memcache'] = int(time())
+
             try:
+                # @added 20250829 - Feature #4708: ionosphere - store and cache fp minmax data
+                # Coerce np.float64 type - how this translates from the DB Decimal type is
+                # beyond me and I cannot replicate it but when run in code the
+                # dict placed in memcache has np.float64 type on the features_sum
+                # {'id': 11874, 'min_fp_value': 0.0, 'max_fp_value': 0.0161667143,
+                # 'values_count': 1008, 'features_count': 210,
+                # 'features_sum': np.float64(4591.060248671147),
+                # 'tsfresh_version': '0.20.3', 'calc_time': 0.006075859069824219}
+                # However out the DB it has Decimal before it is coerced in
+                # skyline/functions/database/queries/get_fp_minmax_scaled_data.py
+                # {'fp_id': 11874, 'minmax_min': Decimal('0E-10'),
+                # 'minmax_max': Decimal('0.0161667143'), 'values_count': 1008,
+                # 'features_count': 210, 'features_sum': Decimal('4591.0602486711'),
+                # 'tsfresh_version': '0.20.3', 'calc_time': 0.00607586,
+                # 'created_timestamp': datetime.datetime(2024, 10, 2, 13, 35, 43)}
+                fp_minmax_scaled_dict['features_sum'] = float(fp_minmax_scaled_dict['features_sum'])
+
                 success = set_memcache_key(current_skyline_app, memcache_key, fp_minmax_scaled_dict)
                 if success:
                     current_logger.info('%s :: set memcache %s key' % (str(function_str), memcache_key))
