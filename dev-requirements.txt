@@ -39,7 +39,14 @@ wheel
 #redis==5.0.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #redis==4.6.0
-redis==5.2.0
+# @modified 20250609 - Task #5627: v5.0.0 update dependencies
+#redis==5.2.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#redis==6.2.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#redis==7.1.1
+redis==7.4.0
 
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #hiredis==1.0.1
@@ -52,7 +59,14 @@ redis==5.2.0
 #hiredis==2.1.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #hiredis==2.2.3
-hiredis==3.0.0
+# @modified 20250609 - Task #5627: v5.0.0 update dependencies
+#hiredis==3.0.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#hiredis==3.2.1
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#hiredis==3.3.0
+hiredis==3.3.1
 
 ## python-daemon and deps
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
@@ -72,7 +86,9 @@ hiredis==3.0.0
 #docutils==0.19
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #docutils==0.20.1
-docutils==0.21.2
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#docutils==0.21.2
+docutils==0.22.4
 
 lockfile==0.12.2
 # @modified 20161119 - Branch #922: ionosphere
@@ -86,7 +102,10 @@ lockfile==0.12.2
 #python-daemon==2.2.3
 # @modified 20211220 - Task #4344: Update dependencies
 #python-daemon==2.2.4
-python-daemon==2.3.0
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#python-daemon==2.3.0
+python-daemon==3.1.2
 
 ## Flask and deps
 # @modified 20190412 - Task #2926: Update dependencies
@@ -120,7 +139,9 @@ itsdangerous==2.2.0
 #Jinja2==3.1.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #Jinja2==3.1.2
-Jinja2==3.1.4
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#Jinja2==3.1.4
+Jinja2==3.1.6
 
 # @modified 20190412 - Task #2926: Update dependencies
 #MarkupSafe==1.0
@@ -133,7 +154,9 @@ Jinja2==3.1.4
 #MarkupSafe==2.1.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #MarkupSafe==2.1.3
-MarkupSafe==3.0.2
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#MarkupSafe==3.0.2
+MarkupSafe==3.0.3
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -165,7 +188,19 @@ MarkupSafe==3.0.2
 #Werkzeug==2.3.6
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #Werkzeug==3.0.1
-Werkzeug==3.0.6
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#Werkzeug==3.0.6
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#Werkzeug==3.1.3
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#Werkzeug==3.1.4
+# @modified 20260310 - Task #5628: Build v5.0.0 and test
+# https://security.snyk.io/vuln/SNYK-PYTHON-WERKZEUG-15322677
+#Werkzeug==3.1.5
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#Werkzeug==3.1.6
+Werkzeug==3.1.8
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
@@ -181,7 +216,20 @@ Werkzeug==3.0.6
 #click==8.1.2
 # @modified 20231210 - Task #5168: v4.1.0 - update dependencies
 #click==8.1.3
-click==8.1.7
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#click==8.1.7
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#click==8.2.1
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+# Tried updating to 8.3.3 but conflicts
+#click==8.3.1
+#click==8.3.3
+#The conflict is caused by:
+#The user requested click==8.3.3
+#flask 3.1.3 depends on click>=8.1.3
+#litellm 1.83.14 depends on click==8.1.8
+click==8.3.1
 
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #Flask==0.11.1
@@ -208,7 +256,13 @@ click==8.1.7
 #Flask==2.3.2
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #Flask==3.0.0
-Flask==3.0.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#Flask==3.0.3
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#Flask==3.1.1
+# @modified 20260219 - Task #5627: v5.0.0 update dependencies
+#Flask==3.1.2
+Flask==3.1.3
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -234,7 +288,14 @@ Flask==3.0.3
 #simplejson==3.19.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #simplejson==3.19.2
-simplejson==3.19.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#simplejson==3.19.3
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#simplejson==3.20.1
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#simplejson==3.20.2
+simplejson==4.1.1
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #six==1.10.0
@@ -244,7 +305,9 @@ simplejson==3.19.3
 #six==1.12.0
 # @modified 20211220 - Task #4344: Update dependencies
 #six==1.15.0
-six==1.16.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#six==1.16.0
+six==1.17.0
 
 ## unittest2 and deps
 # @modified 20230110 - Task #4800: Deprecate unittest2
@@ -289,7 +352,11 @@ funcsigs==1.0.2
 #pbr==5.11.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pbr==6.0.0
-pbr==6.1.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pbr==6.1.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#pbr==6.1.1
+pbr==7.0.3
 
 # @modified 20190529 - Task #3060: Update dependencies
 #mock==2.0.0
@@ -304,7 +371,9 @@ pbr==6.1.0
 #mock==5.0.0
 # @modified 20231210 - Task #5168: v4.1.0 - update dependencies
 #mock==5.0.2
-mock==5.1.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#mock==5.1.0
+mock==5.2.0
 
 # If python-2.6 is being used, distribute is probably still required
 #distribute
@@ -362,7 +431,16 @@ mock==5.1.0
 # numpy is currently at numpy==2.1.2 but ...
 # numba 0.60.0 depends on numpy<2.1 and >=1.22 so pinning numpy to 2.0.2
 #numpy==1.24.4
-numpy==2.0.2
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#numpy==2.0.2
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+# Pinning numpy at 2.3.5 for numba because numpy==2.4.2 is too high
+#numba 0.63.1 depends on numpy<2.4 and >=1.22
+#numpy==2.2.6
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#numpy==2.3.5
+numpy==2.4.4
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -402,7 +480,24 @@ numpy==2.0.2
 #scipy==1.10.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #scipy==1.10.1
-scipy==1.14.1
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#scipy==1.14.1
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+# Staying pinned to 1.15.3 and not updated to 1.17.0 because of statsforecast
+# dependency of
+# statsforecast 2.0.3 depends on scipy<1.16.0 and >=1.7.3
+#scipy==1.15.3
+#scipy==1.17.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+# Tried updating to 1.17.1 but conflicts
+#scipy==1.15.3
+#scipy==1.17.1
+#The user requested scipy==1.17.1
+#tsfresh 0.21.91 depends on scipy>=1.14.0; python_version >= "3.10"
+#luminol 0.4.4 depends on scipy
+#statsforecast 2.0.3 depends on scipy<1.16.0 and >=1.7.3
+scipy==1.15.3
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -423,6 +518,15 @@ scipy==1.14.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #python-dateutil==2.8.2
 python-dateutil==2.9.0.post0
+# @added 20250612 - Task #5627: v5.0.0 update dependencies
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#types-python-dateutil==2.9.0.20250516
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#types-python-dateutil==2.9.0.20251115
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#types-python-dateutil==2.9.0.20260124
+types-python-dateutil==2.9.0.20260408
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #pytz==2016.4
@@ -460,7 +564,9 @@ python-dateutil==2.9.0.post0
 #pytz==2023.3
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pytz==2023.3.post1
-pytz==2024.2
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pytz==2024.2
+pytz==2025.2
 
 # @modified 20211220 - Task #4344: Update dependencies
 #cycler==0.10.0
@@ -494,7 +600,13 @@ cycler==0.12.1
 #pyparsing==3.1.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pyparsing==3.1.1
-pyparsing==3.2.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pyparsing==3.2.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#pyparsing==3.2.3
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#pyparsing==3.3.1
+pyparsing==3.3.2
 
 # @added 20210115 - Bug #3940: SNYK-PYTHON-PILLOW-1055461 and SNYK-PYTHON-PILLOW-1055462
 # Added as matplotlib@3.3.3 introduced pillow@8.0.1 and Pillow is now fixed at
@@ -530,7 +642,14 @@ pyparsing==3.2.0
 #Pillow==9.5.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #Pillow==10.1.0
-Pillow==11.0.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#Pillow==11.0.0
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#Pillow==11.2.1
+# @modified 20260310 - Task #5628: Build v5.0.0 and test
+# https://security.snyk.io/vuln/SNYK-PYTHON-PILLOW-15265439
+#Pillow==11.3.0
+Pillow==12.1.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -568,7 +687,14 @@ Pillow==11.0.0
 #matplotlib==3.7.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #matplotlib==3.7.4
-matplotlib==3.9.2
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#matplotlib==3.9.2
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#matplotlib==3.10.3
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#matplotlib==3.10.8
+matplotlib==3.10.9
 
 ## pandas and deps
 # @modified 20161119 - Branch #922: ionosphere
@@ -600,7 +726,18 @@ matplotlib==3.9.2
 # pandas==1.5.2
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pandas==2.0.3
-pandas==2.2.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pandas==2.2.3
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#pandas==2.3.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#pandas==2.3.1
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#pandas==2.3.3
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#pandas==3.0.0
+pandas==3.0.2
 
 # @modified 20180416 - Task #2272: update deps for luminosity branch
 #patsy==0.4.1
@@ -614,7 +751,15 @@ pandas==2.2.3
 #patsy==0.5.3
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #patsy==0.5.4
-patsy==0.5.6
+# @modified 20250616 - Task #5627: v5.0.0 update dependencies
+#patsy==0.5.6
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#patsy==1.0.1
+patsy==1.0.2
+
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#statsforecast==2.0.1
+statsforecast==2.0.3
 
 # @modified 20170809 - Task #2138: Update deps
 #statsmodels==0.6.1
@@ -655,7 +800,9 @@ patsy==0.5.6
 #statsmodels==0.13.5
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #statsmodels==0.14.0
-statsmodels==0.14.4
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#statsmodels==0.14.4
+statsmodels==0.14.6
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7
@@ -698,7 +845,14 @@ msgpack-python==0.5.6
 #requests==2.28.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #requests==2.31.0
-requests==2.32.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#requests==2.32.3
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#requests==2.32.4
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#requests==2.32.5
+requests==2.33.1
 
 # ALERTERS - uncomment any alerters you want to enable
 # @modified 20211220 - Task #4344: Update dependencies
@@ -768,7 +922,15 @@ pygerduty==0.38.3
 # @modified 20241026 - Support #5514:mysql-connector-python - CVE-2024-21272
 # Requires >= Python 3.9
 #mysql-connector-python==8.2.0
-mysql-connector-python==9.1.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#mysql-connector-python==9.1.0
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#mysql-connector-python==9.3.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#mysql-connector-python==9.4.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#mysql-connector-python==9.5.0
+mysql-connector-python==9.6.0
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
@@ -783,7 +945,12 @@ mysql-connector-python==9.1.0
 #gunicorn==20.1.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #gunicorn==21.2.0
-gunicorn==23.0.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#gunicorn==23.0.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#gunicorn==25.1.0
+gunicorn==25.3.0
 
 # For dependencies management and helpful for debugging
 # @modified 20161119 - Branch #922: ionosphere
@@ -814,7 +981,16 @@ gunicorn==23.0.0
 #pipdeptree==2.9.3
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pipdeptree==2.13.1
-pipdeptree==2.23.4
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pipdeptree==2.23.4
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#pipdeptree==2.26.1
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#pipdeptree==2.28.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#pipdeptree==2.30.0
+pipdeptree==2.35.1
 
 # @added 20210614 - Task #4140: deps updates
 #                   Branch #1444: thunder
@@ -855,7 +1031,13 @@ pipdeptree==2.23.4
 #scikit-learn==1.2.2
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #scikit-learn==1.3.2
-scikit-learn==1.5.2
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#scikit-learn==1.5.2
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#scikit-learn==1.7.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#scikit-learn==1.7.2
+scikit-learn==1.8.0
 
 # @modified 20190412 - Task #2926: Update dependencies
 #future==0.16.0
@@ -873,8 +1055,18 @@ future==1.0.0
 # @modified 20241105 - Task #5525: Python 3.10 - update dependencies
 #dask==2023.5.0
 #distributed==2023.5.0
-dask==2024.10.0
-distributed==2024.10.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#dask==2024.10.0
+#distributed==2024.10.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+# No longer pinning dask and distributed
+#dask==2025.5.1
+#distributed==2025.5.1
+
+# @added 20250611 - Task #5627: v5.0.0 update dependencies
+#                   Branch #5630: v0.21.9 (earthgecko/tsfresh)
+# scipy deprecated scipy.signals.cwt and tsfresh now requires cwt from pywavelets
+pywavelets==1.8.0
 
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #tsfresh==0.1.2
@@ -899,8 +1091,16 @@ distributed==2024.10.0
 # @modified 20241107 - Task #5525: Python 3.10 - update dependencies
 # Update to v0.20.3-skyline
 #git+https://github.com/earthgecko/tsfresh@3d5a320#egg=tsfresh
-git+https://github.com/earthgecko/tsfresh@e015fce#egg=tsfresh
-
+# @modified 20250611 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5630: v0.21.9 (earthgecko/tsfresh)
+#git+https://github.com/earthgecko/tsfresh@e015fce#egg=tsfresh
+# @modified 20260217 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5706_ v0.21.91 (earthgecko/tsfresh)
+#git+https://github.com/earthgecko/tsfresh@38f3fce#egg=tsfresh
+# @modified 20260602 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5750: v0.21.92 (earthgecko/tsfresh)
+#git+https://github.com/earthgecko/tsfresh@7358f2f#egg=tsfresh
+git+https://github.com/earthgecko/tsfresh@2fdebfc#egg=tsfresh
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
 #termcolor==1.1.0
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
@@ -910,7 +1110,11 @@ git+https://github.com/earthgecko/tsfresh@e015fce#egg=tsfresh
 #termcolor==2.3.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #termcolor==2.4.0
-termcolor==2.5.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#termcolor==2.5.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#termcolor==3.1.0
+termcolor==3.3.0
 
 # @added 20161127 - Branch #922: ionosphere
 ## pytest and deps
@@ -965,7 +1169,13 @@ py==1.11.0
 # pytest==7.4.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #pytest==7.4.3
-pytest==7.4.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#pytest==7.4.3
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#pytest==8.4.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#pytest==8.4.1
+pytest==9.0.2
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -1010,7 +1220,12 @@ pytest==7.4.3
 # https://docs.sqlalchemy.org/en/20/changelog/migration_20.html
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #SQLAlchemy==1.4.50
-SQLAlchemy==1.4.54
+# @modified 20260306 - Task #5176: Migrate to sqlalchemy v2 API
+#SQLAlchemy==1.4.54
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#SQLAlchemy==2.0.47
+SQLAlchemy==2.0.49
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
@@ -1056,7 +1271,14 @@ pymemcache==4.0.0
 #PyJWT==2.7.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #PyJWT==2.8.0
-PyJWT==2.9.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#PyJWT==2.9.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#PyJWT==2.10.1
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#PyJWT==2.11.0
+PyJWT==2.12.1
 
 # @added 20180105 - Branch #2270: luminosity
 # @added 20180105 - Branch #2270: luminosity
@@ -1088,7 +1310,18 @@ git+https://github.com/earthgecko/luminol@40791e2#egg=luminol
 #slackclient==2.7.2
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
 #slackclient==2.9.3
-slackclient==2.9.4
+# @modified Task #5344: Migrate slack files.upload method
+#slackclient==2.9.4
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#slack_sdk==3.34.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#slack_sdk==3.35.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#slack_sdk==3.39.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#slack_sdk==3.40.0
+slack_sdk==3.41.0
 
 # @added 20210305 - Support #3974: SNYK-PYTHON-AIOHTTP-1079232
 # Open Redirect in aiohttp@3.7.3 introduced by slackclient@2.9.3 > aiohttp@3.7.3
@@ -1107,7 +1340,14 @@ slackclient==2.9.4
 #aiohttp==3.8.4
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #aiohttp==3.9.1
-aiohttp==3.10.10
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#aiohttp==3.10.10
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#aiohttp==3.12.13
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#aiohttp==3.13.3
+aiohttp==3.13.5
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
@@ -1148,7 +1388,13 @@ aiohttp==3.10.10
 #urllib3==1.26.16
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #urllib3==1.26.18
-urllib3==2.2.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#urllib3==2.2.3
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#urllib3==2.4.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#urllib3==2.6.2
+urllib3==2.6.3
 
 # @added 201906025 - Branch #956: flux
 # @modified 20211220 - Task #4344: Update dependencies
@@ -1173,7 +1419,11 @@ statsd==4.0.1
 #falcon==3.1.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #falcon==3.1.3
-falcon==4.0.1
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#falcon==4.0.1
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#falcon==4.0.2
+falcon==4.2.0
 
 # @added 20200517 - Feature #3550: flux.uploaded_data_worker
 #                   Feature #3538: webapp - upload_data endpoint
@@ -1213,7 +1463,10 @@ timeout-decorator==0.5.0
 # arundo/adtk -        https://github.com/arundo/adtk/issues/147
 # arundo/adtk -        https://github.com/arundo/adtk/pull/155
 #git+https://github.com/earthgecko/adtk@895c517#egg=adtk
-git+https://github.com/earthgecko/adtk@358b77b#egg=adtk
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#                      Task #5631: Replace deprecated seaborn-whitegrid (earthgecko/adtk)
+#git+https://github.com/earthgecko/adtk@358b77b#egg=adtk
+git+https://github.com/earthgecko/adtk@0c48a6f#egg=adtk
 
 # @added 20210411 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
@@ -1233,7 +1486,16 @@ mass-ts==0.1.4
 #boto3==1.26.160
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #boto3==1.33.9
-boto3==1.35.49
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#boto3==1.35.49
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#boto3==1.38.37
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#boto3==1.42.22
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#boto3==1.42.49
+boto3==1.42.96
 
 # @added 20220110 - Feature #4180: custom_algorithm - m66
 #                   Feature #4164: luminosity - cloudbursts
@@ -1241,7 +1503,9 @@ boto3==1.35.49
 #bottleneck==1.3.2
 # @modified 20241106 - Task #5525: Python 3.10 - update dependencies
 #bottleneck==1.3.7
-bottleneck==1.4.2
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#bottleneck==1.4.2
+bottleneck==1.5.0
 
 # @added 20220111 - Feature #3550: flux.uploaded_data_worker
 #                   Feature #3538: webapp - upload_data endpoint
@@ -1265,13 +1529,21 @@ openpyxl==3.1.5
 #opentelemetry-api==1.11.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #opentelemetry-api==1.15.0
-opentelemetry-api==1.27.0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-api==1.27.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-api==1.34.1
+opentelemetry-api==1.39.1
 
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
 #opentelemetry-distro==0.29b0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #opentelemetry-distro==0.36b0
-opentelemetry-distro==0.48b0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-distro==0.48b0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-distro==0.55b1
+opentelemetry-distro==0.60b1
 
 # @modified 20220422 - Task #4452: Update dependencies
 #                      Bug #4532: opentelemetry - rename InstrumentationLibrary to InstrumentationScope
@@ -1289,7 +1561,9 @@ opentelemetry-distro==0.48b0
 opentelemetry-exporter-jaeger==1.21.0
 opentelemetry-exporter-jaeger-proto-grpc==1.21.0
 opentelemetry-exporter-jaeger-thrift==1.21.0
-
+# @added 20250617 - Task #5627: v5.0.0 update dependencies
+# opentelemetry-exporter-jaeger-thrift requires deprecated
+deprecated==1.3.1
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
 #opentelemetry-instrumentation==0.29b0
 #opentelemetry-instrumentation-flask==0.29b1
@@ -1304,12 +1578,26 @@ opentelemetry-exporter-jaeger-thrift==1.21.0
 #opentelemetry-instrumentation-redis==0.36b0
 #opentelemetry-instrumentation-sqlalchemy==0.36b0
 #opentelemetry-instrumentation-wsgi==0.36b0
-opentelemetry-instrumentation==0.48b0
-opentelemetry-instrumentation-flask==0.48b0
-opentelemetry-instrumentation-pymemcache==0.48b0
-opentelemetry-instrumentation-redis==0.48b0
-opentelemetry-instrumentation-sqlalchemy==0.48b0
-opentelemetry-instrumentation-wsgi==0.48b0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-instrumentation==0.48b0
+#opentelemetry-instrumentation-flask==0.48b0
+#opentelemetry-instrumentation-pymemcache==0.48b0
+#opentelemetry-instrumentation-redis==0.48b0
+#opentelemetry-instrumentation-sqlalchemy==0.48b0
+#opentelemetry-instrumentation-wsgi==0.48b0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-instrumentation==0.55b1
+#opentelemetry-instrumentation-flask==0.55b1
+#opentelemetry-instrumentation-pymemcache==0.55b1
+#opentelemetry-instrumentation-redis==0.55b1
+#opentelemetry-instrumentation-sqlalchemy==0.55b1
+#opentelemetry-instrumentation-wsgi==0.55b1
+opentelemetry-instrumentation==0.60b1
+opentelemetry-instrumentation-flask==0.60b1
+opentelemetry-instrumentation-pymemcache==0.60b1
+opentelemetry-instrumentation-redis==0.60b1
+opentelemetry-instrumentation-sqlalchemy==0.60b1
+opentelemetry-instrumentation-wsgi==0.60b1
 
 # @modified 20220422 - Task #4452: Update dependencies
 #                      Bug #4532: opentelemetry - rename InstrumentationLibrary to InstrumentationScope
@@ -1321,8 +1609,14 @@ opentelemetry-instrumentation-wsgi==0.48b0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #opentelemetry-proto==1.15.0
 #opentelemetry-sdk==1.15.0
-opentelemetry-proto==1.27.0
-opentelemetry-sdk==1.27.0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-proto==1.27.0
+#opentelemetry-sdk==1.27.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-proto==1.34.1
+#opentelemetry-sdk==1.34.1
+opentelemetry-proto==1.39.1
+opentelemetry-sdk==1.39.1
 
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
 #opentelemetry-semantic-conventions==0.29b0
@@ -1330,8 +1624,14 @@ opentelemetry-sdk==1.27.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #opentelemetry-semantic-conventions==0.36b0
 #opentelemetry-util-http==0.36b0
-opentelemetry-semantic-conventions==0.48b0
-opentelemetry-util-http==0.48b0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-semantic-conventions==0.48b0
+#opentelemetry-util-http==0.48b0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#opentelemetry-semantic-conventions==0.55b1
+#opentelemetry-util-http==0.55b1
+opentelemetry-semantic-conventions==0.60b1
+opentelemetry-util-http==0.60b1
 
 # @added 20220528 - Feature #4584: custom_algorithm - skyline_ARTime
 # @modified 20230119 - Task #4778: v4.0.0 - update dependencies
@@ -1352,7 +1652,9 @@ python-snappy==0.7.3
 #prometheus-client==0.17.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #prometheus-client==0.19.0
-prometheus-client==0.21.0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#prometheus-client==0.21.0
+prometheus-client==0.22.1
 
 # @added 20220708 - Info #4620: memray
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
@@ -1362,7 +1664,14 @@ prometheus-client==0.21.0
 #memray==1.8.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #memray==1.11.0
-memray==1.14.0
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+#memray==1.14.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#memray==1.17.2
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#memray==1.19.1
+memray==1.19.3
 
 # @added 20221020 - Feature #4702: numba optimisations
 # @modified 20230102 - Task #4778: v4.0.0 - update dependencies
@@ -1371,7 +1680,14 @@ memray==1.14.0
 #numba==0.56.4
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #numba==0.58.1
-numba==0.60.0
+# @modified 20250724 - Task #5627: v5.0.0 update dependencies
+#numba==0.60.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#numba==0.61.2
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#numba==0.63.1
+numba==0.65.1
 
 # @added 20221111 - Feature #4746: custom_algorithm - dbscan
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
@@ -1379,7 +1695,10 @@ numba==0.60.0
 #kneed==0.8.1
 # @modified 20231210 - Task #5168: v4.1.0 - update dependencies
 #kneed==0.8.3
-kneed==0.8.5
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#kneed==0.8.5
+kneed==0.8.6
 
 # @added 20221118 - Feature #4732: flux vortex
 #                   Feature #4734: mirage_vortex
@@ -1387,7 +1706,14 @@ kneed==0.8.5
 # gevent==22.10.2
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #gevent==23.9.1
-gevent==24.10.3
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#gevent==24.10.3
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#gevent==25.5.1
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#gevent==25.9.1
+gevent==26.4.0
 
 # @added 20221128 - Feature #4742: custom_algorithms - skyline_prophet
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
@@ -1397,7 +1723,13 @@ gevent==24.10.3
 #prophet==1.1.4
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #prophet==1.1.5
-prophet==1.1.6
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#prophet==1.1.6
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#prophet==1.1.7
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#prophet==1.2.1
+prophet==1.3.0
 
 # @added 20220104 - Task #4786: Switch from matrixprofile to stumpy
 # For now pin to a protobuf that supports matrixprofile==1.1.10, although all
@@ -1424,14 +1756,22 @@ prophet==1.1.6
 #    opentelemetry-proto 1.27.0 depends on protobuf<5.0 and >=3.19
 # So pinned to latest 4.x version 4.25.5 from Sept 18 2024
 #protobuf==4.21.12
-protobuf==4.25.5
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+# protobuf is at 6.31.1 but opentelemetry-proto requires protobuf>=5.0, < 6.0
+#protobuf==4.25.5
+# @modified 20260310 - Task #5628: Build v5.0.0 and test
+# https://security.snyk.io/vuln/SNYK-PYTHON-PROTOBUF-15090738
+#protobuf==5.29.5
+protobuf==5.29.6
 
 # @added 20230104 - Task #4786: Switch from matrixprofile to stumpy
 # @modified 20231210 - Task #5168: v4.1.0 - update dependencies
 #stumpy==1.11.1
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #stumpy==1.12.0
-stumpy==1.13.0
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#stumpy==1.13.0
+stumpy==1.14.1
 
 # @added 20230427 - Feature #4896: custom_algorithms - mstl
 #                   Feature #4898: custom_algorithms - autoarima
@@ -1439,16 +1779,53 @@ stumpy==1.13.0
 #statsforecast==1.5.0
 # @modified 20241030 - Task #5525: Python 3.10 - update dependencies
 #statsforecast==1.6.0
-statsforecast==1.7.8
+# @modified 20250616 - Task #5627: v5.0.0 update dependencies
+#statsforecast==1.7.8
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#statsforecast==2.0.1
+statsforecast==2.0.3
 
 # @added 20240110 - Feature #5198: flux - tornado
 requests-toolbelt
 
 # @added 20240514 - Feature #5350: functions.skyline.job_scheduled
-croniter
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#croniter
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#croniter==6.0.0
+croniter==6.2.2
 
 # @added 20241112 - Feature #5553: custom_algorithm - laoccfdlpnc
-cvxpy==1.6.0
+# @modified 20250612 - Task #5627: v5.0.0 update dependencies
+#cvxpy==1.6.0
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#cvxpy==1.6.6
+# @modified 20260215 - Task #5627: v5.0.0 update dependencies
+#cvxpy==1.7.5
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+#cvxpy==1.8.1
+cvxpy==1.8.2
+
+# @added 20250618 - Task #5627: v5.0.0 update dependencies
+#                   Feature #5064: mirage.inflection
+#                   Feature #5551: custom_algorithm - mmzrmp
+# @modified 20260106 - Task #5627: v5.0.0 update dependencies
+#ruptures==1.1.9
+ruptures==1.1.10
+
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+# Disabled AI chat related packages
+# @added 20260228 - Task #5709: POC LLM integration
+# Added flask-session and litellm
+flask-session==0.8.0
+# @modified 20260426 - Task #5713: Test CentOS Stream 10
+#                      Task #5627: v5.0.0 update dependencies
+# Disabled litellm requirement
+#litellm
+#litellm==1.83.14
 
 # @added 20241111 - Task #5525: Python 3.10 - update dependencies
 # Declaring non-conflicting jupyter version here.  It has never been a problem
