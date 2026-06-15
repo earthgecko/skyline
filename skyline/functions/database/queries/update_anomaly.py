@@ -73,13 +73,22 @@ def update_anomaly(current_skyline_app, anomaly_id, field, new_value):
     metric_id = None
     original_value = None
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).where(anomalies_table.c.id == anomaly_id)
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).where(anomalies_table.c.id == anomaly_id)
+        stmt = select(anomalies_table).where(anomalies_table.c.id == anomaly_id)
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             original_anomaly = dict(row)
             break
-        connection.close()
+        #connection.close()
         metric_id = original_anomaly['metric_id']
         updated['metric_id'] = int(metric_id)
     except Exception as err:
@@ -106,18 +115,25 @@ def update_anomaly(current_skyline_app, anomaly_id, field, new_value):
 
     try:
         values_dict = {anomalies_table.columns[field]: new_value}
-        connection = engine.connect()
-        stmt = anomalies_table.update().values(values_dict).\
-            where(anomalies_table.c.id == int(anomaly_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #stmt = anomalies_table.update().values(values_dict).\
+        #    where(anomalies_table.c.id == int(anomaly_id))
+        ## stmt = anomalies_table.update().values(values_dict).\
+        ##stmt = anomalies_table.update().values({field: new_value}).\
+        ##    where(anomalies_table.c.id == int(anomaly_id))
+        ##current_logger.debug('debug :: %s :: update 2 stmt: %s' % (
+        ##    function_str, str(stmt)))
+        #result = connection.execute(stmt)
+        #connection.close()
+        stmt = anomalies_table.update().\
+            where(anomalies_table.c.id == int(anomaly_id)).values(values_dict)
         current_logger.debug('debug :: %s :: update 1 stmt: %s' % (
             function_str, str(stmt)))
-        # stmt = anomalies_table.update().values(values_dict).\
-        #stmt = anomalies_table.update().values({field: new_value}).\
-        #    where(anomalies_table.c.id == int(anomaly_id))
-        #current_logger.debug('debug :: %s :: update 2 stmt: %s' % (
-        #    function_str, str(stmt)))
-        result = connection.execute(stmt)
-        connection.close()
+        with engine.begin() as connection:
+            result = connection.execute(stmt)
+
         current_logger.info('%s :: updated anomaly_id: %s with %s' % (
             function_str, str(anomaly_id), str(values_dict)))
     except Exception as err:
@@ -129,14 +145,21 @@ def update_anomaly(current_skyline_app, anomaly_id, field, new_value):
         return updated
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = anomalies_updated_table.insert().values(
             anomaly_id=int(anomaly_id), metric_id=int(metric_id),
             changed_timestamp=int(time()), column=field,
             previous_value=original_value, new_value=new_value)
-        result = connection.execute(ins)
-        connection.close()
-        new_updated_id = result.inserted_primary_key[0]
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_updated_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_updated_id = result.inserted_primary_key[0]
+
         current_logger.info('%s :: new changed id: %s, previous_value: %s, new_value: %s' % (
             function_str, str(new_updated_id), str(original_value),
             str(new_value)))
