@@ -11,6 +11,8 @@ import traceback
 import operator
 # @added 20220722 - Task #4624: Change all dict copy to deepcopy
 import copy
+# @added 20260209 - Feature #5705: ionosphere and inference limit
+from time import time
 
 import numpy as np
 
@@ -272,7 +274,9 @@ def ionosphere_motif_inference(metric, timestamp):
             #     str(metric_id), str(full_duration))
             # results = mysql_select(skyline_app, query)
             fps_full_duration = get_ionosphere_fp_ids_for_full_duration(
-                skyline_app, metric_id, full_duration, True)
+                skyline_app, metric_id, full_duration, True,
+                # @added 20260209 - Feature #5705: ionosphere and inference limit
+                by_latest_matches=True)
             if fps_full_duration:
                 for current_fp_id in list(fps_full_duration.keys()):
                     try:
@@ -317,6 +321,14 @@ def ionosphere_motif_inference(metric, timestamp):
             with open((timeseries_json_file), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: inference :: failed to replace nan with None, err: %s' % (
+                        err))
+
             del raw_timeseries
             timeseries = literal_eval(timeseries_array_str)
             del timeseries_array_str
@@ -331,12 +343,33 @@ def ionosphere_motif_inference(metric, timestamp):
         metric_resolution = determine_data_frequency(skyline_app, timeseries, False)
         logger.info('inference :: looking for similar motifs in trained fps of full_duration: %s' % str(full_duration))
 
+        # @added 20260209 - Feature #5705: ionosphere and inference limit
+        # In the ionosphere and inference contexts ensure that the number of fps
+        # that can be checked is limited to not run exceedingly long when there
+        # are lots of fps for a metric.  This is partly to offset common_motifs
+        # learnings success.  Ensure that that fps are sorted by last_match to
+        # ensure that if only a sample is checked, that the most recent matched
+        # ones are part of the sample.
+        inference_start_time = time()
+        # This is opinionated, inference motif checks should not run for longer
+        # than 20 seconds
+        max_inference_runtime = 20
+        fps_checked_count = 0
+
         for fp_id in full_duration_fp_ids:
 
             # if SINGLE_MATCH and matched_motifs:
             #    break
             if SINGLE_MATCH and exact_matches_found:
                 break
+
+            # @added 20260209 - Feature #5705: ionosphere and inference limit
+            start_inference = time()
+            if start_inference > (inference_start_time + max_inference_runtime):
+                logger.info('inference :: max_inference_runtime reached, limiting further fp checks, %d checks of %d done' % (
+                    fps_checked_count, len(full_duration_fp_ids)))
+                break
+            fps_checked_count += 1
 
             motifs_found_in_fp = []
             exact_match_times = []
@@ -517,7 +550,7 @@ def ionosphere_motif_inference(metric, timestamp):
                 max_y = max(batch_size_dataset)
                 min_y = min(batch_size_dataset)
 
-                # @added 20240326 - Ideas #5316: motif_annihilation learning
+                # @added 20240326 - Ideas #5316: common_motifs learning
                 #                   Feature #4014: Ionosphere - inference
                 # In testing found that on lower value ranges more padding can
                 # be added
@@ -580,7 +613,7 @@ def ionosphere_motif_inference(metric, timestamp):
                                 str(use_top_matches), str(top_matches)))
 
                         start_mass2_batch = timer()
-                        # @modified 20240324 - Ideas #5316: motif_annihilation learning
+                        # @modified 20240324 - Ideas #5316: common_motifs learning
                         #                      Feature #4014: Ionosphere - inference
                         # Added this comment because I can never remember what
                         # index is returned the starting index or the end index.
@@ -920,7 +953,9 @@ def ionosphere_motif_inference(metric, timestamp):
             # useful.
             # relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
             # relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index < (best_index + motif_size)]
-            relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
+            # @modified 20251019 - optimise get slice rather that list comprehension
+            #relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
+            relate_timeseries = full_relate_timeseries[int(best_index):int(best_index + motif_size)]
             relate_dataset = [item[1] for item in relate_timeseries]
             # relate_dataset_timestamps = [int(item[0]) for item in relate_timeseries]
 
@@ -979,16 +1014,20 @@ def ionosphere_motif_inference(metric, timestamp):
                         batch_size_dataset = [float(item[1]) for item in motif_sequence]
                         y_motif = np.array(batch_size_dataset)
                         # motif_area = np.trapz(y_motif, dx=dx)
-                        motif_area = np.trapz(y_motif, dx=1)
+                        # @modified 20260429 - Task #5730: numpy - trapz to trapezoid
+                        #motif_area = np.trapz(y_motif, dx=1)
+                        motif_area = np.trapezoid(y_motif, dx=1)
                     except Exception as e:
-                        logger.error('error :: inference :: failed to get motif_area with np.trapz - %s' % (
+                        logger.error('error :: inference :: failed to get motif_area with np.trapezoid - %s' % (
                             e))
                     try:
                         y_fp_motif = np.array(relate_dataset)
                         # fp_motif_area = np.trapz(y_fp_motif, dx=dx)
-                        fp_motif_area = np.trapz(y_fp_motif, dx=1)
+                        # @modified 20260429 - Task #5730: numpy - trapz to trapezoid
+                        #fp_motif_area = np.trapz(y_fp_motif, dx=1)
+                        fp_motif_area = np.trapezoid(y_fp_motif, dx=1)
                     except Exception as e:
-                        logger.error('error :: inference :: failed to get fp_motif_area with np.trapz - %s' % (
+                        logger.error('error :: inference :: failed to get fp_motif_area with np.trapezoid - %s' % (
                             e))
                     # @added 20210424 - Feature #4014: Ionosphere - inference
                     # Determine the percentage difference (as a

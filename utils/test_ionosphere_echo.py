@@ -121,6 +121,14 @@ def create_test_features_profile(json_file):
     # Convert the timeseries to csv
     try:
         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+        if 'nan' in timeseries_array_str:
+            try:
+                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+            except Exception as err:
+                print('error :: failed to replace nan with None, err: %s' % (
+                    err))
+
         del raw_timeseries
         timeseries = literal_eval(timeseries_array_str)
         del timeseries_array_str
@@ -208,6 +216,14 @@ def calculate_features_other_minmax(use_file, i_json_file, metric):
         raw_timeseries = f.read()
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if 'nan' in timeseries_array_str:
+        try:
+            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+        except Exception as err:
+            print('error :: failed to replace nan with None, err: %s' % (
+                err))
+
     del raw_timeseries
     anomalous_timeseries = literal_eval(timeseries_array_str)
     anomalous_ts_values_count = len(anomalous_timeseries)
@@ -216,6 +232,14 @@ def calculate_features_other_minmax(use_file, i_json_file, metric):
         fp_raw_timeseries = f.read()
     # Convert the timeseries to csv
     fp_timeseries_array_str = str(fp_raw_timeseries).replace('(', '[').replace(')', ']')
+    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if 'nan' in fp_timeseries_array_str:
+        try:
+            fp_timeseries_array_str = str(fp_timeseries_array_str).replace('nan', 'None')
+        except Exception as err:
+            print('error :: failed to replace nan with None, err: %s' % (
+                err))
+
     del fp_raw_timeseries
     fp_id_metric_ts = literal_eval(fp_timeseries_array_str)
     fp_id_metric_ts_values_count = len(fp_id_metric_ts)

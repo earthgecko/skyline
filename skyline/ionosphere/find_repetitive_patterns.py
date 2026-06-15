@@ -4,7 +4,10 @@ find_repetitive_patterns.py
 import logging
 import traceback
 import os
-from datetime import datetime
+# @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+#from datetime import datetime
+import datetime as dt
+
 from time import time
 from ast import literal_eval
 from shutil import rmtree
@@ -55,6 +58,14 @@ try:
     learn_full_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS) * 86400
 except:
     learn_full_duration = 86400 * 30  # 2592000
+
+# @added 20250401 - Feature #5617: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+try:
+    IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS = settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+except:
+    IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS = [
+        'decreased_percent_with_increasing_pair',
+    ]
 
 verify_ssl = True
 try:
@@ -154,7 +165,7 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
         'train_count': 0,
     }
 
-    start = int(time())
+    start_process = int(time())
 
     metric_id = get_metric_id_from_base_name(skyline_app, metric)
     use_metric = str(metric)
@@ -165,7 +176,9 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
 
     until_timestamp = int(anomaly_timestamp)
     from_timestamp = until_timestamp - (86400 * 30)
-    datestr = datetime.utcfromtimestamp(until_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #datestr = datetime.utcfromtimestamp(until_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    datestr = dt.datetime.fromtimestamp(int(until_timestamp), tz=dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
     metric_ids = [metric_id]
     anomalies = get_anomalies_for_period(skyline_app, metric_ids, from_timestamp, until_timestamp)
@@ -173,6 +186,32 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
         function_str, str(len(anomalies)), datestr, str(until_timestamp), str(metric_id), metric))
     if not anomalies:
         return created_fp_ids
+
+    # @added 20250401 - Feature #5617: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+    # Remove anomalies that have algorithm in triggered_algorithm_names that is
+    # in IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+    remove_excluded_algorithm_anomaly_ids = []
+    remove_excluded_algorithm_errors = []
+    for anomaly_id, anomaly_dict in anomalies.items():
+        try:
+            if 'triggered_algorithm_names' in anomaly_dict.keys():
+                for excluded_algorithm in IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS:
+                    if excluded_algorithm in anomaly_dict['triggered_algorithm_names']:
+                        remove_excluded_algorithm_anomaly_ids.append(anomaly_id)
+        except Exception as err:
+            remove_excluded_algorithm_errors.append(['failed to check triggered_algorithm_names for anomaly_id', anomaly_id, anomaly_dict, err])
+    if remove_excluded_algorithm_errors:
+        logger.error('error :: %s :: there %s remove_excluded_algorithm_errors reported, last two: %s' % (
+            function_str, str(len(remove_excluded_algorithm_errors)),
+            str(remove_excluded_algorithm_errors[-2:])))
+    if len(remove_excluded_algorithm_anomaly_ids) > 0:
+        logger.info('%s :: removing %s anomalies as they match IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS' % (
+            function_str, str(len(remove_excluded_algorithm_anomaly_ids))))
+        for anomaly_id in remove_excluded_algorithm_anomaly_ids:
+            del anomalies[anomaly_id]
+        logger.info('%s :: %s anomalies found in 30 days since %s (%s) after IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS removals for metric_id: %s, metric: %s' % (
+            function_str, str(len(anomalies)), datestr, str(until_timestamp), str(metric_id), metric))
+
     if len(anomalies) < 3:
         logger.info('%s :: insufficient anomalies data to evaluate' % function_str)
         update_last_processed_anomaly_timestamp(anomaly_timestamp)
@@ -223,13 +262,22 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
         if anomalies[a_id]['full_duration'] < (604800 - 3600):
             continue
 
-        if int(time()) > start + 55:
-            logger.info('%s :: not processing any further anomalies, max runtime reached' % function_str)
+        # @modified 20250401 - Feature #5618: ionosphere repetitive patterns - shard_host
+        # Renamed start to start_process
+        #if int(time()) > start + 55:
+        #    logger.info('%s :: not processing any further anomalies, max runtime reached' % function_str)
+        now_time = int(time())
+        limit_time = (start_process + 55)
+        if now_time > limit_time:
+            logger.info('%s :: not processing any further anomalies, max runtime reached, start: %s, now_time: %s, limit_time: %s' % (
+                function_str, str(start_process), str(now_time), str(limit_time)))
             return created_fp_ids
 
         start = timer()
         until_timestamp = anomalies[a_id]['anomaly_timestamp']
-        datestr = datetime.utcfromtimestamp(until_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #datestr = datetime.utcfromtimestamp(until_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        datestr = dt.datetime.fromtimestamp(until_timestamp, tz=dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
         from_timestamp = until_timestamp - (86400 * 7)
         training_data_dir = '%s/%s/%s' % (settings.SKYLINE_TMP_DIR, until_timestamp, timeseries_dir)
@@ -509,10 +557,17 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
             if not last_timestamp_to_train:
                 last_timestamp_to_train = int(timestamp_to_train)
                 continue            
-            if last_timestamp_to_train > (timestamp_to_train - (3600 * 12)):
+            # @modified 20250618 - Feature #5304: ionosphere.find_repetitive_patterns
+            # Only learn one per week
+            #if last_timestamp_to_train > (timestamp_to_train - (3600 * 12)):
+            if last_timestamp_to_train > (timestamp_to_train - (3600 * 169)):
                 timestamps_to_deduplicate.append(last_timestamp_to_train)
-                last_timestamp_to_train_datestr = datetime.utcfromtimestamp(last_timestamp_to_train).strftime('%Y-%m-%d %H:%M:%S')
-                timestamp_to_train_datestr = datetime.utcfromtimestamp(timestamp_to_train).strftime('%Y-%m-%d %H:%M:%S')
+                # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                #last_timestamp_to_train_datestr = datetime.utcfromtimestamp(last_timestamp_to_train).strftime('%Y-%m-%d %H:%M:%S')
+                #timestamp_to_train_datestr = datetime.utcfromtimestamp(timestamp_to_train).strftime('%Y-%m-%d %H:%M:%S')
+                last_timestamp_to_train_datestr = dt.datetime.fromtimestamp(last_timestamp_to_train, tz=dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+                timestamp_to_train_datestr = dt.datetime.fromtimestamp(timestamp_to_train, tz=dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+
                 logger.info('%s :: deduplicating training for %s as close to %s' % (
                     function_str, last_timestamp_to_train_datestr, timestamp_to_train_datestr))
             last_timestamp_to_train = int(timestamp_to_train)
@@ -529,7 +584,9 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
         logger.info('%s :: found %s similar training_data sets' % (
             function_str, str(len(metrics_to_train[i_metric]['timestamps_to_train']))))
         for t in sorted(metrics_to_train[i_metric]['timestamps_to_train']):
-            datestr = datetime.utcfromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #datestr = datetime.utcfromtimestamp(t).strftime('%Y-%m-%d %H:%M:%S')
+            datestr = dt.datetime.fromtimestamp(t, tz=dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             logger.info('%s :: creating features profile for training_data with fp_sum: %s, for anomaly_timestamp: %s (%s)' % (
                 function_str, str(features_profile_sums[t]), str(until_timestamp), datestr))
             try:
@@ -665,6 +722,33 @@ def ionosphere_find_repetitive_patterns(timestamp):
     child_process_pid = os.getpid()
     logger.info('%s :: child_process_pid - %s' % (function_str, str(child_process_pid)))
     start = time()
+
+    # @added 20250618 - Feature #5304: ionosphere.find_repetitive_patterns
+    # Reduce run rate
+    common_motifs_running = 0
+    try:
+        common_motifs_running = redis_conn_decoded.get('ionosphere.common_motifs.running')
+        if common_motifs_running:
+            logger.info('%s :: not running as common_motifs is running' % function_str)
+            return
+    except Exception as err:
+        logger.error('error :: %s :: failed to get ionosphere.common_motifs.running from Redis, err: %s' % (
+            function_str, err))
+    last_run_timestamp = 0
+    try:
+        last_run_timestamp = redis_conn_decoded.get('ionosphere.find_repetitive_patterns.last_run_timestamp')
+        if last_run_timestamp:
+            if int(start) < (int(last_run_timestamp) + 180):
+                logger.info('%s :: not running as recent last run' % function_str)
+                return
+    except Exception as err:
+        logger.error('error :: %s :: failed to get ionosphere.find_repetitive_patterns.last_run_timestamp from Redis, err: %s' % (
+            function_str, err))
+    try:
+        redis_conn_decoded.setex('ionosphere.find_repetitive_patterns.last_run_timestamp', 120, int(start))
+    except Exception as err:
+        logger.error('error :: %s :: failed to setex ionosphere.find_repetitive_patterns.last_run_timestamp from Redis, err: %s' % (
+            function_str, err))
 
     # Get the list of all metrics to find repetitive patterns on
     # Get a list of anomalies that are ready to check for the metrics which have find repetitive patterns enabled
@@ -820,7 +904,7 @@ def ionosphere_find_repetitive_patterns(timestamp):
             logger.info('%s :: prune_find_repetitive_patterns_dirs removed %s old dirs' % (
                 function_str, str(pruned_dir_count)))
         except Exception as err:
-            logger.error('error :: %s :: get_anomalies_for_period failed - %s' % (
+            logger.error('error :: %s :: prune_find_repetitive_patterns_dirs failed - %s' % (
                 function_str, err))
         logger.info('%s :: complete, took %s seconds' % (
             function_str, str((time() - start))))
@@ -829,12 +913,43 @@ def ionosphere_find_repetitive_patterns(timestamp):
     logger.info('%s :: %s mirage and ionosphere anomalies in period found from %s, until %s' % (
         function_str, str(len(anomalies_in_period)), str(from_timestamp), str(until_timestamp)))
 
+    # @added 20250403 - Feature #5617: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+    # Remove anomalies that have algorithm in triggered_algorithm_names that is
+    # in IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+    remove_excluded_algorithm_anomaly_ids = []
+    remove_excluded_algorithm_errors = []
+    for anomaly_id, anomaly_dict in anomalies_in_period.items():
+        try:
+            if 'triggered_algorithm_names' in anomaly_dict.keys():
+                for excluded_algorithm in IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS:
+                    if excluded_algorithm in anomaly_dict['triggered_algorithm_names']:
+                        remove_excluded_algorithm_anomaly_ids.append(anomaly_id)
+        except Exception as err:
+            remove_excluded_algorithm_errors.append(['failed to check triggered_algorithm_names for anomaly_id', anomaly_id, anomaly_dict, err])
+    if remove_excluded_algorithm_errors:
+        logger.error('error :: %s :: there %s remove_excluded_algorithm_errors reported, last two: %s' % (
+            function_str, str(len(remove_excluded_algorithm_errors)),
+            str(remove_excluded_algorithm_errors[-2:])))
+    if len(remove_excluded_algorithm_anomaly_ids) > 0:
+        logger.info('%s :: removing %s anomalies as they match IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS' % (
+            function_str, str(len(remove_excluded_algorithm_anomaly_ids))))
+        for anomaly_id in remove_excluded_algorithm_anomaly_ids:
+            del anomalies_in_period[anomaly_id]
+        logger.info('%s :: %s anomalies found after IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS removals' % (
+            function_str, str(len(anomalies_in_period))))
+
     checked_metric_anomalies = 0
     created_fps = {}
     # Iterate the anomalies and find repetitive patterns
     for anomaly_id in list(anomalies_in_period.keys()):
-        if int(time()) > timestamp + 55:
-            logger.info('%s :: not processing any further anomalies, max runtime reached' % function_str)
+        now_time = int(time())
+        limit_time = (timestamp + 55)
+        if now_time > limit_time:
+            # @modified 20250401 - Feature #5618: ionosphere repetitive patterns - shard_host
+            # Additional logging info
+            #logger.info('%s :: not processing any further anomalies, max runtime reached' % function_str)
+            logger.info('%s :: not processing any further anomalies, max runtime reached, timestamp: %s, now_time: %s, limit_time: %s' % (
+                function_str, str(timestamp), str(now_time), str(limit_time)))
             break
 
         # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
@@ -866,12 +981,12 @@ def ionosphere_find_repetitive_patterns(timestamp):
             logger.error('error :: %s :: find_repetitive_patterns failed for metric: %s, anomaly_timestamp: %s, err: %s' % (
                 function_str, metric, str(anomaly_timestamp), err))
 
-        # @added 20240402 - Feature #5318: motif_annihilation
-        # If nothing was learnt add the anomaly for motif_annihilation to
+        # @added 20240402 - Feature #5318: common_motifs
+        # If nothing was learnt add the anomaly for common_motifs to
         # attempt to learn
         if len(created_fp_ids) == 0:
 
-            done_key = 'ionosphere.find_repetitive_patterns.motif_annihilation.%s' % str(anomaly_id)
+            done_key = 'ionosphere.find_repetitive_patterns.common_motifs.%s' % str(anomaly_id)
             done_exists = False
             try:
                 done_exists = redis_conn_decoded.exists(done_key)
@@ -880,24 +995,34 @@ def ionosphere_find_repetitive_patterns(timestamp):
                     function_str, done_key, err))
             if not done_exists:
                 key = str(time())
-                annihilation_data = {
+                check_data = {
                     'metric_id': metric_id, 'metric': metric,
                     'anomaly_id': anomaly_id,
-                    'anomaly_timestamp': anomaly_timestamp
+                    'anomaly_timestamp': anomaly_timestamp,
+                    # @added 20250801 - Feature #5644: ionosphere.learn_self_validation
+                    'context': 'find_repetitive_patterns',
                 }
-                logger.info('%s :: adding motif_annihilation work for anomaly_id: %s' % (
+                logger.info('%s :: adding common_motifs work for anomaly_id: %s' % (
                     function_str, str(anomaly_id)))
                 try:
-                    redis_conn_decoded.hset('ionosphere.find_repetitive_patterns.motif_annihilation.work', key, str(annihilation_data))
+                    redis_conn_decoded.hset('ionosphere.find_repetitive_patterns.common_motifs.work', key, str(check_data))
                 except Exception as err:
-                    logger.error('error :: could not add data to Redis hash ionosphere.find_repetitive_patterns.motif_annihilation.work, err: %s' % err)
+                    logger.error('error :: could not add data to Redis hash ionosphere.find_repetitive_patterns.common_motifs.work, err: %s' % err)
             else:
-                logger.info('%s :: motif_annihilation done for anomaly_id: %s, not adding' % (
+                logger.info('%s :: common_motifs done for anomaly_id: %s, not adding' % (
                     function_str, str(anomaly_id)))
  
     if created_fps:
         logger.info('%s :: created feature profiles: %s' % (
             function_str, str(created_fps)))
+
+    # @added 20250618 - Feature #5304: ionosphere.find_repetitive_patterns
+    # Reduce run rate
+    try:
+        redis_conn_decoded.setex('ionosphere.find_repetitive_patterns.last_run_timestamp', 120, int(time()))
+    except Exception as err:
+        logger.error('error :: %s :: failed to setex ionosphere.find_repetitive_patterns.last_run_timestamp from Redis, err: %s' % (
+            function_str, err))
 
     logger.info('%s :: complete - checked %s metric anomalies, took %s seconds' % (
         function_str, str(checked_metric_anomalies), str(time() - start)))

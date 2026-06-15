@@ -1,6 +1,7 @@
 from __future__ import division
 import logging
-from os import path
+from os import path, walk
+import os
 import time
 # import string
 # import operator
@@ -71,6 +72,12 @@ from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_ba
 
 # @added 20240131 - Task #5248: Optimise ionosphere_functions.get_related
 from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
+
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+
+# @added 20250402 - Feature #5318: motif_annihilation
+from functions.database.queries.get_fps_for_metric import get_fps_for_metric
 
 LOCAL_DEBUG = False
 skyline_version = skyline_version.__absolute_version__
@@ -337,7 +344,7 @@ def create_fp_ts_graph(
 
     fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
         metric_data_dir, base_name, str(fp_id))
-    if path.isfile(fp_ts_graph_file):
+    if os.path.isfile(fp_ts_graph_file):
         return True
 
     fp_id_metric_ts = []
@@ -707,11 +714,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     ts_full_duration = '0'
 
     if context == 'ionosphere_learn':
-        if not path.isfile(features_profile_details_file):
+        if not os.path.isfile(features_profile_details_file):
             current_logger.error('error :: create_features_profile :: no features_profile_details_file - %s' % features_profile_details_file)
             return 'none', False, False, fail_msg, trace
 
-    if path.isfile(features_profile_details_file):
+    if os.path.isfile(features_profile_details_file):
         current_logger.info('create_features_profile :: getting features profile details from - %s' % features_profile_details_file)
         # Read the details file
         with open(features_profile_details_file, 'r') as f:
@@ -728,7 +735,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
         if context != 'ionosphere_learn':
             if ts_full_duration == '0':
-                if path.isfile(anomaly_check_file):
+                if os.path.isfile(anomaly_check_file):
                     current_logger.info('create_features_profile :: determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
                     # Read the details file
                     with open(anomaly_check_file, 'r') as f:
@@ -740,7 +747,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                                 ts_full_duration = str(int(full_duration_array[1]))
                                 current_logger.info('create_features_profile :: determined the full duration as - %s' % str(ts_full_duration))
 
-    if path.isfile(features_profile_created_file):
+    if os.path.isfile(features_profile_created_file):
         # Read the created file
         with open(features_profile_created_file, 'r') as f:
             fp_created_str = f.read()
@@ -750,7 +757,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         return str(new_fp_id), True, True, fail_msg, trace
 
     # Have data
-    if path.isfile(features_file):
+    if os.path.isfile(features_file):
         current_logger.info('create_features_profile :: features_file exists: %s' % features_file)
     else:
         trace = 'none'
@@ -980,7 +987,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # Added ionosphere_echo
     # if context == 'ionosphere_learn' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
     if context in ['ionosphere_learn', 'ionosphere_echo', 'ionosphere_echo_check']:
-        if path.isfile(anomaly_check_file):
+        if os.path.isfile(anomaly_check_file):
             current_logger.info('create_features_profile :: determining the metric_timestamp from anomaly_check_file - %s' % anomaly_check_file)
             # Read the details file
             with open(anomaly_check_file, 'r') as f:
@@ -1047,6 +1054,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if ionosphere_job == 'echo_motif_annihilation':
         fp_validated = 1
 
+    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+    tenant_id = 0
+    try:
+        tenant_id = get_tenant_id(current_skyline_app, metric_id=metrics_id, base_name=None, log=False)
+    except Exception as err:
+        current_logger.error('error :: create_features_profile :: get_tenant_id failed, err: %s' % (
+            err))
+        tenant_id = 0
+
     new_fp_id = False
     try:
         connection = engine.connect()
@@ -1077,7 +1093,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 features_sum=fsum, parent_id=fp_parent_id,
                 generation=fp_generation, validated=fp_validated,
                 echo_fp=echo_fp_value, created_timestamp=db_created_timestamp,
-                user_id=user_id, label=label)
+                user_id=user_id, label=label,
+                # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                tenant_id=tenant_id)
         else:
             ins = ionosphere_table.insert().values(
                 metric_id=int(metrics_id), full_duration=int(ts_full_duration),
@@ -1086,7 +1104,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 calc_time=calculated_time, features_count=fcount,
                 features_sum=fsum, parent_id=fp_parent_id,
                 generation=fp_generation, validated=fp_validated,
-                echo_fp=echo_fp_value, user_id=user_id, label=label)
+                echo_fp=echo_fp_value, user_id=user_id, label=label,
+                # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                tenant_id=tenant_id)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]
@@ -1265,7 +1285,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         i_full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
         anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, use_base_name, str(i_full_duration_in_hours))
 
-    if path.isfile(anomaly_json):
+    if os.path.isfile(anomaly_json):
         current_logger.info('create_features_profile :: metric anomaly json found OK - %s' % (anomaly_json))
         try:
             # Read the timeseries json file
@@ -1294,6 +1314,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if 'nan' in timeseries_array_str:
+        try:
+            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+        except Exception as err:
+            current_logger.error('error :: create_features_profile :: failed to replace nan with None, err: %s' % (
+                err))
+
     del raw_timeseries
     timeseries = literal_eval(timeseries_array_str)
 
@@ -1371,7 +1399,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # series data for more accurate validation
     fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
         metric_training_data_dir, use_base_name, str(new_fp_id))
-    if not path.isfile(fp_ts_graph_file):
+    if not os.path.isfile(fp_ts_graph_file):
         try:
             created_fp_ts_graph, fp_ts_graph_file = create_fp_ts_graph(current_skyline_app, metric_training_data_dir, use_base_name, int(new_fp_id), int(use_anomaly_timestamp), validated_timeseries)
         except:
@@ -1419,10 +1447,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # raise
 
     # Copy data from training data dir to features_profiles dir
-    if not path.isdir(ts_features_profile_dir):
+    if not os.path.isdir(ts_features_profile_dir):
         mkdir_p(ts_features_profile_dir)
 
-    if path.isdir(ts_features_profile_dir):
+    if os.path.isdir(ts_features_profile_dir):
         current_logger.info('create_features_profile :: fp_id - %s - features profile dir created - %s' % (str(new_fp_id), ts_features_profile_dir))
         # src_files = os.listdir(src)
         # for file_name in src_files:
@@ -1558,6 +1586,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         if learn_repetitive_patterns or find_repetitive_patterns:
             message = '*LEARNT - not anomalous repetitive pattern* - features profile id %s was created for %s via %s - %s' % (
                 str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
+
         # @added 20240405 - Feature #5318: motif_annihilation
         if motif_annihilation:
             message = '*LEARNT - not anomalous repetitive pattern motif annihilation* - features profile id %s was created for %s via %s - %s' % (
@@ -1776,6 +1805,70 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     else:
                         current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
                             channel, str(slack_thread_ts)))
+
+        # @added 20250402 - Feature #5318: motif_annihilation
+        # Send the pw5_timeseries and motif_annihilation validation link to
+        # slack to allow to validate inline from slack
+        if motif_annihilation:
+            if not slack_thread_ts and slack_response:
+                try:
+                    slack_thread_ts = slack_response['slack_thread_ts']
+                except:
+                    pass
+        if motif_annihilation and slack_thread_ts:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+            fps_dict = {}
+            try:
+                fps_dict = get_fps_for_metric(current_skyline_app, metrics_id)
+            except Exception as err:
+                current_logger.error('error :: create_features_profile :: get_fps_for_metric failed, err: %s' % (
+                    err))
+            fp_dict = {}
+            if fps_dict:
+                try:
+                    fp_dict = fps_dict[new_fp_id]
+                except Exception as err:
+                    current_logger.error('error :: create_features_profile :: failed to get fp_dict for %s, err: %s' % (
+                        str(new_fp_id), err))
+            pw5_timeseries_image = None
+            if fp_dict:
+                for path, folders, files in walk(ts_features_profile_dir):
+                    if files:
+                        for file in files:
+                            if file.endswith('motif_annihilation.pw5_timeseries.png'):
+                                pw5_timeseries_image = '%s/%s' % (ts_features_profile_dir, file)
+                                break
+            motif_annihilation_validation_link = None
+            if pw5_timeseries_image:
+                try:
+                    motif_annihilation_validation_link = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true&format=json' % (
+                        settings.SKYLINE_URL, str(fp_dict['anomaly_timestamp']), use_base_name)
+                except Exception as err:
+                    current_logger.error('error :: create_features_profile :: failed to build motif_annihilation_validation_link, err: %s' % (
+                        err))
+                    motif_annihilation_validation_link = 'URL link failed to build'
+                motif_annihilation_validation_message = 'pw5_timeseries from which the motif_annihilation features profile id %s was created - *quick validate link*  - %s' % (
+                    str(new_fp_id), motif_annihilation_validation_link)
+                slack_response = {'ok': False}
+                try:
+                    slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), motif_annihilation_validation_message, image_file=pw5_timeseries_image)
+                except Exception as err:
+                    if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                        slack_ssl_error = True
+                        fail_msg = 'warning :: create_features_profile :: failed to post motif_annihilation_validation_message slack_post_message, ssl error, err: %s' % err
+                        current_logger.info('%s' % fail_msg)
+                    else:
+                        trace = traceback.format_exc()
+                        current_logger.error(trace)
+                        fail_msg = 'error :: create_features_profile :: failed to post motif_annihilation_validation_message slack_post_message, err: %s' % err
+                        current_logger.error('%s' % fail_msg)
+                if not slack_response['ok']:
+                    fail_msg = 'error :: create_features_profile :: failed to slack_post_message for motif_annihilation_validation_message, slack dict output follows'
+                    current_logger.error('%s' % fail_msg)
+                    current_logger.error('%s' % str(slack_response))
+                else:
+                    current_logger.info('create_features_profile :: posted slack update with motif_annihilation validation to %s, thread %s' % (
+                        channel, str(slack_thread_ts)))
 
     current_logger.info('create_features_profile :: disposing of any engine')
     try:

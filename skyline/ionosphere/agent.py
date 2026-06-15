@@ -13,7 +13,11 @@ from sys import version_info
 import os
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
+
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -30,9 +34,12 @@ if True:
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
-    # @added 20240405 - Feature #5318: motif_annihilation
+    # @added 20240405 - Feature #5318: common_motifs
     if settings.IONOSPHERE_LEARN_REPETITIVE_PATTERNS:
-        from motif_annihilation import MotifAnnihilation
+        from common_motifs import MotifRemoval
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 skyline_app = 'ionosphere'
 skyline_app_logger = skyline_app + 'Log'
@@ -87,10 +94,10 @@ class IonosphereAgent():
         logger.info('agent :: starting Skyline Ionosphere')
         Ionosphere(getpid()).start()
 
-        # @added 20240405 - Feature #5318: motif_annihilation
+        # @added 20240405 - Feature #5318: common_motifs
         if settings.IONOSPHERE_LEARN_REPETITIVE_PATTERNS:
-            logger.info('agent :: starting motif_annihilation')
-            MotifAnnihilation(getpid()).start()
+            logger.info('agent :: starting common_motifs')
+            MotifRemoval(getpid()).start()
 
         while 1:
             sleep(100)
