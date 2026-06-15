@@ -205,10 +205,25 @@ def get_pearson_correlation_graphs(
             data_points_per_period = 1
             data_points_per_period = 600 / resolution
             T = '%sT' % str(data_points_per_period)
+            # @added 20260227 - Task #5628: Build v5.0.0 and test
+            # changed T to min as per warning in pandas 2.2.3
+            T = '%smin' % str(data_points_per_period)
+
             resampled_df = df.resample(T, origin='end').bfill()
             resampled_values = resampled_df['value'].to_numpy().tolist()
             resampled_ts_df = resampled_df.copy()
-            resampled_ts_df['ts'] = resampled_ts_df.index.astype(np.int64) // 10**9
+            # @modified 20260224 - Task #5628: Build v5.0.0 and test
+            #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #                      Task #5526: Build v5.0.0 and upgrade deps
+            #                      Task #5627: v5.0.0 update dependencies
+            # Handle pandas deprecation which results in all timestamps being
+            # returned as 1.  From pandas changelog:
+            # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+            # Disallow passing a pandas type to Index.view() (GH 55709)
+            # https://github.com/pandas-dev/pandas/issues/55709
+            #resampled_ts_df['ts'] = resampled_ts_df.index.astype(np.int64) // 10**9
+            resampled_ts_df['ts'] = [int(ts.value // 10**9) for ts in resampled_ts_df.index]
+
             resampled_timestamps = resampled_ts_df['ts'].to_numpy().tolist()
             resampled_timeseries = [[t, resampled_values[index]] for index, t in enumerate(resampled_timestamps)]
             try:
@@ -311,6 +326,24 @@ def get_pearson_correlation_graphs(
         base_name = item[0]
         if base_name == metric:
             continue
+
+        # @added 20251125 - Feature #5322: pearson_correlation_graphs
+        # Remove if it is None as it breaks the correlations.html template
+        # and if the correlation is None then there is nothing to do here.
+        remove_entry = False
+        try:
+            pearson_cc_value = pearson_correlations[base_name]['pearson_cc']
+            if pearson_cc_value is None:
+                remove_entry = True
+                pearson_correlations[base_name]['pearson_cc'] = 0
+        except Exception as err:
+            remove_entry = True
+        if remove_entry:
+            current_logger.info('%s :: pearson_cc is None removing %s' % (
+                function_str, base_name))
+            del pearson_correlations[base_name]
+            continue
+
         if item[1] < abs_threshold:
             current_logger.info('%s :: not plotting %s < %s, pearson_cc: %s' % (
                 function_str, base_name, str(abs_threshold), str(item[1])))
