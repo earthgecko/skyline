@@ -260,12 +260,15 @@ def process_graphite_fail_queue(self):
 
     if not pickle_data_submitted:
         added = 0
-        try:
-            added = self.redis_conn_decoded.sadd('skyline.graphite_fail_queue', *set(items_to_readd))
-        except Exception as err:
-            logger.error('error :: horizon.worker :: failed to add %s to Redis set skyline.graphite_fail_queue - %s' % (
-                str(len(items_to_readd)), err))
-            added = 0
+        # @modified 20260220 - Task #5628: Build v5.0.0 and test
+        # Only if there are items_to_readd
+        if len(items_to_readd) > 0:
+            try:
+                added = self.redis_conn_decoded.sadd('skyline.graphite_fail_queue', *set(items_to_readd))
+            except Exception as err:
+                logger.error('error :: horizon.worker :: failed to add %s to Redis set skyline.graphite_fail_queue - %s' % (
+                    str(len(items_to_readd)), err))
+                added = 0
         logger.info('horizon.worker :: process_graphite_fail_queue :: readded %s metrics to the skyline.graphite_fail_queue Redis set' % (
             str(added)))
 
