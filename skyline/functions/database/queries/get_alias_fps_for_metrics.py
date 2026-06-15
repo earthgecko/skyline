@@ -57,9 +57,19 @@ def get_alias_fps_for_metrics(current_skyline_app, metric_ids):
         return metric_ids_alias_fps_dict
 
     try:
-        connection = engine.connect()
-        stmt = select([alias_features_profile_table], alias_features_profile_table.c.metric_id.in_(metric_ids))
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([alias_features_profile_table], alias_features_profile_table.c.metric_id.in_(metric_ids))
+        stmt = select(alias_features_profile_table).\
+                where(alias_features_profile_table.c.metric_id.in_(metric_ids))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         if results:
             for row in results:
                 metric_id = row['metric_id']
@@ -67,15 +77,17 @@ def get_alias_fps_for_metrics(current_skyline_app, metric_ids):
                 if metric_id not in metric_ids_alias_fps_dict.keys():
                     metric_ids_alias_fps_dict[metric_id] = {}
                 metric_ids_alias_fps_dict[metric_id][fp_id] = dict(row)
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        try:
-            connection.close()
-        except Exception as err2:
-            current_logger.error('error :: %s :: failed to close connection, err: %s' % (
-                function_str, err2))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #try:
+        #    connection.close()
+        #except Exception as err2:
+        #    current_logger.error('error :: %s :: failed to close connection, err: %s' % (
+        #        function_str, err2))
         fail_msg = 'error :: %s :: could not convert db ionosphere rows to dict, err: %s' % (
             function_str, err)
         current_logger.error('%s' % fail_msg)
