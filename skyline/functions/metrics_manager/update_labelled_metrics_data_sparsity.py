@@ -79,7 +79,7 @@ def get_metrics_to_update(self, active_labelled_ids_with_metrics, run_every):
     return metrics_to_update
 
 
-def update_metrics(self, metrics_to_update):
+def update_metrics(self, metrics_to_update, max_seconds=45):
     """
     The labelled_metrics by id e.g. labelled_metrics.1234
     """
@@ -98,18 +98,49 @@ def update_metrics(self, metrics_to_update):
         timeseries = []
         r_start = time()
         right_now = int(r_start)
+
+        # @added 20250915 - Bug #5522: Handle duplicate metric names
+        # Limit time
+        if (right_now - update_start) >= max_seconds:
+            logger.info('metrics_manager :: update_labelled_metrics_data_sparsity :: update_metrics stopping due to time limit')
+            break
+
         labelled_metric = 'labelled_metrics.%s' % str(metric_id_str)
+
+        # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+        # Check if key exists before ts().range to prevent Redis from incrementing
+        # Redis own total_error_replies metric.
+        tsdb_key_exists = 0
+        try:
+            tsdb_key_exists = self.redis_conn_decoded.exists(labelled_metric)
+        except Exception as err:
+            errors.append([labelled_metric, 'exists', str(err)])
+            tsdb_key_exists = 0
+        if tsdb_key_exists == 0:
+            errors.append([labelled_metric, 'a request would be made for TSDB key does not exist'])
+
         metrics_last_checked_dict[metric_id_str] = right_now
         full_duration_timeseries = []
-        try:
-            full_duration_timeseries = self.redis_conn_decoded.ts().range(labelled_metric, (from_timestamp * 1000), (until_timestamp * 1000))
-        except Exception as err:
-            if str(err) == 'TSDB: the key does not exist':
-                redis_timings.append(time() - r_start)
-                continue
-            errors.append([labelled_metric, 'ts().range', str(err)])
-            full_duration_timeseries = []
-        redis_timings.append(time() - r_start)
+
+        # @modified 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+        # Wrapped in if tsdb_key_exists to only check if key exists
+        if tsdb_key_exists == 1:
+            try:
+                full_duration_timeseries = self.redis_conn_decoded.ts().range(labelled_metric, (from_timestamp * 1000), (until_timestamp * 1000))
+            except Exception as err:
+                # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+                # Report errors first instead of after continue
+                errors.append([labelled_metric, 'ts().range', str(err)])
+
+                if str(err) == 'TSDB: the key does not exist':
+                    redis_timings.append(time() - r_start)
+                    continue
+                # @modified 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+                # Moved to before continue above so all errors are reported
+                #errors.append([labelled_metric, 'ts().range', str(err)])
+                full_duration_timeseries = []
+            redis_timings.append(time() - r_start)
+
         if full_duration_timeseries:
             timeseries = full_duration_timeseries
             timeseries = [[int(mts / 1000), value] for mts, value in full_duration_timeseries]
@@ -136,6 +167,12 @@ def update_metrics(self, metrics_to_update):
             labelled_metrics_resolution_sparsity_checked_dict[str(metric_id_str)] = int(right_now)
         resolution_and_sparsity_timings.append(time() - start_resolution_and_sparsity_timing)
 
+    # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+    #                   Feature #4792: functions.metrics_manager.manage_inactive_metrics
+    # NOTE: the below Redis hash labelled_metrics.metric_resolutions is pruned
+    # by manage_inactive_labelled_metrics_resolution_hashes it is not managed
+    # directly via manage_inactive_metrics
+
     if labelled_metrics_resolutions:
         hash_key = 'labelled_metrics.metric_resolutions'
         try:
@@ -146,6 +183,13 @@ def update_metrics(self, metrics_to_update):
             logger.error(traceback.format_exc())
             logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity :: failed to set %s Redis hash - %s' % (
                 hash_key, err))
+
+    # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+    #                   Feature #4792: functions.metrics_manager.manage_inactive_metrics
+    # NOTE: the below Redis hash labelled_metrics.data_sparsity is pruned by
+    # manage_inactive_labelled_metrics_resolution_hashes it is not managed
+    # directly via manage_inactive_metrics
+
     if labelled_metrics_sparsity:
         hash_key = 'labelled_metrics.data_sparsity'
         try:
@@ -157,6 +201,13 @@ def update_metrics(self, metrics_to_update):
             logger.error(traceback.format_exc())
             logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity :: failed to set %s Redis hash - %s' % (
                 hash_key, err))
+
+    # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+    #                   Feature #4792: functions.metrics_manager.manage_inactive_metrics
+    # NOTE: the below Redis hash labelled_metrics.resolution_sparsity_last_checked
+    # is pruned by manage_inactive_labelled_metrics_resolution_hashes it is not
+    # managed directly via manage_inactive_metrics
+
     if metrics_last_checked_dict:
         labelled_metrics_resolution_sparsity_last_checked_hash_key = 'labelled_metrics.resolution_sparsity_last_checked'
         hash_key = 'labelled_metrics.resolution_sparsity_last_checked'
@@ -168,6 +219,26 @@ def update_metrics(self, metrics_to_update):
             logger.error(traceback.format_exc())
             logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity :: failed to set %s Redis hash - %s' % (
                 hash_key, err))
+
+    # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+    # Report errors 
+    if errors:
+        logger.warning('warning :: metrics_manager :: update_labelled_metrics_data_sparsity :: errors reported, sample: %s' % (
+            str(errors[0])))
+        errors_timestamp = str(int(update_start))
+        key = 'metrics_manager.labelled_metrics_data_sparsity.update_metrics.errors.%s' % errors_timestamp
+        errors_dict = {}
+        for index, item in enumerate(errors):
+            errors_dict[index] = str(item)
+        try:
+            self.redis_conn.hset(key, mapping=errors_dict)
+            self.redis_conn.expire(key, 900)
+            logger.info('metrics_manager :: update_labelled_metrics_data_sparsity :: created %s Redis hash with %s entries and a 900 second TTL' % (
+                key, str(len(errors))))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity :: failed to sadd %s Redis set, err: %s' % (
+                key, err))
 
     timings = {
         'redis_timings': sum(redis_timings),
