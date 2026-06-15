@@ -27,6 +27,9 @@ from database import (
     get_engine, ionosphere_layers_table_meta, layers_algorithms_table_meta,
     ionosphere_layers_matched_table_meta)
 
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -136,10 +139,19 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
 
     layers_algorithms_result = None
     try:
-        connection = engine.connect()
-        stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == int(layers_id))
-        layers_algorithms_result = connection.execute(stmt)
-        connection.close()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == int(layers_id))
+        stmt = select(layers_algorithms_table).where(layers_algorithms_table.c.layer_id == int(layers_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #layers_algorithms_result = connection.execute(stmt)
+        #connection.close()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            layers_algorithms_result = [dict(row._mapping) for row in result.fetchall()]
+
         # @modified 20170308 - Feature #1960: ionosphere_layers
         # Not currently used
         # layer_algorithms_details_object = layers_algorithms_result
@@ -208,13 +220,22 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
             layers_engine_disposal(engine)
         return False
     try:
-        connection = engine.connect()
-        connection.execute(
-            ionosphere_layers_table.update(
-                ionosphere_layers_table.c.id == layers_id).
-            values(check_count=ionosphere_layers_table.c.check_count + 1,
-                   last_checked=checked_timestamp))
-        connection.close()
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(
+        #    ionosphere_layers_table.update(
+        #        ionosphere_layers_table.c.id == layers_id).
+        #    values(check_count=ionosphere_layers_table.c.check_count + 1,
+        #        last_checked=checked_timestamp))
+        stmt = ionosphere_layers_table.update().\
+            where(ionosphere_layers_table.c.id == layers_id).values(
+                check_count=ionosphere_layers_table.c.check_count + 1,
+                last_checked=checked_timestamp)
+        with engine.begin() as connection:
+            connection.execute(stmt)
+        #connection.close()
         logger.info('updated check_count for %s' % str(layers_id))
     except:
         logger.error(traceback.format_exc())
@@ -543,13 +564,21 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
 
     if not_anomalous:
         try:
-            connection = engine.connect()
-            connection.execute(
-                ionosphere_layers_table.update(
-                    ionosphere_layers_table.c.id == layers_id).
-                values(matched_count=ionosphere_layers_table.c.matched_count + 1,
-                       last_matched=checked_timestamp))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    ionosphere_layers_table.update(
+            #        ionosphere_layers_table.c.id == layers_id).
+            #    values(matched_count=ionosphere_layers_table.c.matched_count + 1,
+            #        last_matched=checked_timestamp))
+            stmt = ionosphere_layers_table.update().\
+                where(ionosphere_layers_table.c.id == layers_id).values(
+                    matched_count=ionosphere_layers_table.c.matched_count + 1,
+                    last_matched=checked_timestamp)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('layers :: updated matched_count for %s' % str(layers_id))
         except:
             logger.error(traceback.format_exc())
@@ -631,12 +660,23 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                 approx_close = 1
                 logger.info('layers :: approximately_close values were needed to obtain a match, labelling approx_close')
 
+        # @added 20250122 - Feature #5592: tenant_id column in DB tables
+        tenant_id = 0
         try:
-            connection = engine.connect()
+            tenant_id = get_tenant_id(skyline_app, metric_id=current_metric_id, base_name=None, log=False)
+        except Exception as err:
+            logger.error('error :: layers :: get_tenant_id failed, err: %s' % (
+                err))
+            tenant_id = 0
+
+        try:
+            #connection = engine.connect()
             ins = ionosphere_layers_matched_table.insert().values(
                 layer_id=int(layers_id),
                 fp_id=int(current_fp_id),
                 metric_id=int(current_metric_id),
+                # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                tenant_id=tenant_id,
                 anomaly_timestamp=int(last_timestamp),
                 anomalous_datapoint=float(last_datapoint),
                 full_duration=int(settings.FULL_DURATION),
@@ -645,9 +685,15 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                 layers_count=layers_count, layers_checked=layers_checked,
                 # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
                 approx_close=approx_close)
-            result = connection.execute(ins)
-            connection.close()
-            new_matched_id = result.inserted_primary_key[0]
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #connection.close()
+            #new_matched_id = result.inserted_primary_key[0]
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_matched_id = result.inserted_primary_key[0]
+
             logger.info('layers :: new ionosphere_layers_matched id: %s' % str(new_matched_id))
         except:
             logger.error(traceback.format_exc())
