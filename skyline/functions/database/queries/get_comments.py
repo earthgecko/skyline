@@ -53,14 +53,23 @@ def get_comments(
 
     all_comments = {}
     try:
-        connection = engine.connect()
-        stmt = select([comments_table]).where(comments_table.c.metric_id == int(metric_id))
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([comments_table]).where(comments_table.c.metric_id == int(metric_id))
+        stmt = select(comments_table).where(comments_table.c.metric_id == int(metric_id))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         if results:
             for row in results:
                 comment_id = row['id']
                 all_comments[comment_id] = dict(row)
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: failed to build all_comments dict - %s' % (
