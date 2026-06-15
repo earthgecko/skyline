@@ -1,0 +1,210 @@
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
+{% block body %}
+<!-- BEGIN /SNAB block -->
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/snab">SNAB</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">SNAB</span> <span class="re">process_algorithm</span></span></li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
+
+  <ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/snab">SNAB</a></li>
+  		<li class="active"><span class="logo"><span class="sky">SNAB</span> <span class="re">process_algorithm</span></li>
+    </div>
+	</ol>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs" id="view" role="tablist">
+	<li class="nav-item">
+	  <a class="nav-link" data-bs-toggle="tab" href="/snab" role="tab" aria-controls="view" aria-selected="false"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a>
+	</li>
+	<li class="nav-item">
+	  <a class="nav-link" data-bs-toggle="tab" href="/snab?report=true" role="tab" aria-controls="results" aria-selected="false"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a>
+	</li>
+	<li class="nav-item">
+	  <a class="nav-link active" data-bs-toggle="tab" href="/snab?process_algorithm=true" role="tab" aria-controls="process_algorithm" aria-selected="true"><span class="logo"><span class="sky">SNAB</span> <span class="re">process_algorithm</span></span></a>
+	</li>
+  </ul>
+</div>
+<br>
+
+{% else %}
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/snab"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
+		  <li><a href="/snab?report=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a></li>
+		  <li class="active"><a href="/snab?process_algorithm=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">process_algorithm</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+{% endif %}
+
+	<div class="col-md-12">
+	  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">process_algorithm</span></span></h4>
+
+    <br>
+    You can run SNAB with a custom_algorithm and reprocess anomalies which have
+    already been evaluated via SNAB.  There must be evaluations on an
+    algorithm_group to be able to do this.  This means SNAB checks must have
+    been run for Analyzer or Mirage and evaluations made for SNAB to be able to
+    run each data set through the algorithm and automatically assign an
+    evaluation for the algorithm based on the result and the previous evaluation.
+    There are 3 requirements:<br>
+    1. The custom_algorithm must be defined in <code>settings.VORTEX_ALGORITHMS</code> to be listed below.<br>
+    2. The custom_algorithm must have been run so that it has an algorithm id<br>
+    3. SNAB evaluations <strong>must</strong> have been done on at least one algorithm group.
+    <br>
+
+{% if algorithm_groups_validated|length == 0 %}
+  <div class="alert alert-warning">
+    <strong>There are no SNAB evaluations that can be used</strong>. There is no data for process_algorithm to use.
+  </div>
+{% endif %}
+
+
+{% if response %}
+  {% if version == dev_ver %}
+    <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#process_algorithm">Show options</button>
+    <div id="process_algorithm" class="collapse">
+  {% else %}
+    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#process_algorithm">Show options</button>
+    <div id="process_algorithm" class="collapse">
+  {% endif %}
+{% endif %}
+      <form action="snab" method=post enctype=multipart/form-data>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>process_algorithm</td>
+              <td><select name="process_algorithm">
+                <option value="true">true</option>
+              </select></td>
+            </tr>
+            <tr>
+              <td>run_algorithm</td>
+              <td>
+              Tick the algorithm you wish to run with SNAB against the evaluated algorithm group.<br>
+      {% for algorithm in vortex_algorithms %}
+        {% if algorithm != 'default' %}
+                <input type="checkbox" id="{{ algorithm }}" name="run_algorithm" value="{{ algorithm }}"> <strong><a target='_blank' href="/static/docs/skyline.custom_algorithms.html#module-custom_algorithms.{{ algorithm }}">{{ algorithm }}</a></strong>
+                <br>
+        {% endif %}
+      {% endfor %}
+              </td>
+            </tr>
+  		      <tr>
+  		        <td>algorithm_source:</td>
+  		        <td><input type="text" name="algorithm_source" value="default" />
+              This is a string of the path and filename of the custom_algorithm you selected above.  If set to default
+              the algorithm_source will be automatically looked up as the default path and filename of the custom_algorithm.
+              </td>
+  		      </tr>
+            <tr>
+  		        <td>algorithm_parameters:</td>
+  		        <td><input type="text" name="algorithm_parameters" value="{'anomaly_window': 1, 'return_results': True}" />
+              This is a string of the algorithm_parameters dict that you pass to the selected algorithm
+              </td>
+  		      </tr>
+  		      <tr>
+              <td>algorithm_group</td>
+  		        <td><select name="snab_algorithm_group_id">
+{% for algorithm_group in algorithm_groups_validated %}
+                <option value="{{ algorithm_groups_validated[algorithm_group]['algorithm_group_id'] }}">{{ algorithm_groups_validated[algorithm_group]['algorithm_group'] }} ({{ algorithm_groups_validated[algorithm_group]['validated_count'] }} SNAB evaluations)</option>
+{% endfor %}
+              </select><br>
+              Select the algorithm_group that represents the previous SNAB evaluated anomalies you wish to process with the above selected algorithm.
+{% if algorithm_groups_validated|length == 0 %}
+            <div class="alert alert-warning">
+              <strong>There are no SNAB evaluations for any algorithm_group</strong>.
+            </div>
+{% endif %}
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>limit:</td>
+              <td><input type="number" name="limit" min="0" value="0" /> use 0 for unlimited</td>
+              This allows you to set a limit on the number of SNAB evaluated anomalies from the
+              selected algorithm_group to process.  This allows for testing say 5 to ensure the
+              process runs as desired before processing all.
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>data_only:</td>
+              <td><select name="data_only">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> Whether to only create the SNAB dataset and not run analysis.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>snab_dataset_id:</td>
+  		        <td><input type="text" name="snab_dataset_id" value="none" />
+                This is only required if you want to make a SNAB dataset.
+              </td>
+  		      </tr>
+          </tbody>
+        </table>
+        <br>
+{% if algorithm_groups_validated|length != 0 %}
+        <input type="submit" value="process_algorithm">
+{% endif %}
+      </form>
+      </div>
+{% if response %}
+<!-- collapse button div -->
+      </div>
+{% endif %}
+
+{% if response %}
+  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">process_algorithm :: </span></span> response</h4>
+  <code>response: {{ response }}</code><br>
+{% endif %}
+
+</div>
+
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /SNAB block -->
+{% endblock %}

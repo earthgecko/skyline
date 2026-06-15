@@ -129,7 +129,7 @@
     <a class="nav-link" href="/ionosphere?fp_validate=true&metric=all"><span class="logo"><span class="re">Validate</span></span></a>
     </li>
     <li class="nav-item">
-    <a class="nav-link" href="?validate_motif_annihilations=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re"></span>motif_annihilations</span></span></a>
+    <a class="nav-link" href="?validate_common_motifs=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re"></span>common_motifs</span></span></a>
     </li>
 <!--
     <li class="nav-item">
@@ -281,14 +281,6 @@
     <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profiles :: </span></span>{{ use_for_metric }} :: {{ td_files|length }} data sets</h4>
 If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
 below.<br>
-Please note: be advised that tracking the timestamp and metric through Flask
-and Jinja templating was <b>very hard to achieve</b>.  However it was done to help <b>you</b>
-as if there are multiple data sets below and you came here by a list by
-date route, it is highly probable that you would not know the date you selected
-once you were presented with a multiple choice.  Please take the appropriate
-amount of time to appreciate this seemingly, insignificant feature that was
-<b>painstakingly</b> added for your benefit.<br>
-Also note:
   	<table class="table table-hover">
   		<thead>
   			<tr>
@@ -424,9 +416,9 @@ An alias features profile is a features profile that has been copied from one me
       {% if fp_label == 'LEARNT - repetitive pattern' %}
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile learnt from </span></span>
       <b>repetitive patterns</b></h4></center>
-      {% elif fp_label == 'LEARNT - motif_annihilation' %}
+      {% elif fp_label == 'LEARNT - common_motifs' %}
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile learnt from </span></span>
-      <b>motif_annihilation</b></h4></center>
+      <b>common_motifs</b></h4></center>
       {% else %}
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile based on </span></span>
       <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ use_for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a></h4></center>
@@ -987,7 +979,7 @@ Image file: {{ image }}<br><br>
   {% else %}
     {% for image in metric_images %}
 <!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
-      {% if ((not '.redis.plot' in image) and (not '.vortex.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image) and (not 'match_compare' in image) and ( not 'vortex.' in image ) and ( not 'custom_algorithms.' in image ) and ( not 'snab.' in image ) and ( not 'motif_annihilation.' in image )) %}
+      {% if ((not '.redis.plot' in image) and (not '.vortex.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image) and (not 'match_compare' in image) and ( not 'vortex.' in image ) and ( not 'custom_algorithms.' in image ) and ( not 'snab.' in image ) and ( not 'common_motifs.' in image )) %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
@@ -1024,26 +1016,32 @@ Image file: {{ image }}<br><br>
       {% endif %}
     {% endfor %}
 
-    {% if fp_label == 'LEARNT - motif_annihilation' %}
+    {% if ((fp_label == 'LEARNT - common_motifs') or (fp_label == 'LEARNT - repetitive pattern')) %}
       {% for image in metric_images %}
-        {% if 'motif_annihilation.png' in image %}
-      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilated time series</span> :: anomaly time series and derived time series from the best matched common motifs from the previous 4 week</span></h4>
+        {% if 'common_motifs.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_removed time series</span> :: anomaly time series and derived time series from the best matched common motifs from the previous 4 week</span></h4>
 This is the <strong>derived</strong> best matches time series overlaid on the the anomaly timeseries.<br>
   <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile derived best matches time series graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
-        {% if 'motif_annihilation.derived.png' in image %}
-      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilation</span> :: derived time series from the best matched common motifs from the previous 4 weeks</span></h4>
+        {% if 'common_motifs.derived.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">common_motifs</span> :: derived time series from the best matched common motifs from the previous 4 weeks</span></h4>
 This is the <strong>derived</strong> best matches time series.<br>
   <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile derived best matches time series graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
-        {% if 'motif_annihilation.pw5_timeseries.png' in image %}
-      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilation</span> :: 5 weeks, previous 4 weeks from which the best matched common motifs were derived and the anomaly time series</span></h4>
-This is the previous 4 weeks of the metric from which the best matches common motifs were derived and the annihilated anomaly time series.<br>
+        {% if 'common_motifs.pw5_timeseries.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">common_motifs</span> :: 5 weeks, previous 4 weeks from which the best matched common motifs were derived and the anomaly time series</span></h4>
+This is the previous 4 weeks of the metric from which the best matches common motifs were derived and the removed anomaly time series.<br>
 The last green part of the time series is the potential anomaly and the past 7 days, the dotted blue part of the time series is the 4 weeks prior to
 the anomaly.  There is nothing unusual in the green part that is not fairly common in the dotted blue part.
-  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} previous 4 weeks of the metric from which the best matches common motifs were derived and the annihilated anomaly time series" class="img-responsive center-block" /><br>
+  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} previous 4 weeks of the metric from which the best matches common motifs were derived and the removed anomaly time series" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+        {% if 'common_motifs.validated.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">VALIDATED by common_motifs</span> :: 4 weeks within which the features profile falls</span></h4>
+This is the 4 week period with was used to validate the features profile using the common_motifs method.
+  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} 4 week common motifs validated period" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
       {% endfor %}

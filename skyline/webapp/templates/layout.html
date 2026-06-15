@@ -196,6 +196,12 @@ it with the selected algorithms on an adhoc basis">Vortex</a></li>
             ><a data-placement="bottom" data-toggle="tooltip" href="/utilities"
             title="Miscellaneous utilities to do or view various things">Utilities</a></li>
             <li
+            {% if url_for("llm_chat") in request.path %}
+            class="active"
+            {% endif %}
+            ><a data-placement="bottom" data-toggle="tooltip" href="/llm_chat"
+            title="LLM Chat">LLM Chat</a></li>
+            <li
             {% if url_for("tsdbs") in request.path %}
             class="active"
             {% endif %}
