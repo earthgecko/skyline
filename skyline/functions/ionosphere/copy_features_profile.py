@@ -15,7 +15,9 @@ import copy
 from sqlalchemy import (
     Column, Table, Integer, MetaData)
 from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.sql import select
+# @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+# Added insert
+from sqlalchemy.sql import select, insert
 
 import settings
 from skyline_functions import mkdir_p, write_data_to_file
@@ -27,6 +29,9 @@ from database import (
     get_engine, engine_disposal, ionosphere_table_meta, 
     alias_features_profile_table_meta,
 )
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+
 
 # @added 20241011 - Feature #5481: ionosphere.copy_features_profile
 #                   Feature #5479: ionosphere.alias_features_profile
@@ -238,12 +243,23 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             raise
         return fp_created_via_copy
 
+    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+    tenant_id = 0
+    try:
+        tenant_id = get_tenant_id(current_skyline_app, metric_id=target_metric_id, base_name=None, log=False)
+    except Exception as err:
+        current_logger.error('error :: create_features_profile :: get_tenant_id failed, err: %s' % (
+            err))
+        tenant_id = 0
+
     # Create DB ionosphere record
     new_fp_id = False
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = ionosphere_table.insert().values(
             metric_id=int(target_metric_id),
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id=tenant_id,
             full_duration=int(fp_id_row['full_duration']),
             anomaly_timestamp=int(fp_id_row['anomaly_timestamp']),
             enabled=1, tsfresh_version=fp_id_row['tsfresh_version'],
@@ -256,9 +272,16 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             echo_fp=fp_id_row['echo_fp'],
             #created_timestamp=db_created_timestamp,
             user_id=user_id, label=label, alias_id=alias_fp_id)
-        result = connection.execute(ins)
-        connection.close()
-        new_fp_id = result.inserted_primary_key[0]
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_fp_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_fp_id = result.inserted_primary_key[0]
+
         current_logger.info('%s :: copied to new ionosphere fp_id: %s' % (function_str, str(new_fp_id)))
     except Exception as err:
         trace = traceback.format_exc()
@@ -320,19 +343,30 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
     fp_features = []
     try:
         use_table_meta = MetaData()
-        use_table = Table(metric_fp_table, use_table_meta, autoload=True, autoload_with=engine)
+        use_table = Table(metric_fp_table, use_table_meta, autoload_with=engine)
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: use_table Table failed on %s table, err: %s' % (
             function_str, metric_fp_table, err))
     try:
-        stmt = select([use_table.c.feature_id, use_table.c.value]).where(use_table.c.fp_id == original_fp_id)
-        connection = engine.connect()
-        for row in engine.execute(stmt):
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([use_table.c.feature_id, use_table.c.value]).where(use_table.c.fp_id == original_fp_id)
+        stmt = select(use_table.c.feature_id, use_table.c.value).where(use_table.c.fp_id == original_fp_id)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #for row in engine.execute(stmt):
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
+
             fp_feature_id = int(row['feature_id'])
             fp_value = float(row['value'])
             fp_features.append([fp_feature_id, fp_value])
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined %s features for original_fp_id: %s' % (
             function_str, str(len(fp_features)), str(original_fp_id)))
     except Exception as err:
@@ -367,9 +401,15 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
             raise
         return fp_created_via_copy
     try:
-        connection = engine.connect()
-        connection.execute(fp_metric_table.insert(), insert_statement)
-        connection.close()
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(fp_metric_table.insert(), insert_statement)
+        #connection.close()
+        with engine.begin() as connection:
+            #connection.execute(fp_metric_table.insert(), insert_statement)
+            connection.execute(insert(fp_metric_table), insert_statement)
+
         current_logger.info('%s :: fp_id - %s - feature values inserted into %s' % (
             function_str, str(new_fp_id), fp_table_name))
     except Exception as err:
@@ -434,9 +474,14 @@ def copy_features_profile(current_skyline_app, alias_fp_dict):
     for ts, value in original_fp_id_metric_timeseries:
         insert_statement.append({'fp_id': new_fp_id, 'timestamp': ts, 'value': value},)
     try:
-        connection = engine.connect()
-        connection.execute(ts_metric_table.insert(), insert_statement)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(ts_metric_table.insert(), insert_statement)
+        #connection.close()
+        with engine.begin() as connection:
+            connection.execute(insert(ts_metric_table), insert_statement)
+
         current_logger.info('%s :: fp_id: %s, timeseries inserted into %s' % (
             function_str, str(new_fp_id), ts_table_name))
     except Exception as err:
