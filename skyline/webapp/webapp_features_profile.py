@@ -8,13 +8,19 @@ import traceback
 import logging
 
 from flask import Flask, request, jsonify
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
     sys.path.insert(0, os.path.dirname(__file__))
     import settings
     from features_profile import calculate_features_profile
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
