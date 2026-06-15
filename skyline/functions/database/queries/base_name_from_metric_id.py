@@ -54,13 +54,19 @@ def base_name_from_metric_id(current_skyline_app, metric_id, log=False):
         return False, fail_msg, trace
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table.c.metric]).where(metrics_table.c.id == int(metric_id))
-        result = connection.execute(stmt)
-        for row in result:
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #stmt = select([metrics_table.c.metric]).where(metrics_table.c.id == int(metric_id))
+        #result = connection.execute(stmt)
+        stmt = select(metrics_table.c.metric).where(metrics_table.c.id == int(metric_id))
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             base_name = row['metric']
             break
-        connection.close()
+        #connection.close()
         if log:
             current_logger.info('%s :: determined metric with id %s base_name: %s' % (
                 function_str, str(metric_id), base_name))
@@ -73,7 +79,7 @@ def base_name_from_metric_id(current_skyline_app, metric_id, log=False):
             function_str, base_name, e)
         current_logger.error('%s' % fail_msg)
         if engine:
-            engine_disposal(current_skyline_app, engine)
+            (current_skyline_app, engine)
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
