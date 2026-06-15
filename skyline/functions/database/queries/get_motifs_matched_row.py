@@ -50,10 +50,21 @@ def get_motifs_matched_row(current_skyline_app, motifs_matched_id):
         return motifs_matched_row
 
     try:
-        connection = engine.connect()
-        stmt = select([motifs_matched_table]).where(motifs_matched_table.c.id == int(motifs_matched_id))
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([motifs_matched_table]).where(motifs_matched_table.c.id == int(motifs_matched_id))
+        stmt = select(motifs_matched_table).where(motifs_matched_table.c.id == int(motifs_matched_id))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         try:
             motifs_matched_row = dict(row)
         except Exception as err:
@@ -66,7 +77,7 @@ def get_motifs_matched_row(current_skyline_app, motifs_matched_id):
                 # Raise to webapp
                 raise
             return motifs_matched_row
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get motifs_matched row for motifs_matched id %s - %s' % (
