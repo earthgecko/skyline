@@ -11,7 +11,11 @@ import os.path
 # @added 20220722 - Task #4624: Change all dict copy to deepcopy
 import copy
 
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
+
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -29,6 +33,9 @@ if True:
     from prometheus import PrometheusMetrics
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 skyline_app = 'horizon'
 skyline_app_logger = '%sLog' % skyline_app

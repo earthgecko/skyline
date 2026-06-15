@@ -44,6 +44,10 @@ from functions.database.queries.get_all_db_metric_names import get_all_db_metric
 #                   Task #5178: Build and test skyline v4.1.0
 from functions.redis.redis_rename_key import redis_rename_key
 
+# @added 20251008 - Bug #5522: Handle duplicate metric names
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
+
 parent_skyline_app = 'horizon'
 child_skyline_app = 'prometheus'
 skyline_app_logger = '%sLog' % parent_skyline_app
@@ -103,6 +107,20 @@ if VICTORIAMETRICS_ENABLED:
             )
     except:
         vm_url = None
+
+# @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+# The PrometheusMetrics is now also responsible for adding any Graphite metrics
+# that have been selected to have their FULL_DURATION resolution data stored
+# for longer that FULL_DURATION or 7 days in Graphite 
+LONGTERM_FULL_DURATION_NAMESPACES = []
+try:
+    LONGTERM_FULL_DURATION_NAMESPACES = settings.LONGTERM_FULL_DURATION_NAMESPACES
+except:
+    LONGTERM_FULL_DURATION_NAMESPACES = []
+if LONGTERM_FULL_DURATION_NAMESPACES:
+    from functions.victoriametrics.send_long_full_duration_metrics_to_victoriametrics import send_long_full_duration_metrics_to_victoriametrics
+else:
+    send_long_full_duration_metrics_to_victoriametrics = nullcontext()
 
 try:
     MEMRAY_ENABLED = settings.MEMRAY_ENABLED
@@ -1246,6 +1264,17 @@ class PrometheusMetrics(Process):
                                 logger.error('error :: horizon.prometheus :: pipeline not available, continuing')
                                 break
 
+                    # @added 20251008 - Bug #5522: Handle duplicate metric names
+                    # To reduce the amount of runs that call get_all_db_metric_names
+                    # due to the fact that a number of labelled_metrics are
+                    # sparsely populated and set to inactive and therefore not
+                    # present in the aet.metrics_manager.active_labelled_metrics_with_id
+                    # Redis hash, lookups are done for 50 metrics.  50 lookups
+                    # should cover these types of metrics and the full list from
+                    # get_all_db_metric_names should only be called when there
+                    # are lots of new metrics added.
+                    metric_lookup_fails = 0
+
                     for item in aggregated_metrics_data_list:
                         try:
                             metric = item[0]
@@ -1285,6 +1314,19 @@ class PrometheusMetrics(Process):
                                 except:
                                     pass
 
+                            # @added 20251008 - Bug #5522: Handle duplicate metric names
+                            if not metric_id and not all_db_base_names_with_ids and metric_lookup_fails < 49:
+                                try:
+                                    metric_id = get_metric_id_from_base_name(parent_skyline_app, metric)
+                                except Exception as err:
+                                    logger.info('horizon.prometheus :: get_metric_id_from_base_name failed, err: %s' % err)
+                                    metric_lookup_fails += 1
+                                if not metric_id:
+                                    logger.info('horizon.prometheus :: get_metric_id_from_base_name could not determine metric id for %s' % (
+                                        str(metric)))
+                                    metric_lookup_fails += 1
+
+                            if not metric_id:
                                 # @added 20230123 - Task #2732: Prometheus to Skyline
                                 #                   Branch #4300: prometheus
                                 # Check metric if metric/s are in DB and not in
@@ -1575,6 +1617,14 @@ class PrometheusMetrics(Process):
                             logger.error('error :: horizon.prometheus :: could not sadd %s metric data for metrics without ids to Redis set %s - %s' % (
                                 str(len(metrics_with_no_id_data_list)), metrics_with_no_id_key, str(err)))
                         metrics_with_no_id = [item[0] for item in metrics_with_no_id_data_list]
+
+                        # @added 20250704 - Task #5639: horizon.prometheus - add equivalent logging for panorama
+                        # https://github.com/earthgecko/skyline/issues/652#issuecomment-3030507299
+                        # For the user should they look at the logs advise them they get
+                        # added to the panorama.horizon.metrics_with_no_id as well
+                        logger.info('horizon.prometheus :: adding %s entries to Redis set panorama.horizon.metrics_with_no_id for metrics without ids' % (
+                            str(len(metrics_with_no_id_data_list))))
+
                         try:
                             self.redis_conn_decoded.sadd('panorama.horizon.metrics_with_no_id', *metrics_with_no_id)
                         except Exception as err:
@@ -1582,6 +1632,18 @@ class PrometheusMetrics(Process):
                                 str(len(metrics_with_no_id_data_list)), str(err)))
                         del metrics_with_no_id
                     del metrics_with_no_id_data_list
+
+                    # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                    # Submit Graphite namespace metrics to VictoriaMetrics for
+                    # any Graphite metrics that have been added to the Redis set
+                    # to be stored at FULL_DURATION longer term in VictoriaMetrics
+                    if LONGTERM_FULL_DURATION_NAMESPACES:
+                        logger.info('horizon.prometheus :: running send_long_full_duration_metrics_to_victoriametrics')
+                        try:
+                            sent_count = send_long_full_duration_metrics_to_victoriametrics(parent_skyline_app)
+                        except Exception as err:
+                            logger.error('error :: horizon.prometheus :: send_long_full_duration_metrics_to_victoriametrics failed, err: %s' % (
+                                err))
 
                     send_graphite_metric(self, skyline_app, submitted_metrics_metric_name, metrics_submitted)
                     dropped_metrics_metric_name = '%s.prometheus_metrics.dropped' % skyline_app_graphite_namespace

@@ -97,6 +97,13 @@ if HORIZON_SHARDS:
     number_of_horizon_shards = len(HORIZON_SHARDS)
     HORIZON_SHARD = HORIZON_SHARDS[this_host]
 
+# @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+LONGTERM_FULL_DURATION_NAMESPACES = []
+try:
+    LONGTERM_FULL_DURATION_NAMESPACES = settings.LONGTERM_FULL_DURATION_NAMESPACES
+except:
+    LONGTERM_FULL_DURATION_NAMESPACES = []
+
 # @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
 #                   Branch #3262: py3
 python_version = int(version_info[0])
@@ -117,10 +124,10 @@ class Worker(Process):
             # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
             # self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         else:
             # self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         self.q = queue
         self.parent_pid = parent_pid
         self.daemon = True
@@ -325,10 +332,10 @@ class Worker(Process):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
                 else:
                     # self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
                 pipe = self.redis_conn.pipeline()
                 continue
 
@@ -348,12 +355,18 @@ class Worker(Process):
                 except Exception as err:
                     logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
 
+            # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+            long_full_duration_metrics_data = []
+
             try:
                 # Get a chunk from the queue with a 15 second timeout
                 chunk = self.q.get(True, 15)
                 # @modified 20170317 - Feature #1978: worker - DO_NOT_SKIP_LIST
                 # now = time()
                 now = int(time())
+
+                # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                long_full_duration_metrics_data = []
 
                 for metric in chunk:
 
@@ -448,6 +461,26 @@ class Worker(Process):
                     except Exception as e:
                         logger.error('%s :: error on pipe.sadd: %s' % (skyline_app, str(e)))
 
+                    # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                    if LONGTERM_FULL_DURATION_NAMESPACES:
+                        base_name = str(metric[0])
+                        # This is a reduced version of matched_or_regexed_in_list
+                        # just based on the namespace elements.  This is
+                        # super fast, checking 5609 metrics takes
+                        # 0.035369873046875 seconds.
+                        base_name_namespace_elements = base_name.split('.')
+                        matched = False
+                        for match_namespace in LONGTERM_FULL_DURATION_NAMESPACES:
+                            match_namespace_namespace_elements = match_namespace.split('.')
+                            elements_matched = set(base_name_namespace_elements) & set(match_namespace_namespace_elements)
+                            if len(elements_matched) == len(match_namespace_namespace_elements):
+                                matched = True
+                                break
+                        if matched:
+                            metric_data = [base_name, metric[1][1], metric[1][0]]
+                            metric_data_csv = ','.join(map(str, metric_data))
+                            long_full_duration_metrics_data.append(metric_data_csv)
+
                     if not self.skip_mini:
                         # Append to mini namespace
                         # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
@@ -479,6 +512,22 @@ class Worker(Process):
                 # Added traceback
                 logger.error(traceback.format_exc())
                 logger.error('%s :: error: %s' % (skyline_app, str(e)))
+
+            # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+            if long_full_duration_metrics_data:
+                current_aligned_ts = int(int(time()) // 60 * 60)
+                long_full_duration_metrics_data_redis_key = 'skyline.long_full_duration_metrics.%s' % str(current_aligned_ts)
+                try:
+                    self.redis_conn.sadd(long_full_duration_metrics_data_redis_key, *set(long_full_duration_metrics_data))
+                    logger.info('%s :: worker :: added %s metrics to %s' % (
+                        skyline_app,
+                        str(len(set(long_full_duration_metrics_data))),
+                        long_full_duration_metrics_data_redis_key))
+                    self.redis_conn.expire(long_full_duration_metrics_data_redis_key, 125)
+                except Exception as err:
+                    logger.error('error :: %s :: worker :: failed to add %s metrics to Redis set %s, %s' % (
+                        skyline_app, str(len(long_full_duration_metrics_data)),
+                        long_full_duration_metrics_data_redis_key, err))
 
             # Log progress
             if self.canary:
