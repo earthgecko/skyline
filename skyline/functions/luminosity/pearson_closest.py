@@ -122,6 +122,10 @@ def pearson_closest(
     if downsample:
         start_t1_downsample = time()
         T = '%sT' % str(downsample)
+        # @added 20260227 - Task #5628: Build v5.0.0 and test
+        # changed T to min as per warning in pandas 2.2.3
+        T = '%smin' % str(downsample)
+
         df = pd.DataFrame(metric_timeseries, columns=['date', 'value'])
         df['date'] = pd.to_datetime(df['date'], unit='s')
         datetime_index = pd.DatetimeIndex(df['date'].values)
@@ -129,7 +133,18 @@ def pearson_closest(
         df.drop('date', axis=1, inplace=True)
         mean_resampled_df = df.resample(T, origin='end').mean().bfill()
         mean_resampled_values = mean_resampled_df['value'].to_numpy().tolist()
-        mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Task #5627: v5.0.0 update dependencies
+        # Handle pandas deprecation which results in all timestamps being
+        # returned as 1.  From pandas changelog:
+        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+        # Disallow passing a pandas type to Index.view() (GH 55709)
+        # https://github.com/pandas-dev/pandas/issues/55709
+        #mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+        mean_resampled_df['ts'] = [int(ts.value // 10**9) for ts in mean_resampled_df.index]
+
         mean_resampled_timestamps = mean_resampled_df['ts'].to_numpy().tolist()
         t1 = [[t, mean_resampled_values[index]] for index, t in enumerate(mean_resampled_timestamps)]
         results['timings']['t1_downsample'] = time() - start_t1_downsample
@@ -176,7 +191,18 @@ def pearson_closest(
         df.drop('date', axis=1, inplace=True)
         mean_resampled_df = df.resample(T, origin='end').mean().bfill()
         mean_resampled_values = mean_resampled_df['value'].to_numpy().tolist()
-        mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Task #5627: v5.0.0 update dependencies
+        # Handle pandas deprecation which results in all timestamps being
+        # returned as 1.  From pandas changelog:
+        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+        # Disallow passing a pandas type to Index.view() (GH 55709)
+        # https://github.com/pandas-dev/pandas/issues/55709
+        #mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+        mean_resampled_df['ts'] = [int(ts.value // 10**9) for ts in mean_resampled_df.index]
+
         mean_resampled_timestamps = mean_resampled_df['ts'].to_numpy().tolist()
         t2 = [[t, mean_resampled_values[index]] for index, t in enumerate(mean_resampled_timestamps)]
         results['timings']['t2_downsample'] = time() - start_t2_downsample
