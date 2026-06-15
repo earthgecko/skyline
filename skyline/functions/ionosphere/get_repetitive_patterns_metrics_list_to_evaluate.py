@@ -3,6 +3,7 @@ get_repetitive_patterns_metrics_list_to_evaluate.py
 """
 import logging
 import copy
+
 from time import time
 
 import settings
@@ -13,6 +14,13 @@ from functions.settings.get_external_settings import get_external_settings
 from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
 # @added 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
 from skyline_functions import get_redis_conn_decoded
+
+# @added 20250401 - Feature #5618: ionosphere repetitive patterns - shard_host
+from functions.cluster.is_shard_metric import is_shard_metric
+try:
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
+except:
+    HORIZON_SHARDS = {}
 
 # @modified 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
 # Added parent_namespace
@@ -116,6 +124,20 @@ def get_repetitive_patterns_metrics_list_to_evaluate(current_skyline_app, metric
 
     current_logger.info('%s :: determining which of the %s metrics to include in repetitive pattern learning' % (
         function_str, str(len(metrics))))
+
+    # @added 20250401 - Feature #5618: ionosphere repetitive patterns - shard_host
+    if HORIZON_SHARDS:
+        shard_metrics = []
+        try:
+            # On 2000 metrics took: 0.11422514915466309 seconds
+            shard_metrics = [base_name for base_name in metrics if is_shard_metric(base_name)]
+        except Exception as err:
+            current_logger.error('error :: %s :: determining metrics when filtering on is_shard_metric, err: %s' % (
+                function_str, err))
+        if shard_metrics:
+            metrics = list(shard_metrics)
+            current_logger.info('%s :: determining which of the %s metrics (assigned to this cluster node) to include in repetitive pattern learning' % (
+                function_str, str(len(metrics))))
 
     # @added 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
     # Allow to filter by parent_namespace
@@ -412,6 +434,7 @@ def get_repetitive_patterns_metrics_list_to_evaluate(current_skyline_app, metric
             operation_metrics_count = len(exclude_metrics)
         current_logger.info('%s :: determined %s metrics to %s in repetitive pattern analysis, skipped(%s)' % (
             function_str, str(operation_metrics_count), operation, str(len(skipped))))
+
     if exclude_metrics:
         include_metrics = [metric for metric in include_metrics if metric not in exclude_metrics]
         # @added 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
