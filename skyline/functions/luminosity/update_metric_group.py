@@ -1,5 +1,5 @@
 import logging
-import os
+#import os
 import sys
 from time import time
 import traceback
@@ -139,11 +139,14 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
             logger.error('error :: related_metrics :: update_metric_group :: metric_group_table_meta - %s' % str(err))
 
     if metric_group_to_be_updated:
-        try:
-            connection = engine.connect()
-        except Exception as err:
-            logger.error(traceback.format_exc())
-            logger.error('error :: related_metrics :: update_metric_group :: engine.connect failed to add related_metric_ids - %s' % str(err))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #try:
+        #    connection = engine.connect()
+        #except Exception as err:
+        #    logger.error(traceback.format_exc())
+        #    logger.error('error :: related_metrics :: update_metric_group :: engine.connect failed to add related_metric_ids - %s' % str(err))
 
         # Delete any metrics from the metric_group that are no longer valid
         if len(remove_related_metric_ids) > 0:
@@ -175,7 +178,13 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
                 stmt = metric_group_table.delete().\
                     where(metric_group_table.c.metric_id == metric_id).\
                     where(metric_group_table.c.related_metric_id.in_(remove_related_metric_ids))
-                result = connection.execute(stmt)
+
+                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                result = None
+                with engine.begin() as connection:
+                    result = connection.execute(stmt)
                 if result:
                     updated_metric_group = True
             except Exception as err:
@@ -216,7 +225,13 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
                         shifted_counts=json.dumps(cross_correlation_data['shifted_counts']),
                         avg_shifted_coefficient=cross_correlation_data['avg_shifted_coefficient'],
                         timestamp=timestamp)
-                    result = connection.execute(ins)
+
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(ins)
+                    with engine.begin() as connection:
+                        result = connection.execute(ins)
+
                     if result:
                         updated_metric_group = True
                         if DEBUG:
@@ -240,14 +255,26 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
                 if related_metric_id == metric_id:
                     continue
                 try:
-                    stmt = metric_group_table.update().values(
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = metric_group_table.update().values(
+                    #    avg_coefficient=cross_correlation_data['avg_coefficient'],
+                    #    shifted_counts=json.dumps(cross_correlation_data['shifted_counts']),
+                    #    avg_shifted_coefficient=cross_correlation_data['avg_shifted_coefficient'],
+                    #    timestamp=timestamp).\
+                    #    where(metric_group_table.c.metric_id == metric_id).\
+                    #    where(metric_group_table.c.related_metric_id == related_metric_id)
+                    #connection.execute(stmt)
+                    stmt = metric_group_table.update().\
+                        where(metric_group_table.c.metric_id == metric_id).\
+                        where(metric_group_table.c.related_metric_id == related_metric_id).values(
                         avg_coefficient=cross_correlation_data['avg_coefficient'],
                         shifted_counts=json.dumps(cross_correlation_data['shifted_counts']),
                         avg_shifted_coefficient=cross_correlation_data['avg_shifted_coefficient'],
-                        timestamp=timestamp).\
-                        where(metric_group_table.c.metric_id == metric_id).\
-                        where(metric_group_table.c.related_metric_id == related_metric_id)
-                    connection.execute(stmt)
+                        timestamp=timestamp)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
+
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: related_metrics :: update_metric_group :: failed to update metric_group_table from metric_id: %s, related_metric_id: %s - %s' % (
@@ -277,10 +304,18 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
             current_updated_count = 0
         updated_count = current_updated_count + 1
         try:
-            connection.execute(metric_group_info_table.update(
-                metric_group_info_table.c.metric_id == metric_id).values(
-                related_metrics=related_metrics_count, last_updated=timestamp,
-                updated_count=updated_count))
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection.execute(metric_group_info_table.update(
+            #    metric_group_info_table.c.metric_id == metric_id).values(
+            #    related_metrics=related_metrics_count, last_updated=timestamp,
+            #    updated_count=updated_count))
+            stmt = metric_group_info_table.update().\
+                    where(metric_group_info_table.c.metric_id == metric_id).values(
+                    related_metrics=related_metrics_count, last_updated=timestamp,
+                    updated_count=updated_count)
+            with engine.begin() as connection:
+                connection.execute(stmt)
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: related_metrics :: update_metric_group :: failed to update metric_group_info table record for metric_id: %s - %s' % (
@@ -292,7 +327,12 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
             ins = metric_group_info_table.insert().values(
                 metric_id=int(metric_id), related_metrics=related_metrics_count,
                 last_updated=timestamp)
-            result = connection.execute(ins)
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+
             logger.info('related_metrics :: update_metric_group :: added new record to metric_groups_info table for %s' % (
                 base_name))
         except Exception as err:
@@ -307,11 +347,13 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
         logger.error('error :: related_metrics :: update_metric_group :: failed to get Redis hash aet.metrics_manager.metric_names_with_ids - %s' % str(err))
 
     if metric_group_to_be_updated:
-        try:
-            connection.close()
-        except Exception as err:
-            logger.error(traceback.format_exc())
-            logger.error('error :: related_metrics :: update_metric_group :: connection.close() failed - %s' % str(err))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #try:
+        #    connection.close()
+        #except Exception as err:
+        #    logger.error(traceback.format_exc())
+        #    logger.error('error :: related_metrics :: update_metric_group :: connection.close() failed - %s' % str(err))
 
         related_metric_ids = []
         for related_metric_id in list(current_related_metric_ids + add_related_metric_ids):
