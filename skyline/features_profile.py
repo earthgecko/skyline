@@ -379,6 +379,14 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+    if 'nan' in timeseries_array_str:
+        try:
+            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+        except Exception as err:
+            current_logger.error('error :: %s :: failed to replace nan with None, err: %s' % (
+                log_context, err))
+
     del raw_timeseries
     timeseries = literal_eval(timeseries_array_str)
 
@@ -390,7 +398,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
             new_datapoint = [float(datapoint[0]), float(datapoint[1])]
             converted.append(new_datapoint)
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             continue
 
@@ -724,6 +732,10 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
     t_fname_out = fname_in + '.features.transposed.csv'
     try:
         df_t.to_csv(t_fname_out)
+        # @added 20260426 - Task #5713: Test CentOS Stream 10
+        #                   Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        # pandas 3.0.0, set permissions
+        os.chmod(t_fname_out, mode=0o644)
     except:
         trace = traceback.format_exc()
         current_logger.debug(trace)

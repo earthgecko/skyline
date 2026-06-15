@@ -112,7 +112,10 @@ def plot_fp_match(
             ax.set_facecolor('white')
         else:
             ax.set_axis_bgcolor('white')
-        datetimes = [dt.datetime.utcfromtimestamp(int(item[0])) for item in not_anomalous_timeseries]
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #datetimes = [dt.datetime.utcfromtimestamp(int(item[0])) for item in not_anomalous_timeseries]
+        datetimes = [dt.datetime.fromtimestamp(int(item[0]), tz=dt.timezone.utc) for item in not_anomalous_timeseries]
+
         plt.xticks(rotation=0, horizontalalignment='center')
         # if full_duration == FULL_DURATION:
         #     xfmt = DateFormatter('%H:%M:%S')
@@ -159,7 +162,9 @@ def plot_fp_match(
         # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
         #                      Task #4778: v4.0.0 - update dependencies
         # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
-        if matplotlib_version < '3.7.0':
+        # @modified 20250610 - Task #5627: v5.0.0 update dependencies
+        #if matplotlib_version < '3.7.0':
+        if matplotlib_version == 'deprecated':
             ax.grid(b=True, which='both', axis='both', color='lightgray',
                     linestyle='solid', alpha=0.5, linewidth=0.6)
         else:
