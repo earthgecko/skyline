@@ -482,6 +482,12 @@ def ks_test(timeseries, use_full_duration):
         if reference.size < 20 or probe.size < 20:
             return False
 
+        # @added 20250623 - Bug #5635: statsmodels - adfuller handle constant
+        #                   Bug #5593: statsmodels adfuller error in Analyzer
+        # Handle ValueError: Invalid input, x is constant
+        if np.all(reference == reference[0]):
+            return False
+
         ks_d, ks_p_value = scipy.stats.ks_2samp(reference, probe)
 
         if ks_p_value < 0.05 and ks_d > 0.5:
@@ -667,6 +673,12 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 
 def run_selected_batch_algorithm(
         timeseries, metric_name, run_negatives_present,
+        # @modified 20250321 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        custom_algorithm_only,
+        # @modified 20250326 - Feature #5611: custom_algorithm_only
+        # Added derivative_metrics for custom_algorithm_only
+        derivative_metrics=[],
         # @added 20240607 - Feature #5368: analyzer_batch - reprocess
         # Allow oneshot analysis for reprocessing added custom_algorithm_overrides
         custom_algorithm_overrides={}):
@@ -714,6 +726,18 @@ def run_selected_batch_algorithm(
             logger.debug('debug :: algorithms_batch :: %s - timeseries boring' % (
                 metric_name))
         raise Boring()
+
+    # @added 20250221 - Feature #5600: analyzer - skip less than full_duration
+    # @modified 20250212 - Feature #5600: analyzer - skip less than full_duration
+    # This is a BIG NO but left here to show that it is a BIG NO
+    #if len(timeseries) > 2:
+    #    first_required_timestamp = int(time()) - (FULL_DURATION - 600)
+    #    if timeseries[0][0] < first_required_timestamp:
+    #        if LOCAL_DEBUG:
+    #            tn = int(time())
+    #            logger.debug('debug :: algorithms_batch :: %s - timeseries has insufficient duration for analysis, first_timestamp: %s' % (
+    #                metric_name, str(tn), str(timeseries[0][0])))
+    #        raise TooShort()
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
     # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
@@ -773,6 +797,12 @@ def run_selected_batch_algorithm(
     if metric_name.startswith('labelled_metrics.'):
         base_name = str(metric_name)
 
+    # @added 20250321 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    custom_algorithm_only_run = False
+    if custom_algorithm_only == 'custom_algorithm_only':
+        custom_algorithm_only_run = True
+
     custom_algorithms_to_run = {}
 
     if CUSTOM_ALGORITHMS:
@@ -797,6 +827,34 @@ def run_selected_batch_algorithm(
             if custom_run_3sigma_algorithms is False:
                 run_3sigma_algorithms = False
                 break
+
+        # @added 20250321 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        if not custom_algorithm_only_run:
+            custom_algorithms_to_remove = []
+            for custom_algorithm in custom_algorithms_to_run:
+                custom_algorithm_only = False
+                try:
+                    custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['custom_algorithm_only']
+                except:
+                    custom_algorithm_only = False
+                if not custom_algorithm_only:
+                    try:
+                        custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['custom_algorithm_only']
+                    except:
+                        custom_algorithm_only = False
+                if custom_algorithm_only:
+                    custom_algorithms_to_remove.append(custom_algorithm)
+            if custom_algorithms_to_remove:
+                for custom_algorithm in custom_algorithms_to_remove:
+                    del custom_algorithms_to_run[custom_algorithm]
+        if custom_algorithm_only_run:
+            run_3sigma_algorithms = False
+        # @added 20250326 - Feature #5611: custom_algorithm_only
+        # Added derivative_metrics for custom_algorithm_only
+        if derivative_metrics and custom_algorithm_only_run:
+            custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['derivative_metrics'] = derivative_metrics
+
         for custom_algorithm in custom_algorithms_to_run:
             custom_consensus = None
             try:
@@ -891,6 +949,12 @@ def run_selected_batch_algorithm(
                         return_anomalies = False
                     if return_anomalies:
                         return_results = True
+
+                    if not return_results:
+                        try:
+                            return_results = custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['return_results']
+                        except:
+                            return_results = False
 
                     try:
                         # @modified 20240523 - Feature #5360: custom_algorithms - sigma_macd
