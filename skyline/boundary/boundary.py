@@ -49,7 +49,7 @@ from skyline_functions import (
     # @added 20191025 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200506 - Feature #3532: Sort all time series
     sort_timeseries,
@@ -154,9 +154,9 @@ class Boundary(Thread):
         # @added 20191022 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
 #        if settings.REDIS_PASSWORD:
-#            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 #        else:
-#            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -344,6 +344,10 @@ class Boundary(Thread):
         zero_fill_metrics = []
         try:
             zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+            # @added 20251027 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+            # Use a set
+            if zero_fill_metrics:
+                zero_fill_metrics = set(zero_fill_metrics)
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: zero_fill_metrics_list failed - %s' % err)
@@ -806,7 +810,7 @@ class Boundary(Thread):
                     )
                     # Dump the the timeseries data to a file
                     # @modified 20170913 - Task #2160: Test skyline with bandit
-                    # Added nosec to exclude from bandit tests
+                    # Added "nosec" to exclude from bandit tests
                     # @modified 20230109 - Task #4778: v4.0.0 - update dependencies
                     # timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm  # nosec
                     timeseries_dump_dir = '%s/boundary/%s' % (settings.SKYLINE_TMP_DIR, algorithm)
@@ -1792,7 +1796,9 @@ class Boundary(Thread):
                         anomaly_cache_key = 'anomaly_seen.%s' % (base_name)
                     times_seen = 0
                     try:
-                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                        # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                        #self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, int(times_seen))
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.debug('debug :: redis - anomaly_cache_key set OK - %s' % str(anomaly_cache_key))
                     except:
@@ -1980,7 +1986,9 @@ class Boundary(Thread):
                                         times_seen = 1
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.debug('debug :: redis setex anomaly_cache_key - ' + str(anomaly_cache_key))
-                                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                        # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                                        #self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, int(times_seen))
                                         logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
                                     except Exception as e:
                                         logger.error('error :: redis setex failed :: %s' % str(anomaly_cache_key))
@@ -1995,12 +2003,16 @@ class Boundary(Thread):
                                 anomaly_cache_key_count_set = False
 
                             if anomaly_cache_key_count_set:
-                                unpacker = Unpacker(use_list=False)
-                                unpacker.feed(anomaly_cache_key_count)
-                                raw_times_seen = list(unpacker)
-                                times_seen = int(raw_times_seen[0]) + 1
+                                # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                                #unpacker = Unpacker(use_list=False)
+                                #unpacker.feed(anomaly_cache_key_count)
+                                #raw_times_seen = list(unpacker)
+                                #times_seen = int(raw_times_seen[0]) + 1
+                                times_seen = int(anomaly_cache_key_count) + 1
                                 try:
-                                    self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                    # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                                    #self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                    self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, int(times_seen))
                                     logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
                                 except:
                                     times_seen = 1
@@ -2142,10 +2154,12 @@ class Boundary(Thread):
                                         else:
                                             if ENABLE_BOUNDARY_DEBUG:
                                                 logger.debug('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
-                                            unpacker = Unpacker(use_list=False)
-                                            unpacker.feed(alerter_sent_count_key_data)
-                                            raw_alerts_sent = list(unpacker)
-                                            alerts_sent = int(raw_alerts_sent[0])
+                                            # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                                            #unpacker = Unpacker(use_list=False)
+                                            #unpacker.feed(alerter_sent_count_key_data)
+                                            #raw_alerts_sent = list(unpacker)
+                                            #alerts_sent = int(raw_alerts_sent[0])
+                                            alerts_sent = int(alerter_sent_count_key_data)
                                             if ENABLE_BOUNDARY_DEBUG:
                                                 logger.info("debug :: alerter %s alerts sent %s " % (str(alerter), str(alerts_sent)))
                                     except:
@@ -2336,7 +2350,9 @@ class Boundary(Thread):
                                     try:
                                         # alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
                                         new_alerts_sent = int(alerts_sent) + 1
-                                        self.redis_conn.setex(alerter_sent_count_key, alerter_expiration_time, packb(int(new_alerts_sent)))
+                                        # @modified 20260122 - Task #5701: Disable msgpack on small keys
+                                        #self.redis_conn.setex(alerter_sent_count_key, alerter_expiration_time, packb(int(new_alerts_sent)))            
+                                        self.redis_conn.setex(alerter_sent_count_key, alerter_expiration_time, int(new_alerts_sent))
                                         logger.info('set %s - %s' % (alerter_sent_count_key, str(new_alerts_sent)))
                                     except Exception as err:
                                         logger.error('error :: failed to set Redis key %s, err:%s' % (alerter_sent_count_key, err))
