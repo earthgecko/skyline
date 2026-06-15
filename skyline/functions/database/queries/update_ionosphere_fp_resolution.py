@@ -58,12 +58,20 @@ def update_ionosphere_fp_resolution(current_skyline_app, fp_id, resolution):
         return updated
 
     try:
-        connection = engine.connect()
-        stmt = ionosphere_table.update().values(
-            resolution=int(resolution)).\
-            where(ionosphere_table.c.id == int(fp_id))
-        result = connection.execute(stmt)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #stmt = ionosphere_table.update().values(
+        #    resolution=int(resolution)).\
+        #    where(ionosphere_table.c.id == int(fp_id))
+        #result = connection.execute(stmt)
+        #connection.close()
+        stmt = ionosphere_table.update().\
+            where(ionosphere_table.c.id == int(fp_id)).values(
+            resolution=int(resolution))
+        with engine.begin() as connection:
+            connection.execute(stmt)
+
         current_logger.info('%s :: updated fp_id: %s with resolution: %s' % (
             function_str, str(fp_id), str(resolution)))
         updated = True
