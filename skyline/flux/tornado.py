@@ -6,6 +6,7 @@ flux/tornado provides pre-loaded njit algorithms such as stump.
 import sys
 import os
 import gzip
+from contextlib import nullcontext
 from time import time, sleep
 import json
 import traceback
@@ -25,9 +26,85 @@ if True:
     import settings
     import flux
     from skyline_functions import get_redis_conn_decoded
-    from tornadoes.tornado_stump import tornado_stump
-    # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
-    from tornadoes.tornado_laoccfdlpnc import tornado_laoccfdlpnc
+
+    # @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+    # Determine what tornadoes to load based on the tornado algorithms
+    # used in CUSTOM_ALGORITHMS and load the others as nullcontext
+    try:
+        CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+    except:
+        CUSTOM_ALGORITHMS = {}
+
+    # @added 20260422 - Feature #5665: custom_algorithm - mirage_nirvana
+    # stumpy is required by many
+    try:
+        from tornadoes.tornado_stump import tornado_stump
+    except:
+        tornado_stump = nullcontext()
+
+    # @added 20260422 - Feature #5563: mirage_vortex - use tornado
+    #                   Feature #5198: flux - tornado
+    #                   Feature #4734: mirage_vortex
+    # Handle all algortihms defined in VORTEX_ALGORITHMS as well
+    try:
+        VORTEX_ALGORITHMS = settings.VORTEX_ALGORITHMS
+    except Exception as outer_err:
+        VORTEX_ALGORITHMS = {}
+    tornado_algorithms = []
+    for key in VORTEX_ALGORITHMS.keys():
+        if key != 'default':
+            tornado_algorithms.append(key)
+    for key in CUSTOM_ALGORITHMS.keys():
+        if key != 'default':
+            tornado_algorithms.append(key)
+    tornado_mirages_nirvana_matrixprofile = nullcontext()
+    tornado_mirage_nirvana = nullcontext()
+    tornado_laoccfdlpnc = nullcontext()
+    # @added 20260613 - Feature #5751: custom_algorithm - skyline_fast
+    tornado_skyline_fast = nullcontext()
+
+    # @modified 20260422 - Feature #5563: mirage_vortex - use tornado
+    #                      Feature #5198: flux - tornado
+    #                      Feature #4734: mirage_vortex
+    # Handle all algortihms defined in VORTEX_ALGORITHMS as well
+    #for c_algo in CUSTOM_ALGORITHMS.keys():
+    for c_algo in tornado_algorithms:
+
+        # @modified 20260422 - Feature #5665: custom_algorithm - mirage_nirvana
+        # stumpy is required by many
+        #if c_algo == 'skyline_matrixprofile':
+        #    from tornadoes.tornado_stump import tornado_stump
+        #else:
+        #    tornado_stump = nullcontext()
+
+        if c_algo == 'mirages_nirvana_matrixprofile':
+            try:
+                from tornadoes.tornado_mirages_nirvana_matrixprofile import tornado_mirages_nirvana_matrixprofile
+            except:
+                tornado_mirages_nirvana_matrixprofile = nullcontext()
+        #else:
+        #    tornado_mirages_nirvana_matrixprofile = nullcontext()
+        if 'laoccfdlpnc' in c_algo:
+            try:
+                # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
+                from tornadoes.tornado_laoccfdlpnc import tornado_laoccfdlpnc
+            except:
+                tornado_laoccfdlpnc = nullcontext()
+        if c_algo == 'mirage_nirvana':
+            # @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+            #                   Feature #4994: custom_algorithm - mirages
+            try:
+                from tornadoes.tornado_mirage_nirvana import tornado_mirage_nirvana
+            except:
+                tornado_mirage_nirvana = nullcontext()
+        #else:
+        #    tornado_mirage_nirvana = nullcontext()
+        # @added 20260613 - Feature #5751: custom_algorithm - skyline_fast
+        if c_algo == 'skyline_fast':
+            try:
+                from tornadoes.tornado_skyline_fast import tornado_skyline_fast
+            except:
+                tornado_skyline_fast = nullcontext()
 
 FLUX_SELF_API_KEY = settings.FLUX_SELF_API_KEY
 
@@ -199,9 +276,17 @@ class TornadoPost(object):
 
             profile = []
             run_stump = False
+            run_mirages_nirvana_matrixprofile = False
 
             # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
             run_laoccfdlpnc = False
+
+            # @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+            #                   Feature #4994: custom_algorithm - mirages
+            run_mirage_nirvana = False
+
+            # @added 20260613 - Feature #5751: custom_algorithm - skyline_fast
+            run_skyline_fast = False
 
             custom_algorithm_modules = ['stumpy','stump','stumpy.stamp','custom_algorithm_sources.stumpy','custom_algorithm_sources.stumpy.stump']
             if 'algorithm' in postData:
@@ -221,6 +306,43 @@ class TornadoPost(object):
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: tornado :: tornado_stump failed, err: %s' % (
+                            err))
+                        resp.status = falcon.HTTP_500
+                        return
+                    algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                    logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
+                        postData['algorithm'], str(algorithm_modules_loaded)))
+
+                if postData['algorithm'] == 'mirages_nirvana_matrixprofile':
+
+                    if isinstance(tornado_mirages_nirvana_matrixprofile, nullcontext):
+                        logger.error('error :: mirages_nirvana_matrixprofile is not available')
+                        body = {"code": 400, "message": 'mirages_nirvana_matrixprofile is not available'}
+                        resp.text = json.dumps(body)
+                        resp.status = falcon.HTTP_400
+                        return
+
+                    try:
+                        algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                        logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (before): %s' % (
+                            postData['algorithm'], str(algorithm_modules_loaded)))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: determine and log algorithm_modules_loaded, err: %s' % (
+                            err))
+                    run_mirages_nirvana_matrixprofile = True
+                    response_dict = {
+                        'anomalous': None,
+                        'anomalyScore': None,
+                        'results': None,
+                    }
+                    try:
+                        response_dict = tornado_mirages_nirvana_matrixprofile(postData)
+                        logger.info('tornado :: request_id: %s, tornado_mirages_nirvana_matrixprofile run' % (
+                            request_id))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: tornado_mirages_nirvana_matrixprofile failed, err: %s' % (
                             err))
                         resp.status = falcon.HTTP_500
                         return
@@ -258,6 +380,82 @@ class TornadoPost(object):
                     logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
                         postData['algorithm'], str(algorithm_modules_loaded)))
 
+                # @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+                #                   Feature #4994: custom_algorithm - mirages
+                if postData['algorithm'] == 'mirage_nirvana':
+
+                    if isinstance(tornado_mirage_nirvana, nullcontext):
+                        logger.error('error :: mirage_nirvana is not available')
+                        body = {"code": 400, "message": 'mirage_nirvana is not available'}
+                        resp.text = json.dumps(body)
+                        resp.status = falcon.HTTP_400
+                        return
+
+                    try:
+                        algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                        logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (before): %s' % (
+                            postData['algorithm'], str(algorithm_modules_loaded)))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: determine and log algorithm_modules_loaded, err: %s' % (
+                            err))
+                    run_mirage_nirvana = True
+                    response_dict = {
+                        'anomalous': None,
+                        'anomalyScore': None,
+                        'results': None,
+                    }
+                    try:
+                        response_dict = tornado_mirage_nirvana(postData)
+                        logger.info('tornado :: request_id: %s, tornado_mirage_nirvana run' % (
+                            request_id))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: tornado_mirage_nirvana failed, err: %s' % (
+                            err))
+                        resp.status = falcon.HTTP_500
+                        return
+                    algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                    logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
+                        postData['algorithm'], str(algorithm_modules_loaded)))
+
+                # @added 20260613 - Feature #5751: custom_algorithm - skyline_fast
+                if postData['algorithm'] == 'skyline_fast':
+                    if isinstance(tornado_skyline_fast, nullcontext):
+                        logger.error('error :: skyline_fast is not available')
+                        body = {"code": 400, "message": 'skyline_fast is not available'}
+                        resp.text = json.dumps(body)
+                        resp.status = falcon.HTTP_400
+                        return
+                    try:
+                        algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                        logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (before): %s' % (
+                            postData['algorithm'], str(algorithm_modules_loaded)))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: determine and log algorithm_modules_loaded, err: %s' % (
+                            err))
+                    run_skyline_fast = True
+                    response_dict = {
+                        'anomalous': None,
+                        'anomalyScore': None,
+                        'results': None,
+                    }
+                    try:
+                        response_dict = tornado_skyline_fast(postData)
+                        logger.info('tornado :: request_id: %s, tornado_skyline_fast run' % (
+                            request_id))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: tornado_skyline_fast failed, err: %s' % (
+                            err))
+                        resp.status = falcon.HTTP_500
+                        return
+                    algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                    logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
+                        postData['algorithm'], str(algorithm_modules_loaded)))
+
+
             request_time = round((timer() - start_request_timer), 6)
             timings_dict['request_time'] = round((timer() - start_request_timer), 6)
             if TIMINGS:
@@ -270,6 +468,26 @@ class TornadoPost(object):
                 resp.status = falcon.HTTP_200
                 return
 
+            if run_mirages_nirvana_matrixprofile:
+                try:
+                    body = {
+                        "status": {"code": 200, "request_id": request_id, "request_time": request_time},
+                        "data": {
+                            "anomalous": response_dict['anomalous'],
+                            "anomalyScore": response_dict['anomalyScore'],
+                            "results": response_dict['results'],
+                        }
+                    }
+                    resp.text = json.dumps(body)
+                    logger.info('tornado :: mirages_nirvana_matrixprofile - anomalous: %s, base_name: %s' % (
+                        str(response_dict['anomalous']), postData['base_name']))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: tornado :: failed to create response from mirages_nirvana_matrixprofile, err: %s' % (
+                        err))
+                resp.status = falcon.HTTP_200
+                return
+
             # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
             if run_laoccfdlpnc:
                 try:
@@ -278,12 +496,55 @@ class TornadoPost(object):
                         "data": response_dict,
                     }
                     resp.text = json.dumps(body)
+                    logger.info('tornado :: laoccfdlpnc - anomalous: %s, base_name: %s' % (
+                        str(response_dict['anomalous']), postData['base_name']))
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: tornado :: failed to create response from laoccfdlpnc, err: %s' % (
                         err))
-                logger.info('tornado :: laoccfdlpnc - anomalous: %s, base_name: %s' % (
-                    str(response_dict['anomalous']), postData['base_name']))
+                resp.status = falcon.HTTP_200
+                return
+
+            # @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+            #                   Feature #4994: custom_algorithm - mirages
+            if run_mirage_nirvana:
+                try:
+                    body = {
+                        "status": {"code": 200, "request_id": request_id, "request_time": request_time},
+                        "data": {
+                            "anomalous": response_dict['anomalous'],
+                            "anomalyScore": response_dict['anomalyScore'],
+                            "results": response_dict['results'],
+                        }
+                    }
+                    resp.text = json.dumps(body)
+                    logger.info('tornado :: mirage_nirvana - anomalous: %s, base_name: %s' % (
+                        str(response_dict['anomalous']), postData['base_name']))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: tornado :: failed to create response from mirage_nirvana, err: %s' % (
+                        err))
+                resp.status = falcon.HTTP_200
+                return
+
+            # @added 20260613 - Feature #5751: custom_algorithm - skyline_fast
+            if run_skyline_fast:
+                try:
+                    body = {
+                        "status": {"code": 200, "request_id": request_id, "request_time": request_time},
+                        "data": {
+                            "anomalous": response_dict['anomalous'],
+                            "anomalyScore": response_dict['anomalyScore'],
+                            "results": response_dict['results'],
+                        }
+                    }
+                    resp.text = json.dumps(body)
+                    logger.info('tornado :: skyline_fast - anomalous: %s, base_name: %s' % (
+                        str(response_dict['anomalous']), postData['base_name']))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: tornado :: failed to create response from skyline_fast, err: %s' % (
+                        err))
                 resp.status = falcon.HTTP_200
                 return
 
