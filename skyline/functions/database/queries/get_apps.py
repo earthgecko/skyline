@@ -6,7 +6,9 @@ import traceback
 
 # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import select, Table, MetaData
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, Table, MetaData, text
 
 from database import get_engine, engine_disposal
 
@@ -33,12 +35,18 @@ def get_apps(current_skyline_app):
     apps_list = []
     if engine:
         try:
-            connection = engine.connect()
-            stmt = 'SELECT DISTINCT(app) FROM apps'
-            result = connection.execute(stmt)
-            for row in result:
+            #connection = engine.connect()
+            stmt = text('SELECT DISTINCT(app) FROM apps')
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 apps_list.append(row['app'])
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_apps :: failed to build apps_list - %s' % str(err))
@@ -50,24 +58,33 @@ def get_apps(current_skyline_app):
             # Use the MetaData autoload rather than string-based query construction
             try:
                 use_table_meta = MetaData()
-                use_table = Table('apps', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('apps', use_table_meta, autoload_with=engine)
             except Exception as err:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_apps :: use_table Table failed on apps table - %s' % (
                     err))
 
-            connection = engine.connect()
-            for app in apps_list:
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            with engine.connect() as connection:
+                for app in apps_list:
 
-                # @modified 20230106  - Task #4022: Move mysql_select calls to SQLAlchemy
-                # stmt = 'SELECT id FROM apps WHERE app=\'%s\'' % app
-                stmt = select(use_table.c.id).where(use_table.c.app == app)
+                    # @modified 20230106  - Task #4022: Move mysql_select calls to SQLAlchemy
+                    # stmt = 'SELECT id FROM apps WHERE app=\'%s\'' % app
+                    stmt = select(use_table.c.id).where(use_table.c.app == app)
 
-                result = connection.execute(stmt)
-                for row in result:
-                    apps[app] = row['id']
-                    break
-            connection.close()
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
+                        apps[app] = row['id']
+                        break
+                #connection.close()
+
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_apps :: failed to build apps - %s' % str(err))
