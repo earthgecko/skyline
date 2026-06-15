@@ -44,7 +44,10 @@ def get_new_metrics(current_skyline_app, from_timestamp=None):
             raise
         return new_metrics, fail_msg, trace
 
-    current_time = datetime.datetime.utcnow()
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #current_time = datetime.datetime.utcnow()
+    current_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
     full_duration_period = current_time - datetime.timedelta(seconds=FULL_DURATION)
 
     # @added 20230510 - Feature #4902: Prevent training on metrics newer than 7 days
@@ -54,12 +57,22 @@ def get_new_metrics(current_skyline_app, from_timestamp=None):
         full_duration_period = current_time - datetime.timedelta(seconds=from_seconds)
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table.c.metric, metrics_table.c.id]).where(metrics_table.c.created_timestamp > full_duration_period)
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table.c.metric, metrics_table.c.id]).where(metrics_table.c.created_timestamp > full_duration_period)
+        stmt = select(metrics_table.c.metric, metrics_table.c.id).where(metrics_table.c.created_timestamp > full_duration_period)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             new_metrics[row['metric']] = row['id']
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined %s new metrics from the db' % (
             function_str, str(len(new_metrics))))
     except Exception as e:
