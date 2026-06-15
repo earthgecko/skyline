@@ -17,7 +17,13 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 from skyline_functions import get_redis_conn_decoded
 
 
-def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces': []}):
+# @modified 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+# Make a single DB query for all the metrics and pass them to
+# get_metric_group_info as metric_ids_with_names
+#def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces': []}):
+def get_metric_group_info(
+        current_skyline_app, metric_id=0, metric_ids_with_names={},
+        params={'namespaces': []}):
     """
     Returns the metrics_groups table as dict
     """
@@ -47,23 +53,45 @@ def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces'
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_metric_group_info :: metric_groups_info_table_meta - %s' % str(err))
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if metric_id:
-                stmt = select([metric_groups_info_table]).where(metric_groups_info_table.c.metric_id == metric_id)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metric_groups_info_table]).where(metric_groups_info_table.c.metric_id == metric_id)
+                stmt = select(metric_groups_info_table).where(metric_groups_info_table.c.metric_id == metric_id)
             else:
-                stmt = select([metric_groups_info_table])
-            results = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metric_groups_info_table])
+                stmt = select(metric_groups_info_table)
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 group_metric_id = row['metric_id']
                 if row['related_metrics'] > 0:
                     metric_groups_info[group_metric_id] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_metric_group_info :: failed to build metric_groups_info dict - %s' % str(err))
 
     ids_with_base_names = {}
-    if not metric_id:
+
+    # @added 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+    # Make a single DB query for all the metrics and pass them to
+    # get_metric_group_info as metric_ids_with_names
+    if metric_ids_with_names:
+        ids_with_base_names = metric_ids_with_names
+
+    # @modified 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+    # Only call if no metric_ids_with_names
+    #if not metric_id:
+    if not metric_id and not ids_with_base_names:
         try:
             ids_with_base_names = get_metric_ids_and_base_names(current_skyline_app)
         except Exception as err:
