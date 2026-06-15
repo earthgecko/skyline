@@ -21,7 +21,8 @@ The requirements are:
   that is being populated with metric data from telegraf, sensu, prometheus
   remote_storage_adapter, et al or whatever your preferred metric collector is.
   Skyline use Graphite and/or VictoriaMetrics for long term time series
-  database.  Graphite and/or VictoriaMetrics can run on the Skyline instance.
+  database.  Graphite and/or VictoriaMetrics can run on the Skyline instance
+  with small to medium metric populations (< 5000).
 - A slack account, although optional, almost **all** of Skyline's messaging is
   done via slack, along with all the links and functionality to train metrics.
   A channel and bot in a free-tier slack account is sufficient.
