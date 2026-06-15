@@ -53,12 +53,22 @@ def get_untrained_metrics(current_skyline_app, log=True):
         return False, fail_msg, trace
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table.c.metric]).where(metrics_table.c.ionosphere_enabled == 0)
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table.c.metric]).where(metrics_table.c.ionosphere_enabled == 0)
+        stmt = select(metrics_table.c.metric).where(metrics_table.c.ionosphere_enabled == 0)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             untrained_metrics.append(row['metric'])
-        connection.close()
+        #connection.close()
         if log:
             current_logger.info('%s :: determined %s untrained metrics' % (
                 function_str, str(len(untrained_metrics))))
