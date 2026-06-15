@@ -5,7 +5,7 @@ import logging
 import traceback
 from time import time
 
-from sqlalchemy.sql import select
+#from sqlalchemy.sql import select
 
 from database import get_engine, engine_disposal, metrics_table_meta
 
@@ -54,14 +54,23 @@ def set_metric_ids_as_active(current_skyline_app, metric_ids):
         return set_metrics_as_active_count
 
     try:
-        connection = engine.connect()
-        stmt = metrics_table.update().values(
-            inactive=0, inactive_at=int(time())).\
-            where(metrics_table.c.id.in_(metric_ids))
-        connection.execute(stmt)
-        result = connection.execute(stmt)
-        set_metrics_as_active_count = int(result.rowcount)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #ins = metrics_table.update().values(
+        #    inactive=0, inactive_at=int(time())).\
+        #    where(metrics_table.c.id.in_(metric_ids))
+        #connection.execute(stmt)
+        #result = connection.execute(stmt)
+        #set_metrics_as_active_count = int(result.rowcount)
+        #connection.close()
+        ins = metrics_table.update().\
+            where(metrics_table.c.id.in_(metric_ids)).values(
+            inactive=0, inactive_at=int(time()))
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            set_metrics_as_active_count = int(result.rowcount)
+
     except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
