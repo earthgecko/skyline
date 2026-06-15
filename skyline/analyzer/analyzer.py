@@ -50,7 +50,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200413 - Feature #3486: analyzer_batch
     #                   Feature #3480: batch_processing
@@ -108,10 +108,13 @@ from functions.redis.redis_rename_key import redis_rename_key
 #                   Feature #5352: vista - bigquery
 from functions.settings.get_batch_processing_namespaces import get_batch_processing_namespaces
 
+settings_warnings = []
+
 try:
     send_algorithm_run_metrics = settings.ENABLE_ALGORITHM_RUN_METRICS
-except:
+except Exception as err:
     send_algorithm_run_metrics = False
+    settings_warnings.append('warning :: SERVER_METRIC_PATH is not defined in settings.py, err: %s' % err)
 if send_algorithm_run_metrics:
     from algorithms import determine_array_median
 
@@ -133,14 +136,16 @@ try:
     SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
     if SERVER_METRIC_PATH == '.':
         SERVER_METRIC_PATH = ''
-except:
+except Exception as err:
     SERVER_METRIC_PATH = ''
+    settings_warnings.append('warning :: SERVER_METRIC_PATH is not defined in settings.py, err: %s' % err)
 
 try:
     # @modified 20200606 - Bug #3572: Apply list to settings imports
     DO_NOT_ALERT_ON_STALE_METRICS = list(settings.DO_NOT_ALERT_ON_STALE_METRICS)
-except:
+except Exception as err:
     DO_NOT_ALERT_ON_STALE_METRICS = []
+    settings_warnings.append('warning :: DO_NOT_ALERT_ON_STALE_METRICS is not defined in settings.py, err: %s' % err)
 
 # @modified 20190524 - Feature #2882: Mirage - periodic_check
 #                      Branch #3002: docker
@@ -152,67 +157,79 @@ except:
 try:
     # @modified 20200606 - Bug #3572: Apply list to settings imports
     MIRAGE_PERIODIC_CHECK = list(settings.MIRAGE_PERIODIC_CHECK)
-except:
+except Exception as err:
     MIRAGE_PERIODIC_CHECK = False
+    settings_warnings.append('warning :: MIRAGE_PERIODIC_CHECK is not defined in settings.py, err: %s' % err)
 try:
     MIRAGE_PERIODIC_CHECK_INTERVAL = settings.MIRAGE_PERIODIC_CHECK_INTERVAL
-except:
+except Exception as err:
     MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+    settings_warnings.append('warning :: MIRAGE_PERIODIC_CHECK_INTERVAL is not defined in settings.py, err: %s' % err)
+
 # @added 20200505 - Feature #2882: Mirage - periodic_check
 # Surface this once
 try:
     # @modified 20200606 - Bug #3572: Apply list to settings imports
     mirage_periodic_check_namespaces = list(settings.MIRAGE_PERIODIC_CHECK_NAMESPACES)
-except:
+except Exception as err:
     mirage_periodic_check_namespaces = []
+    settings_warnings.append('warning :: MIRAGE_PERIODIC_CHECK_NAMESPACES is not defined in settings.py, err: %s' % err)
 
 # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
 try:
     ANALYZER_ENABLED = settings.ANALYZER_ENABLED
     logger.info('ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
-except:
+except Exception as err:
     ANALYZER_ENABLED = True
     logger.info('warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
 
 try:
     ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
-except:
+except Exception as err:
     ALERT_ON_STALE_METRICS = False
+    settings_warnings.append('warning :: ALERT_ON_STALE_METRICS is not defined in settings.py, err: %s' % err)
 
 # @added 20200117 - Feature #3400: Identify air gaps in the metric data
 try:
     from settings import IDENTIFY_AIRGAPS
-except:
+except Exception as err:
     IDENTIFY_AIRGAPS = False
+    settings_warnings.append('warning :: IDENTIFY_AIRGAPS is not defined in settings.py, err: %s' % err)
 try:
     from settings import MAX_AIRGAP_PERIOD
-except:
+except Exception as err:
     MAX_AIRGAP_PERIOD = int(3600 * 6)
+    settings_warnings.append('warning :: MAX_AIRGAP_PERIOD is not defined in settings.py, err: %s' % err)
 
 # @added 20200214 - Bug #3448: Repeated airgapped_metrics
 #                   Feature #3400: Identify air gaps in the metric data
 try:
     from settings import IDENTIFY_UNORDERED_TIMESERIES
-except:
+except Exception as err:
     IDENTIFY_UNORDERED_TIMESERIES = False
+    settings_warnings.append('warning :: IDENTIFY_UNORDERED_TIMESERIES is not defined in settings.py, err: %s' % err)
 
 # @added 20200411 - Feature #3480: batch_processing
 try:
     from settings import BATCH_PROCESSING
-except:
+except Exception as err:
     BATCH_PROCESSING = None
+    settings_warnings.append('warning :: BATCH_PROCESSING is not defined in settings.py, err: %s' % err)
+
 try:
     # @modified 20200606 - Bug #3572: Apply list to settings imports
     # from settings import BATCH_PROCESSING_NAMESPACES
     BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
-except:
+except Exception as err:
     BATCH_PROCESSING_NAMESPACES = []
+    settings_warnings.append('warning :: BATCH_PROCESSING_NAMESPACES is not defined in settings.py, err: %s' % err)
 # @added 20200414 - Feature #3486: analyzer_batch
 #                   Feature #3480: batch_processing
 try:
     from settings import BATCH_PROCESSING_DEBUG
-except:
+except Exception as err:
     BATCH_PROCESSING_DEBUG = None
+    settings_warnings.append('warning :: BATCH_PROCESSING_DEBUG is not defined in settings.py, err: %s' % err)
 
 # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
 # This was implemented to allow a busy analyzer to offload low priority metrics
@@ -220,8 +237,9 @@ except:
 # actually.  Being left in as may be workable with a different logic.
 try:
     ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = settings.ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
-except:
+except Exception as err:
     ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = False
+    settings_warnings.append('warning :: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED is not defined in settings.py, err: %s' % err)
 # Always disable until refactored to work more efficiently if possible
 ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = False
 
@@ -233,8 +251,10 @@ if IDENTIFY_AIRGAPS:
         # @modified 20200606 - Bug #3572: Apply list to settings imports
         # from settings import CHECK_AIRGAPS
         CHECK_AIRGAPS = list(settings.CHECK_AIRGAPS)
-    except:
+    except Exception as err:
         CHECK_AIRGAPS = []
+        settings_warnings.append('warning :: CHECK_AIRGAPS is not defined in settings.py, err: %s' % err)
+
     if CHECK_AIRGAPS:
         from skyline_functions import is_check_airgap_metric
 
@@ -245,24 +265,27 @@ try:
     # @modified 20200606 - Bug #3572: Apply list to settings imports
     # from settings import KNOWN_NEGATIVE_METRICS
     KNOWN_NEGATIVE_METRICS = list(settings.KNOWN_NEGATIVE_METRICS)
-except:
+except Exception as err:
     KNOWN_NEGATIVE_METRICS = []
+    settings_warnings.append('warning :: KNOWN_NEGATIVE_METRICS is not defined in settings.py, err: %s' % err)
 
 # @added 20200427 - Feature #3514: Identify inactive metrics
 # Added metrics that have become inactive to the Redis set to be flagged
 # as inactive
 try:
     inactive_after = settings.METRICS_INACTIVE_AFTER
-except:
+except Exception as err:
     inactive_after = settings.FULL_DURATION - 3600
+    settings_warnings.append('warning :: METRICS_INACTIVE_AFTER is not defined in settings.py, err: %s' % err)
 
 # @added 20200528 - Feature #3560: External alert config
 try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS.copy()
     EXTERNAL_ALERTS = copy.deepcopy(settings.EXTERNAL_ALERTS)
-except:
+except Exception as err:
     EXTERNAL_ALERTS = {}
+    settings_warnings.append('warning :: EXTERNAL_ALERTS is not defined in settings.py, err: %s' % err)
 # @added 20200602 - Feature #3560: External alert config
 if EXTERNAL_ALERTS:
     from external_alert_configs import get_external_alert_configs
@@ -272,7 +295,7 @@ try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
     CUSTOM_ALGORITHMS = copy.deepcopy(settings.CUSTOM_ALGORITHMS)
-except:
+except Exception as err:
     CUSTOM_ALGORITHMS = None
 # @added 20230616 - Feature #3566: custom_algorithms
 # Filter out only the ones in which analyzer is
@@ -283,70 +306,81 @@ if CUSTOM_ALGORITHMS:
         try:
             if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
                 ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
-        except:
-            pass
+        except Exception as err:
+            settings_warnings.append('warning :: CUSTOM_ALGORITHMS is not defined correctly in settings.py, err: %s' % err)
+            #pass
     CUSTOM_ALGORITHMS = copy.deepcopy(ASSIGNED_CUSTOM_ALGORITHMS)
 
 try:
     DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
-except:
+except Exception as err:
     DEBUG_CUSTOM_ALGORITHMS = False
+    settings_warnings.append('warning :: DEBUG_CUSTOM_ALGORITHMS is not defined in settings.py, err: %s' % err)
 # @added 20200607 - Feature #3566: custom_algorithms
 try:
     MIRAGE_ALWAYS_METRICS = list(settings.MIRAGE_ALWAYS_METRICS)
-except:
+except Exception as err:
     MIRAGE_ALWAYS_METRICS = []
+    settings_warnings.append('warning :: MIRAGE_ALWAYS_METRICS is not defined in settings.py, err: %s' % err)
 
 # @added 20200623 - Feature #3588: Metric http_alerter queues
 #                   Feature #3396: http_alerter
 try:
     HTTP_ALERTERS_ENABLED = settings.HTTP_ALERTERS_ENABLED
-except:
+except Exception as err:
     HTTP_ALERTERS_ENABLED = False
+    settings_warnings.append('warning :: HTTP_ALERTERS_ENABLED is not defined in settings.py, err: %s' % err)
 
 # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
 try:
     FLUX_ZERO_FILL_NAMESPACES = settings.FLUX_ZERO_FILL_NAMESPACES
-except:
+except Exception as err:
     FLUX_ZERO_FILL_NAMESPACES = []
+    settings_warnings.append('warning :: FLUX_ZERO_FILL_NAMESPACES is not defined in settings.py, err: %s' % err)
 
 # @added 20200916 - Branch #3068: SNAB
 #                   Task #3744: POC matrixprofile
 #                   Info #1792: Shapelet extraction
 try:
     SNAB_ENABLED = settings.SNAB_ENABLED
-except:
+except Exception as err:
     # SNAB_ENABLED = False
     SNAB_ENABLED = True
+    settings_warnings.append('warning :: SNAB_ENABLED is not defined in settings.py, err: %s' % err)
 try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # SNAB_CHECKS = settings.SNAB_CHECKS.copy()
     SNAB_CHECKS = copy.deepcopy(settings.SNAB_CHECKS)
-except:
+except Exception as err:
     SNAB_CHECKS = {}
+    settings_warnings.append('warning :: SNAB_CHECKS is not defined in settings.py, err: %s' % err)
 
 # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
 # The number of metrics to load test Analyzer with
 try:
     SNAB_LOAD_TEST_ANALYZER = int(settings.SNAB_LOAD_TEST_ANALYZER)
-except:
+except Exception as err:
     SNAB_LOAD_TEST_ANALYZER = 0
+    settings_warnings.append('warning :: SNAB_LOAD_TEST_ANALYZER is not defined in settings.py, err: %s' % err)
 
 # @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
 try:
     ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
-except:
+except Exception as err:
     ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = True
+    settings_warnings.append('warning :: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS is not defined in settings.py, err: %s' % err)
 # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
 try:
     ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = settings.ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
-except:
+except Exception as err:
     ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = False
+    settings_warnings.append('warning :: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is not defined in settings.py, err: %s' % err)
 # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
 try:
     ANALYZER_MAD_LOW_PRIORITY_METRICS = settings.ANALYZER_MAD_LOW_PRIORITY_METRICS
-except:
+except Exception as err:
     ANALYZER_MAD_LOW_PRIORITY_METRICS = 0
+    settings_warnings.append('warning :: ANALYZER_MAD_LOW_PRIORITY_METRICS is not defined in settings.py, err: %s' % err)
 # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
 # Set the default ANALYZER_MAD_LOW_PRIORITY_METRICS to 10 if not set and
 # ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is set.
@@ -381,26 +415,30 @@ ANALYZER_USE_METRICS_MANAGER = True
 # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
 try:
     CHECK_DATA_SPARSITY = settings.CHECK_DATA_SPARSITY
-except:
+except Exception as err:
     CHECK_DATA_SPARSITY = True
+    settings_warnings.append('warning :: CHECK_DATA_SPARSITY is not defined in settings.py, err: %s' % err)
 
 # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
 try:
     ANALYZER_CHECK_LAST_TIMESTAMP = settings.ANALYZER_CHECK_LAST_TIMESTAMP
-except:
+except Exception as err:
     ANALYZER_CHECK_LAST_TIMESTAMP = False
+    settings_warnings.append('warning :: ANALYZER_CHECK_LAST_TIMESTAMP is not defined in settings.py, err: %s' % err)
 
 # @added 20210512 - Feature #4064: VERBOSE_LOGGING
 try:
     VERBOSE_LOGGING = settings.ANALYZER_VERBOSE_LOGGING
-except:
+except Exception as err:
     VERBOSE_LOGGING = False
+    settings_warnings.append('warning :: VERBOSE_LOGGING is not defined in settings.py, err: %s' % err)
 
 # @added 20210513 - Feature #4068: ANALYZER_SKIP
 try:
     ANALYZER_SKIP = list(settings.ANALYZER_SKIP)
-except:
+except Exception as err:
     ANALYZER_SKIP = []
+    settings_warnings.append('warning :: ANALYZER_SKIP is not defined in settings.py, err: %s' % err)
 
 # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
 custom_stale_metrics_hash_key = 'analyzer.metrics_manager.custom_stale_periods'
@@ -408,15 +446,30 @@ try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # CUSTOM_STALE_PERIOD = settings.CUSTOM_STALE_PERIOD.copy()
     CUSTOM_STALE_PERIOD = copy.deepcopy(settings.CUSTOM_STALE_PERIOD)
-except:
+except Exception as err:
     CUSTOM_STALE_PERIOD = {}
+    settings_warnings.append('warning :: CUSTOM_STALE_PERIOD is not defined in settings.py, err: %s' % err)
 
 # @added 20230402 - Feature #4888: analyzer - load_shedding
 LOAD_SHEDDING_ENABLED = True
 try:
     LOAD_SHEDDING_ENABLED = settings.LOAD_SHEDDING_ENABLED
-except:
+except Exception as err:
     LOAD_SHEDDING_ENABLED = True
+    settings_warnings.append('warning :: LOAD_SHEDDING_ENABLED is not defined in settings.py, err: %s' % err)
+
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except Exception as err:
+    SKYLINE_DAWN_ENABLED = True
+    settings_warnings.append('warning :: SKYLINE_DAWN_ENABLED is not defined in settings.py, err: %s' % err)
+
+if len(settings_warnings) > 0:
+    for settings_warning in settings_warnings:
+        logger.warning(settings_warning)
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -460,7 +513,7 @@ class Analyzer(Thread):
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -511,10 +564,10 @@ class Analyzer(Thread):
         try:
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
-        except:
+        except Exception as err:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.info('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead, err: %s' % err)
             sys_exit(0)
 
     # @added 20200213 - Bug #3448: Repeated airgapped_metrics
@@ -809,6 +862,12 @@ class Analyzer(Thread):
         if len(assigned_metrics) == 0:
             logger.info('0 assigned metrics, nothing to do')
             return
+
+        # @added 20250522 - Feature #5626: skylark.echo
+        # Thanks to my friend Pip for the naming inspiration, things that carry
+        # tunes and messages.
+        skylark_metrics_value_dict = {}
+        skylark_metrics_timestamp_dict = {}
 
         # @added 20241212 - Feature #4888: analyzer - load_shedding
         # Define an empty dict
@@ -1188,6 +1247,20 @@ class Analyzer(Thread):
             logger.info('No raw_assigned set, returning')
             return
 
+        # @added 20260221 - Feature #5712: skyline.dawn
+        #                   Task #5628: Build v5.0.0 and test
+        dawn_expiry_timestamp = None
+        if SKYLINE_DAWN_ENABLED:
+            try:
+                dawn_expiry_timestamp = self.redis_conn_decoded.get('skyline.dawn.analyzer')
+            except Exception as err:
+                logger.error('error :: failed on get skyline.dawn.analyzer, err: %s' % (
+                    err))
+            if dawn_expiry_timestamp:
+                logger.info('NOTICE - skyline.dawn.analyzer key exists, not analyzing metrics until %s' % (
+                    str(dawn_expiry_timestamp)))
+                return
+
         logger.info('got raw_assigned metric data from Redis for %s assigned metrics' % str(len(assigned_metrics)))
 
         # @added 20161119 - Branch #922: ionosphere
@@ -1370,6 +1443,11 @@ class Analyzer(Thread):
         zero_fill_metrics = []
         try:
             zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+            # @added 20251027 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+            # Use a set
+            if zero_fill_metrics:
+                zero_fill_metrics = set(zero_fill_metrics)
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: zero_fill_metrics_list failed - %s' % err)
@@ -1841,6 +1919,23 @@ class Analyzer(Thread):
                     logger.error('error :: failed to determine if custom_algorithms are to be run with %s' % (
                         skyline_app))
 
+        # @added 20250321 - Feature #5611: custom_algorithm_only
+        analyzer_custom_algorithm_only_metrics = []
+        redis_set = 'metrics_manager.analyzer.custom_algorithm_only.metrics'
+        try:
+            analyzer_custom_algorithm_only_metrics = list(self.redis_conn_decoded.smembers(redis_set))
+        except Exception as err:
+            logger.error('error :: could not query Redis for set %s - %s' % (redis_set, err))
+            analyzer_custom_algorithm_only_metrics = []
+        analyzer_batch_custom_algorithm_only_metrics = []
+        redis_set = 'metrics_manager.analyzer_batch.custom_algorithm_only.metrics'
+        try:
+            analyzer_batch_custom_algorithm_only_metrics = list(self.redis_conn_decoded.smembers(redis_set))
+        except Exception as err:
+            logger.error('error :: could not query Redis for set %s - %s' % (redis_set, err))
+            analyzer_batch_custom_algorithm_only_metrics = []
+        custom_algorithm_only_metrics = list(set(analyzer_custom_algorithm_only_metrics + analyzer_batch_custom_algorithm_only_metrics))
+
         # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
         metrics_last_timestamp_dict = {}
         metrics_without_new_data = []
@@ -2125,7 +2220,11 @@ class Analyzer(Thread):
                         except:
                             last_metric_timestamp = None
                     if last_metric_timestamp:
-                        data = [metric_name, last_metric_timestamp]
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        #data = [metric_name, last_metric_timestamp]
+                        data = [metric_name, last_metric_timestamp, None]
+
                         redis_set = 'analyzer.batch'
                         try:
                             self.redis_conn.sadd(redis_set, str(data))
@@ -2853,7 +2952,9 @@ class Analyzer(Thread):
             #                   Bug #2050: analyse_derivatives - change in monotonicity
             # Unset the unknown_deriv_status if the derivate metrics are being
             # refreshed
-            if not manage_derivative_metrics:
+            # @modified 20260610
+            #if not manage_derivative_metrics:
+            if manage_derivative_metrics:
                 unknown_deriv_status = True
 
             # @added 20220414 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -2862,6 +2963,10 @@ class Analyzer(Thread):
                 unknown_deriv_status = False
                 is_strictly_increasing_monotonically = False
                 known_derivative_metric = False
+
+            # @modified 20260610
+            if manage_derivative_metrics:
+                unknown_deriv_status = True
 
             if unknown_deriv_status:
   
@@ -3365,7 +3470,12 @@ class Analyzer(Thread):
                             if send_to_batch:
                                 # Add to analyzer.batch to check
                                 added_to_analyzer_batch_proccessing_metrics = None
-                                data = [metric_name, last_metric_timestamp]
+
+                                # @added 20250321 - Feature #5611: custom_algorithm_only
+                                # Added custom_algorithm_only
+                                #data = [metric_name, last_metric_timestamp]
+                                data = [metric_name, last_metric_timestamp, None]
+
                                 # redis_set = 'crucible.firings.batch_processing_metrics'
                                 redis_set = 'analyzer.batch'
                                 try:
@@ -3428,6 +3538,26 @@ class Analyzer(Thread):
                 except:
                     operation_timings['batch_check'] = [(time() - start_batch_check)]
 
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Add custom_algorithm_only_metrics to analyzer_batch to be processed
+            if base_name in custom_algorithm_only_metrics:
+                redis_set = 'analyzer.batch'
+                try:
+                    last_metric_timestamp = 0
+                    try:
+                        last_metric_timestamp = int(last_timestamps_hash_dict[base_name])
+                    except:
+                        last_metric_timestamp = 0
+                    data = [metric_name, last_metric_timestamp, 'custom_algorithm_only']
+                    self.redis_conn.sadd(redis_set, str(data))
+                    added_to_analyzer_batch_proccessing_metrics = True
+                    sent_to_analyzer_batch_proccessing_metrics += 1
+                    logger.info('added custom_algorithm_only to analyzer.batch, metric: %s' % (
+                        base_name))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: batch processing - failed to add %s to %s Redis set, err: %s' % (
+                        str(base_name), redis_set, err))
 
             # @added 20220414 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
             #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -3697,6 +3827,13 @@ class Analyzer(Thread):
                     timeseries[-1][1] = test_value
                     logger.info('TESTING %s replaced %s' % (
                         base_name, str(timeseries[-1])))
+
+                # @added 20250522 - Feature #5626: skylark.echo
+                try:
+                    skylark_metrics_value_dict[base_name] = timeseries[-1][1]
+                    skylark_metrics_timestamp_dict[base_name] = int(timeseries[-1][0])
+                except:
+                    pass
 
                 # @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics
                 # Added negatives_found and run_negatives_present
@@ -5304,6 +5441,9 @@ class Analyzer(Thread):
                     if key_ttl == -1 and load_shedding_active:
                         self.redis_conn_decoded.expire('analyzer.metrics.last_analysis_timestamp', 300)
                         logger.info('set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key to 300')
+                    if key_ttl == -1 and not load_shedding_active:
+                        self.redis_conn_decoded.expire('analyzer.metrics.last_analysis_timestamp', 5)
+                        logger.info('set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key to 5 seconds as load_shedding_active not active')
                 except Exception as err:
                     logger.error('error :: failed to set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key - %s' % err)
 
@@ -5311,6 +5451,30 @@ class Analyzer(Thread):
         if load_shedding_active and skyline_feedback_metrics:
             logger.info('load_shedding_active - skipped analysis on %s feedback metrics' % (
                 str(skyline_feedback_metrics_skipped_count)))
+
+        # @added 20250522 - Feature #5626: skylark.echo
+        current_aligned_ts = int(int(spin_start) // 60 * 60)
+        skylark_values_key = 'skylark.echo.metrics.values.%s' % str(current_aligned_ts)
+        skylark_timestamps_key = 'skylark.echo.metrics.timestamps.%s' % str(current_aligned_ts)
+        # @modified 20250522 - Feature #5626: skylark.echo
+        # Wrapped in if skylark_metrics_value_dict
+        if skylark_metrics_value_dict:
+            try:
+                self.redis_conn.hset(skylark_values_key, mapping=skylark_metrics_value_dict)
+                logger.info('updated %s hash key with %s metrics' % (
+                    skylark_values_key, str(len(skylark_values_key))))
+                self.redis_conn.expire(skylark_values_key, 300)
+            except Exception as err:
+                logger.error('error :: failed to update Redis %s hash key - %s' % (
+                    skylark_values_key, err))
+            try:
+                self.redis_conn.hset(skylark_timestamps_key, mapping=skylark_metrics_timestamp_dict)
+                logger.info('updated %s hash key with %s metrics' % (
+                    skylark_timestamps_key, str(len(skylark_timestamps_key))))
+                self.redis_conn.expire(skylark_timestamps_key, 300)
+            except Exception as err:
+                logger.error('error :: failed to update Redis %s hash key - %s' % (
+                    skylark_timestamps_key, err))
 
         # @added 20230331 - Feature #4886: analyzer - operation_timings
         try:
@@ -6907,11 +7071,22 @@ class Analyzer(Thread):
                             # algorithms_run = send_alert_for[5]
                             algorithms_run = send_alert_for['algorithms_run']
 
+                            # @added 20250324 - Feature #5611: custom_algorithm_only
+                            # Added custom_algorithm_only
+                            i_custom_algorithm_only = None
+                            try:
+                                i_custom_algorithm_only = send_alert_for['custom_algorithm_only']
+                            except:
+                                i_custom_algorithm_only = None
+
                             # @modified 20201008 - Feature #3734: waterfall alerts
                             #                      Branch #3068: SNAB
                             # Added triggered_algorithms and algorithms_run
                             # anomalous_metric = [value, base_name, metric_timestamp]
-                            anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+                            # @modified 20250324 - Feature #5611: custom_algorithm_only
+                            # Added custom_algorithm_only
+                            #anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+                            anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run, i_custom_algorithm_only]
                             redis_set = 'analyzer.all_anomalous_metrics'
                             data = str(anomalous_metric)
                             try:
@@ -7042,6 +7217,16 @@ class Analyzer(Thread):
                             except:
                                 external_alerter_id = None
 
+                            # @added 20250324 - Feature #5611: custom_algorithm_only
+                            # Added custom_algorithm_only
+                            i_custom_algorithm_only = None
+                            try:
+                                if metric[5] == 'custom_algorithm_only':
+                                    i_custom_algorithm_only = 'custom_algorithm_only'
+                                    logger.debug('debug :: i_custom_algorithm_only: %s' % str(i_custom_algorithm_only))
+                            except:
+                                i_custom_algorithm_only = None
+
                             # @modified 20200610 - Feature #3560: External alert config
                             # Use the all_alerts list which includes external alert configs
                             # @modified 20200624 - Feature #3560: External alert config
@@ -7055,6 +7240,12 @@ class Analyzer(Thread):
                             if LOCAL_DEBUG:
                                 logger.debug('debug :: last_alert cache key %s' % (
                                     str(cache_key)))
+
+                            # @added 20250324 - Feature #5611: custom_algorithm_only
+                            # Added custom_algorithm_only
+                            if i_custom_algorithm_only == 'custom_algorithm_only':
+                                cache_key = cache_key + '.custom_algorithm_only'
+                                logger.debug('debug :: cache_key: %s' % str(cache_key))
 
                             if settings.ENABLE_MIRAGE:
                                 try:
@@ -7157,6 +7348,15 @@ class Analyzer(Thread):
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to determine anomaly_check_file')
 
+                                # @added 20250324 - Feature #5611: custom_algorithm_only
+                                # Added custom_algorithm_only
+                                if i_custom_algorithm_only == 'custom_algorithm_only':
+                                    anomaly_check_file = '%s/%s.%s.%s.txt' % (
+                                        settings.MIRAGE_CHECK_PATH,
+                                        str(int(time())),
+                                        str(int(metric[2])),
+                                        sane_metricname)
+
                                 # @added 20200904 - Task #3730: Validate Mirage running multiple processes
                                 # Deduplicate checks sent to Mirage. At times
                                 # analyzer will send the same metric and
@@ -7194,6 +7394,13 @@ class Analyzer(Thread):
                                     mirage_check_sent = False
                                     mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
                                         str(int(metric[2])), str(metric[1]))
+
+                                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                                    # Added custom_algorithm_only
+                                    if i_custom_algorithm_only == 'custom_algorithm_only':
+                                        mirage_check_sent_key = mirage_check_sent_key + '.custom_algorithm_only'
+                                        logger.debug('debug :: mirage_check_sent_key: %s' % str(mirage_check_sent_key))
+
                                     try:
                                         mirage_check_sent = self.redis_conn_decoded.get(mirage_check_sent_key)
                                     except Exception as e:
@@ -7242,8 +7449,17 @@ class Analyzer(Thread):
                                             # metric_name, anomalous datapoint, hours to resolve, timestamp
                                             # @modified 20190410 - Feature #2882: Mirage - periodic_check
                                             # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
-                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                            # @modified 20250324 - Feature #5611: custom_algorithm_only
+                                            # Added custom_algorithm_only
+                                            #fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\ncustom_algorithm_only = "%s"\n' % (
+                                                     metric[1], metric[0], str(use_hours_to_resolve), str(metric[2]),
+                                                     str(i_custom_algorithm_only)))
                                         anomaly_check_file_created = True
+                                        if i_custom_algorithm_only == 'custom_algorithm_only':
+                                            logger.info('debug :: custom_algorithm_only added anomaly_check_file: %s' % (
+                                                anomaly_check_file))
+
                                     except:
                                         logger.error(traceback.format_exc())
                                         logger.error('error :: failed to write anomaly_check_file')
@@ -8904,6 +9120,27 @@ class Analyzer(Thread):
                 except:
                     logger.info('failed to delete analyzer.mirage_periodic_check_metrics Redis set')
 
+            # @added 20260518 - Feature #5588: snab.process_algorithm
+            # Analyzer has never sent snab checks as SNAB requires an anomaly id.
+            # Add any entries in analyzer.real_anomalous_metrics to a new set
+            # which expires that can be used transiently down the line with say
+            # snab or jupyter
+            current_real_anomalous_metrics = []
+            try:
+                current_real_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
+            except Exception as err:
+                logger.error('error :: failed to generate list from Redis set analyzer.real_anomalous_metrics, err: %s' % err)
+            if current_real_anomalous_metrics:
+                expiring_redis_set = 'analyzer.real_anomalous_metrics.%s' % (str(int(time())))
+                try:
+                    self.redis_conn_decoded.sadd(expiring_redis_set, *set(current_real_anomalous_metrics))
+                    self.redis_conn_decoded.expire(expiring_redis_set, 900)
+                    logger.info('added %s anomalies to %s Redis set' % (
+                        str(len(current_real_anomalous_metrics)), expiring_redis_set))
+                except Exception as err:
+                    logger.error('error :: failed to create Redis set %s, err: %s' % (
+                        expiring_redis_set, err))
+
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # self.real_anomalous_metrics[:] = []
             try:
@@ -8971,7 +9208,10 @@ class Analyzer(Thread):
                 try:
                     # @modified 20170901 - Bug #2154: Infrequent missing new_ Redis keys
                     # self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
-                    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 300, key_timestamp)
+                    # @modified 20260611 - Feature #2034: analyse_derivatives
+                    # Decrease manage frequency
+                    #self.redis_conn.setex('analyzer.derivative_metrics_expiry', 300, key_timestamp)
+                    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 1800, key_timestamp)
                     logger.info('derivative metrics were managed - set analyzer.derivative_metrics_expiry Redis key')
                 except:
                     logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')

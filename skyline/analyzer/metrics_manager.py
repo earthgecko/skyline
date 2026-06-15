@@ -48,6 +48,9 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 #                      Feature #3828: Add inactive columns to the metrics DB table
 from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 from functions.database.queries.get_all_active_db_metric_names import get_all_active_db_metric_names
+# @added 20251009 - Bug #5522: Handle duplicate metric names
+from functions.database.queries.get_all_db_metric_names_db_only import get_all_db_metric_names_db_only
+
 
 # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
 from functions.settings.get_custom_stale_period import custom_stale_period
@@ -134,6 +137,10 @@ from functions.metrics_manager.purge_vortex_saved_data import purge_vortex_saved
 # @added 20230105 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
 from functions.metrics_manager.manage_inactive_metrics import manage_inactive_metrics
 
+# @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+#                   Feature #4792: functions.metrics_manager.manage_inactive_metrics
+from functions.metrics_manager.manage_inactive_labelled_metrics_resolution_hashes import manage_inactive_labelled_metrics_resolution_hashes
+
 # @added 20230123 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
 #                   Feature #4444: webapp - inactive_metrics
@@ -182,6 +189,9 @@ from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
 
 # @added 20240610 - Feature #5352: vista - bigquery
 from functions.metrics_manager.cluster_sync_bq_archives import cluster_sync_bq_archives
+
+# @added 20250321 - Feature #5611: custom_algorithm_only
+from functions.metrics_manager.manage_custom_algorithm_only_metrics import manage_custom_algorithm_only_metrics
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -439,6 +449,12 @@ try:
 except:
     ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY = True
 
+# @added 20250321 - Feature #5611: custom_algorithm_only
+try:
+    CUSTOM_ALGORITHMS = copy.deepcopy(settings.CUSTOM_ALGORITHMS)
+except:
+    CUSTOM_ALGORITHMS = None
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 full_uniques = '%sunique_metrics' % settings.FULL_NAMESPACE
@@ -643,15 +659,30 @@ class Metrics_Manager(Thread):
             else:
                 local_skyline_instance = [skyline_url, None, None, this_host]
 
+        training_data_raw = []
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Also sync training for do_not_train instances
+        training_data_raw_with_do_not_train = []
+        try:
+            training_data_raw_with_do_not_train = list(self.redis_conn_decoded.smembers('ionosphere.training_data_with_do_not_train'))
+        except Exception as err:
+            logger.error('error :: metrics_manager :: sync_cluster_files - failed to generate a list from ionosphere.training_data_with_do_not_train Redis set, err: %s' % err)
+            training_data_raw_with_do_not_train = []
+        if training_data_raw_with_do_not_train:
+            training_data_raw = training_data_raw_with_do_not_train
+
         # Check training data on REMOTE_SKYLINE_INSTANCES and determine what
         # training_data needs to be fetched
-        training_data_raw = []
-        try:
-            training_data_raw = list(self.redis_conn_decoded.smembers('ionosphere.training_data'))
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: metrics_manager :: sync_cluster_files - failed to generate a list from ionosphere.training_data Redis set')
-            training_data_raw = None
+        # @modified 20250329 - Feature #5611: custom_algorithm_only
+        # Also sync training for do_not_train instances, now only 
+        #training_data_raw = []
+        if not training_data_raw:
+            try:
+                training_data_raw = list(self.redis_conn_decoded.smembers('ionosphere.training_data'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: sync_cluster_files - failed to generate a list from ionosphere.training_data Redis set')
+                training_data_raw = None
 
         training_data = []
         if training_data_raw:
@@ -668,6 +699,20 @@ class Metrics_Manager(Thread):
         training_data_to_fetch = 0
         training_data_fetched = 0
 
+        # @added 20250711 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+        #                   Feature #3890: metrics_manager - sync_cluster_files
+        #                   Feature #5611: custom_algorithm_only
+        # Since the introduction of syncing files for Feature #5611: custom_algorithm_only,
+        # which is now also syncing training for do_not_train instances, additional
+        # rate limiting is required due to when many metrics in the population
+        # are being checked as potentially anomalous.
+        # When this occurs nginx 429 rate limiting in kicking in as in one minute
+        # 1000s of ionosphere_files can be requested, seen as many as 4082.
+        max_ionosphere_files = 1000
+        ionosphere_files_requested = 0
+        max_no_file_data_count = 3
+        no_file_data_count = 0
+
         # Rate limit this so that a new instance becomes eventually consistent
         # add does not thunder against all the other Skyline instances to
         # populate itself
@@ -680,6 +725,12 @@ class Metrics_Manager(Thread):
             remote_training_data = []
             data_required = 'metrics'
             endpoint = 'api?training_data'
+
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Also sync training for do_not_train instances
+            if training_data_raw_with_do_not_train:
+                endpoint = 'api?training_data&do_not_train=true'
+
             save_file = False
             try:
                 remote_training_data = self.get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
@@ -716,6 +767,21 @@ class Metrics_Manager(Thread):
             
             if remote_training_data_to_fetch:
                 for fetch_item in remote_training_data_to_fetch:
+
+                    # @added 20250711 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                    #                   Feature #3890: metrics_manager - sync_cluster_files
+                    #                   Feature #5611: custom_algorithm_only
+                    # Rate limit on no file data returned and max number of files
+                    # per operation
+                    if no_file_data_count >= max_no_file_data_count:
+                        logger.info('metrics_manager :: sync_cluster_files - there have been %s requests that have not returned file data, not continuing' % (
+                            str(no_file_data_count)))
+                        break
+                    if ionosphere_files_requested >= max_ionosphere_files:
+                        logger.info('metrics_manager :: sync_cluster_files - there have been %s requests, rate limiting, not continuing' % (
+                            str(ionosphere_files_requested)))
+                        break
+
                     cache_key_exists = False
                     try:
                         cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
@@ -762,8 +828,42 @@ class Metrics_Manager(Thread):
                                 if not os.path.isfile(data_file):
                                     file_saved = self.get_remote_data(remote_skyline_instance, data_required, endpoint, data_file)
                                     if not file_saved:
-                                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
-                                            data_file, str(remote_skyline_instance[0])))
+                                        # @modified 20250625 - Task #5637: metrics_manager - sync_cluster_files - grace period
+                                        # Only log error if the file is not available
+                                        # after 10 minutes
+                                        #logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
+                                        #    data_file, str(remote_skyline_instance[0])))
+
+                                        # @added 20250625 - Task #5637: metrics_manager - sync_cluster_files - grace period
+                                        # Only log error if the file is not available
+                                        # after 10 minutes
+                                        file_ts = None
+                                        log_error = True
+                                        try:
+                                            elements = len(settings.IONOSPHERE_DATA_FOLDER.split('/'))
+                                            file_ts_str = data_file.split('/')[elements]
+                                            file_ts = int(float(file_ts_str))
+                                        except Exception as err:
+                                            logger.info('warning :: metrics_manager :: sync_cluster_files - failed to determine timestamp from file path %s, reported: %s' % (
+                                                data_file, err))
+                                        if isinstance(file_ts):
+                                            if int(time()) > (file_ts + 600):
+                                                log_error = False
+                                                logger.info('metrics_manager :: sync_cluster_files - not available yet on %s, data_file: %s' % (
+                                                    str(remote_skyline_instance[0]), data_file))
+                                        if log_error:
+                                            logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
+                                                data_file, str(remote_skyline_instance[0])))
+
+                                        # @added 20250711 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                                        #                   Feature #3890: metrics_manager - sync_cluster_files
+                                        #                   Feature #5611: custom_algorithm_only
+                                        # Increase no_file_data_count and
+                                        # ionosphere_files_requested and sleep
+                                        no_file_data_count += 1
+                                        ionosphere_files_requested += 1
+                                        sleep(5)
+
                                         continue
                                     logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
                                         data_file, str(remote_skyline_instance[0])))
@@ -777,12 +877,53 @@ class Metrics_Manager(Thread):
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                                     endpoint, str(remote_skyline_instance[0])))
+
+                        # @added 20251210 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                        #                   Feature #3890: metrics_manager - sync_cluster_files
+                        if files_exist == files_to_fetch:
+                            # New training_data so just set a short TTL
+                            # key so that the training_data is checked
+                            # after 15 mins and can sync any training_data
+                            # resources that had not been created in the
+                            # initial sync and to achieve eventual
+                            # consistency
+                            if int(time()) < (int(fetch_item[1]) + 600):
+                                self.redis_conn.setex(cache_key, 900, int(time()))
+                            else:
+                                self.redis_conn.setex(cache_key, settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR, int(time()))
+
                         if files_fetched == files_to_fetch:
                             training_data_fetched += 1
                             try:
                                 cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
                                     str(fetch_item[0]), str(fetch_item[1]))
-                                self.redis_conn.setex(cache_key, 900, int(time()))
+                                # @added 20250711 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                                #                   Feature #3890: metrics_manager - sync_cluster_files
+                                #                   Feature #5611: custom_algorithm_only
+                                # Increase TTL from 900 to 3600 with rate limiting enabled
+                                # @modified 20251210 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                                #                      Feature #3890: metrics_manager - sync_cluster_files
+                                # Setting this key to 3600 means that during the
+                                # entire IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+                                # the training_data is requested every hour for
+                                # 3 days.  Although there could be times when
+                                # the training_data resources are not fully
+                                # provisioned yet and the sync occurs while
+                                # training_data resources are being created,
+                                # however once retrieved this key should be set
+                                # to the whole IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+                                # period
+                                #self.redis_conn.setex(cache_key, 3600, int(time()))
+                                if int(time()) < (int(fetch_item[1]) + 600):
+                                    # New training_data so just set a short TTL
+                                    # key so that the training_data is checked
+                                    # after 15 mins and can sync any training_data
+                                    # resources that had not been created in the
+                                    # initial sync and to achieve eventual
+                                    # consistency
+                                    self.redis_conn.setex(cache_key, 900, int(time()))
+                                else:
+                                    self.redis_conn.setex(cache_key, settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR, int(time()))
                                 logger.info('created Redis key - %s' % (cache_key))
                             except:
                                 pass
@@ -792,7 +933,34 @@ class Metrics_Manager(Thread):
                             try:
                                 cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
                                     str(fetch_item[0]), str(fetch_item[1]))
-                                self.redis_conn.setex(cache_key, 900, int(time()))
+                                # @added 20250711 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                                #                   Feature #3890: metrics_manager - sync_cluster_files
+                                #                   Feature #5611: custom_algorithm_only
+                                # Increase TTL from 900 to 3600 with rate limiting enabled
+                                # @modified 20251210 - Task #5642: metrics_manager - sync_cluster_files - rate limit
+                                #                      Feature #3890: metrics_manager - sync_cluster_files
+                                # Setting this key to 3600 means that during the
+                                # entire IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+                                # the training_data is requested every hour for
+                                # 3 days.  Although there could be times when
+                                # the training_data resources are not fully
+                                # provisioned yet and the sync occurs while
+                                # training_data resources are being created,
+                                # however once retrieved this key should be set
+                                # to the whole IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+                                # period
+                                #self.redis_conn.setex(cache_key, 3600, int(time()))
+                                if int(time()) < (int(fetch_item[1]) + 600):
+                                    # New training_data so just set a short TTL
+                                    # key so that the training_data is checked
+                                    # after 15 mins and can sync any training_data
+                                    # resources that had not been created in the
+                                    # initial sync and to achieve eventual
+                                    # consistency
+                                    self.redis_conn.setex(cache_key, 900, int(time()))
+                                else:
+                                    self.redis_conn.setex(cache_key, settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR, int(time()))
+
                                 logger.info('created Redis key - %s' % (cache_key))
                             except:
                                 pass
@@ -1349,6 +1517,9 @@ class Metrics_Manager(Thread):
                 unique_parent_namespaces = {}
                 unique_parent_namespaces_timings = []
 
+                # @added 20251114 - Feature #5670: metrics_manager - expire flux aggregate_metrics
+                flux_active_aggregation_metrics = []
+
                 # @added 20220128 - Feature #4404: flux - external_settings - aggregation
                 #                   Feature #4324: flux - reload external_settings
                 #                   Feature #4376: webapp - update_external_settings
@@ -1422,6 +1593,10 @@ class Metrics_Manager(Thread):
                     logger.error('error :: metrics_manager :: failed to generate a list from %s Redis set' % full_uniques)
                     unique_metrics = []
 
+                # @added 20260506 - Task #5176: Migrate to sqlalchemy v2 API
+                # Validate labelled_metrics have a metric_id which is an int
+                invalid_labelled_metrics = []
+
                 # @added 20230203 - Feature #4840: flux - prometheus - x-test-only header
                 # Readded all_db_metric_names_with_ids so that labelled_metrics
                 # base_names can be looked up if they become active again in
@@ -1436,9 +1611,40 @@ class Metrics_Manager(Thread):
                 if labelled_metrics_unique_metrics:
                     for labelled_metric in labelled_metrics_unique_metrics:
                         metric_id_str = labelled_metric.replace('labelled_metrics.', '')
+
+                        # @added 20260506 - Task #5176: Migrate to sqlalchemy v2 API
+                        # Validate labelled_metrics have a metric_id which is an int
+                        metric_id_int = None
+                        try:
+                            metric_id_int = int(metric_id_str)
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: metric_id is not an int, metric_id: %s , err: %s' % (
+                                metric_id_str, str(err)))
+                            metric_id_int = None
+                        if not metric_id_int:
+                            logger.info('metrics_manager :: adding to invalid_labelled_metrics, labelled_metric: %s' % (
+                                labelled_metric))
+                            invalid_labelled_metrics.append(labelled_metric)
+                            continue
+
                         labelled_metrics_active_ids.append(int(metric_id_str))
                     logger.info('metrics_manager :: there are %s active labelled_metrics in labelled_metrics.unique_labelled_metrics Redis set' % (
                         str(len(labelled_metrics_active_ids))))
+
+                # @added 20260506 - Task #5176: Migrate to sqlalchemy v2 API
+                # Validate labelled_metrics have a metric_id which is an int
+                if len(invalid_labelled_metrics) > 0:
+                    logger.info('metrics_manager :: removing to %s invalid_labelled_metrics from labelled_metrics.unique_labelled_metrics' % (
+                        str(len(invalid_labelled_metrics))))
+                    try:
+                        invalid_labelled_metrics_removed = self.redis_conn_decoded.srem('labelled_metrics.unique_labelled_metrics', *set(invalid_labelled_metrics))
+                        logger.info('metrics_manager :: removed %s invalid_labelled_metrics from labelled_metrics.unique_labelled_metrics' % (
+                            str(invalid_labelled_metrics_removed)))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to srem Redis from labelled_metrics.unique_labelled_metrics, err: %s' % (
+                            err))
+
+
                 # @added 20230217 - Feature #4854: boundary - labelled_metrics
                 #                   Task #2732: Prometheus to Skyline
                 #                   Branch #4300: prometheus
@@ -2221,6 +2427,10 @@ class Metrics_Manager(Thread):
                     if do_reload_flux:
 
 
+                        # @added 20251114- Feature #4324: flux - reload external_settings
+                        # Optimise to a single operation on the Redis hash
+                        metrics_manager_flux_namespace_quotas_dict = {}
+
                         # @added 20230509- Feature #4324: flux - reload external_settings
                         # Update metrics_manager.flux.namespace_quotas before flux restart
                         namespaces_with_quotas = []
@@ -2239,11 +2449,23 @@ class Metrics_Manager(Thread):
                                 if quota:
                                     namespaces_with_quotas.append(namespace)
                                     try:
-                                        self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                        # @modified 20251114- Feature #4324: flux - reload external_settings
+                                        # Optimise to a single operation on the Redis hash
+                                        #self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                        metrics_manager_flux_namespace_quotas_dict[namespace] = quota
                                     except Exception as err:
                                         logger.error(traceback.format_exc())
                                         logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
                                             namespace, str(quota), err))
+
+                        # @added 20251114- Feature #4324: flux - reload external_settings
+                        # Optimise to a single operation on the Redis hash
+                        if metrics_manager_flux_namespace_quotas_dict:
+                            try:
+                                self.redis_conn_decoded.hset('metrics_manager.flux.namespace_quotas', mapping=metrics_manager_flux_namespace_quotas_dict)
+                            except Exception as err:
+                                logger.error('error :: metrics_manager :: hset failed on metrics_manager.flux.namespace_quotas, err: %s' % (
+                                    err))
 
                         try:
                             self.redis_conn.delete('skyline.external_settings.update.metrics_manager')
@@ -2840,6 +3062,11 @@ class Metrics_Manager(Thread):
                     namespace_quotas_settings = {}
                 except:
                     namespace_quotas_settings = {}
+
+                # @added 20251114- Feature #4324: flux - reload external_settings
+                # Optimise to a single operation on the Redis hash
+                metrics_manager_flux_namespace_quotas_dict = {}
+
                 if namespace_quotas_settings:
                     for namespace in namespace_quotas_settings:
                         quota = 0
@@ -2854,12 +3081,30 @@ class Metrics_Manager(Thread):
                         if quota:
                             namespaces_with_quotas.append(namespace)
                             try:
-                                self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                # @modified 20251114- Feature #4324: flux - reload external_settings
+                                # Optimise to a single operation on the Redis hash
+                                #self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                metrics_manager_flux_namespace_quotas_dict[namespace] = quota
                             except Exception as err:
                                 logger.error(traceback.format_exc())
-                                logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
+                                logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager_flux_namespace_quotas_dict, err: %s' % (
                                     namespace, str(quota), err))
+
+                # @added 20251114- Feature #4324: flux - reload external_settings
+                # Optimise to a single operation on the Redis hash
+                if metrics_manager_flux_namespace_quotas_dict:
+                    try:
+                        self.redis_conn_decoded.hset('metrics_manager.flux.namespace_quotas', mapping=metrics_manager_flux_namespace_quotas_dict)
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: hset failed to set metrics_manager.flux.namespace_quotas, err: %s' % (
+                            err))
+
                 del namespace_quotas_settings
+
+                # @added 20251114- Feature #4324: flux - reload external_settings
+                # Optimise to a single operation on the Redis hash
+                metrics_manager_flux_namespace_quotas_dict = {}
+
                 if external_settings:
                     for external_setting in external_settings:
                         quota = 0
@@ -2875,11 +3120,23 @@ class Metrics_Manager(Thread):
                         if quota:
                             namespaces_with_quotas.append(namespace)
                             try:
-                                self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                # @modified 20251114- Feature #4324: flux - reload external_settings
+                                # Optimise to a single operation on the Redis hash
+                                #self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                                metrics_manager_flux_namespace_quotas_dict[namespace] = quota
                             except Exception as err:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
+                                logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager_flux_namespace_quotas_dict, err: %s' % (
                                     namespace, str(quota), err))
+
+                # @added 20251114- Feature #4324: flux - reload external_settings
+                # Optimise to a single operation on the Redis hash
+                if metrics_manager_flux_namespace_quotas_dict:
+                    try:
+                        self.redis_conn_decoded.hset('metrics_manager.flux.namespace_quotas', mapping=metrics_manager_flux_namespace_quotas_dict)
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: hset failed to set metrics_manager.flux.namespace_quotas, err: %s' % (
+                            err))
+
                 namespace_quotas_dict = {}
                 if namespaces_with_quotas:
                     try:
@@ -2888,6 +3145,10 @@ class Metrics_Manager(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to hgetall metrics_manager.flux.namespace_quotas Redis hash key - %s' % (
                             err))
+
+                # @added 20251114 - Feature #4464: flux - quota - cluster_sync
+                # Optimise to a single hash operation
+                metrics_manager_flux_quota_namespace_metrics_dict = {}
 
                 # @added 20220510 - Feature #4464: flux - quota - cluster_sync
                 #                   Release #4562 - v3.0.4
@@ -2934,12 +3195,26 @@ class Metrics_Manager(Thread):
                                 namespace, err))
                         all_namespace_metrics = list(set(known_namespace_metrics + namespace_metrics))
                         try:
-                            self.redis_conn_decoded.hset('metrics_manager.flux.quota.namespace_metrics', parent_namespace, str(all_namespace_metrics))
-                            logger.info('metrics_manager :: added %s metrics for %s to metrics_manager.flux.quota.namespace_metrics' % (
+                            # @modified 20251114 - Feature #4464: flux - quota - cluster_sync
+                            # Optimise to a single hash operation
+                            #self.redis_conn_decoded.hset('metrics_manager.flux.quota.namespace_metrics', parent_namespace, str(all_namespace_metrics))
+                            metrics_manager_flux_quota_namespace_metrics_dict[parent_namespace] = str(all_namespace_metrics)
+                            logger.info('metrics_manager :: added %s metrics for %s to be added to metrics_manager.flux.quota.namespace_metrics' % (
                                 str(len(all_namespace_metrics)), parent_namespace))
                         except Exception as err:
                             logger.error('error :: metrics_manager :: failed to hset %s in metrics_manager.flux.quota.namespace_metrics - %s' % (
                                 parent_namespace, err))
+
+                # @added 20251114 - Feature #4464: flux - quota - cluster_sync
+                # Optimise to a single hash operation
+                if metrics_manager_flux_quota_namespace_metrics_dict:
+                    try:
+                        self.redis_conn_decoded.hset('metrics_manager.flux.quota.namespace_metrics', mapping=metrics_manager_flux_quota_namespace_metrics_dict)
+                        logger.info('metrics_manager :: added metrics for %s parent_namespaces to metrics_manager.flux.quota.namespace_metrics' % (
+                            str(len(metrics_manager_flux_quota_namespace_metrics_dict))))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to hset metrics_manager.flux.quota.namespace_metrics, err: %s' % (
+                            err))
 
                 # @added 20220426 - Feature #4536: Handle Redis failure
                 # Add flux required data to memcache as well
@@ -3150,6 +3425,10 @@ class Metrics_Manager(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to delete metrics_manager.flux_last_known_value_aggregate_metrics Redis set')
 
+                        # @added 20251114 - Feature #4404: flux - external_settings - aggregation
+                        # Optimise adding to Redis hash in a single operation
+                        metrics_manager_flux_aggregate_namespaces_settings = {}
+
                         for i_base_name in unique_base_names:
                             pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, aggregate_namespaces)
                             if pattern_match:
@@ -3158,7 +3437,10 @@ class Metrics_Manager(Thread):
                                     matched_namespace = metric_matched_by['matched_namespace']
                                     metric_aggregation_settings = FLUX_AGGREGATE_NAMESPACES[matched_namespace]
                                     # Add the configuration to Redis
-                                    self.redis_conn.hset('metrics_manager.flux.aggregate_namespaces.settings', i_base_name, str(metric_aggregation_settings))
+                                    # @added 20251114 - Feature #4404: flux - external_settings - aggregation
+                                    # Optimise adding to Redis hash in a single operation
+                                    #self.redis_conn.hset('metrics_manager.flux.aggregate_namespaces.settings', i_base_name, str(metric_aggregation_settings))
+                                    metrics_manager_flux_aggregate_namespaces_settings[i_base_name] = str(metric_aggregation_settings)
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: metrics_manager :: failed to delete metrics_manager.flux_last_known_value_aggregate_metrics Redis set')
@@ -3181,6 +3463,15 @@ class Metrics_Manager(Thread):
                                     add_to_last_known_value = False
                                 if add_to_last_known_value:
                                     flux_aggregate_lkv_metrics.append(i_base_name)
+
+                        # @added 20251114 - Feature #4404: flux - external_settings - aggregation
+                        # Optimise adding to Redis hash in a single operation
+                        if metrics_manager_flux_aggregate_namespaces_settings:
+                            try:
+                                self.redis_conn_decoded.hset('metrics_manager.flux.aggregate_namespaces.settings', mapping=metrics_manager_flux_aggregate_namespaces_settings)
+                            except Exception as err:
+                                logger.error('error :: metrics_manager :: hset failed on metrics_manager.flux.aggregate_namespaces.settings, err: %s' % err)
+
                         if flux_aggregate_zerofill_metrics:
                             try:
                                 logger.info('metrics_manager :: adding %s aggregate metrics that have zerofill aggregation setting to metrics_manager.flux_zero_fill_aggregate_metrics' % str(len(flux_aggregate_zerofill_metrics)))
@@ -3231,9 +3522,75 @@ class Metrics_Manager(Thread):
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_aggregate_metrics Redis set')
+
+                        # @added 20251114 - Feature #5670: metrics_manager - expire flux aggregate_metrics
+                        # Based on the last_flush time
+                        flux_active_aggregation_metrics = []
+                        flux_aggregate_metrics_last_flush_dict = {}
+                        try:
+                            flux_aggregate_metrics_last_flush_dict = self.redis_conn_decoded.hgetall('flux.aggregate_metrics.last_flush')
+                            flux_active_aggregation_metrics = set(list(flux_aggregate_metrics_last_flush_dict.keys()))
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: hgetall failed on flux.aggregate_metrics.last_flush, err: %s' % err)
+                        try:
+                            flux_aggregate_metrics_to_remove = [i_basename for i_basename, timestamp_str in flux_aggregate_metrics_last_flush_dict.items() if int(timestamp_str) < (int(spin_start) - (86400 + 3600))]
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: hgetall failed on flux.aggregate_metrics.last_flush, err: %s' % err)
+                        logger.info('metrics_manager :: %s metrics determined from flux.aggregate_metrics.last_flush to remove from flux_aggregate_metrics_list as inactive' % (
+                            str(len(flux_aggregate_metrics_to_remove))))
+                        for i_basename in flux_aggregate_metrics_list:
+                            if i_base_name not in flux_active_aggregation_metrics:
+                                flux_aggregate_metrics_to_remove.append(i_base_name)
+                        logger.info('metrics_manager :: %s metrics to remove from flux_aggregate_metrics_list which are no longer active or submitting data' % (
+                            str(len(flux_aggregate_metrics_to_remove))))
+                        if flux_aggregate_metrics_to_remove:
+                            remove_hash_keys_count = 0
+                            aggregate_metric_hash_keys = [
+                                'flux.aggregate_metrics.last_flush',
+                                'metrics_manager.flux.aggregate_metrics.hash',
+                                'metrics_manager.flux.aggregate_namespaces.settings',
+                            ]
+                            for i_hash_key in aggregate_metric_hash_keys:
+                                try:
+                                    remove_hash_keys_count = self.redis_conn_decoded.hdel(i_hash_key, *set(flux_aggregate_metrics_to_remove))
+                                    logger.info('metrics_manager :: removed %s metrics from %s' % (
+                                        str(remove_hash_keys_count), i_hash_key))
+                                except Exception as err:
+                                    logger.error('error :: metrics_manager :: hdel failed on %s, err: %s' % (i_hash_key, err))
+                            remove_set_keys_count = 0
+                            aggregate_metric_sets = [
+                                'metrics_manager.flux.aggregate_metrics',
+                                'metrics_manager.flux_zero_fill_aggregate_metrics',
+                                'analyzer.flux_aggregate_metrics',
+                                'flux.zero_fill_metrics',
+                                'analyzer.flux_zero_fill_metrics',
+                            ]
+                            for i_hash_key in aggregate_metric_sets:
+                                try:
+                                    remove_set_keys_count = self.redis_conn_decoded.srem(i_hash_key, *set(flux_aggregate_metrics_to_remove))
+                                    logger.info('metrics_manager :: removed %s metrics from %s' % (
+                                        str(remove_set_keys_count), i_hash_key))
+                                except Exception as err:
+                                    logger.error('error :: metrics_manager :: srem failed on %s, err: %s' % (i_hash_key, err))
+                        flux_active_aggregation_metrics = []
+                        try:
+                            flux_aggregate_metrics_last_flush_dict = self.redis_conn_decoded.hgetall('flux.aggregate_metrics.last_flush')
+                            flux_active_aggregation_metrics = set(list(flux_aggregate_metrics_last_flush_dict.keys()))
+                            logger.info('metrics_manager :: determined %s active flux aggregations metrics' % (
+                                str(len(flux_active_aggregation_metrics))))
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: hgetall failed on flux.aggregate_metrics.last_flush, err: %s' % err)
+
                         for flux_aggregate_base_name in flux_aggregate_metrics_list:
                             if flux_aggregate_base_name not in unique_base_names:
                                 flux_aggregate_metrics_to_remove.append(flux_aggregate_base_name)
+                            # @added 20251114 - Feature #5670: metrics_manager - expire flux aggregate_metrics
+                            # Only consider the metrics that have been flushed by
+                            # flux to be used
+                            if flux_active_aggregation_metrics:
+                                if flux_aggregate_base_name not in flux_active_aggregation_metrics:
+                                    flux_aggregate_metrics_to_remove.append(flux_aggregate_base_name)
+
                         if flux_aggregate_metrics_to_remove:
                             try:
                                 logger.info('metrics_manager :: removing %s metrics from analyzer.flux_aggregate_metrics' % str(len(flux_aggregate_metrics_to_remove)))
@@ -3249,6 +3606,13 @@ class Metrics_Manager(Thread):
                                 logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_aggregate_metrics Redis set')
                         else:
                             logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_aggregate_metrics')
+
+                        # @added 20251114 - Feature #5670: metrics_manager - expire flux aggregate_metrics
+                        # Only consider the metrics that have been flushed by
+                        # flux to be used
+                        if flux_active_aggregation_metrics:
+                            flux_aggregate_metrics_list = list(flux_active_aggregation_metrics)
+
                         if flux_aggregate_metrics_list:
                             # Replace the existing flux.aggregate_metrics Redis set
                             try:
@@ -3276,17 +3640,35 @@ class Metrics_Manager(Thread):
                                         logger.error('error :: metrics_manager :: set_memcache_key failed to set metrics_manager.flux.aggregate_metrics - %s' % (
                                             err))
 
+                            # @added 20251114 - Feature #4404: flux - external_settings - aggregation
+                            # Optimise adding to Redis hash in a single operation
+                            metrics_manager_flux_aggregate_metrics_hash_dict = {}
+
                             # Create a Redis hash for flux/listen.  These entries are
                             # managed flux/listen, if the timestamp for an entry is
                             # older than 12 hours flux/listen removes it from the hash
                             time_now = int(time())
                             for flux_aggregate_metric in flux_aggregate_metrics_list:
                                 try:
-                                    self.redis_conn.hset(
-                                        'metrics_manager.flux.aggregate_metrics.hash', flux_aggregate_metric,
-                                        time_now)
+                                    # @modified 20251114 - Feature #4404: flux - external_settings - aggregation
+                                    # Optimise adding to Redis hash in a single operation
+                                    #self.redis_conn.hset(
+                                    #    'metrics_manager.flux.aggregate_metrics.hash', flux_aggregate_metric,
+                                    #    time_now)
+                                    metrics_manager_flux_aggregate_metrics_hash_dict[flux_aggregate_metric] = time_now
                                 except:
                                     pass
+
+                            # @added 20251114 - Feature #4404: flux - external_settings - aggregation
+                            # Optimise adding to Redis hash in a single operation
+                            if metrics_manager_flux_aggregate_metrics_hash_dict:
+                                try:
+                                    self.redis_conn_decoded.hset(
+                                        'metrics_manager.flux.aggregate_metrics.hash',
+                                        mapping=metrics_manager_flux_aggregate_metrics_hash_dict)
+                                except Exception as err:
+                                    logger.error('error :: metrics_manager :: hset failed on metrics_manager.flux.aggregate_metrics.hash, err: %s' % (
+                                        err))
 
                 # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
                 # Analyzer determines what metrics flux should 0 fill by creating
@@ -3318,8 +3700,17 @@ class Metrics_Manager(Thread):
                             pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, FLUX_ZERO_FILL_NAMESPACES)
                             if pattern_match:
                                 flux_zero_fill_metric = True
+
+                            # @added 20251114 - Feature #5670: metrics_manager - expire flux aggregate_metrics
+                            # Only consider the metrics that have been flushed by
+                            # flux to be used
+                            if flux_active_aggregation_metrics:
+                                if i_base_name not in flux_active_aggregation_metrics:
+                                    flux_zero_fill_metric = False
+
                             if flux_zero_fill_metric:
                                 flux_zero_fill_metrics.append(i_base_name)
+
                         try:
                             self.redis_conn.delete('analyzer.flux_zero_fill_metrics')
                         except:
@@ -3873,6 +4264,40 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: metric_management_process :: memory usage after custom_stale_period management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
 
+                # @added 20210825 - Feature #4164: luminosity - cloudbursts
+                metric_names_with_ids = {}
+                # @added 20211004 - Feature #4264: luminosity - cross_correlation_relationships
+                ids_with_metric_names = {}
+
+                # @added 20210430 - Task #4030: refactoring
+                metric_names = []
+                try:
+                    # @modified 20210825 - Feature #4164: luminosity - cloudbursts
+                    # metric_names = get_all_db_metric_names(skyline_app)
+                    with_ids = True
+                    # @modified 20220302 - Feature #4444: webapp - inactive_metrics
+                    #                      Feature #3828: Add inactive columns to the metrics DB table
+                    #                      Feature #4468: flux - remove_namespace_quota_metrics
+                    # Use the method to exclude metrics that have been set to inactive
+                    # metric_names, metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+                    metric_names, metric_names_with_ids = get_all_active_db_metric_names(skyline_app, with_ids)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to get_all_active_db_metric_names - %s' % (
+                        err))
+
+                # @added 20250321 - Feature #5611: custom_algorithm_only
+                custom_algorithms_only_per_app = {}
+                if CUSTOM_ALGORITHMS:
+                    try:
+                        custom_algorithms_only_per_app = manage_custom_algorithm_only_metrics(self, CUSTOM_ALGORITHMS, metric_names)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to get_all_active_db_metric_names - %s' % (
+                            err))
+                    if custom_algorithms_only_per_app:
+                        del custom_algorithms_only_per_app
+
                 # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
                 #                   Branch #1444: thunder
                 # Prune any entries out of the analyzer.metrics.last_timeseries_timestamp
@@ -4047,7 +4472,12 @@ class Metrics_Manager(Thread):
                             expiration = external_boundary_metrics[key]['expiration']
                             minimum_avg = 0
                             if 'minimum_avg' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
-                                minimum_avg = float(external_boundary_metrics[key]['boundary'][algo]['minimum_avg'])
+                                # @modified 20250102 - Feature #5104: boundary - external_settings
+                                # Set to 0 if None
+                                try:
+                                    minimum_avg = float(external_boundary_metrics[key]['boundary'][algo]['minimum_avg'])
+                                except:
+                                    minimum_avg = 0
                             minimum_avg_seconds = 0
                             if 'minimum_avg_seconds' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
                                 minimum_avg_seconds = int(external_boundary_metrics[key]['boundary'][algo]['minimum_avg_seconds'])
@@ -4538,6 +4968,11 @@ class Metrics_Manager(Thread):
                         str(len(boundary_metrics)), str(len(unique_base_names)),
                         str(len(active_labelled_metrics_with_id))))
                     boundary_metrics_keys_updated = 0
+
+                    # @added 20251114 - Feature #5104: boundary - external_settings
+                    # Optimise adding to Redis hash in a single operation
+                    boundary_metrics_hash_key_dict = {}
+
                     if boundary_metrics:
                         boundary_metrics_base_names = list(boundary_metrics.keys())
                         try:
@@ -4548,14 +4983,29 @@ class Metrics_Manager(Thread):
                                 boundary_metrics_hash_key, e))
                         for base_name in boundary_metrics_base_names:
                             try:
-                                self.redis_conn.hset(
-                                    boundary_metrics_hash_key, base_name,
-                                    str(boundary_metrics[base_name]))
+                                # @modified 20251114 - Feature #5104: boundary - external_settings
+                                # Optimise adding to Redis hash in a single operation
+                                #self.redis_conn.hset(
+                                #    boundary_metrics_hash_key, base_name,
+                                #    str(boundary_metrics[base_name]))
+                                boundary_metrics_hash_key_dict[base_name] = str(boundary_metrics[base_name])
+
                                 boundary_metrics_keys_updated += 1
                             except Exception as e:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: metrics_manager :: failed to add entry to %s for - %s - %s' % (
                                     boundary_metrics_hash_key, base_name, e))
+
+                    # @added 20251114 - Feature #5104: boundary - external_settings
+                    # Optimise adding to Redis hash in a single operation
+                    if boundary_metrics_hash_key_dict:
+                        try:
+                            self.redis_conn_decoded.hset(
+                                boundary_metrics_hash_key,
+                                mapping=boundary_metrics_hash_key_dict)
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: hset failed on %s, err: %s' % (
+                                boundary_metrics_hash_key, err))
 
                     # Remove entries not defined in BOUNDARY_METRICS
                     boundary_metrics_keys_removed = 0
@@ -5682,27 +6132,7 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: managed untrainable new metrics, added %s new metrics and removed %s mature metrics' % (
                     str(managed_new_metrics_dict['added']), str(managed_new_metrics_dict['removed'])))
 
-                # @added 20210825 - Feature #4164: luminosity - cloudbursts
-                metric_names_with_ids = {}
-                # @added 20211004 - Feature #4264: luminosity - cross_correlation_relationships
-                ids_with_metric_names = {}
-
                 # @added 20210430 - Task #4030: refactoring
-                metric_names = []
-                try:
-                    # @modified 20210825 - Feature #4164: luminosity - cloudbursts
-                    # metric_names = get_all_db_metric_names(skyline_app)
-                    with_ids = True
-                    # @modified 20220302 - Feature #4444: webapp - inactive_metrics
-                    #                      Feature #3828: Add inactive columns to the metrics DB table
-                    #                      Feature #4468: flux - remove_namespace_quota_metrics
-                    # Use the method to exclude metrics that have been set to inactive
-                    # metric_names, metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
-                    metric_names, metric_names_with_ids = get_all_active_db_metric_names(skyline_app, with_ids)
-                except Exception as err:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: metrics_manager :: failed to get_all_active_db_metric_names - %s' % (
-                        err))
                 if metric_names:
                     try:
                         # @modified 20231223 - Task #5188: Optimise redis renames
@@ -5744,12 +6174,16 @@ class Metrics_Manager(Thread):
                 all_db_metric_names_with_ids = {}
                 try:
                     with_ids = True
-                    all_db_metric_names, all_db_metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+                    # @modified 20251009 - Bug #5522: Handle duplicate metric names
+                    #all_db_metric_names, all_db_metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+                    all_db_metric_names, all_db_metric_names_with_ids = get_all_db_metric_names_db_only(skyline_app, with_ids)
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: failed to get_all_db_metric_names - %s' % (
                         err))
-                
+                logger.info('metrics_manager :: determined %s metric names from the DB with get_all_db_metric_names' % (
+                    str(len(all_db_metric_names))))
+
                 all_db_metric_ids_with_names = {}
                 for metric in list(all_db_metric_names_with_ids.keys()):
                     all_db_metric_ids_with_names[all_db_metric_names_with_ids[metric]] = metric
@@ -5778,6 +6212,7 @@ class Metrics_Manager(Thread):
                         except:
                             unique_parent_namespaces[parent_namespace] = 1
                     unique_parent_namespaces_timings.append(time() - start_unique_parent_namespaces_timing)
+                logger.info('metrics_manager :: determined %s unique parent namespaces' % str(len(unique_parent_namespaces)))
 
                 # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
                 #                   Task #5248: Optimise ionosphere_functions.get_related
@@ -5939,6 +6374,20 @@ class Metrics_Manager(Thread):
                     logger.error('error :: metrics_manager :: smembers on horizon.active_metrics_not_in_metric_names_with_ids failed - %s' % (
                         str(err)))
                 set_metrics_as_active_count = 0
+
+                # @added 20251008 - Bug #5522: Handle duplicate metric names
+                panorama_metric_ids_to_reactive = []
+                panorama_metric_ids_and_basenames_duplicated = {}
+                try:
+                    panorama_metric_ids_and_basenames_duplicated = self.redis_conn_decoded.hgetall('panorama.not_inserted_duplicate_metrics')
+                    panorama_metric_ids_to_reactive = [int(metric_id) for metric_id in list(panorama_metric_ids_and_basenames_duplicated.keys())]
+                    if panorama_metric_ids_to_reactive:
+                        logger.info('metrics_manager :: determined %s metric ids to reactive from panorama.not_inserted_duplicate_metrics' % str(len(panorama_metric_ids_to_reactive)))
+                        metric_ids_to_reactive = metric_ids_to_reactive + panorama_metric_ids_to_reactive
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: hkeys failed on panorama.not_inserted_duplicate_metrics, err: %s' % (
+                        str(err)))
+
                 if metric_ids_to_reactive:
                     try:
                         self.redis_conn_decoded.delete('horizon.active_metrics_not_in_metric_names_with_ids')
@@ -5952,6 +6401,16 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: set_metric_ids_as_active failed - %s' % (
                             str(err)))
                     logger.info('metrics_manager :: set %s metric ids as active again' % str(set_metrics_as_active_count))
+
+                # @added 20251008 - Bug #5522: Handle duplicate metric names
+                if panorama_metric_ids_to_reactive:
+                    try:
+                        panorama_metric_ids_to_reactive_strs = [str(metric_id) for metric_id in panorama_metric_ids_to_reactive]
+                        panorama_metric_ids_to_reactive_deleted = self.redis_conn_decoded.hdel('panorama.not_inserted_duplicate_metrics', *set(panorama_metric_ids_to_reactive_strs))
+                        logger.info('metrics_manager :: deleted %s reactived metric ids from panorama.not_inserted_duplicate_metrics' % str(panorama_metric_ids_to_reactive_deleted))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: hkeys failed on panorama.not_inserted_duplicate_metrics, err: %s' % (
+                            str(err)))
 
                 # @added 20230605 - Feature #4932: mute_alerts_on
                 mute_alerts_on_dict = {}
@@ -6060,17 +6519,32 @@ class Metrics_Manager(Thread):
 
                     del analyzer_labelled_metrics_last_timeseries_timestamps
 
+                    # @added 20251008 - Bug #5522: Handle duplicate metric names
+                    duplicate_mids_readded = 0
+                    if panorama_metric_ids_and_basenames_duplicated:
+                        for metric_id_str, c_metric_name in panorama_metric_ids_and_basenames_duplicated.items():
+                            if '{' in c_metric_name and '=' in c_metric_name and '_tenant_id="' in c_metric_name:
+                                active_labelled_metrics_with_id[c_metric_name] = int(metric_id_str)
+                                duplicate_mids_readded += 1
+                        logger.info('metrics_manager :: %s labelled_metrics added to active_labelled_metrics_with_id from panorama_metric_ids_and_basenames_duplicated' % str(duplicate_mids_readded))
+
                     # @added 20230406 - Feature #4882: labelled_metrics - resolution and data sparsity
                     #                   Task #2732: Prometheus to Skyline
                     #                   Branch #4300: prometheus
                     updated_labelled_metrics_sparsity = {}
                     if active_labelled_ids_with_metrics:
-                        try:
-                            updated_labelled_metrics_sparsity = update_labelled_metrics_data_sparsity(self, active_labelled_ids_with_metrics, RUN_EVERY)
-                        except Exception as err:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity failed - %s' % err)
-                        logger.info('metrics_manager :: sparsity updated %s labelled_metric' % str(len(updated_labelled_metrics_sparsity)))
+
+                        # @added 20250915 - Bug #5522: Handle duplicate metric names
+                        # Do not run if load shedding is active
+                        if load_shedding_active:
+                            logger.info('metrics_manager :: load_shedding_active - not running update_labelled_metrics_data_sparsity')
+                        else:
+                            try:
+                                updated_labelled_metrics_sparsity = update_labelled_metrics_data_sparsity(self, active_labelled_ids_with_metrics, RUN_EVERY)
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: update_labelled_metrics_data_sparsity failed - %s' % err)
+                            logger.info('metrics_manager :: sparsity updated %s labelled_metric' % str(len(updated_labelled_metrics_sparsity)))
 
                     # @added 20230203 - Feature #4840: flux - prometheus - x-test-only header
                     # Readded all_db_metric_names_with_ids so that labelled_metrics
@@ -6223,13 +6697,16 @@ class Metrics_Manager(Thread):
                 #                   Feature #4888: analyzer - load_shedding
                 if load_shedding_active:
                     logger.info('metrics_manager :: load_shedding_active - not running manage_inactive_metrics')
+                    # @modified 20251008 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    # Do not set the CONSTANT to a variable here
+                    # MANAGE_INACTIVE_METRICS = False
 
                 try:
                     # @added 20240111 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
                     # @modified 20240218 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
                     #                      Feature #4888: analyzer - load_shedding
                     # if MANAGE_INACTIVE_METRICS:
-                    if MANAGE_INACTIVE_METRICS:
+                    if MANAGE_INACTIVE_METRICS and not load_shedding_active:
                         reactivate_metric_ids = manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_with_id)
                     else:
                         logger.info('metrics_manager :: not running manage_inactive_metrics, MANAGE_INACTIVE_METRICS: %s' % str(MANAGE_INACTIVE_METRICS))
@@ -6253,6 +6730,24 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: set_metric_ids_as_active failed after manage_inactive_metrics - %s' % (
                             str(err)))
                     logger.info('metrics_manager :: set %s metric ids as active again after manage_inactive_metrics' % str(set_metrics_as_active_count))
+
+                # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+                #                   Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                # Once every day remove inactive labelled_metrics from the
+                # labelled_metrics.metric_resolutions and
+                # labelled_metrics.resolution_sparsity_last_checked hashes.
+                try:
+                    if MANAGE_INACTIVE_METRICS and not load_shedding_active:
+                        logger.info('metrics_manager :: running manage_inactive_labelled_metrics_resolution_hashes')
+                        removed_inactive_labelled_metrics_ids = manage_inactive_labelled_metrics_resolution_hashes(self)
+                        logger.info('metrics_manager :: manage_inactive_labelled_metrics_resolution_hashes reports %s removed ids' % (
+                            str(removed_inactive_labelled_metrics_ids)))
+                    else:
+                        logger.info('metrics_manager :: not running manage_inactive_labelled_metrics_resolution_hashes, MANAGE_INACTIVE_METRICS: %s, load_shedding_active: %s' % (
+                            str(MANAGE_INACTIVE_METRICS),
+                            str(load_shedding_active)))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: manage_inactive_labelled_metrics_resolution_hashes failed, err: %s' % err)
 
                 # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
                 # Create feedback_labelled_metrics from active_labelled_metrics_with_id
@@ -6981,6 +7476,13 @@ class Metrics_Manager(Thread):
 
             if unique_metrics_count == 0:
                 logger.info('metrics_manager :: no metrics in redis. try adding some - see README')
+                sleep(10)
+                continue
+
+            # @added 20241217 - Feature #2916: ANALYZER_ENABLED setting
+            # Honour ANALYZER_ENABLED
+            if not ANALYZER_ENABLED:
+                logger.info('metrics_manager :: ANALYZER_ENABLED %s, nothing to do' % str(ANALYZER_ENABLED))
                 sleep(10)
                 continue
 

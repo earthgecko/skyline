@@ -34,7 +34,7 @@ import datetime as dt
 # Added gmtime and strftime
 # @modified 20191030 - Branch #3262: py3
 # from time import (time, gmtime, strftime)
-from time import gmtime, strftime, time
+from time import gmtime, strftime, time, sleep
 from email import charset
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
@@ -98,7 +98,7 @@ if True:
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         get_redis_conn, is_derivative_metric,
         # @modified 20191105 - Task #3290: Handle urllib2 in py3
         #                      Branch #3262: py3
@@ -663,7 +663,7 @@ def alert_smtp(alert, metric, context):
         if image_data is None and data_source == 'graphite':
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20190520 - Branch #3002: docker
                 # image_data = urllib2.urlopen(link).read()  # nosec
                 if graphite_custom_headers:
@@ -856,6 +856,14 @@ def alert_smtp(alert, metric, context):
                     with open(anomaly_json, 'r') as f:
                         raw_timeseries = f.read()
                     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                    if 'nan' in timeseries_array_str:
+                        try:
+                            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                        except Exception as err:
+                            logger.error('error :: failed to replace nan with None, err: %s' % (
+                                err))
+
                     timeseries = literal_eval(timeseries_array_str)
                     logger.info('%s Redis timeseries replaced with timeseries from :: %s' % (skyline_app, anomaly_json))
                     timeseries_x = [float(item[0]) for item in timeseries]
@@ -1011,7 +1019,9 @@ def alert_smtp(alert, metric, context):
                     ax.set_axis_bgcolor(background_hex_code)
 
                 try:
-                    datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+                    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                    #datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+                    datetimes = [dt.datetime.fromtimestamp(int(ts), tz=dt.timezone.utc) for ts in timeseries_x]
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - datetimes: %s' % 'OK')
                 except:
@@ -1061,7 +1071,9 @@ def alert_smtp(alert, metric, context):
                 # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
                 #                      Task #4778: v4.0.0 - update dependencies
                 # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
-                if matplotlib_version < '3.7.0':
+                # @modified 20250610 - Task #5627: v5.0.0 update dependencies
+                #if matplotlib_version < '3.7.0':
+                if matplotlib_version == 'deprecated':
                     ax.grid(b=True, which='both', axis='both', color='lightgray',
                             linestyle='solid', alpha=0.5, linewidth=0.6)
                 else:
@@ -1153,7 +1165,9 @@ def alert_smtp(alert, metric, context):
 
     # @added 20170806 - Feature #1830: Ionosphere alerts
     # Show a human date in alerts
-    alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
+    alerted_at = str(dt.datetime.fromtimestamp(int(metric[2]), tz=dt.timezone.utc))
 
     try:
         # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1588,64 +1602,6 @@ def alert_pagerduty(alert, metric, context):
         return
 
 
-def alert_hipchat(alert, metric, context):
-    """
-    Called by :func:`~trigger_alert` and sends an alert the hipchat room that is
-    configured in settings.py.
-    """
-
-    if settings.HIPCHAT_ENABLED:
-        sender = settings.HIPCHAT_OPTS['sender']
-        import hipchat
-        hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
-        rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
-            context, str(int(full_duration_in_hours)), str(metric[0]))
-        graph_title_string = quote(unencoded_graph_title, safe='')
-        graph_title = '&title=%s' % graph_title_string
-
-        # @added 20180809 - Bug #2498: Incorrect scale in some graphs
-        # If -xhours is used the scale is incorrect if x hours > than first
-        # retention period, passing from and until renders the graph with the
-        # correct scale.
-        # @modified 20181009 - Feature #2618: alert_slack
-        #                      Bug #2498: Incorrect scale in some graphs
-        # Corrected the from_timestamp and until_timestamp as they were incorrectly
-        # order, however Graphite still rendered the correct graph as it plotted
-        # reverse, which is the same.  Also using the metric[0] value instead of
-        # time()
-        # from_timestamp = int(time())
-        # until_timestamp = from_timestamp - full_duration_seconds
-        until_timestamp = int(metric[2])
-        from_timestamp = until_timestamp - full_duration_seconds
-
-        graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
-        logger.info('graphite_from - %s' % str(graphite_from))
-        graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
-        logger.info('graphite_until - %s' % str(graphite_until))
-
-        graphite_port = get_graphite_port(skyline_app)
-        graphite_render_uri = get_graphite_render_uri(skyline_app)
-
-        # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
-        # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
-
-        for room in rooms:
-            message = '%s - %s - anomalous metric: %s (value: %s) at %s hours %s' % (
-                sender, context, metric[1], str(metric[0]), str(int(full_duration_in_hours)), embed_graph)
-            hipchat_color = settings.HIPCHAT_OPTS['color']
-            hipster.method(
-                'rooms/message', method='POST',
-                parameters={'room_id': room, 'from': 'Skyline', 'color': hipchat_color, 'message': message})
-    else:
-        return
-
-
 def alert_syslog(alert, metric, context):
     """
     Called by :func:`~trigger_alert` and logs anomalies to syslog.
@@ -1813,6 +1769,8 @@ def alert_slack(alert, metric, context):
     except:
         logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
         return False
+    # @modified 20230107 - Task #4778: v4.0.0 - update dependencies
+    # Added nosec for bandit "B105":hardcoded_password_string - Possible hardcoded password
     if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':  # nosec B105
         logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
@@ -1836,15 +1794,23 @@ def alert_slack(alert, metric, context):
     #                      Task #3556: Update deps
     # slackclient v2 has a version function, < v2 does not
     # from slackclient import SlackClient
-    try:
-        from slack import version as slackVersion
-        slack_version = slackVersion.__version__
-    except:
-        slack_version = '1.3'
-    if slack_version == '1.3':
-        from slackclient import SlackClient
-    else:
-        from slack import WebClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    #try:
+    #    from slack import version as slackVersion
+    #    slack_version = slackVersion.__version__
+    #except:
+    #    slack_version = '1.3'
+    #if slack_version == '1.3':
+    #    from slackclient import SlackClient
+    #else:
+        # @modified 20250305 - Task #5344: Migrate slack files.upload method
+        #from slack import WebClient
+    #    from slack_sdk import WebClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    slack_version = 0
+    from slack_sdk import WebClient
 
     import simplejson as json
 
@@ -2181,6 +2147,16 @@ def alert_slack(alert, metric, context):
     except:
         filename = None
 
+    # @added 20250305 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        default_channel = settings.SLACK_OPTS['default_channel']
+        default_channel_id = settings.SLACK_OPTS['default_channel_id']
+    except:
+        default_channel = None
+        default_channel_id = None
+
     try:
         bot_user_oauth_access_token = settings.SLACK_OPTS['bot_user_oauth_access_token']
     except:
@@ -2218,9 +2194,9 @@ def alert_slack(alert, metric, context):
             sc = SlackClient(bot_user_oauth_access_token)
         else:
             sc = WebClient(bot_user_oauth_access_token, timeout=10)
-    except:
+    except Exception as err:
         logger.info(traceback.format_exc())
-        logger.error('error :: alert_slack - could not initiate slack.RTMClient')
+        logger.error('error :: alert_slack - could not initiate slack WebClient, err: %s' % err)
         return False
 
     # @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -2273,6 +2249,42 @@ def alert_slack(alert, metric, context):
             err))
     if metric_muted:
         send_msg = False
+
+    # @added 20250304 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        channel_ids = settings.SLACK_OPTS['channel_ids']
+    except:
+        channel_ids = {}
+    channel_ids_from_redis = False
+    if not channel_ids:
+        try:
+            channel_ids = redis_conn_decoded.hgetall('skyline.slack_channel_ids')
+            if channel_ids:
+                channel_ids_from_redis = True
+        except Exception as err:
+            logger.error('error :: failed to hgetall skyline.slack_channel_ids - %s' % (
+                err))
+    if not channel_ids:
+        try:
+            conversations_channels = sc.conversations_list()
+            if conversations_channels['ok']:
+                for channel in conversations_channels['channels']:
+                    channel_ids[channel['name']] = channel['id']
+        except Exception as err:
+            logger.error('error :: alert_slack - failed to determine conversations_list for channel ids, err: %s' % err)
+        if channel_ids:
+            if not channel_ids_from_redis:
+                try:
+                    channel_ids_from_redis = redis_conn_decoded.hset('skyline.slack_channel_ids', mapping=channel_ids)
+                    if channel_ids:
+                        channel_ids_from_redis = True
+                except Exception as err:
+                    logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                        err))
+    if default_channel_id:
+        channel_ids[default_channel] = default_channel_id
 
     for channel in channels:
         if send_slack_message:
@@ -2349,9 +2361,20 @@ def alert_slack(alert, metric, context):
                             'files.upload', filename=filename, channels=channel,
                             initial_comment=initial_comment, file=open(image_file, 'rb'))
                     else:
-                        slack_file_upload = sc.files_upload(
-                            filename=filename, channels=channel,
-                            initial_comment=initial_comment, file=open(image_file, 'rb'))
+                        # @modified 20250305 - Task #5344: Migrate slack files.upload method
+                        #slack_file_upload = sc.files_upload(
+                        #    filename=filename, channels=channel,
+                        #    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                        try:
+                            channel_id = channel_ids[channel]
+                        except:
+                            channel_id = channel
+                        slack_file_upload = sc.files_upload_v2(
+                            file=image_file,
+                            channel=channel_id,
+                            initial_comment=initial_comment,
+                        )
+
                     if not slack_file_upload['ok']:
                         logger.error('error :: alert_slack - failed to send slack message')
                     # @added 20181205 - Branch #2646: slack
@@ -2362,7 +2385,45 @@ def alert_slack(alert, metric, context):
                     # is created.
                     else:
                         logger.info('alert_slack - sent slack message')
-                        if slack_thread_updates:
+
+                        # @added 20250305 - Task #5344: Migrate slack files.upload method
+                        # The new files_upload_v2 method does not return the
+                        # same response as the previous files_upload method as
+                        # this new method can have multiple files uploads and
+                        # each of them have their file info.
+                        file_id = None
+                        try:
+                            file_id = slack_file_upload['file']['id']
+                        except Exception as err:
+                            logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                                err))
+                        loop_start = time()
+                        while True:
+                            now = time()
+                            if (now - loop_start) > 5:
+                                break
+                            try:
+                                file_info = sc.files_info(file=file_id)
+                                shares = file_info['file'].get('shares')
+                                if shares:
+                                    for share_type in ['public', 'private']:
+                                        if share_type in shares:
+                                            for channel_id, share_list in shares[share_type].items():
+                                                for share in share_list:
+                                                    slack_thread_ts = share['ts']
+                                                    break
+                            except Exception as err:
+                                logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                                    err))
+                            sleep(1)
+                        if slack_thread_ts:
+                            logger.info('alert_slack - the slack_thread_ts is %s' % (
+                                str(slack_thread_ts)))
+
+                        # @modified 20250304 - Task #5344: Migrate slack files.upload method
+                        #if slack_thread_updates:
+                        if slack_thread_updates and slack_thread_ts is None:
+
                             # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
                             #                   Issue #111: New slack messaging does not handle public channel
                             # The sc.api_call 'files.upload' response which generates
@@ -2825,6 +2886,14 @@ def alert_http(alert, metric, context):
                 if raw_timeseries:
                     try:
                         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                        if 'nan' in timeseries_array_str:
+                            try:
+                                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                            except Exception as err:
+                                logger.error('error :: failed to replace nan with None, err: %s' % (
+                                    err))
+
                         timeseries = literal_eval(timeseries_array_str)
                         values = pd.Series([x[1] for x in timeseries])
                         array_amin = np.amin(values)

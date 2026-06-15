@@ -37,7 +37,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200506 - Feature #3532: Sort all time series
     sort_timeseries,
@@ -285,9 +285,11 @@ class AnalyzerBatch(Thread):
 
     # @modified 20240602 - Feature #5368: analyzer_batch - reprocess
     # Added reprocess_work
+    # @modified 20250321 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
     def spin_batch_process(
             self, i, run_timestamp, metric_name, last_analyzed_timestamp,
-            batch=[], reprocess_work={}):
+            custom_algorithm_only, batch=[], reprocess_work={}):
         """
         Assign a metric and last_analyzed_timestamp for a process to analyze.
 
@@ -296,6 +298,7 @@ class AnalyzerBatch(Thread):
         :param metric_name: the FULL_NAMESPACE metric name as keyed in Redis
         :param last_analyzed_timestamp: the last analysed timestamp as recorded
             in the Redis key last_timestamp.basename key.
+        :param custom_algorithm_only: if this is a custom_algorithm_only run.
 
         :return: returns True
 
@@ -313,7 +316,9 @@ class AnalyzerBatch(Thread):
         if not reprocess_work:
             if not batch:
                 batch_mode = False
-                metrics = [[metric_name, last_analyzed_timestamp]]
+                # @modified 20250321 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                metrics = [[metric_name, last_analyzed_timestamp, custom_algorithm_only]]
                 logger.info('child_batch_process_pid - %s, processing %s from %s' % (
                     str(child_batch_process_pid), metric_name, str(last_analyzed_timestamp)))
             else:
@@ -463,6 +468,10 @@ class AnalyzerBatch(Thread):
         zero_fill_metrics = []
         try:
             zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+            # @added 20251027 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+            # Use a set
+            if zero_fill_metrics:
+                zero_fill_metrics = set(zero_fill_metrics)
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: zero_fill_metrics_list failed - %s' % err)
@@ -555,6 +564,15 @@ class AnalyzerBatch(Thread):
             last_analyzed_timestamp = item[1]
             reprocess_until = None
 
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            i_custom_algorithm_only = None
+            try:
+                if item[2] == 'custom_algorithm_only':
+                    i_custom_algorithm_only = 'custom_algorithm_only'
+            except:
+                i_custom_algorithm_only = None
+
             # @added 20240607 - Feature #5368: analyzer_batch - reprocess
             # Allow for oneshot analysis
             oneshot = False
@@ -626,12 +644,16 @@ class AnalyzerBatch(Thread):
             if not last_redis_timestamp:
                 try:
                     last_redis_timestamp_data = self.redis_conn_decoded.get(last_metric_timestamp_key)
-                    last_redis_timestamp = int(last_redis_timestamp_data)
-                except:
-                    logger.error('error :: failed to get Redis key %s' % last_metric_timestamp_key)
+                    if last_redis_timestamp_data:
+                        last_redis_timestamp = int(last_redis_timestamp_data)
+                except Exception as err:
+                    logger.error('error :: failed to get Redis key %s, err: %s' % (last_metric_timestamp_key, err))
 
             get_raw_series = True
-            if last_redis_timestamp:
+            # @modified 20250321 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            #if last_redis_timestamp:
+            if last_redis_timestamp and not i_custom_algorithm_only:
                 if last_redis_timestamp > last_analyzed_timestamp:
                     get_raw_series = False
                     logger.info('The %s is %s, the passed last_analyzed_timestamp is %s, not getting raw_series returning' % (
@@ -666,7 +688,12 @@ class AnalyzerBatch(Thread):
 
                 # Remove for work list
                 redis_set = 'analyzer.batch'
-                data = [metric_name, int(last_analyzed_timestamp)]
+
+                # @modified 20250321 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                #data = [metric_name, int(last_analyzed_timestamp)]
+                data = [metric_name, int(last_analyzed_timestamp), i_custom_algorithm_only]
+
                 try:
                     self.redis_conn.srem(redis_set, str(data))
                     logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -724,8 +751,18 @@ class AnalyzerBatch(Thread):
             # euthanize keys if not done in roomba, allows for backfill processing
             # via analyzer_batch
             roombaed = False
+
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only, only roomba if not custom_algorithm_only
+            do_roomba = True
+            if i_custom_algorithm_only == 'custom_algorithm_only':
+                do_roomba = False
+
             # if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
-            if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS and len(timeseries) > 0:
+            # @modified 20250321 - Feature #5611: custom_algorithm_only
+            # Do not roomba for custom_algorithm_only
+            #if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS and len(timeseries) > 0:
+            if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS and len(timeseries) > 0 and do_roomba:
                 if LOCAL_DEBUG:
                     logger.debug('debug :: checking if roomba needs to be run on %s' % (base_name))
                 now = int(time())
@@ -755,10 +792,8 @@ class AnalyzerBatch(Thread):
                                 #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
                                 custom_duration = True
                                 break
-
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+                except Exception as err:
+                    logger.error('error :: analyzer_batch :: failed to custom durations, err: %s' % err)
 
                 namespace_unique_metrics = '%sunique_metrics' % str(settings.FULL_NAMESPACE)
                 euthanized = 0
@@ -878,7 +913,10 @@ class AnalyzerBatch(Thread):
                     logger.info('No raw_series defined after euthanizing %s, returning' % (key))
                     # Remove for work list
                     redis_set = 'analyzer.batch'
-                    data = [metric_name, int(last_analyzed_timestamp)]
+                    # @modified 20250321 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    #data = [metric_name, int(last_analyzed_timestamp)]
+                    data = [metric_name, int(last_analyzed_timestamp), i_custom_algorithm_only]
                     try:
                         self.redis_conn.srem(redis_set, str(data))
                         logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -929,6 +967,10 @@ class AnalyzerBatch(Thread):
             # first_last_duration_timestamp = last_analyzed_timestamp - settings.FULL_DURATION
             first_last_duration_timestamp = last_analyzed_timestamp - use_full_duration
 
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Just pass the whole time series to the custom_algorithm
+            custom_algorithm_timeseries = list(timeseries)
+
             timeseries_length = len(timeseries)
             full_duration_timeseries = []
             try:
@@ -942,6 +984,11 @@ class AnalyzerBatch(Thread):
                             str(timeseries_length), str(full_duration_timeseries_length)))
             except:
                 timeseries = []
+
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Just pass the whole time series to the custom_algorithm
+            if i_custom_algorithm_only == 'custom_algorithm_only':
+                timeseries = list(custom_algorithm_timeseries)
 
             # @added 20240604 - Feature #5352: vista - bigquery
             # Ensure that only metrics belonging to the shard are processed on
@@ -1003,6 +1050,11 @@ class AnalyzerBatch(Thread):
                 last_timestamp_present = timeseries[-1][0]
                 if last_timestamp_present < reprocess_until:
                     fetch_data_from_graphite = True
+
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Do not fetch data from Graphite for custom_algorithm_only
+            if i_custom_algorithm_only == 'custom_algorithm_only':
+                fetch_data_from_graphite = False
 
             if fetch_data_from_graphite:
                 graphite_timeseries = []
@@ -1181,6 +1233,11 @@ class AnalyzerBatch(Thread):
             del reversed_timeseries
             timestamps_to_analyse = list(reversed(timestamps_to_analyse))
 
+            # @added 20250321 - Feature #5611: custom_algorithm_only
+            # Only assign the last timestamp to analyse for custom_algorithm_only
+            if i_custom_algorithm_only == 'custom_algorithm_only':
+                timestamps_to_analyse = [timeseries[-1][0]]
+
             # @added 20200413 - Feature #3486: analyzer_batch
             #                   Feature #3480: batch_processing
             # Handle there being no timestamps_to_analyse and report such as
@@ -1229,7 +1286,10 @@ class AnalyzerBatch(Thread):
                 #                   Feature #3504: Handle airgaps in batch metrics
                 # If there are no data points to analyze remove from the set
                 redis_set = 'analyzer.batch'
-                data = [metric_name, int(last_analyzed_timestamp)]
+                # @modified 20250321 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                #data = [metric_name, int(last_analyzed_timestamp)]
+                data = [metric_name, int(last_analyzed_timestamp), i_custom_algorithm_only]
                 try:
                     self.redis_conn.srem(redis_set, str(data))
                     logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -1674,7 +1734,13 @@ class AnalyzerBatch(Thread):
                     # and only run if a oneshot_results dict does not exist
                     triggered_algorithms = None
                     if len(oneshot_results) == 0:
-                        anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms, custom_algorithms_results = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present, custom_algorithm_overrides=custom_algorithm_overrides)
+
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        #anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms, custom_algorithms_results = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present, custom_algorithm_overrides=custom_algorithm_overrides)
+                        # @modified 20250326 - Feature #5611: custom_algorithm_only
+                        # Added derivative_metrics for custom_algorithm_only
+                        anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms, custom_algorithms_results = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present, i_custom_algorithm_only, derivative_metrics=derivative_metrics, custom_algorithm_overrides=custom_algorithm_overrides)
 
                         # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
                         #                   Branch #5532: v5.0.0-alpha
@@ -2361,7 +2427,11 @@ class AnalyzerBatch(Thread):
                                 'value': float(datapoint), 'metric': base_name,
                                 'timestamp': int(float(metric_timestamp)),
                                 'triggered_algorithms': triggered_algorithms,
-                                'algorithms_run': algorithms_run}
+                                'algorithms_run': algorithms_run,
+                                # @added 20250324 - Feature #5611: custom_algorithm_only
+                                # Added custom_algorithm_only
+                                'custom_algorithm_only': i_custom_algorithm_only,
+                                }
                             try:
                                 self.redis_conn.hset(alerts_hash_key, hash_key_key, str(hash_key_value))
                                 logger.info('added Redis alert key - %s to %s with %s' % (
@@ -2564,7 +2634,11 @@ class AnalyzerBatch(Thread):
             if use_last_analyzed_timestamp:
                 last_analyzed_timestamp = use_last_analyzed_timestamp
 
-            data = [metric_name, int(last_analyzed_timestamp)]
+            # @added 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            #data = [metric_name, int(last_analyzed_timestamp)]
+            data = [metric_name, int(last_analyzed_timestamp), i_custom_algorithm_only]
+
             try:
                 self.redis_conn.srem(redis_set, str(data))
                 logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -2829,6 +2903,13 @@ class AnalyzerBatch(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: Analyzer batch could not update the Redis %s key' % skyline_app)
 
+                # @added 20241217 - Feature #2916: ANALYZER_ENABLED setting
+                # Honour ANALYZER_ENABLED
+                if not ANALYZER_ENABLED:
+                    logger.info('ANALYZER_ENABLED %s, nothing to do' % str(ANALYZER_ENABLED))
+                    sleep(10)
+                    continue
+
                 analyzer_batch_work = []
 
                 # @added 20240602 - Feature #5368: analyzer_batch - reprocess
@@ -2905,6 +2986,13 @@ class AnalyzerBatch(Thread):
                     batch_processing_metric = literal_eval(analyzer_batch)
                     metric_name = str(batch_processing_metric[0])
                     last_analyzed_timestamp = int(batch_processing_metric[1])
+
+                    # @added 20250321 - Feature #5611: custom_algorithm_only
+                    try:
+                        custom_algorithm_only = batch_processing_metric[2]
+                    except:
+                        custom_algorithm_only = False
+
                     break
                 except:
                     logger.error(traceback.format_exc())
@@ -2912,6 +3000,8 @@ class AnalyzerBatch(Thread):
                     metric_name = None
                     last_analyzed_timestamp = None
                     batch_processing_metric = None
+                    # @added 20250321 - Feature #5611: custom_algorithm_only
+                    custom_algorithm_only = None
                     sleep(1)
 
             # @added 20200728 - Feature #3480: batch_processing
@@ -2925,7 +3015,17 @@ class AnalyzerBatch(Thread):
                         batch_processing_metric = literal_eval(analyzer_batch)
                         metric_name = str(batch_processing_metric[0])
                         last_analyzed_timestamp = int(batch_processing_metric[1])
-                        unsorted_analyzer_batch_work.append([metric_name, last_analyzed_timestamp])
+
+                        # @added 20250321 - Feature #5611: custom_algorithm_only
+                        try:
+                            i_custom_algorithm_only = batch_processing_metric[2]
+                        except:
+                            i_custom_algorithm_only = False
+
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        #unsorted_analyzer_batch_work.append([metric_name, last_analyzed_timestamp])
+                        unsorted_analyzer_batch_work.append([metric_name, last_analyzed_timestamp, i_custom_algorithm_only])
+
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: could not determine details from analyzer_batch entry')
@@ -2946,14 +3046,33 @@ class AnalyzerBatch(Thread):
                             if item[0] == metric:
                                 timestamp = item[1]
                                 work_timestamps.append(timestamp)
-                        new_analyzer_batch_work.append([metric, timestamp])
+
+                                # @added 20250321 - Feature #5611: custom_algorithm_only
+                                i_custom_algorithm_only = None
+                                try:
+                                    if item[2] == 'custom_algorithm_only':
+                                        i_custom_algorithm_only = 'custom_algorithm_only'
+                                except:
+                                    i_custom_algorithm_only = None
+
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        #new_analyzer_batch_work.append([metric, timestamp])
+                        if i_custom_algorithm_only:
+                            new_analyzer_batch_work.append([metric, timestamp, i_custom_algorithm_only])
+                        else:
+                            new_analyzer_batch_work.append([metric, timestamp, None])
+
                         if len(work_timestamps) > 1:
                             last_work_timestamp = work_timestamps[-1]
                             for work_timestamp in work_timestamps:
                                 if work_timestamp != last_work_timestamp:
                                     # Remove from work list
                                     redis_set = 'analyzer.batch'
-                                    data = [metric, int(work_timestamp)]
+                                    # @modified 20250321 - Feature #5611: custom_algorithm_only
+                                    # Added custom_algorithm_only
+                                    # data = [metric, int(work_timestamp)]
+                                    data = [metric, int(work_timestamp), i_custom_algorithm_only]
+
                                     try:
                                         self.redis_conn.srem('analyzer.batch', str(data))
                                         logger.info('analyzer_batch :: newer work exists, removed older work item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -2966,10 +3085,21 @@ class AnalyzerBatch(Thread):
                         pruned_item_count = original_work_queue_length - new_work_queue_length
                         logger.info('the analyzer.batch Redis set was pruned of %s older items which have newer work items' % str(pruned_item_count))
 
+                custom_algorithm_only = None
                 try:
                     metric_name = str(sorted_analyzer_batch_work[0][0])
                     last_analyzed_timestamp = int(sorted_analyzer_batch_work[0][1])
-                    batch_processing_metric = [metric_name, last_analyzed_timestamp]
+                    # @modified 20250321 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    #batch_processing_metric = [metric_name, last_analyzed_timestamp]
+                    custom_algorithm_only = None
+                    try:
+                        if sorted_analyzer_batch_work[0][2] == 'custom_algorithm_only':
+                            custom_algorithm_only = 'custom_algorithm_only'
+                    except:
+                        pass
+                    batch_processing_metric = [metric_name, last_analyzed_timestamp, 'custom_algorithm_only']
+
                 except Exception as err:
                     logger.error('error :: analyzer_batch :: failed to determine metric_name, err: %s' % err)
                     metric_name = None
@@ -3027,9 +3157,13 @@ class AnalyzerBatch(Thread):
             if len(analyzer_batch_reprocess_work) == 0:
                 for i in range(1, 2):
                     if BATCH_MODE:
-                        batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, 'batch_mode', 0, sorted_analyzer_batch_work[0:300]))
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, 'batch_mode', 0, custom_algorithm_only, sorted_analyzer_batch_work[0:300]))
                     else:
-                        batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, metric_name, last_analyzed_timestamp))
+                        # @modified 20250321 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, metric_name, last_analyzed_timestamp, custom_algorithm_only))
                     batch_pids.append(batch_p)
                     batch_pid_count += 1
                     logger.info('starting 1 of %s spin_batch_process' % (str(batch_pid_count)))
@@ -3051,7 +3185,9 @@ class AnalyzerBatch(Thread):
                     assigned_work = process_analyzer_batch_reprocess_work[i]
                     if len(assigned_work) > 0:
                         try:
-                            batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, 'batch_mode', 0, [], assigned_work))
+                            # @modified 20250321 - Feature #5611: custom_algorithm_only
+                            # Added custom_algorithm_only
+                            batch_p = Process(target=self.spin_batch_process, args=(i, run_timestamp, 'batch_mode', 0, custom_algorithm_only, [], assigned_work))
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: spin_batch_process failed with analyzer_batch_reprocess_work: %s, err: %s' % (

@@ -39,7 +39,12 @@ import numpy as np
 import pandas as pd
 import memray
 
-from prometheus_client.parser import _parse_labels as parse_labels
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+# _parse_labels changed to parse_labels in v0.22.0
+try:
+    from prometheus_client.parser import _parse_labels as parse_labels
+except:
+    from prometheus_client.parser import parse_labels
 
 import settings
 from skyline_functions import (
@@ -166,6 +171,14 @@ try:
 except:
     MEMRAY_ENABLED = False
 
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -263,14 +276,14 @@ class AnalyzerLabelledMetrics(Thread):
             metric_labels_str = metric_elements[1]
             metric_labels = metric_labels_str.rstrip('}')
         except Exception as err:
-            logger.error('error :: labelled_metrics_spin_process :: failed to parse metric %s - %s' % (
+            logger.error('error :: metric_name_labels_parser :: failed to parse metric %s - %s' % (
                 str(metric), str(err)))
             return metric_dict
         labels = {}
         try:
             labels = parse_labels(metric_labels)
         except Exception as err:
-            logger.error('error :: labelled_metrics_spin_process :: failed to parse labels %s - %s' % (
+            logger.error('error :: metric_name_labels_parser :: failed to parse labels %s - %s' % (
                 str(metric), str(err)))
             return metric_dict
         metric_dict['metric'] = metric_name
@@ -407,6 +420,10 @@ class AnalyzerLabelledMetrics(Thread):
                     algorithms = self.redis_conn_decoded.hgetall('metrics_manager.algorithms.ids')
                 except Exception as err:
                     logger.error('error :: labelled_metrics_spin_process :: hgetall metrics_manager.algorithms.ids - %s' % str(err))
+
+                # @added 20250522 - Feature #5626: skylark.echo
+                skylark_metrics_value_dict = {}
+                skylark_metrics_timestamp_dict = {}
 
                 # @added 20210513 - Feature #4068: ANALYZER_SKIP
                 analyzer_skip_metrics = []
@@ -652,7 +669,7 @@ class AnalyzerLabelledMetrics(Thread):
                     try:
                         analyzer_labelled_metrics_busy = self.redis_conn_decoded.get('analyzer_labelled_metrics.busy')
                     except Exception as err:
-                        logger.error('error :: labelled_metrics_spin_process :: failed to get analyzer_labelled_metrics.busy Redis key' % (
+                        logger.error('error :: labelled_metrics_spin_process :: failed to get analyzer_labelled_metrics.busy Redis key, err: %s' % (
                             err))
                 if analyzer_labelled_metrics_busy:
                     logger.info('labelled_metrics_spin_process :: analyzer_labelled_metrics_busy found')
@@ -701,6 +718,7 @@ class AnalyzerLabelledMetrics(Thread):
                         metrics_last_analyzed_timestamp_sorted = sorted(metrics_last_analyzed_timestamp, key=lambda x: x[0])
                         del metrics_last_analyzed_timestamp
                         del last_metrics_last_analysis_dict
+                        last_metrics_last_analysis_dict = {}
                         metrics_last_analysis_dict = {}
                         metrics_last_analyzed_timestamp_sorted = [item for item in metrics_last_analyzed_timestamp_sorted if item[1] in assigned_labelled_metrics]
                         # @modified 20240229 - Task #5178: Build and test skyline v4.1.0
@@ -789,6 +807,20 @@ class AnalyzerLabelledMetrics(Thread):
                     del load_shedding_assigned_metrics
                     logger.info('labelled_metrics_spin_process :: load_shedding_active now %s assigned_metrics' % (
                         str(len(assigned_metrics))))
+
+                # @added 20260221 - Feature #5712: skyline.dawn
+                #                   Task #5628: Build v5.0.0 and test
+                dawn_expiry_timestamp = None
+                if SKYLINE_DAWN_ENABLED:
+                    try:
+                        dawn_expiry_timestamp = self.redis_conn_decoded.get('skyline.dawn.analyzer')
+                    except Exception as err:
+                        logger.error('error :: failed on get skyline.dawn.analyzer, err: %s' % (
+                            err))
+                    if dawn_expiry_timestamp:
+                        logger.info('skyline.dawn.analyzer key exists, not analyzing metrics until %s' % (
+                            str(dawn_expiry_timestamp)))
+                        return
 
                 # @added 20230404 - Feature #4890: analyzer_labelled_metrics - use mrange
                 # Added filters
@@ -1234,6 +1266,13 @@ class AnalyzerLabelledMetrics(Thread):
                         metrics_last_analysis_dict[labelled_metric] = int(right_now)
 
                         continue
+
+                    # @added 20250522 - Feature #5626: skylark.echo
+                    try:
+                        skylark_metrics_value_dict[labelled_metric] = timeseries[-1][1]
+                        skylark_metrics_timestamp_dict[labelled_metric] = int(timeseries[-1][0])
+                    except:
+                        pass
 
                     # TODO: How to not classify as short if the metric stops and starts
                     # again.  In analyzer with FULL_DURATION data this is not so much of
@@ -2646,6 +2685,31 @@ class AnalyzerLabelledMetrics(Thread):
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key - %s' % err)
 
+                # @added 20250522 - Feature #5626: skylark.echo
+                current_aligned_ts = int(int(spin_start) // 60 * 60)
+                skylark_values_key = 'skylark.echo.metrics.values.%s' % str(current_aligned_ts)
+                skylark_timestamps_key = 'skylark.echo.metrics.timestamps.%s' % str(current_aligned_ts)
+
+                # @modified 20250522 - Feature #5626: skylark.echo
+                # Wrapped in if skylark_metrics_value_dict
+                if skylark_metrics_value_dict:
+                    try:
+                        self.redis_conn.hset(skylark_values_key, mapping=skylark_metrics_value_dict)
+                        logger.info('updated %s hash key with %s metrics' % (
+                            skylark_values_key, str(len(skylark_values_key))))
+                        self.redis_conn.expire(skylark_values_key, 300)
+                    except Exception as err:
+                        logger.error('error :: failed to update Redis %s hash key - %s' % (
+                            skylark_values_key, err))
+                    try:
+                        self.redis_conn.hset(skylark_timestamps_key, mapping=skylark_metrics_timestamp_dict)
+                        logger.info('updated %s hash key with %s metrics' % (
+                            skylark_timestamps_key, str(len(skylark_timestamps_key))))
+                        self.redis_conn.expire(skylark_timestamps_key, 300)
+                    except Exception as err:
+                        logger.error('error :: failed to update Redis %s hash key - %s' % (
+                            skylark_timestamps_key, err))
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: labelled_metrics_spin_process :: error in memray with block - %s' % (
@@ -2769,7 +2833,7 @@ class AnalyzerLabelledMetrics(Thread):
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: analyzer_labelled_metrics :: failed to hgetall aet.metrics_manager.metric_names_with_ids Redis hash key %s - %s' % (
-                err))
+                metric_names_with_ids_key, err))
         logger.info('analyzer_labelled_metrics :: memory usage after loading aet.metrics_manager.metric_names_with_ids - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
 
         metric_ids_with_metric_key = 'aet.metrics_manager.active_labelled_ids_with_metric'
@@ -2779,7 +2843,7 @@ class AnalyzerLabelledMetrics(Thread):
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: analyzer_labelled_metrics :: failed to hgetall aet.metrics_manager.active_labelled_ids_with_metric Redis hash key %s - %s' % (
-                err))
+                metric_ids_with_metric_key, err))
         if not metric_ids_with_name:
             for base_name in metric_names_with_ids:
                 metric_id = metric_names_with_ids[base_name]
@@ -2792,7 +2856,7 @@ class AnalyzerLabelledMetrics(Thread):
             labelled_metrics_id_types = self.redis_conn_decoded.hgetall('skyline.labelled_metrics.id.type')
         except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: analyzer_labelled_metrics :: failed to hgetall skyline.labelled_metrics.id.type Redis hash key %s - %s' % (
+            logger.error('error :: analyzer_labelled_metrics :: failed to hgetall skyline.labelled_metrics.id.type Redis hash key skyline.labelled_metrics.id.type - %s' % (
                 err))
         logger.info('analyzer_labelled_metrics :: memory usage after creating labelled_metrics_id_types - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
 
@@ -2801,6 +2865,12 @@ class AnalyzerLabelledMetrics(Thread):
         tenant_ids_with_count = {}
         tenant_ids_base_names = {}
         tenant_ids_labelled_metrics = {}
+
+        # @added 20260428 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+        #                   Feature #5310: flux - prometheus - handle json
+        # labelled_metrics that are submit to flux via the json payload do not
+        # have metadata so their type cannot be determined in the normal way
+        metrics_to_determine_type_for = []
 
         logger.info('analyzer_labelled_metrics :: memory usage before creating metrics_and_labels_dict - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
         metrics_and_labels_dict = {}
@@ -2898,6 +2968,12 @@ class AnalyzerLabelledMetrics(Thread):
                 # Do not default to COUNTER
                 # metrics_and_labels_dict[base_name]['type'] = 'COUNTER'
                 metrics_and_labels_dict[base_name]['type'] = None
+                # @added 20260429 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+                #                   Feature #5310: flux - prometheus - handle json
+                # labelled_metrics that are submit to flux via the json payload do not
+                # have metadata so their type cannot be determined in the normal way
+                metrics_to_determine_type_for.append(base_name)
+
         logger.info('analyzer_labelled_metrics :: memory usage after determining metric types from metric_type_redis_keys - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
 
         fetch_new_metrics = False
@@ -3127,6 +3203,11 @@ class AnalyzerLabelledMetrics(Thread):
                     except:
                         # metrics_and_labels_dict[base_name]['type'] = 'COUNTER'
                         metrics_and_labels_dict[base_name]['type'] = None
+                        # @added 20260429 - Feature #5729: metrics_manager - optimise labelled_metrics metric resolution and sparsity hashes
+                        #                   Feature #5310: flux - prometheus - handle json
+                        # labelled_metrics that are submit to flux via the json payload do not
+                        # have metadata so their type cannot be determined in the normal way
+                        metrics_to_determine_type_for.append(base_name)
 
             logger.info('analyzer_labelled_metrics :: memory usage before creating stationary_metrics_dict - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
             stationary_metrics_dict = {}

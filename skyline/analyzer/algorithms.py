@@ -670,7 +670,10 @@ def histogram_bins(timeseries, series):
         # @modified 20221019 - Feature #4702: numba optimisations
         # Added dtype for numba
         # series = np.array([x[1] for x in timeseries])
-        series = np.array([x[1] for x in timeseries], dtype=np.float64)
+        # @modified 20260510 - Bug #5742: mirage_algorithms.histogram_bins regression
+        # No nans from labelled metrics
+        #series = np.array([x[1] for x in timeseries], dtype=np.float64)
+        series = np.array([x[1] for x in timeseries if not np.isnan(x[1])], dtype=np.float64)
 
         t = tail_avg(timeseries, series)
 
@@ -720,6 +723,12 @@ def ks_test(timeseries, series):
         probe = np.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
         if reference.size < 20 or probe.size < 20:
+            return False
+
+        # @added 20250623 - Bug #5635: statsmodels - adfuller handle constant
+        #                   Bug #5593: statsmodels adfuller error in Analyzer
+        # Handle ValueError: Invalid input, x is constant
+        if np.all(reference == reference[0]):
             return False
 
         ks_d, ks_p_value = scipy.stats.ks_2samp(reference, probe)
@@ -1336,6 +1345,14 @@ def run_selected_algorithm(
         # Get rid of boring series
         if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
             raise Boring()
+
+        # @added 20250221 - Feature #5600: analyzer - skip less than full_duration
+	# @modified 20250212 - Feature #5600: analyzer - skip less than full_duration
+        # This is a BIG NO but left here to show that it is a BIG NO
+        #if len(timeseries) > 2:
+        #    first_required_timestamp = int(time()) - (FULL_DURATION - 600)
+        #    if timeseries[0][0] < first_required_timestamp:
+        #        raise TooShort()
 
     # @added 20200423 - Feature #3508: ionosphere.untrainable_metrics
     # Added run_negatives_present
