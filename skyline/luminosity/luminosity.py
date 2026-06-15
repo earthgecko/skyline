@@ -33,7 +33,9 @@ from pymemcache.client.base import Client as pymemcache_Client
 
 # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import select
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, text
 
 import settings
 from skyline_functions import (
@@ -48,7 +50,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded)
 
 
@@ -204,7 +206,7 @@ class Luminosity(Thread):
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -552,12 +554,23 @@ class Luminosity(Thread):
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # results = mysql_select(skyline_app, query)
-                stmt = select([metrics_table.c.id, metrics_table.c.metric], metrics_table.c.metric.in_(metrics_strs))
-                connection = engine.connect()
-                results = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table.c.id, metrics_table.c.metric], metrics_table.c.metric.in_(metrics_strs))
+                stmt = select(metrics_table.c.id, metrics_table.c.metric).\
+                        where(metrics_table.c.metric.in_(metrics_strs))
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
                     correlated_metrics_list.append([int(row['id']), row['metric'], None])
-                connection.close()
+                #connection.close()
 
             except Exception as err:
                 logger.error(traceback.format_exc())
@@ -607,7 +620,7 @@ class Luminosity(Thread):
 
             # @added 20180420 - Branch #2270: luminosity
             # Only try and insert if there are values present
-            values_present = False
+            #values_present = False
 
             # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
@@ -628,7 +641,7 @@ class Luminosity(Thread):
             number_of_correlations_in_insert = 0
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
                 if coefficient:
-                    values_present = True
+                    #values_present = True
                     # @added 20170720 - Task #2462: Implement useful metrics for Luminosity
                     # Populate the self.correlations list to send a count to Graphite
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -665,15 +678,22 @@ class Luminosity(Thread):
                 # Use sqlalchemy rather than string-based query construction
                 # Use sqlalchemy insert
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     ins = luminosity_table.insert().values(
                         id=int(anomaly_id),
                         metric_id=int(metric_id),
                         coefficient=round(coefficient, 5),
                         shifted=shifted,
                         shifted_coefficient=round(shifted_coefficient, 5))
-                    result = connection.execute(ins)
-                    connection.close()
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(ins)
+                    #connection.close()
+                    #new_inserted_ids.append(anomaly_id)
+                    with engine.begin() as connection:
+                        result = connection.execute(ins)
+                        #anomaly_id = result.inserted_primary_key[0]
                     new_inserted_ids.append(anomaly_id)
                 except Exception as err:
                     logger.error(traceback.format_exc())
@@ -890,7 +910,10 @@ class Luminosity(Thread):
                     #                      Task #4778: v4.0.0 - update dependencies
                     # Use sqlalchemy rather than string-based query construction
                     # query = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
-                    stmt = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+                    stmt = text('SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1')
 
                     results = None
                     try:
@@ -898,12 +921,19 @@ class Luminosity(Thread):
                         #                      Task #4778: v4.0.0 - update dependencies
                         # Use sqlalchemy rather than string-based query construction
                         # results = mysql_select(skyline_app, query)
-                        connection = engine.connect()
-                        results = connection.execute(stmt)
+
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #connection = engine.connect()
+                        #results = connection.execute(stmt)
+                        #for row in result:
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
                         for row in results:
                             last_processed_anomaly_id = row['id']
                             break
-                        connection.close()
+                        #connection.close()
 
                     except Exception as err:
                         logger.error(traceback.format_exc())
@@ -934,6 +964,20 @@ class Luminosity(Thread):
                                     self.memcache_client.close()
                                 except:
                                     logger.error('error :: failed to close memcache_client')
+
+                # @added 20251111 - Feature #5667: Reset anomaly_id in luminosity if too old
+                reset_anomaly_id_from_db = None
+                try:
+                    reset_anomaly_id_from_db = self.redis_conn_decoded.get('luminosity.process_correlations.reset.anomaly_id')
+                except Exception as err:
+                    logger.error('error :: failed to get Redis key luminosity.process_correlations.reset.anomaly_id, err: %s' % err)
+                if reset_anomaly_id_from_db:
+                    logger.info('resetting the anomaly_id from the DB as luminosity.process_correlations.reset.anomaly_id key exist')
+                    last_processed_anomaly_id = None
+                    try:
+                        self.redis_conn_decoded.delete('luminosity.process_correlations.reset.anomaly_id')
+                    except Exception as err:
+                        logger.error('error :: failed to delete Redis key luminosity.process_correlations.reset.anomaly_id, err: %s' % err)
 
                 # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                   Task #4778: v4.0.0 - update dependencies
@@ -971,15 +1015,42 @@ class Luminosity(Thread):
                         # Use sqlalchemy rather than string-based query construction
                         # results = mysql_select(skyline_app, query)
                         stmt = select(anomalies_table.c.id).where(anomalies_table.c.anomaly_timestamp > int(after))
-                        connection = engine.connect()
-                        results = connection.execute(stmt)
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #connection = engine.connect()
+                        #results = connection.execute(stmt)
+                        #for row in result:
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
                         for row in results:
                             process_anomaly_id = row['id']
                             break
-                        connection.close()
+                        #connection.close()
                     except Exception as err:
                         # logger.error('error :: MySQL quey failed - %s' % query)
                         logger.error('error :: database quey failed determining new anomalies after timestamp - %s' % err)
+
+                    # @added 20251118 - Feature #5667: Reset anomaly_id in luminosity if too old
+                    # Handle no new anomalies after the after
+                    if not process_anomaly_id:
+                        results = None
+                        try:
+                            stmt = select(anomalies_table.c.id).where(anomalies_table.c.id > 1).order_by(anomalies_table.c.id.desc()).limit(1)
+                            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                            #                      Task #5628: Build v5.0.0 and test
+                            #connection = engine.connect()
+                            #results = connection.execute(stmt)
+                            with engine.connect() as connection:
+                                result = connection.execute(stmt)
+                                results = [dict(row._mapping) for row in result.fetchall()]
+                            for row in results:
+                                process_anomaly_id = row['id']
+                                break
+                            #connection.close()
+                        except Exception as err:
+                            # logger.error('error :: MySQL quey failed - %s' % query)
+                            logger.error('error :: database quey failed determining new anomalies after timestamp - %s' % err)
 
                     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
                     #                      Task #4778: v4.0.0 - update dependencies
@@ -1017,12 +1088,17 @@ class Luminosity(Thread):
                     # Use sqlalchemy rather than string-based query construction
                     # results = mysql_select(skyline_app, query)
                     stmt = select(anomalies_table.c.id).where(anomalies_table.c.id > last_processed_anomaly_id)
-                    connection = engine.connect()
-                    results = connection.execute(stmt)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #results = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
                     for row in results:
                         process_anomaly_id = row['id']
                         break
-                    connection.close()
+                    #connection.close()
                 except Exception as err:
                     # logger.error('error :: MySQL quey failed - %s' % query)
                     logger.error('error :: database query failed to determine process_anomaly_id - %s' % err)
@@ -1075,6 +1151,36 @@ class Luminosity(Thread):
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to determine classify_anomalies_set - %s' % err)
+
+                        # @added 20250306 - Feature #5604: luminosity - purge luminosity.classify_anomalies set
+                        if len(classify_anomalies_set) > 0:
+                            purge_timestamp = int(time()) - 86400
+                            remove_items = []
+                            for index, item in enumerate(classify_anomalies_set):
+                                try:
+                                    data = literal_eval(item)
+                                    if data[2] < purge_timestamp:
+                                        remove_items.append(str(item))
+                                except:
+                                    pass
+                            if remove_items:
+                                logger.info('luminosity.classify_anomalies set has %s items' % (
+                                    str(len(classify_anomalies_set))))
+                                logger.info('purging %s old items from the luminosity.classify_anomalies set' % (
+                                    str(len(remove_items))))
+                                try:
+                                    purged = self.redis_conn_decoded.srem('luminosity.classify_anomalies', *set(remove_items))
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to determine classify_anomalies_set - %s' % err)
+                                try:
+                                    classify_anomalies_set = self.redis_conn_decoded.smembers('luminosity.classify_anomalies')
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to determine classify_anomalies_set - %s' % err)
+                                logger.info('luminosity.classify_anomalies set after purging %s items has %s items' % (
+                                    str(purged), str(len(classify_anomalies_set))))
+
                         if len(classify_anomalies_set) > 0:
                             current_now = int(time())
                             classify_for = 19
