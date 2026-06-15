@@ -12,7 +12,9 @@ import shutil
 import glob
 from ast import literal_eval
 import traceback
-from datetime import datetime
+# @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+#from datetime import datetime
+import datetime
 
 from redis import StrictRedis
 # @modified 20190503 - Branch #2646: slack - linting
@@ -25,7 +27,10 @@ from sqlalchemy import (
 # from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
 from sqlalchemy.dialects.mysql import DOUBLE
 
-from sqlalchemy.sql import select
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+#                      Task #5628: Build v5.0.0 and test
+# Added insert
+from sqlalchemy.sql import select, insert
 # import json
 from tsfresh import __version__ as tsfresh_version
 
@@ -76,7 +81,7 @@ from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_b
 # @added 20250122 - Feature #5592: tenant_id column in DB tables
 from functions.metrics.get_tenant_id import get_tenant_id
 
-# @added 20250402 - Feature #5318: motif_annihilation
+# @added 20250402 - Feature #5318: common_motifs
 from functions.database.queries.get_fps_for_metric import get_fps_for_metric
 
 LOCAL_DEBUG = False
@@ -375,13 +380,24 @@ def create_fp_ts_graph(
             return False
 
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
-            result = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+            stmt = select(ionosphere_table).where(ionosphere_table.c.id == int(fp_id))
+
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 metric_id = int(row['metric_id'])
                 current_logger.info('found metric_id from the DB - %s' % (str(metric_id)))
-            connection.close()
+            #connection.close()
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: could not determine full_duration from ionosphere for fp_id %s' % str(fp_id))
@@ -409,7 +425,7 @@ def create_fp_ts_graph(
         # Use the MetaData autoload rather than string-based query construction
         try:
             use_table_meta = MetaData()
-            use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+            use_table = Table(metric_fp_ts_table, use_table_meta, autoload_with=engine)
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_ionosphere_learn_details :: use_table Table failed on %s table - %s' % (
@@ -419,14 +435,24 @@ def create_fp_ts_graph(
             # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                      Task #4778: v4.0.0 - update dependencies
             # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))
-            stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+            stmt = select(use_table.c.timestamp, use_table.c.value).where(use_table.c.fp_id == int(fp_id))
 
-            connection = engine.connect()
-            for row in engine.execute(stmt):
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #for row in engine.execute(stmt):
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
+
                 fp_id_ts_timestamp = int(row['timestamp'])
                 fp_id_ts_value = float(row['value'])
                 fp_id_metric_ts.append([fp_id_ts_timestamp, fp_id_ts_value])
-            connection.close()
+            #connection.close()
             values_count = len(fp_id_metric_ts)
             current_logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(base_name)))
         except:
@@ -609,10 +635,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if ionosphere_job == 'find_repetitive_patterns':
         find_repetitive_patterns = True
 
-    # @added 20240405 - Feature #5318: motif_annihilation
-    motif_annihilation = False
-    if ionosphere_job == 'motif_annihilation':
-        motif_annihilation = True
+    # @added 20240405 - Feature #5318: common_motifs
+    common_motifs = False
+    if ionosphere_job == 'common_motifs':
+        common_motifs = True
 
     if context == 'training_data':
         ionosphere_job = 'learn_fp_human'
@@ -622,9 +648,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
         if find_repetitive_patterns:
             ionosphere_job = 'find_repetitive_patterns'
-        # @added 20240405 - Feature #5318: motif_annihilation
-        if motif_annihilation:
-            ionosphere_job = 'motif_annihilation'
+        # @added 20240405 - Feature #5318: common_motifs
+        if common_motifs:
+            ionosphere_job = 'common_motifs'
 
     current_logger.info('create_features_profile :: %s :: requested for %s at %s by user id %s' % (
         context, str(base_name), str(requested_timestamp), str(user_id)))
@@ -679,8 +705,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             settings.SKYLINE_TMP_DIR, str(requested_timestamp),
             metric_timeseries_dir)
 
-    # @added 20240405 - Feature #5318: motif_annihilation
-    if motif_annihilation:
+    # @added 20240405 - Feature #5318: common_motifs
+    if common_motifs:
         metric_training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
             metric_timeseries_dir)
@@ -925,7 +951,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     current_logger.info('create_features_profile :: metrics_table OK')
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # @modified 20161209 -  - Branch #922: ionosphere
         #                        Task #1658: Patterning Skyline Ionosphere
         # result = connection.execute('select id from metrics where metric=\'%s\'' % base_name)
@@ -936,11 +962,24 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # @modified 20220728 - Task #2732: Prometheus to Skyline
         #                      Branch #4300: prometheus
         if not labelled_metric_base_name:
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
         else:
-            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == labelled_metric_base_name)
 
-        result = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             metrics_id = row['id']
             # @added 20170113 - Feature #1854: Ionosphere learn - generations
@@ -952,9 +991,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 metric_max_percent_diff_from_origin = float(row['max_percent_diff_from_origin'])
             except:
                 current_logger.error('error :: create_features_profile :: failed to determine learn related values from DB for %s' % base_name)
-        row = result.fetchone()
+        #row = result.fetchone()
         # metric_db_object = row
-        connection.close()
+        #connection.close()
         current_logger.info('create_features_profile :: determined db metric id: %s' % str(metrics_id))
         current_logger.info('create_features_profile :: determined db metric learn_full_duration_days: %s' % str(metric_learn_full_duration_days))
         current_logger.info('create_features_profile :: determined db metric learn_valid_ts_older_than: %s' % str(metric_learn_valid_ts_older_than))
@@ -965,6 +1004,17 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error(trace)
         fail_msg = 'error :: create_features_profile :: could not determine id of metric from DB: %s' % base_name
         current_logger.error('%s' % fail_msg)
+
+    # @added 20260211 - Bug #5707: create_features_profile - no metric id from DB
+    # There is the possibility of an edge case where when the select is called
+    # on the metrics_table during fp creation and the DB does not respond, then
+    # the metric_id associated with the created fp will be 0.
+    # Try and get it using the function which queries Redis before the DB
+    if not metrics_id:
+        try:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
 
     if metric_learn_full_duration_days:
         learn_full_duration_days = metric_learn_full_duration_days
@@ -1037,8 +1087,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fp_validated = 0
         if fp_generation < 2:
             fp_generation = 2
-    # @added 20240405 - Feature #5318: motif_annihilation
-    if motif_annihilation:
+    # @added 20240405 - Feature #5318: common_motifs
+    if common_motifs:
         fp_generation = 2
 
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
@@ -1049,9 +1099,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     else:
         echo_fp_value = 0
 
-    # @added 20240425 - Feature #5318: motif_annihilation
+    # @added 20240425 - Feature #5318: common_motifs
     # Add echo fp creation
-    if ionosphere_job == 'echo_motif_annihilation':
+    if ionosphere_job == 'echo_common_motifs':
         fp_validated = 1
 
     # @added 20250122 - Feature #5592: tenant_id column in DB tables
@@ -1065,7 +1115,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     new_fp_id = False
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # @added 20170113 - Feature #1854: Ionosphere learn
         # Added learn values parent_id, generation
         # @modified 20170120 - Feature #1854: Ionosphere learn
@@ -1084,7 +1134,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
         if context in ['ionosphere_echo', 'ionosphere_echo_check']:
             ts_for_db = int(requested_timestamp)
-            db_created_timestamp = datetime.utcfromtimestamp(ts_for_db).strftime('%Y-%m-%d %H:%M:%S')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #db_created_timestamp = datetime.utcfromtimestamp(ts_for_db).strftime('%Y-%m-%d %H:%M:%S')
+            db_created_timestamp = datetime.datetime.fromtimestamp(ts_for_db, tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             ins = ionosphere_table.insert().values(
                 metric_id=int(metrics_id), full_duration=int(ts_full_duration),
                 anomaly_timestamp=int(use_anomaly_timestamp),
@@ -1107,9 +1159,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 echo_fp=echo_fp_value, user_id=user_id, label=label,
                 # @added 20250122 - Feature #5592: tenant_id column in DB tables
                 tenant_id=tenant_id)
-        result = connection.execute(ins)
-        connection.close()
-        new_fp_id = result.inserted_primary_key[0]
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #new_fp_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_fp_id = result.inserted_primary_key[0]
+        #connection.close()
         current_logger.info('create_features_profile :: new ionosphere fp_id: %s' % str(new_fp_id))
     except:
         trace = traceback.format_exc()
@@ -1213,9 +1270,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         #     (str(new_fp_id), fp_table_name))
 
     try:
-        connection = engine.connect()
-        connection.execute(fp_metric_table.insert(), insert_statement)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(fp_metric_table.insert(), insert_statement)
+        #connection.close()
+        with engine.begin() as connection:
+            connection.execute(insert(fp_metric_table), insert_statement)
+
         current_logger.info('create_features_profile :: fp_id - %s - feature values inserted into %s' % (str(new_fp_id), fp_table_name))
     except:
         trace = traceback.format_exc()
@@ -1332,7 +1394,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             new_datapoint = [str(int(datapoint[0])), float(datapoint[1])]
             validated_timeseries.append(new_datapoint)
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             continue
 
@@ -1344,9 +1406,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     for ts, value in validated_timeseries:
         insert_statement.append({'fp_id': new_fp_id, 'timestamp': ts, 'value': value},)
     try:
-        connection = engine.connect()
-        connection.execute(ts_metric_table.insert(), insert_statement)
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(ts_metric_table.insert(), insert_statement)
+        #connection.close()
+        with engine.begin() as connection:
+            connection.execute(insert(ts_metric_table), insert_statement)
+
         current_logger.info('create_features_profile :: fp_id - %s - timeseries inserted into %s' % (str(new_fp_id), ts_table_name))
     except:
         trace = traceback.format_exc()
@@ -1431,13 +1498,20 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # Set ionosphere_enabled for the metric
     try:
         # update_statement = 'UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id)
-        connection = engine.connect()
+        #connection = engine.connect()
         # result = connection.execute('UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id))
         # connection.execute(ts_metric_table.insert(), insert_statement)
-        connection.execute(
-            metrics_table.update(
-                metrics_table.c.id == metrics_id).values(ionosphere_enabled=1))
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection.execute(
+        #    metrics_table.update(
+        #        metrics_table.c.id == metrics_id).values(ionosphere_enabled=1))
+        with engine.begin() as connection:
+            connection.execute(metrics_table.update().\
+                where(metrics_table.c.id == metrics_id).values(
+                ionosphere_enabled=1))
+        #connection.close()
+
         current_logger.info('create_features_profile :: ionosphere_enabled set on metric id: %s' % str(metrics_id))
     except:
         trace = traceback.format_exc()
@@ -1528,16 +1602,26 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         anomaly_id = None
         slack_thread_ts = 0
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_table]).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table]).\
+            stmt = select(anomalies_table).\
                 where(anomalies_table.c.metric_id == metrics_id).\
                 where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 anomaly_id = row['id']
                 slack_thread_ts = row['slack_thread_ts']
                 break
-            connection.close()
+            #connection.close()
             current_logger.info('create_features_profile :: determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
                 str(anomaly_id), str(metrics_id),
                 str(use_anomaly_timestamp), str(slack_thread_ts)))
@@ -1587,9 +1671,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             message = '*LEARNT - not anomalous repetitive pattern* - features profile id %s was created for %s via %s - %s' % (
                 str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
 
-        # @added 20240405 - Feature #5318: motif_annihilation
-        if motif_annihilation:
-            message = '*LEARNT - not anomalous repetitive pattern motif annihilation* - features profile id %s was created for %s via %s - %s' % (
+        # @added 20240405 - Feature #5318: common_motifs
+        if common_motifs:
+            message = '*LEARNT - not anomalous repetitive pattern motif removal* - features profile id %s was created for %s via %s - %s' % (
                 str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
 
         channel = None
@@ -1766,8 +1850,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             # if context == 'ionosphere_learn':
             # @modified 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
             # if context == 'ionosphere_learn' or learn_repetitive_patterns:
-            # @modified 20240405 - Feature #5318: motif_annihilation
-            if context == 'ionosphere_learn' or learn_repetitive_patterns or find_repetitive_patterns or motif_annihilation:
+            # @modified 20240405 - Feature #5318: common_motifs
+            if context == 'ionosphere_learn' or learn_repetitive_patterns or find_repetitive_patterns or common_motifs:
                 try:
                     validate_link = '%s/ionosphere?fp_validate=true&metric=%s&validated_equals=false&limit=0&order=DESC' % (
                         settings.SKYLINE_URL, use_base_name)
@@ -1782,11 +1866,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
                 # if learn_repetitive_patterns:
                 if learn_repetitive_patterns or find_repetitive_patterns:
-                    message = '*Skyline Ionosphere LEARNT - repetitive pattern * - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
+                    message = '*Skyline Ionosphere LEARNT - repetitive pattern* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
                         str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
-                # @added 20240405 - Feature #5318: motif_annihilation
-                if motif_annihilation:
-                    message = '*Skyline Ionosphere LEARNT - repetitive pattern (motif annihilation)* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
+                # @added 20240405 - Feature #5318: common_motifs
+                if common_motifs:
+                    message = '*Skyline Ionosphere LEARNT - repetitive pattern (common_motifs)* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
                         str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
 
                 if slack_ionosphere_job != 'learn_fp_human':
@@ -1806,16 +1890,16 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
                             channel, str(slack_thread_ts)))
 
-        # @added 20250402 - Feature #5318: motif_annihilation
-        # Send the pw5_timeseries and motif_annihilation validation link to
+        # @added 20250402 - Feature #5318: common_motifs
+        # Send the pw5_timeseries and common_motifs validation link to
         # slack to allow to validate inline from slack
-        if motif_annihilation:
+        if common_motifs:
             if not slack_thread_ts and slack_response:
                 try:
                     slack_thread_ts = slack_response['slack_thread_ts']
                 except:
                     pass
-        if motif_annihilation and slack_thread_ts:
+        if common_motifs and slack_thread_ts:
             metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
             fps_dict = {}
             try:
@@ -1838,36 +1922,39 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                             if file.endswith('motif_annihilation.pw5_timeseries.png'):
                                 pw5_timeseries_image = '%s/%s' % (ts_features_profile_dir, file)
                                 break
-            motif_annihilation_validation_link = None
+                            if file.endswith('common_motifs.pw5_timeseries.png'):
+                                pw5_timeseries_image = '%s/%s' % (ts_features_profile_dir, file)
+                                break
+            common_motifs_validation_link = None
             if pw5_timeseries_image:
                 try:
-                    motif_annihilation_validation_link = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true&format=json' % (
+                    common_motifs_validation_link = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true&format=json' % (
                         settings.SKYLINE_URL, str(fp_dict['anomaly_timestamp']), use_base_name)
                 except Exception as err:
-                    current_logger.error('error :: create_features_profile :: failed to build motif_annihilation_validation_link, err: %s' % (
+                    current_logger.error('error :: create_features_profile :: failed to build common_motifs_validation_link, err: %s' % (
                         err))
-                    motif_annihilation_validation_link = 'URL link failed to build'
-                motif_annihilation_validation_message = 'pw5_timeseries from which the motif_annihilation features profile id %s was created - *quick validate link*  - %s' % (
-                    str(new_fp_id), motif_annihilation_validation_link)
+                    common_motifs_validation_link = 'URL link failed to build'
+                common_motifs_validation_message = 'pw5_timeseries from which the common_motifs features profile id %s was created - *quick validate link*  - %s' % (
+                    str(new_fp_id), common_motifs_validation_link)
                 slack_response = {'ok': False}
                 try:
-                    slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), motif_annihilation_validation_message, image_file=pw5_timeseries_image)
+                    slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), common_motifs_validation_message, image_file=pw5_timeseries_image)
                 except Exception as err:
                     if 'CERTIFICATE_VERIFY_FAILED' in str(err):
                         slack_ssl_error = True
-                        fail_msg = 'warning :: create_features_profile :: failed to post motif_annihilation_validation_message slack_post_message, ssl error, err: %s' % err
+                        fail_msg = 'warning :: create_features_profile :: failed to post common_motifs_validation_message slack_post_message, ssl error, err: %s' % err
                         current_logger.info('%s' % fail_msg)
                     else:
                         trace = traceback.format_exc()
                         current_logger.error(trace)
-                        fail_msg = 'error :: create_features_profile :: failed to post motif_annihilation_validation_message slack_post_message, err: %s' % err
+                        fail_msg = 'error :: create_features_profile :: failed to post common_motifs_validation_message slack_post_message, err: %s' % err
                         current_logger.error('%s' % fail_msg)
                 if not slack_response['ok']:
-                    fail_msg = 'error :: create_features_profile :: failed to slack_post_message for motif_annihilation_validation_message, slack dict output follows'
+                    fail_msg = 'error :: create_features_profile :: failed to slack_post_message for common_motifs_validation_message, slack dict output follows'
                     current_logger.error('%s' % fail_msg)
                     current_logger.error('%s' % str(slack_response))
                 else:
-                    current_logger.info('create_features_profile :: posted slack update with motif_annihilation validation to %s, thread %s' % (
+                    current_logger.info('create_features_profile :: posted slack update with common_motifs validation to %s, thread %s' % (
                         channel, str(slack_thread_ts)))
 
     current_logger.info('create_features_profile :: disposing of any engine')
@@ -1918,8 +2005,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # if learn_repetitive_patterns:
         if learn_repetitive_patterns or find_repetitive_patterns:
             create_redis_work_item = False
-        # @added 20240405 - Feature #5318: motif_annihilation
-        if motif_annihilation:
+        # @added 20240405 - Feature #5318: common_motifs
+        if common_motifs:
             create_redis_work_item = False
 
         if create_redis_work_item:
@@ -2067,14 +2154,23 @@ def get_correlations(current_skyline_app, anomaly_id):
             fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
             current_logger.error('%s' % fail_msg)
         try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-            results = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+            stmt = select(metrics_table).where(metrics_table.c.id > 0)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 metric_id = row['id']
                 metric_name = row['metric']
                 metrics_list.append([int(metric_id), str(metric_name)])
-            connection.close()
+            #connection.close()
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_correlations :: could not determine metrics from MySQL')
@@ -2083,9 +2179,19 @@ def get_correlations(current_skyline_app, anomaly_id):
             raise
 
     try:
-        connection = engine.connect()
-        stmt = select([luminosity_table]).where(luminosity_table.c.id == int(anomaly_id))
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([luminosity_table]).where(luminosity_table.c.id == int(anomaly_id))
+        stmt = select(luminosity_table).where(luminosity_table.c.id == int(anomaly_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             metric_id = row['metric_id']
             metric_name = None
@@ -2109,7 +2215,7 @@ def get_correlations(current_skyline_app, anomaly_id):
             shifted = row['shifted']
             shifted_coefficient = row['shifted_coefficient']
             correlations.append([metric_name, coefficient, shifted, shifted_coefficient])
-        connection.close()
+        #connection.close()
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: could not determine correlations for anomaly id -  %s' % str(anomaly_id))
@@ -2254,14 +2360,23 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
             current_logger.error('%s' % fail_msg)
         try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-            results = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+            stmt = select(metrics_table).where(metrics_table.c.id > 0)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 metric_id = row['id']
                 metric_name = row['metric']
                 metrics_list.append([int(metric_id), str(metric_name)])
-            connection.close()
+            #connection.close()
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_related :: could not determine metrics from MySQL')
@@ -2270,12 +2385,21 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             raise
 
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).\
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).\
+        stmt = select(anomalies_table).\
             where(anomalies_table.c.anomaly_timestamp > minus_two_minutes).\
             where(anomalies_table.c.anomaly_timestamp <= plus_two_minutes).\
             where(anomalies_table.c.id != anomaly_id)
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             related_anomaly_id = row['id']
             metric_id = row['metric_id']
@@ -2293,7 +2417,7 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             related_anomaly_timestamp = row['anomaly_timestamp']
             related_full_duration = row['full_duration']
             related.append([int(related_anomaly_id), int(metric_id), str(metric_name), int(related_anomaly_timestamp), int(related_full_duration)])
-        connection.close()
+        #connection.close()
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_related :: could not determine related anomalies from DB for anomaly id -  %s' % str(anomaly_id))
@@ -2305,9 +2429,18 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
     anomaly_details = []
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).where(anomalies_table.c.id == anomaly_id)
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).where(anomalies_table.c.id == anomaly_id)
+        stmt = select(anomalies_table).where(anomalies_table.c.id == anomaly_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             related_anomaly_id = row['id']
             metric_id = row['metric_id']
@@ -2325,7 +2458,7 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             full_duration = row['full_duration']
             anomaly_details = [int(anomaly_id), int(metric_id), str(metric_name), int(full_duration)]
             break
-        connection.close()
+        #connection.close()
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: could not determine anomaly details from DB for anomaly id -  %s' % str(anomaly_id))
@@ -2336,20 +2469,29 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
         try:
             from_timestamp = int(anomaly_timestamp) - int(full_duration)
             until_timestamp = int(anomaly_timestamp) + 600
-            connection = engine.connect()
-            stmt = select([anomalies_table]).where(anomalies_table.c.metric_id == int(metric_id)).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table]).where(anomalies_table.c.metric_id == int(metric_id)).\
+            stmt = select(anomalies_table).where(anomalies_table.c.metric_id == int(metric_id)).\
                 where(anomalies_table.c.anomaly_timestamp >= from_timestamp).\
                 where(anomalies_table.c.anomaly_timestamp <= until_timestamp).\
                 where(anomalies_table.c.label.isnot(None)).\
                 where(anomalies_table.c.label != 'None')
-            results = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 labelled_anomaly_id = row['id']
                 labelled_anomaly_created_timestamp = row['created_timestamp']
                 labelled_anomaly_timestamp = row['anomaly_timestamp']
                 labelled_anomaly_label = row['label']
                 labelled_anomalies.append([int(labelled_anomaly_id), labelled_anomaly_created_timestamp, int(labelled_anomaly_timestamp), labelled_anomaly_label])
-            connection.close()
+            #connection.close()
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: could not determine anomaly details from DB for anomaly id -  %s' % str(anomaly_id))
