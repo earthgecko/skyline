@@ -6,7 +6,9 @@ import traceback
 
 # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import select, Table, MetaData
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, Table, MetaData, text
 
 from database import get_engine, engine_disposal
 
@@ -40,12 +42,17 @@ def get_algorithm_groups(current_skyline_app, return_all_algorithm_groups_by_id=
     algorithm_groups_list = []
     if engine:
         try:
-            connection = engine.connect()
-            stmt = 'SELECT DISTINCT(algorithm_group) FROM algorithm_groups'
-            result = connection.execute(stmt)
-            for row in result:
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            stmt = text('SELECT DISTINCT(algorithm_group) FROM algorithm_groups')
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 algorithm_groups_list.append(row['algorithm_group'])
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_algorithm_groups :: failed to build algorithm_groups_list - %s' % str(err))
@@ -57,13 +64,15 @@ def get_algorithm_groups(current_skyline_app, return_all_algorithm_groups_by_id=
             # Use the MetaData autoload rather than string-based query construction
             try:
                 use_table_meta = MetaData()
-                use_table = Table('algorithm_groups', use_table_meta, autoload=True, autoload_with=engine)
+                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #use_table = Table('algorithm_groups', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('algorithm_groups', use_table_meta, autoload_with=engine)
             except Exception as err:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_algorithm_groups :: use_table Table failed on algorithm_groups table - %s' % (
                     err))
 
-            connection = engine.connect()
             for algorithm_group in algorithm_groups_list:
 
                 # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -75,8 +84,15 @@ def get_algorithm_groups(current_skyline_app, return_all_algorithm_groups_by_id=
                 # Added all_algorithm_groups_by_id
                 first_id = None
 
-                result = connection.execute(stmt)
-                for row in result:
+                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
+                for row in results:
                     # @modified 20230722 - Feature #5008: webapp - snab report page
                     # Added all_algorithm_groups_by_id
                     # algorithm_groups[algorithm_group] = row['id']
@@ -87,7 +103,7 @@ def get_algorithm_groups(current_skyline_app, return_all_algorithm_groups_by_id=
                         first_id = int(c_id)
                     all_algorithm_groups_by_id[c_id] = algorithm_group
 
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_algorithm_groups :: failed to build algorithm_groups - %s' % str(err))
