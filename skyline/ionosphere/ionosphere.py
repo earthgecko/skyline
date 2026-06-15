@@ -27,9 +27,12 @@ from shutil import rmtree
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 from shutil import move as shutil_move
 
+
 # import csv
 from ast import literal_eval
-from datetime import datetime
+# @modified 20251002 - Feature #1888: Ionosphere learn - evolutionary maturity forget
+#from datetime import datetime
+import datetime
 
 # from redis import StrictRedis
 import traceback
@@ -47,7 +50,9 @@ from sqlalchemy.sql import desc
 
 # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import Table, MetaData
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import Table, MetaData, text
 
 # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
 from sqlalchemy import or_
@@ -86,7 +91,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200714 - Bug #3644: Do not apply ionosphere_busy to batch processing metrics
     #                   Feature #3480: batch_processing
@@ -172,6 +177,12 @@ from functions.database.queries.get_alias_fps_for_metrics import get_alias_fps_f
 from functions.numpy.minmax_scale import minmax_scale
 
 # @added 20241004 - Feature #5479: ionosphere.alias_features_profile
+
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+
+# @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+from learn_self_validation import self_validation
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -313,9 +324,35 @@ try:
 except:
     FIND_REPETITIVE_PATTERNS = False
 
+# @added 20250728 - Feature #5644: ionosphere.learn_self_validation
+try:
+    IONOSPHERE_LEARN_SELF_VALIDATE = settings.IONOSPHERE_LEARN_SELF_VALIDATE
+except:
+    IONOSPHERE_LEARN_SELF_VALIDATE = {}
+
+# @added 20251002 - Feature #1888: Ionosphere learn - evolutionary maturity forget
+try:
+    IONOSPHERE_FORGET_SECONDS_NOT_MATCHED = settings.IONOSPHERE_FORGET_SECONDS_NOT_MATCHED
+except:
+    IONOSPHERE_FORGET_SECONDS_NOT_MATCHED = 0
+
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
+
+# @added 20250328 - Feature #5611: custom_algorithm_only
+# Do not allow training on specific custom_algorithms
+NO_TRAINING_CUSTOM_ALGORITHMS = [
+    'decreased_percent_with_increasing_pair',
+]
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
@@ -357,7 +394,7 @@ class Ionosphere(Thread):
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -613,6 +650,15 @@ class Ionosphere(Thread):
         # as it can be appended to by the historical training data
         training_data_instances = []
 
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Do not allow training on specific custom_algorithms
+        # Create another Redis set that also includes the do_not_train instances
+        # for the purpose of viewing the instance in smoke.  Unfortunately two
+        # full sets are required because in real time the training is added to
+        # the set in Mirage, this function only run periodically to manage the
+        # set, therefore both full sets need to be maintained.
+        training_data_instances_with_do_not_train = []
+
         # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
         if training_data_list:
@@ -645,6 +691,9 @@ class Ionosphere(Thread):
                         add_folder = False
                         metric = None
                         timestamp = None
+                        # @added 20260311 - Task #2732: Prometheus to Skyline
+                        use_full_duration = None
+
                         if files:
                             add_folder = False
                             metric = None
@@ -659,6 +708,12 @@ class Ionosphere(Thread):
                                 # metric_file = None
                                 # metric_file_path = None
                                 continue
+
+                            # @added 20250328 - Feature #5611: custom_algorithm_only
+                            # Do not allow training on specific custom_algorithms
+                            do_not_train = False
+                            custom_algorithm_results = False
+
                             for ifile in files:
                                 if ifile.endswith('.png'):
                                     # @added 20210329 - Feature #3978: luminosity - classify_metrics
@@ -666,6 +721,18 @@ class Ionosphere(Thread):
                                     if ifile.startswith('adtk_'):
                                         continue
                                     add_folder = True
+
+                                # @added 20250328 - Feature #5611: custom_algorithm_only
+                                # Do not allow training on specific custom_algorithms
+                                if ifile.startswith('do_not_train'):
+                                    do_not_train = True
+
+                                if ifile.endswith('custom_algorithms_results.json'):
+                                    custom_algorithm_results = True
+                                    # @added 20260311 - Task #2732: Prometheus to Skyline
+                                    if ifile.startswith('labelled_metrics.'):
+                                        add_folder = True
+
                                 if ifile.endswith('.txt'):
                                     if ifile.endswith('.fp.details.txt'):
                                         continue
@@ -679,6 +746,29 @@ class Ionosphere(Thread):
                                         continue
                                     metric_file = ifile
                                     metric_file_path = path
+
+                            if metric_file and metric_file_path and custom_algorithm_results:
+                                metric_check_file = '%s/%s' % (metric_file_path, metric_file)
+                                if os.path.isfile(metric_check_file):
+                                    with open(metric_check_file, 'r') as f:
+                                        content = f.read()
+                                        do_not_train = any(t in content for t in NO_TRAINING_CUSTOM_ALGORITHMS)
+                                    # @added 20260311 - Task #2732: Prometheus to Skyline
+                                    if metric_file.startswith('labelled_metrics.'):
+                                        with open(metric_check_file, 'r') as f:
+                                            anomaly_details = f.readlines()
+                                            for i, line in enumerate(anomaly_details):
+                                                if 'full_duration' in line:
+                                                    _full_duration = '%s' % str(line).split("'", 2)
+                                                    full_duration_array = literal_eval(_full_duration)
+                                                    use_full_duration = int(full_duration_array[1])
+
+                            if do_not_train:
+                                do_not_train_file = '%s/do_not_train' % metric_file_path
+                                if not os.path.isfile(do_not_train_file):
+                                    with open(do_not_train_file, 'a'):
+                                        pass
+
                             if add_folder:
                                 if metric_file and metric_file_path:
                                     metric = metric_file.replace('.txt', '', 1)
@@ -703,6 +793,17 @@ class Ionosphere(Thread):
                                                 resolution_seconds = ifile_resolution * 3600
                                             except:
                                                 pass
+
+                                    # @added 20260311 - Task #2732: Prometheus to Skyline
+                                    if use_full_duration:
+                                        resolution_seconds = int(use_full_duration)
+
+                                    # @added 20250329 - Feature #5611: custom_algorithm_only
+                                    # Do not allow training on specific custom_algorithms
+                                    training_data_instances_with_do_not_train.append([metric, timestamp, resolution_seconds])
+                                    if do_not_train:
+                                        continue
+
                                     # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                                     # Added resolution_seconds
                                     # training_data_instances.append([metric, timestamp])
@@ -786,6 +887,16 @@ class Ionosphere(Thread):
                         logger.error('error :: failed to evaluate historical training_dir - %s' % str(path))
                 logger.info('added %s historical training data instances' % (str(historical_training_data_added)))
 
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Do not allow training on specific custom_algorithms
+            if training_data_instances == training_data_instances_with_do_not_train:
+                training_data_instances_with_do_not_train = []
+
+            # @added 20250711 - Feature #5611: custom_algorithm_only
+            # The entries in the set do not expire so after the last time
+            # the set is added to, no old entries will be removed
+            expired_training_data_timestamp = int(current_time) - settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+
             if training_data_instances:
                 training_data_count = len(training_data_instances)
                 redis_set = 'ionosphere.training_data.new'
@@ -798,6 +909,10 @@ class Ionosphere(Thread):
                 except:
                     pass
 
+                # @added 20250328 - Feature #5611: custom_algorithm_only
+                # Optimise sadd to a single call
+                training_data_to_add = []
+
                 # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Added resolution_seconds
                 # for metric, timestamp in training_data_instances:
@@ -807,10 +922,23 @@ class Ionosphere(Thread):
                         # Added resolution_seconds
                         # data = [metric, int(timestamp)]
                         data = [metric, int(timestamp), resolution_seconds]
-                        self.redis_conn.sadd(redis_set, str(data))
+                        # @modified 20250328 - Feature #5611: custom_algorithm_only
+                        # Optimise sadd to a single call
+                        #self.redis_conn.sadd(redis_set, str(data))
+                        training_data_to_add.append(str(data))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+
+                # @added 20250328 - Feature #5611: custom_algorithm_only
+                # Optimise sadd to a single call
+                if training_data_to_add:
+                    try:
+                        self.redis_conn.sadd(redis_set, *set(training_data_to_add))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add %s items to %s Redis set' % (
+                            str(len(training_data_to_add)), redis_set))
 
                 try:
                     # Rename works to overwrite existing key fine
@@ -834,6 +962,66 @@ class Ionosphere(Thread):
                     logger.error(traceback.format_exc())
                     logger.error(
                         'error :: failed to rename ionosphere.training_data.new to ionosphere.training_data')
+
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Do not allow training on specific custom_algorithms
+            if training_data_instances_with_do_not_train:
+                training_data_with_do_not_train_count = len(training_data_instances_with_do_not_train)
+                redis_set = 'ionosphere.training_data_with_do_not_train.new'
+                try:
+                    # Delete it if it exists and was not renamed for some reason
+                    self.redis_conn.delete(redis_set)
+                    logger.info(
+                        'deleted Redis set - %s' % (redis_set))
+                except:
+                    pass
+                logger.info('creating Redis set %s with %s training_data_instances_with_do_not_train instances' % (
+                    redis_set, str(training_data_with_do_not_train_count)))
+            training_data_instances_with_do_not_train_to_add = []
+            for metric, timestamp, resolution_seconds in training_data_instances_with_do_not_train:
+                # @added 20250711 - Feature #5611: custom_algorithm_only
+                # The entries in the set do not expire so after the last time
+                # the set is added to, no old entries will be removed
+                if int(timestamp) < expired_training_data_timestamp:
+                    continue
+
+                try:
+                    data = [metric, int(timestamp), resolution_seconds]
+                    training_data_instances_with_do_not_train_to_add.append(str(data))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+            if training_data_instances_with_do_not_train_to_add:
+                try:
+                    self.redis_conn.sadd(redis_set, *set(training_data_instances_with_do_not_train_to_add))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add %s items to %s Redis set' % (
+                        str(len(training_data_instances_with_do_not_train_to_add)), redis_set))
+            else:
+                # @added 20250711 - Feature #5611: custom_algorithm_only
+                # The entries in the set do not expire so after the last time
+                # the set is added to, no old entries will be removed
+                redis_set = 'ionosphere.training_data_with_do_not_train.new'
+                try:
+                    self.redis_conn.delete(redis_set)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete %s Redis set, err: %s' % (
+                        redis_set, err))
+
+            try:
+                redis_key_renamed = False
+                try:
+                    redis_key_renamed = redis_rename_key(skyline_app, 'ionosphere.training_data_with_do_not_train.new', 'ionosphere.training_data_with_do_not_train', log=True)
+                except Exception as err:
+                    logger.error('error :: redis_rename_key failed renaming ionosphere.training_data_with_do_not_train.new to ionosphere.training_data_with_do_not_train, err: %s' % err)
+                if redis_key_renamed:
+                    logger.info('replaced Redis ionosphere.training_data_with_do_not_train via a rename of ionosphere.training_data_with_do_not_train.new')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error(
+                    'error :: failed to rename ionosphere.training_data_with_do_not_train.new to ionosphere.training_data_with_do_not_train')
 
         last_purge_ts = int(time())
         try:
@@ -950,9 +1138,17 @@ class Ionosphere(Thread):
             #                      Branch #4300: prometheus
             # Handle labelled_metrics
             # stmt = 'select metric from metrics where ionosphere_enabled=1'
-            stmt = 'select id, metric from metrics where ionosphere_enabled=1'
-            connection = engine.connect()
-            for row in engine.execute(stmt):
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = 'select id, metric from metrics where ionosphere_enabled=1'
+            stmt = text('select id, metric from metrics where ionosphere_enabled=1')
+            #for row in engine.execute(stmt):
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
+
                 metric_basename = row['metric']
                 metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric_basename))
                 # @added 20220803 - Task #2732: Prometheus to Skyline
@@ -964,7 +1160,7 @@ class Ionosphere(Thread):
                     except Exception as err:
                         errors.append(['determining metric id for', metric_basename, str(err)])
                 ionosphere_enabled_metrics.append(metric_name)
-            connection.close()
+            #connection.close()
             query_ok = True
         except Exception as err:
             logger.error(traceback.format_exc())
@@ -1219,6 +1415,16 @@ class Ionosphere(Thread):
 
         else:
             logger.error('error :: spawn_learn_process not called with valid learn_job_context')
+
+    # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+    def spawn_validation_process(self, i, last_self_validate_timestamp):
+        function_name = 'spawn_validation_process'
+        logger.info('spawn_validation_process running')
+        try:
+            self_validation(last_self_validate_timestamp)
+        except Exception as err:
+            logger.error('error :: self_validation failed, err: %s' % err)
+
 
     # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
     def process_ionosphere_echo(self, i, metric_check_file):
@@ -1487,7 +1693,7 @@ class Ionosphere(Thread):
             # @added 20230925 - Task #5000: Replace alert key scans with sets
             # Instead of using expiring keys with have a compute cost with
             # using scan_iter(match='[PATTERN]') switch to using entries in a
-            # hash key, the management of which has a must lower compute cost.
+            # hash key, the management of which has a much lower compute cost.
             ionosphere_alerts_hash_key = 'ionosphere.%s.alerts' % added_by
             hash_key_key = '%s.%s' % (str(metric_timestamp), use_base_name)
             hash_key_value = {
@@ -2077,7 +2283,12 @@ class Ionosphere(Thread):
                 try:
                     metric_ionosphere_enabled_str = metrics_db_object['ionosphere_enabled']
                     if metric_ionosphere_enabled_str:
-                        metric_ionosphere_enabled = int(metric_ionosphere_enabled_str)
+                        # @modified 20241223 - Task #5526: Build v5.0.0 and upgrade deps
+                        # Handle being set to 'None' in memcache now
+                        if metric_ionosphere_enabled_str == 'None':
+                            metric_ionosphere_enabled = 0
+                        else:
+                            metric_ionosphere_enabled = int(metric_ionosphere_enabled_str)
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % use_base_name)
@@ -2330,6 +2541,26 @@ class Ionosphere(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
 
+        # @added 20260221 - Feature #5712: skyline.dawn
+        #                   Task #5628: Build v5.0.0 and test
+        dawn_expiry_timestamp = None
+        if SKYLINE_DAWN_ENABLED:
+            try:
+                dawn_expiry_timestamp = self.redis_conn_decoded.get('skyline.dawn.ionosphere')
+            except Exception as err:
+                logger.error('error :: failed on get skyline.dawn.ionosphere, err: %s' % (
+                    err))
+            if dawn_expiry_timestamp:
+                logger.info('NOTICE - skyline.dawn.ionosphere key exists, not analyzing metrics until %s' % (
+                    str(dawn_expiry_timestamp)))
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
+                logger.info('sending %s back to %s to alert' % (use_base_name, added_by))
+                return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                self.remove_metric_check_file(str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
+
         # @added 20240103 - Feature #4672: ionosphere_downsampled
         #                   Task #5178: Build and test skyline v4.1.0
         # To ensure the good performance of features profiles we ensure that the
@@ -2440,12 +2671,15 @@ class Ionosphere(Thread):
             alias_fp_ids = []
 
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 # @modified 2018075 - Task #2446: Optimize Ionosphere
                 #                     Branch #2270: luminosity
                 # Order by the latest features profile, this also results in the
                 # layers ids being ordered by latest too.
-                # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
+                # stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metrics_id)
                 # @modified 20210429 - Feature #4014: Ionosphere - inference
                 #                      Task #2446: Optimize Ionosphere
                 # For efficiency order by the last fp matched, if there are
@@ -2453,22 +2687,38 @@ class Ionosphere(Thread):
                 # that the metric may be sent through for multiple time over
                 # a period.  When a features profilee matches, chances are it
                 # will match again multiple times for that incident period.
-                # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.last_matched))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+                # stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.last_matched))
+                stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.last_matched))
 
                 # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
                 if alias_fp_ids:
-                    stmt = select([ionosphere_table]).where(
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table]).where(
+                    stmt = select(ionosphere_table).where(
                         or_(
                             ionosphere_table.c.metric_id == metrics_id,
                             ionosphere_table.c.id.in_(alias_fp_ids)
                         )
                     ).order_by(desc(ionosphere_table.c.last_matched))
 
-                result = connection.execute(stmt)
+                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
                 # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
                 # To be used for ionosphere_echo
-                fps_db_object = [{column: value for column, value in rowproxy.items()} for rowproxy in result]
+                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                #fps_db_object = [{column: value for column, value in rowproxy.items()} for rowproxy in result]
+                fps_db_object = [{column: value for column, value in row.items()} for row in results]
 
                 # for row in result:
                 for row in fps_db_object:
@@ -2494,6 +2744,39 @@ class Ionosphere(Thread):
                             #                   Feature #4732: flux vortex
                             # Return the matched fp id in the vortex results
                             fp_layers_id_dict[fp_layers_id] = fp_id
+
+                    # @added 20251002 - Feature #1888: Ionosphere learn - evolutionary maturity forget
+                    if IONOSPHERE_FORGET_SECONDS_NOT_MATCHED:
+                        if int(row['full_duration']) == int(full_duration):
+                            created_timestamp = 0
+                            now = int(time())
+                            try:
+                                created_timestamp = int(row['created_timestamp'].timestamp())
+                            except Exception as err:
+                                created_timestamp = int(now)
+                                pass
+                            forget_before = now - IONOSPHERE_FORGET_SECONDS_NOT_MATCHED
+                            if created_timestamp < forget_before:
+                                try: 
+                                    last_checked = row['last_checked']
+                                    motif_last_checked = row['motif_last_checked']
+                                    last_matched = row['last_matched']
+                                    motif_last_matched = row['motif_last_matched']
+                                    if (last_checked > forget_before) or (motif_last_checked > forget_before):
+                                        if (last_matched < forget_before) and (motif_last_matched < forget_before):
+                                            # Forget - exclude fps that are older than and not matched
+                                            # This would be the SQL for all fp_ids to exclude
+                                            #dt_str = str(row['created_timestamp'])
+                                            #stmt = "select id from ionosphere where enabled = 1 and created_timestamp < '%s' and (last_checked > %s or motif_last_checked > %s) and (last_matched < %s and motif_last_matched < %s)" % (
+                                            #    str(dt_str), str(forget_before),
+                                            #    str(forget_before), str(forget_before),
+                                            #    str(forget_before))
+                                            logger.info('forgetting - fp id %s no recent matches' % (
+                                                str(fp_id)))
+                                            continue
+                                except Exception as err:
+                                    logger.error('error :: forget check failed for fp id: %s, err: %s' % (
+                                        str(fp_id), err))
 
                     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
                     # Added all_fp_ids
@@ -2558,7 +2841,7 @@ class Ionosphere(Thread):
                 # @modified 20170308 - Feature #1960: ionosphere_layers
                 # Not currently used - fp_ids_db_object
                 # fp_ids_db_object = row
-                connection.close()
+                #connection.close()
                 fp_count = len(fp_ids)
                 logger.info('determined %s fp ids for %s' % (str(fp_count), use_base_name))
                 # @added 20170309 - Feature #1960: ionosphere_layers
@@ -2575,6 +2858,9 @@ class Ionosphere(Thread):
             if len(alias_fp_ids) > 0:
                 for fp_id in list(fps_dict.keys()):
                     if fp_id in alias_fp_ids:
+                        # DISABLED FOR NOW
+                        metric_id = 0
+
                         fps_dict[fp_id]['alias_fp_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['id']
                         fps_dict[fp_id]['original_metric_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['original_metric_id']
                         fps_dict[fp_id]['alias_metric_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['alias_metric_id']
@@ -2672,12 +2958,20 @@ class Ionosphere(Thread):
                             metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
                             logger.info(log_msg)
                             logger.info('metrics_table OK')
-                            connection = engine.connect()
-                            connection.execute(
-                                metrics_table.update(
-                                    metrics_table.c.id == metrics_id).
-                                values(ionosphere_enabled=0))
-                            connection.close()
+                            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                            #                      Task #5628: Build v5.0.0 and test
+                            #connection = engine.connect()
+                            #connection.execute(
+                            #    metrics_table.update(
+                            #        metrics_table.c.id == metrics_id).
+                            #    values(ionosphere_enabled=0))
+                            #connection.close()
+                            stmt = metrics_table.update().\
+                                where(metrics_table.c.id == metrics_id).values(
+                                ionosphere_enabled=0)
+                            with engine.begin() as connection:
+                                connection.execute(stmt)
+
                             logger.info('updated %s to ionosphere_enabled=0' % (
                                 base_name))
                             logger.info('%s has been unwilly nillied' % (base_name))
@@ -2747,7 +3041,10 @@ class Ionosphere(Thread):
                                                     'added_by = \'%s\'\n' \
                                                     'added_at = \'%s\'\n' \
                                 % (use_base_name, str(anomalous_value), str(int(from_timestamp)),
-                                   str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                                # @modified 20251115 - Feature #5665: custom_algorithm - mirage_nirvana
+                                # Use passed algorithms
+                                #   str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                                   str(int(metric_timestamp)), str(algorithms),
                                    str(triggered_algorithms), skyline_app, source,
                                    this_host, added_at)
                             # Create an anomaly file with details about the anomaly
@@ -2910,13 +3207,21 @@ class Ionosphere(Thread):
             motif_checks_updated_count = 0
             for fp_checked_for_motifs in fps_checked_for_motifs:
                 try:
-                    connection = engine.connect()
-                    connection.execute(
-                        ionosphere_table.update(
-                            ionosphere_table.c.id == fp_checked_for_motifs).
-                        values(motif_checked_count=ionosphere_table.c.motif_checked_count + 1,
-                               motif_last_checked=motif_checked_timestamp))
-                    connection.close()
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #connection.execute(
+                    #    ionosphere_table.update(
+                    #        ionosphere_table.c.id == fp_checked_for_motifs).
+                    #    values(motif_checked_count=ionosphere_table.c.motif_checked_count + 1,
+                    #        motif_last_checked=motif_checked_timestamp))
+                    stmt = ionosphere_table.update().\
+                        where(ionosphere_table.c.id == fp_checked_for_motifs).values(
+                            motif_checked_count=ionosphere_table.c.motif_checked_count + 1,
+                            motif_last_checked=motif_checked_timestamp)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
+                    #connection.close()
                     motif_checks_updated_count += 1
                 except Exception as e:
                     logger.error(traceback.format_exc())
@@ -3046,15 +3351,26 @@ class Ionosphere(Thread):
                     # Return the matched fp id in the vortex results
                     matched_fp_id = int(matched_motif[1])
 
+                    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                    tenant_id = 0
+                    try:
+                        tenant_id = get_tenant_id(skyline_app, metric_id=int(matched_motif[0]), base_name=None, log=False)
+                    except Exception as err:
+                        logger.error('error :: get_tenant_id failed for metric_id: %s, err: %s' % (
+                            str(matched_motif[0]), err))
+                        tenant_id = 0
+
                     # Only a single ionosphere_matched record is created for
                     # the most similar motif (primary_match=1) HOWEVER
                     # DO NOTE that EVERY motif match that is surfaced is
                     # in a run is recorded in the motifs_matched table.
                     # ordered_matched_motifs.append([motif_metric_id, motif_fp_id, motif_fp_index, motif_dist, motif_size, motif_matched_timestamp, match_type_id, match_type, motif_sequence, motif_area, fp_motif_area, area_percent_diff])
                     try:
-                        connection = engine.connect()
+                        #connection = engine.connect()
                         ins = motifs_matched_table.insert().values(
                             metric_id=int(matched_motif[0]),
+                            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                            tenant_id=tenant_id,
                             fp_id=int(matched_motif[1]),
                             metric_timestamp=int(matched_motif[5]),
                             primary_match=primary_match,
@@ -3071,9 +3387,15 @@ class Ionosphere(Thread):
                             # Add time taken and fps checked
                             fps_checked=int(matched_motif[12]),
                             runtime=float(matched_motif[13]))
-                        result = connection.execute(ins)
-                        connection.close()
-                        new_motif_matched_id = result.inserted_primary_key[0]
+                        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(ins)
+                        #connection.close()
+                        #new_motif_matched_id = result.inserted_primary_key[0]
+                        with engine.begin() as connection:
+                            result = connection.execute(ins)
+                            new_motif_matched_id = result.inserted_primary_key[0]
+
                         new_motifs_matched_ids.append(new_motif_matched_id)
                     except:
                         logger.error(traceback.format_exc())
@@ -3088,15 +3410,20 @@ class Ionosphere(Thread):
                     if new_motif_matched_id and IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS:
                         new_motif_sequence_ids = []
                         try:
-                            connection = engine.connect()
+                            #connection = engine.connect()
                             for motif_sequence_timestamp, motif_sequence_value in matched_motif[8]:
                                 try:
                                     ins = not_anomalous_motifs_table.insert().values(
                                         motif_id=int(new_motif_matched_id),
                                         timestamp=int(motif_sequence_timestamp),
                                         value=motif_sequence_value)
-                                    result = connection.execute(ins)
-                                    new_motif_sequence_id = result.inserted_primary_key[0]
+                                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                                    #                      Task #5628: Build v5.0.0 and test
+                                    #result = connection.execute(ins)
+                                    with engine.begin() as connection:
+                                        result = connection.execute(ins)
+                                        new_motif_sequence_id = result.inserted_primary_key[0]
+
                                     new_motif_sequence_ids.append(new_motif_sequence_id)
                                 except:
                                     logger.error(traceback.format_exc())
@@ -3104,7 +3431,7 @@ class Ionosphere(Thread):
                                         str(motif_sequence_timestamp),
                                         str(motif_sequence_value),
                                         str(new_motif_matched_id)))
-                            connection.close()
+                            #connection.close()
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: could not insert timestamps and values for into not_anomalous_motifs table: %s' % (
@@ -3121,14 +3448,17 @@ class Ionosphere(Thread):
                             # in a run is recorded in the motifs_matched table.
                             new_matched_id = 0
                             try:
-                                connection = engine.connect()
+                                #connection = engine.connect()
                                 ins = ionosphere_matched_table.insert().values(
                                     fp_id=int(matching_motif[1]),
                                     metric_timestamp=int(matching_motif[5]),
                                     motifs_matched_id=int(new_motif_matched_id))
-                                result = connection.execute(ins)
-                                connection.close()
-                                new_matched_id = result.inserted_primary_key[0]
+                                # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                                #                      Task #5628: Build v5.0.0 and test
+                                with engine.begin() as connection:
+                                    result = connection.execute(ins)
+                                    new_matched_id = result.inserted_primary_key[0]
+                                #connection.close()
                                 logger.info('new ionosphere_matched id: %s (for matched motif with matched_motif_id: %s' % (
                                     str(new_matched_id), str(new_motif_matched_id)))
                             except:
@@ -3143,13 +3473,21 @@ class Ionosphere(Thread):
                                 # Update motif_matched_count in ionosphere_table
                                 motif_matched_timestamp = int(time())
                                 try:
-                                    connection = engine.connect()
-                                    connection.execute(
-                                        ionosphere_table.update(
-                                            ionosphere_table.c.id == matching_motif[1]).
-                                        values(motif_matched_count=ionosphere_table.c.motif_matched_count + 1,
-                                               motif_last_matched=motif_matched_timestamp))
-                                    connection.close()
+                                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                                    #                      Task #5628: Build v5.0.0 and test
+                                    #connection = engine.connect()
+                                    #connection.execute(
+                                    #    ionosphere_table.update(
+                                    #        ionosphere_table.c.id == matching_motif[1]).
+                                    #    values(motif_matched_count=ionosphere_table.c.motif_matched_count + 1,
+                                    #        motif_last_matched=motif_matched_timestamp))
+                                    stmt = ionosphere_table.update().\
+                                        where(ionosphere_table.c.id == matching_motif[1]).values(
+                                            motif_matched_count=ionosphere_table.c.motif_matched_count + 1,
+                                            motif_last_matched=motif_matched_timestamp)
+                                    with engine.begin() as connection:
+                                        connection.execute(stmt)
+                                    #connection.close()
                                     logger.info('updated motif_matched_count and motif_last_matched for fp_id %s for dur to matched_motif_id: %s' % (
                                         str(matching_motif[1]), str(new_matched_id)))
                                 except:
@@ -3561,26 +3899,36 @@ class Ionosphere(Thread):
                         # Use the MetaData autoload and sqlalchemy rather than string-based query construction
                         try:
                             use_table_meta = MetaData()
-                            use_table = Table(metric_fp_table, use_table_meta, autoload=True, autoload_with=engine)
+                            use_table = Table(metric_fp_table, use_table_meta, autoload_with=engine)
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: use_table Table failed on %s table - %s' % (
                                 metric_fp_table, err))
 
                         # @modified 20170913 - Task #2160: Test skyline with bandit
-                        # Added nosec to exclude from bandit tests
+                        # Added "nosec" to exclude from bandit tests
                         # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                         #                      Task #4778: v4.0.0 - update dependencies
                         # Use sqlalchemy rather than string-based query construction
                         # stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))  # nosec
-                        stmt = select([use_table.c.feature_id, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+                        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #stmt = select([use_table.c.feature_id, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+                        stmt = select(use_table.c.feature_id, use_table.c.value).where(use_table.c.fp_id == int(fp_id))
 
-                        connection = engine.connect()
-                        for row in engine.execute(stmt):
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #connection = engine.connect()
+                        #for row in engine.execute(stmt):
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        for row in results:
+
                             fp_feature_id = int(row['feature_id'])
                             fp_value = float(row['value'])
                             fp_features.append([fp_feature_id, fp_value])
-                        connection.close()
+                        #connection.close()
                         features_count = len(fp_features)
                         logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
                     except:
@@ -3736,13 +4084,21 @@ class Ionosphere(Thread):
                     logger.error('error :: engine not obtained to update checked details in db for %s' % (str(fp_id)))
 
                 try:
-                    connection = engine.connect()
-                    connection.execute(
-                        ionosphere_table.update(
-                            ionosphere_table.c.id == fp_id).
-                        values(checked_count=ionosphere_table.c.checked_count + 1,
-                               last_checked=checked_timestamp))
-                    connection.close()
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #connection.execute(
+                    #    ionosphere_table.update(
+                    #        ionosphere_table.c.id == fp_id).
+                    #    values(checked_count=ionosphere_table.c.checked_count + 1,
+                    #        last_checked=checked_timestamp))
+                    stmt = ionosphere_table.update().\
+                        where(ionosphere_table.c.id == fp_id).values(
+                            checked_count=ionosphere_table.c.checked_count + 1,
+                            last_checked=checked_timestamp)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
+                    #connection.close()
                     logger.info('updated checked_count for %s' % str(fp_id))
                 except:
                     logger.error(traceback.format_exc())
@@ -3903,7 +4259,7 @@ class Ionosphere(Thread):
                             # Use the MetaData autoload and sqlalchemy rather than string-based query construction
                             try:
                                 use_table_meta = MetaData()
-                                use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+                                use_table = Table(metric_fp_ts_table, use_table_meta, autoload_with=engine)
                             except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: use_table Table failed on %s table - %s' % (
@@ -3913,14 +4269,24 @@ class Ionosphere(Thread):
                             #                      Task #4778: v4.0.0 - update dependencies
                             # Use sqlalchemy rather than string-based query construction
                             # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
-                            stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+                            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                            #                      Task #5628: Build v5.0.0 and test
+                            #stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+                            stmt = select(use_table.c.timestamp, use_table.c.value).where(use_table.c.fp_id == int(fp_id))
 
-                            connection = engine.connect()
-                            for row in engine.execute(stmt):
+                            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                            #                      Task #5628: Build v5.0.0 and test
+                            #connection = engine.connect()
+                            #for row in engine.execute(stmt):
+                            with engine.connect() as connection:
+                                result = connection.execute(stmt)
+                                results = [dict(row._mapping) for row in result.fetchall()]
+                            for row in results:
+
                                 fp_id_ts_timestamp = int(row['timestamp'])
                                 fp_id_ts_value = float(row['value'])
                                 fp_id_metric_ts.append([fp_id_ts_timestamp, fp_id_ts_value])
-                            connection.close()
+                            #connection.close()
                             values_count = len(fp_id_metric_ts)
                             logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(use_base_name)))
                         except:
@@ -3970,6 +4336,14 @@ class Ionosphere(Thread):
                                     with open((redis_anomaly_json), 'r') as f:
                                         raw_timeseries = f.read()
                                     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                                    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                                    if 'nan' in timeseries_array_str:
+                                        try:
+                                            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                                        except Exception as err:
+                                            logger.error('error :: failed to replace nan with None, err: %s' % (
+                                                err))
+
                                     del raw_timeseries
                                     echo_anomalous_timeseries = literal_eval(timeseries_array_str)
                                     del timeseries_array_str
@@ -3990,6 +4364,14 @@ class Ionosphere(Thread):
                                 with open((anomaly_json), 'r') as f:
                                     raw_timeseries = f.read()
                                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                                if 'nan' in timeseries_array_str:
+                                    try:
+                                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                                    except Exception as err:
+                                        logger.error('error :: failed to replace nan with None, err: %s' % (
+                                            err))
+
                                 del raw_timeseries
                                 anomalous_timeseries = literal_eval(timeseries_array_str)
                                 del timeseries_array_str
@@ -4297,6 +4679,11 @@ class Ionosphere(Thread):
                                 df_sum['value'] = df_sum['value'].astype(float)
                                 minmax_fp_features_count = len(df_sum['value'])
                                 minmax_fp_features_sum = df_sum['value'].sum()
+                                # @added 20250829 - Feature #4708: ionosphere - store and cache fp minmax data
+                                # Coerce type - np.float64 to float as when inserted
+                                # into memcache the np.float64 breaks literal_eval
+                                minmax_fp_features_sum = float(minmax_fp_features_sum)
+
                                 logger.info('minmax_fp_ts - features_count: %s, features_sum: %s' % (str(minmax_fp_features_count), str(minmax_fp_features_sum)))
                             except:
                                 logger.error(traceback.format_exc())
@@ -4573,13 +4960,21 @@ class Ionosphere(Thread):
                         logger.error('error :: engine not obtained to update matched details in db for %s' % (str(fp_id)))
 
                     try:
-                        connection = engine.connect()
-                        connection.execute(
-                            ionosphere_table.update(
-                                ionosphere_table.c.id == fp_id).
-                            values(matched_count=ionosphere_table.c.matched_count + 1,
-                                   last_matched=matched_timestamp))
-                        connection.close()
+                        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #connection = engine.connect()
+                        #connection.execute(
+                        #    ionosphere_table.update(
+                        #        ionosphere_table.c.id == fp_id).
+                        #    values(matched_count=ionosphere_table.c.matched_count + 1,
+                        #        last_matched=matched_timestamp))
+                        stmt = ionosphere_table.update().\
+                            where(ionosphere_table.c.id == fp_id).values(
+                                matched_count=ionosphere_table.c.matched_count + 1,
+                                last_matched=matched_timestamp)
+                        with engine.begin() as connection:
+                            connection.execute(stmt)
+                        #connection.close()
                         logger.info('updated matched_count for %s' % str(fp_id))
                     except:
                         logger.error(traceback.format_exc())
@@ -4630,7 +5025,7 @@ class Ionosphere(Thread):
                         fp_count = fp_count_with_echo
 
                     try:
-                        connection = engine.connect()
+                        #connection = engine.connect()
                         # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
                         #                      Feature #1844: ionosphere_matched DB table
                         # Added all_calc_features_sum, all_calc_features_count,
@@ -4653,9 +5048,13 @@ class Ionosphere(Thread):
                             # @added 2018075 - Task #2446: Optimize Ionosphere
                             #                  Branch #2270: luminosity
                             fp_count=fp_count, fp_checked=fp_checked)
-                        result = connection.execute(ins)
-                        connection.close()
-                        new_matched_id = result.inserted_primary_key[0]
+                        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(ins)
+                        with engine.begin() as connection:
+                            result = connection.execute(ins)
+                            new_matched_id = result.inserted_primary_key[0]
+                        #connection.close()
                         # @modified 20180620 - Feature #2404: Ionosphere - fluid approximation
                         # Added minmax
                         if minmax == 0:
@@ -4728,29 +5127,41 @@ class Ionosphere(Thread):
                     learning_rate_limited = False
                     now = int(time())
                     rate_limit_timestamp = now - 3600
-                    rate_limit_datetime = datetime.fromtimestamp(rate_limit_timestamp)
+                    # @modified 20251002 - Feature #1888: Ionosphere learn - evolutionary maturity forget
+                    #rate_limit_datetime = datetime.fromtimestamp(rate_limit_timestamp)
+                    rate_limit_datetime = datetime.datetime.fromtimestamp(rate_limit_timestamp)
+
                     f = '%Y-%m-%d %H:%M:%S'
                     after_datetime = rate_limit_datetime.strftime(f)
                     try:
-                        connection = engine.connect()
+                        #connection = engine.connect()
                         # @modified 20170913 - Task #2160: Test skyline with bandit
-                        # Added nosec to exclude from bandit tests
+                        # Added "nosec" to exclude from bandit tests
                         # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                         #                      Task #4778: v4.0.0 - update dependencies
                         # Use sqlalchemy rather than string-based query construction
                         # result = connection.execute(
                         #     'SELECT * FROM ionosphere WHERE metric_id=%s AND created_timestamp > \'%s\' AND generation > 1' % (str(metrics_id), str(after_datetime)))  # nosec
                         # for row in result:
-                        stmt = select([ionosphere_table]).\
+                        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #stmt = select([ionosphere_table]).\
+                        stmt = select(ionosphere_table).\
                             where(ionosphere_table.c.metric_id == int(metrics_id)).\
                             where(ionosphere_table.c.created_timestamp > after_datetime).\
                             where(ionosphere_table.c.generation > 1)
-                        for row in engine.execute(stmt):
+                        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #for row in engine.execute(stmt):
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        for row in results:
                             last_full_duration = row['full_duration']
                             if int(full_duration) <= int(last_full_duration):
                                 learning_rate_limited = True
                                 break
-                        connection.close()
+                        #connection.close()
 
                     except:
                         logger.error(traceback.format_exc())
@@ -4769,17 +5180,27 @@ class Ionosphere(Thread):
                     # list
                     try:
                         # @modified 20170913 - Task #2160: Test skyline with bandit
-                        # Added nosec to exclude from bandit tests
+                        # Added "nosec" to exclude from bandit tests
                         # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                         #                      Task #4778: v4.0.0 - update dependencies
                         # Use sqlalchemy rather than string-based query construction
                         # stmt = 'SELECT generation FROM ionosphere WHERE id=%s' % str(fp_id)  # nosec
-                        stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
+                        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
+                        stmt = select(ionosphere_table.c.generation).where(ionosphere_table.c.id == int(fp_id))
 
-                        connection = engine.connect()
-                        for row in engine.execute(stmt):
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #connection = engine.connect()
+                        #for row in engine.execute(stmt):
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        for row in results:
+
                             matched_fp_generation = int(row['generation'])
-                        connection.close()
+                        #connection.close()
                         logger.info(
                             'determined matched fp_id %s is a generation %s profile' % (
                                 str(fp_id), str(matched_fp_generation)))
@@ -4859,6 +5280,14 @@ class Ionosphere(Thread):
                         with open((full_duration_json_file), 'r') as f:
                             raw_timeseries = f.read()
                         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                        if 'nan' in timeseries_array_str:
+                            try:
+                                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                            except Exception as err:
+                                logger.error('error :: failed to replace nan with None, err: %s' % (
+                                    err))
+
                         anomalous_timeseries = literal_eval(timeseries_array_str)
                     except:
                         logger.error(traceback.format_exc())
@@ -5050,7 +5479,10 @@ class Ionosphere(Thread):
                                             'added_by = \'%s\'\n' \
                                             'added_at = \'%s\'\n' \
                         % (use_base_name, str(anomalous_value), str(int(from_timestamp)),
-                           str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                        # @modified 20251115 - Feature #5665: custom_algorithm - mirage_nirvana
+                        # Use passed algorithms
+                        #  str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                           str(int(metric_timestamp)), str(algorithms),
                            str(triggered_algorithms), skyline_app, source,
                            this_host, added_at)
 
@@ -5369,7 +5801,7 @@ class Ionosphere(Thread):
                     logger.error('error :: failed to get MySQL engine')
                 try:
                     use_table_meta = MetaData()
-                    use_table = Table('hosts', use_table_meta, autoload=True, autoload_with=engine)
+                    use_table = Table('hosts', use_table_meta, autoload_with=engine)
                     hosts_table_loaded = True
                 except Exception as err:
                     logger.error(traceback.format_exc())
@@ -5377,7 +5809,7 @@ class Ionosphere(Thread):
                         err))
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
@@ -5389,12 +5821,23 @@ class Ionosphere(Thread):
                 # else:
                 #     logger.info('failed to determine host id of %s' % this_host)
                 try:
-                    stmt = select([use_table.c.id]).where(use_table.c.host == this_host)
-                    connection = engine.connect()
-                    for row in engine.execute(stmt):
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([use_table.c.id]).where(use_table.c.host == this_host)
+                    stmt = select(use_table.c.id).where(use_table.c.host == this_host)
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #for row in engine.execute(stmt):
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
+
                         host_id = row['id']
                         break
-                    connection.close()
+                    #connection.close()
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to find id of %s in hosts table - %s' % (
@@ -5431,7 +5874,7 @@ class Ionosphere(Thread):
                 if not hosts_table_loaded:
                     try:
                         use_table_meta = MetaData()
-                        use_table = Table('hosts', use_table_meta, autoload=True, autoload_with=engine)
+                        use_table = Table('hosts', use_table_meta, autoload_with=engine)
                         hosts_table_loaded = True
                     except Exception as err:
                         logger.error(traceback.format_exc())
@@ -5439,18 +5882,22 @@ class Ionosphere(Thread):
                             err))
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
                 # host_id = self.mysql_insert(query)
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     ins = use_table.insert().values(host=this_host)
-                    result = connection.execute(ins)
-                    connection.close()
-                    host_id = result.inserted_primary_key[0]
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(ins)
+                    with engine.begin() as connection:
+                        result = connection.execute(ins)
+                        host_id = result.inserted_primary_key[0]
+                    #connection.close()
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to insert host into hosts table - %s' % (
@@ -5501,6 +5948,9 @@ class Ionosphere(Thread):
                 logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
                 ionosphere_non_smtp_alerter_metrics = []
 
+            # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+            learn_self_validation_job_skip = False
+
             # Determine if any metric has been added to add
             # while True:
             while 1:
@@ -5531,11 +5981,11 @@ class Ionosphere(Thread):
                         echo_work_queue_items = len(ionosphere_echo_work)
                         if echo_work_queue_items > 0:
                             echo_job = True
-                            logger.info('processing a ionosphere.echo.work item')
+                            logger.info('processing a ionosphere.echo.work item from the queue of %s items' % str(len(ionosphere_echo_work)))
                 if echo_job:
 
-                    # @added 20240424 - Feature #5318: motif_annihilation
-                    # Add echo fp creation for motif_annihilation
+                    # @added 20240424 - Feature #5318: common_motifs
+                    # Add echo fp creation for common_motifs
                     ionosphere_job = 'echo_fp_human'
 
                     # for index, ionosphere_echo_work in enumerate(ionosphere_echo_work):
@@ -5545,8 +5995,8 @@ class Ionosphere(Thread):
                             echo_metric_timestamp = int(echo_metric_list[2])
                             echo_base_name = str(echo_metric_list[3])
                             echo_full_duration = int(echo_metric_list[6])
-                            # @added 20240424 - Feature #5318: motif_annihilation
-                            # Add echo fp creation for motif_annihilation
+                            # @added 20240424 - Feature #5318: common_motifs
+                            # Add echo fp creation for common_motifs
                             try:
                                 ionosphere_job = str(echo_metric_list[1])
                             except:
@@ -5565,7 +6015,7 @@ class Ionosphere(Thread):
                         settings.SKYLINE_TMP_DIR, str(echo_metric_timestamp),
                         echo_base_name)
 
-                    # @added 20240611 - Feature #5318: motif_annihilation
+                    # @added 20240611 - Feature #5318: common_motifs
                     # Use the labelled_metricname to prevent errors on the
                     # filesystem with unsupported chars
                     if '_tenant_id="' in echo_base_name:
@@ -5936,12 +6386,18 @@ class Ionosphere(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
 
+                    # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+                    learn_self_validation_job_skip = False
+
                 ionosphere_job = False
                 learn_job = False
 
                 # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
                 # Default the new learn_job_context variable
                 learn_job_context = 'learn'
+
+                # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+                learn_self_validation_job = False
 
                 # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
                 # Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES
@@ -6137,6 +6593,50 @@ class Ionosphere(Thread):
                     logger.info('%s metric check files, so set to ionosphere_job = True' % (str(len(metric_var_files))))
                     break
 
+                # @added 20250728 - Feature #5644: ionosphere.learn_self_validation
+                work_queue_items = 0
+                learn_self_validation_job = False
+                last_self_validate_timestamp = 0
+                if IONOSPHERE_LEARN_SELF_VALIDATE:
+                    if not learn_self_validation_job_skip:
+                        try:
+                            last_self_validate_timestamp = self.redis_conn_decoded.get('ionosphere.learn_self_validate.last_timestamp')
+                            if last_self_validate_timestamp:
+                                last_self_validate_timestamp = int(last_self_validate_timestamp)
+                            else:
+                                last_self_validate_timestamp = 0
+                        except Exception as err:
+                            logger.error('error :: failed to get ionosphere.last_self_validate.timestamp from Redis - %s' % (
+                                err))
+                    else:
+                        last_self_validate_timestamp = None
+                    if isinstance(last_self_validate_timestamp, int) or last_self_validate_timestamp == 0:
+                        # Only run 3 times in a row then skip for 5 minutes to
+                        # allow FIND_REPETITIVE_PATTERNS, etc to run
+                        last_self_validate_count = 0
+                        try:
+                            last_self_validate_count = self.redis_conn_decoded.get('ionosphere.last_self_validate.count')
+                            if last_self_validate_count:
+                                last_self_validate_count = int(last_self_validate_count)
+                        except Exception as err:
+                            logger.error('error :: failed to get ionosphere.last_self_validate.count from Redis - %s' % (
+                                err))
+                        if last_self_validate_count:
+                            if last_self_validate_count >= 3:
+                                learn_self_validation_job = False
+                                logger.info('skipping learn_self_validation as run %s times in a row and TTL has not expired' % (
+                                    str(last_self_validate_count)))
+                                learn_self_validation_job_skip = True
+                            else:
+                                learn_self_validation_job = True
+                        else:
+                            learn_self_validation_job = True
+                    if learn_self_validation_job:
+                        learn_job = False
+                        learn_job_context = 'self_validation'
+                if learn_self_validation_job:
+                    break
+
                 # @added 20240311 - Feature #5304: ionosphere.find_repetitive_patterns
                 # Use the learn process to handle find_repetitive_patterns
                 work_queue_items = 0
@@ -6217,7 +6717,6 @@ class Ionosphere(Thread):
                         learn_job_context = 'learn_repetitive_patterns'
                 if learn_job:
                     break
-
 
             # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
             #                   Feature #2484: FULL_DURATION feature profiles
@@ -6374,6 +6873,10 @@ class Ionosphere(Thread):
 
                 function_name = 'spawn_learn_process'
 
+            # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+            if learn_self_validation_job:
+                function_name = 'spawn_validation_process'
+
             # Spawn processes
             pids = []
             spawned_pids = []
@@ -6409,6 +6912,26 @@ class Ionosphere(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to start %s' % function_name)
                         continue
+
+                # @added 20250729 - Feature #5644: ionosphere.learn_self_validation
+                if learn_self_validation_job:
+                    function_name = 'spawn_validation_process'
+                    try:
+                        p = Process(target=self.spawn_validation_process, args=(i, last_self_validate_timestamp))
+                        pids.append(p)
+                        pid_count += 1
+                        logger.info(
+                            'starting %s of %s %s' % (
+                                str(pid_count), str(IONOSPHERE_PROCESSES),
+                                function_name))
+                        p.start()
+                        spawned_pids.append(p.pid)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to start %s' % function_name)
+                        continue
+                    # learn_self_validation should only ever run one process
+#                    break
 
                 # @added 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
                 if learn_job:
