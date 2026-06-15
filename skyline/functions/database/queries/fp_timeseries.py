@@ -45,7 +45,7 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
         # Use the MetaData autoload rather than string-based query construction
         try:
             use_table_meta = MetaData()
-            use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+            use_table = Table(metric_fp_ts_table, use_table_meta, autoload_with=engine)
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: use_table Table failed on %s table - %s' % (
@@ -54,10 +54,20 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
         # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
         # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))
-        stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+        stmt = select(use_table.c.timestamp, use_table.c.value).where(use_table.c.fp_id == int(fp_id))
 
-        connection = engine.connect()
-        for row in connection.execute(stmt):
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #for row in connection.execute(stmt):
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        end_db_query = timer()
+        for row in results:
             fp_id_ts_timestamp = int(row['timestamp'])
             fp_id_ts_value = float(row['value'])
             if fp_id_ts_timestamp and fp_id_ts_value:
@@ -67,8 +77,8 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
             # Handle all 0s
             if fp_id_ts_timestamp and fp_id_ts_value == 0:
                 timeseries.append([fp_id_ts_timestamp, fp_id_ts_value])
-        connection.close()
-        end_db_query = timer()
+        #connection.close()
+        #end_db_query = timer()
         current_logger.info('%s :: determined %s values for the fp_id %s time series in %6f seconds' % (
             function_str, str(len(timeseries)), str(fp_id),
             (end_db_query - start_db_query)))
