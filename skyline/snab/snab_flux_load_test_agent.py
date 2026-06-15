@@ -2,7 +2,11 @@ import logging
 import sys
 from os import getpid
 from os.path import isdir
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
+
 from time import sleep
 from sys import version_info
 
@@ -18,6 +22,9 @@ if True:
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
     from snab_flux_load_test import SNAB_flux_load_test
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 skyline_app = 'snab_flux_load_test'
 skyline_app_logger = 'snab_flux_load_testLog'
