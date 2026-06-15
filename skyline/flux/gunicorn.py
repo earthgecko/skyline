@@ -49,6 +49,9 @@ worker_class = 'gevent'
 workers = settings.FLUX_WORKERS
 backlog = settings.FLUX_BACKLOG
 
+# @added 20260221 - Task #5711: Test Ubuntu 24.04
+#                   Task #5628: Build v5.0.0 and test
+control_socket = '%s/flux.gunicorn.ctl' % settings.SKYLINE_TMP_DIR
 
 skyline_app = 'flux'
 # skyline_app_logger = '%sLog' % skyline_app

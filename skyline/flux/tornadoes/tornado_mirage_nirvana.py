@@ -1,21 +1,27 @@
 """
-tornado_laoccfdlpnc.py
+tornado_mirage_nirvana.py
 """
 import os
 from os import getpid
 
 import sys
-from timeit import default_timer as timer
 import traceback
+
+from contextlib import nullcontext
+from timeit import default_timer as timer
 
 import numpy as np
 
-from custom_algorithms.laoccfdlpnc import laoccfdlpnc
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+try:
+    from custom_algorithms.mirage_nirvana import mirage_nirvana
+except:
+    mirage_nirvana = nullcontext()
 
 from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
+
 
 import settings
 
@@ -35,12 +41,12 @@ skyline_app = 'flux'
 
 LOCAL_DEBUG = False
 
-
-# @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
-def tornado_laoccfdlpnc(postData):
+# @added 20251108 - Feature #5665: custom_algorithm - mirage_nirvana
+#                   Feature #4994: custom_algorithm - mirages
+def tornado_mirage_nirvana(postData):
     """
-    The tornado_laoccfdlpnc function runs the algorithm returns the normal tuple
-    of (anomalous, anomalyScore, all_results)
+    The tornado_mirage_nirvana function runs the algorithm returns
+    the normal tuple of (anomalous, anomalyScore, all_results)
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -54,7 +60,7 @@ def tornado_laoccfdlpnc(postData):
     :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],
         [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the matrixprofile custom
+        custom_algorithm and algorithm itself.  For the mirage_nirvana custom
         algorithm the following parameters are required, example:
         ``algorithm_parameters={
             'check_details': {<empty_dict|check_details dict>},
@@ -69,8 +75,8 @@ def tornado_laoccfdlpnc(postData):
     :rtype: boolean
 
     """
-    func_name = 'flux.tornadoes.tornado_laoccfdlpnc'
-    custom_algorithm = 'laoccfdlpnc'
+    func_name = 'flux.tornadoes.tornado_mirage_nirvana'
+    custom_algorithm = 'mirage_nirvana'
     anomalous = None
     anomalyScore = 0.0
     results = {}
@@ -80,22 +86,22 @@ def tornado_laoccfdlpnc(postData):
         'anomalyScore': anomalyScore,
         'results': results,
     }
-    
+    if isinstance(mirage_nirvana, nullcontext):
+        logger.info('%s :: %s is not available' % (
+            func_name, custom_algorithm))
+        response_dict['error'] = 'mirage_nirvana is not available'
+        return response_dict
+
     requesting_skyline_app = 'mirage'
     postItems = {}
     for key in list(postData.keys()):
         if key == 'timeseries':
             continue
-        # @added 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
-        # Remove any api keys from the log if any are sent in the
-        # request
         if 'api_key' in key:
             continue
         postItems[key] = postData[key]
-    # @modified 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
-    # Added api keys to the excl message
-    logger.info('%s :: %s - postData (excl. timeseries and api_keys): %s' % (
-        func_name, custom_algorithm, str(postItems)))
+    logger.info('%s :: postData (excl. timeseries and api_keys): %s' % (
+        func_name, str(postItems)))
     try:
         requesting_skyline_app = postData['skyline_app']
     except Exception as err:
@@ -133,12 +139,21 @@ def tornado_laoccfdlpnc(postData):
     except Exception as err:
         try:
             debug_logging = postData['algorithm_parameters']['debug_logging']
-        except Exception as err:
+        except Exception as err2:
             debug_logging = False
 
     algorithm_parameters['metric'] = base_name
+
     labelled_metric_name = None
-    if '_tenant_id=' in base_name:
+    # @added 20251019 - Allow for another Skyline node to send metrics for
+    # analysis and pass the labelled_metric_name so it does not have to be
+    # looked up
+    try:
+        labelled_metric_name = algorithm_parameters['labelled_metric_name']
+    except:
+        labelled_metric_name = None
+
+    if '_tenant_id=' in base_name and not labelled_metric_name:
         metric_id = 0
         try:
             metric_id = get_metric_id_from_base_name(skyline_app, base_name)
@@ -151,21 +166,21 @@ def tornado_laoccfdlpnc(postData):
     start_compute = timer()
     try:
         if debug_logging:
-            logger.debug('debug :: %s :: calling laoccfdlpnc with algorithm_parameters: %s' % (
+            logger.debug('debug :: %s :: calling mirage_nirvana with algorithm_parameters: %s' % (
                 func_name, str(algorithm_parameters)))
-        anomalous, anomalyScore, results = laoccfdlpnc(skyline_app, getpid(), timeseries, algorithm_parameters)
+        anomalous, anomalyScore, results = mirage_nirvana(skyline_app, getpid(), timeseries, algorithm_parameters)
         if debug_logging:
-            logger.debug('debug :: %s :: laoccfdlpnc returned anomalous: %s' % (
+            logger.debug('debug :: %s :: mirage_nirvana returned anomalous: %s' % (
                 func_name, str(anomalous)))
     except Exception as err:
         traceback_msg = traceback.format_exc()
         if debug_logging:
             logger.error(traceback_msg)
-            logger.error('error :: debug_logging :: %s :: failed to run laoccfdlpnc, err: %s' % (
+            logger.error('error :: debug_logging :: %s :: failed to run mirage_nirvana, err: %s' % (
                 func_name, err))
     end_compute = timer()
     compute_runtime = end_compute - start_compute
-    logger.info('%s :: laoccfdlpnc took %.6f seconds run with result anomalous: %s' % (
+    logger.info('%s :: mirage_nirvana took %.6f seconds run with result anomalous: %s' % (
         func_name, compute_runtime, str(anomalous)))
 
     response_dict = {

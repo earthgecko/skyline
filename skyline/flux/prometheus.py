@@ -398,7 +398,7 @@ class PrometheusMetricDataPost(object):
             if test_only:
                 logger.info('prometheus :: %s :: test_only request' % str(now))
                 logger.debug('debug :: prometheus :: %s request' % str(content_type))
-                request_type = 'json_payload'
+            request_type = 'json_payload'
 
         # Shard request
         shard_request_node = None
@@ -627,6 +627,11 @@ class PrometheusMetricDataPost(object):
                     if isinstance(dropLabels, str):
                         dropLabels = [dropLabels]
 
+        # @added 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Only submit metadata to Redis if not in initial breach
+        submit_metadata_to_redis = False
+        metadata_key = 'flux.prometheus_metadata'
+
         # Decompress and decode Prometheus WriteRequest data
         prometheus_data = {}
         prometheus_metadata = {}
@@ -691,7 +696,6 @@ class PrometheusMetricDataPost(object):
                     prometheus_metadata['tenant_id'] = '%s' % str(tenant_id)
                     prometheus_metadata['server_id'] = '%s' % str(server_id)
                     prometheus_metadata['server_url'] = '%s' % str(server_url)
-                    metadata_key = 'flux.prometheus_metadata'
 
                     # @modified 20230202 - Feature #4840: flux - prometheus - x-test-only header
                     # Only submit metadata if it is not a test_only request
@@ -701,11 +705,16 @@ class PrometheusMetricDataPost(object):
                         return
 
                     if not test_only:
-                        try:
-                            redis_conn_decoded.hset(metadata_key, time(), str(prometheus_metadata))
-                            redis_conn_decoded.expire(metadata_key, 360)
-                        except Exception as err:
-                            logger.error('error :: prometheus :: could not add prom_data to %s - %s' % (metadata_key, str(err)))
+                        # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                        # Only submit metadata to Redis if not in initial breach
+                        # moved to after initial breach check
+                        #try:
+                        #    redis_conn_decoded.hset(metadata_key, time(), str(prometheus_metadata))
+                        #    redis_conn_decoded.expire(metadata_key, 360)
+                        #except Exception as err:
+                        #    logger.error('error :: prometheus :: could not add prom_data to %s - %s' % (metadata_key, str(err)))
+                        submit_metadata_to_redis = True
+
             except Exception as err:
                 logger.error('error :: prometheus :: could not parse prometheus write data Metadata - %s' % str(err))
 
@@ -935,6 +944,122 @@ class PrometheusMetricDataPost(object):
         error_logged = False
         labels_checked_to_drop = 0
         sample_logged = False
+
+        # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Moved from after cardinality check to enable quota check before
+        # handling if there is breach on the initial submission and in this
+        # initial breach test the x-test-only header is not considered
+        # Handle metric quota
+        namespace_quota = 0
+        namespace_metrics = []
+        update_namespace_quota_metrics = False
+        quota_namespace_metrics_redis_key = 'flux.quota.namespace_metrics.%s' % str(tenant_id)
+        if tenant_id in namespaces_with_quotas:
+            try:
+                namespace_quota = int(namespace_quotas_dict[tenant_id])
+            except Exception as err:
+                logger.error('error :: prometheus :: %s :: failed to determine namespace_quota - %s' % (
+                    str(now), str(err)))
+        if DEVELOPMENT and tenant_id == '123':
+            namespace_quota = 30000
+        if namespace_quota:
+            try:
+                try:
+                    namespace_metrics = list(redis_conn_decoded.smembers(quota_namespace_metrics_redis_key))
+                except:
+                    namespace_metrics = []
+                    if get_memcache_key:
+                        try:
+                            namespace_metrics = get_memcache_key('flux', quota_namespace_metrics_redis_key)
+                            if not namespace_metrics:
+                                namespace_metrics = []
+                        except Exception as err:
+                            logger.error('error :: prometheus :: could get memcache set %s - %s' % (
+                                quota_namespace_metrics_redis_key, err))
+                            namespace_metrics = []
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: prometheus :: error determining namespace_metrics for quota, %s' % err)
+            if FLUX_VERBOSE_LOGGING:
+                logger.info('prometheus :: %s, len(namespace_metrics): %s' % (
+                    str(now), str(len(namespace_metrics))))
+
+        # @added 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Determine if an additional requests breaches quota to prevent a poorly
+        # configured Prometheus remote_write from dumping 10s of 1000s of metrics
+        # initially.  If the quota is breached and no known namespace quota
+        # metrics exists return 400 which Prometheus by default does not retry.
+        if prometheus_data and timeseries_data and namespace_quota:
+            if FLUX_VERBOSE_LOGGING:
+                logger.info('prometheus :: %s, prometheus_data check initial submission - len(namespace_metrics): %s' % (
+                    str(now), str(len(namespace_metrics))))
+            metric_count = 0
+            try:
+                metric_count = len(prometheus_data['timeseries'])
+            except Exception as err:
+                logger.error('error :: prometheus :: could not determine metric_count for tenant_id: %s, from prometheus_data["timeseries"], err: %s' % (
+                    str(tenant_id), str(err)))
+            # If no metrics are known for this user and the submission breaches
+            # the quota return a 400 to prevent Prometheus from resending the
+            # data
+            if len(namespace_metrics) == 0 and metric_count > namespace_quota:
+                message = 'Too many metrics - quota: %s, submitted: %s' % (
+                    str(namespace_quota), str(metric_count))
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, %s, for tenant_id: %s, returning 400' % (
+                    str(now), str(message), str(tenant_id)))
+                resp.status = falcon.HTTP_400
+                return
+
+        # @added 20260430 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Handle a tenant_id that has no quota
+        metrics_type_hash_exists = 0
+        if prometheus_metadata and len(namespace_metrics) == 0:
+            metrics_type_hash = 'metrics_manager.prometheus.metrics_type.%s.%s' % (
+                str(tenant_id), str(server_id))
+            try:
+                metrics_type_hash_exists = redis_conn_decoded.exists(metrics_type_hash)
+            except:
+                metrics_type_hash_exists = 0
+
+        # Handle metadata requests as well and if no namespace_metrics are
+        # known assume this is the initial submission and too many metrics were
+        # sent.  This is trivial and Prometheus will submit metadata again and
+        # when namespace_metrics exist, it will be accepted.
+        if prometheus_metadata and len(namespace_metrics) == 0:
+
+            # @modified 20260430 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+            # Wrapped in only reject if a metrics_type_hash does not exist to
+            # handle a tenant_id that has no quota
+            if metrics_type_hash_exists == 0:
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('prometheus :: %s, prometheus_metadata check initial submission - len(namespace_metrics): %s' % (
+                        str(now), str(len(namespace_metrics))))
+                message = 'Too many metrics - metadata rejected'
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, %s, for tenant_id: %s, returning 400' % (
+                    str(now), str(message), str(tenant_id)))
+                resp.status = falcon.HTTP_400
+                return
+
+        # @added 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Only submit metadata to Redis if not in initial breach, moved from
+        # the metadata handling block above
+        if submit_metadata_to_redis:
+            try:
+                redis_conn_decoded.hset(metadata_key, time(), str(prometheus_metadata))
+                redis_conn_decoded.expire(metadata_key, 360)
+                logger.info('prometheus :: %s, prometheus_metadata updated in %s' % (
+                    str(now), metadata_key))
+                end = timer()
+                logger.info('prometheus :: %s :: request completed in %.6f seconds' % (str(now), (end - start)))
+                resp.status = falcon.HTTP_204
+                return
+            except Exception as err:
+                logger.error('error :: prometheus :: could not add prom_data to %s - %s' % (metadata_key, str(err)))
+
         if prometheus_data and timeseries_data:
             if LOCAL_DEBUG:
                 logger.debug('debug :: prometheus :: %s :: prometheus_data and timeseries_data available' % (str(now)))
@@ -1145,7 +1270,7 @@ class PrometheusMetricDataPost(object):
                 if len(jsonPostData['metrics']) == 0:
                     no_metrics_data = True
                 else:
-                    logger.info('prometheus :: %s, %s metrics submitted for tenant_id: %s, returning 400' % (
+                    logger.info('prometheus :: %s, %s metrics submitted for tenant_id: %s' % (
                         str(now), str(len(jsonPostData['metrics'])), str(tenant_id)))
 
             if no_metrics_data:
@@ -1516,37 +1641,48 @@ class PrometheusMetricDataPost(object):
 
                 try:
                     previous_namespace_cardinality = 0
-                    try:
-                        previous_namespace_cardinality = len(previous_namespace_cardinality_dict[cardinality_namespace])
-                    except Exception as err:
-                        if previous_namespace_cardinality_counts_dict:
-                            try:
-                                previous_namespace_cardinality = int(float(previous_namespace_cardinality_counts_dict[cardinality_namespace]))
-                            except Exception as new_err:
-                                if not trace_logged:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: prometheus :: %s :: could not determine previous_namespace_cardinality for %s - 1st err: %s, 2nd err: %s' % (
-                                        str(now), str(cardinality_namespace), str(err), str(new_err)))
-                                    trace_logged = True
+
+                    # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                    # Only check if the key is in the dict
+                    if cardinality_namespace in previous_namespace_cardinality_dict.keys():
+                        try:
+                            previous_namespace_cardinality = len(previous_namespace_cardinality_dict[cardinality_namespace])
+                        except Exception as err:
+                            if previous_namespace_cardinality_counts_dict:
+                                try:
+                                    previous_namespace_cardinality = int(float(previous_namespace_cardinality_counts_dict[cardinality_namespace]))
+                                except Exception as new_err:
+                                    if not trace_logged:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: prometheus :: %s :: could not determine previous_namespace_cardinality for %s - 1st err: %s, 2nd err: %s' % (
+                                            str(now), str(cardinality_namespace), str(err), str(new_err)))
+                                        trace_logged = True
+                                    previous_namespace_cardinality = 0
+                            else:
                                 previous_namespace_cardinality = 0
-                        else:
-                            previous_namespace_cardinality = 0
 
 #                        previous_namespace_cardinality = 0
                     metric_names_list = []
-                    try:
-                        # metric_names_list = list(set(metric_namespaces_dict[namespace]))
-                        metric_names_list = list(set(cardinality_metric_namespaces_dict[cardinality_namespace]))
-                    except Exception as err:
-                        logger.error('error :: prometheus :: %s :: could not determine metric_names_list for %s - %s' % (
-                            str(now), str(cardinality_namespace), str(err)))
-                        metric_names_list = []
+
+                    # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                    # Only check if the key is in the dict
+                    if cardinality_namespace in previous_namespace_cardinality_dict.keys():
+                        try:
+                            # metric_names_list = list(set(metric_namespaces_dict[namespace]))
+                            metric_names_list = list(set(cardinality_metric_namespaces_dict[cardinality_namespace]))
+                        except Exception as err:
+                            logger.error('error :: prometheus :: %s :: could not determine metric_names_list for %s - %s' % (
+                                str(now), str(cardinality_namespace), str(err)))
+                            metric_names_list = []
 
                     processed_namespace_metrics = []
-                    try:
-                        processed_namespace_metrics = processed_namespace_metrics_dict[cardinality_namespace]
-                    except:
-                        processed_namespace_metrics = []
+                    # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                    # Only check if the key is in the dict
+                    if cardinality_namespace in processed_namespace_metrics_dict.keys():
+                        try:
+                            processed_namespace_metrics = processed_namespace_metrics_dict[cardinality_namespace]
+                        except:
+                            processed_namespace_metrics = []
 
                     if processed_namespace_metrics:
                         total_metrics = len(list(set(metric_names_list + processed_namespace_metrics)))
@@ -1751,21 +1887,23 @@ class PrometheusMetricDataPost(object):
         # logger.debug('debug :: prometheus :: current_namespace_cardinality_count: %s' % (
         #     str(current_namespace_cardinality_count)))
 
-        # Handle metric quota
-        namespace_quota = 0
-        namespace_metrics = []
-        update_namespace_quota_metrics = False
-        quota_namespace_metrics_redis_key = 'flux.quota.namespace_metrics.%s' % str(tenant_id)
-        if tenant_id in namespaces_with_quotas:
-            # namespace_quota = namespaces_with_quotas[tenant_id]
-            try:
-                namespace_quota = int(namespace_quotas_dict[tenant_id])
-            except Exception as err:
-                logger.error('error :: prometheus :: %s :: failed to determine namespace_quota - %s' % (
-                    str(now), str(err)))
-        if DEVELOPMENT and tenant_id == '123':
-            # namespace_quota = 800
-            namespace_quota = 30000
+        # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+        # Handle metric quota was moved to before starting to process the metrics
+        # to enable handling a breach in the initial submission
+        #namespace_quota = 0
+        #namespace_metrics = []
+        #update_namespace_quota_metrics = False
+        #quota_namespace_metrics_redis_key = 'flux.quota.namespace_metrics.%s' % str(tenant_id)
+        #if tenant_id in namespaces_with_quotas:
+        #    # namespace_quota = namespaces_with_quotas[tenant_id]
+        #    try:
+        #        namespace_quota = int(namespace_quotas_dict[tenant_id])
+        #    except Exception as err:
+        #        logger.error('error :: prometheus :: %s :: failed to determine namespace_quota - %s' % (
+        #            str(now), str(err)))
+        #if DEVELOPMENT and tenant_id == '123':
+        #    # namespace_quota = 800
+        #    namespace_quota = 30000
 
         # @added 20230202 - Feature #4840: flux - prometheus - x-test-only header
         if test_only:

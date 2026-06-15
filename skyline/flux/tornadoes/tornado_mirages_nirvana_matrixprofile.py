@@ -1,21 +1,27 @@
 """
-tornado_laoccfdlpnc.py
+tornado_mirages_nirvana_matrixprofile.py
 """
 import os
 from os import getpid
 
 import sys
-from timeit import default_timer as timer
 import traceback
+
+from contextlib import nullcontext
+from timeit import default_timer as timer
 
 import numpy as np
 
-from custom_algorithms.laoccfdlpnc import laoccfdlpnc
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+try:
+    from custom_algorithms.mirages_nirvana_matrixprofile import mirages_nirvana_matrixprofile
+except:
+    mirages_nirvana_matrixprofile = nullcontext()
 
 from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
+
 
 import settings
 
@@ -36,11 +42,10 @@ skyline_app = 'flux'
 LOCAL_DEBUG = False
 
 
-# @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
-def tornado_laoccfdlpnc(postData):
+def tornado_mirages_nirvana_matrixprofile(postData):
     """
-    The tornado_laoccfdlpnc function runs the algorithm returns the normal tuple
-    of (anomalous, anomalyScore, all_results)
+    The tornado_mirage_nirvana_matrixprofile function runs the algorithm returns
+    the normal tuple of (anomalous, anomalyScore, all_results)
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -69,8 +74,8 @@ def tornado_laoccfdlpnc(postData):
     :rtype: boolean
 
     """
-    func_name = 'flux.tornadoes.tornado_laoccfdlpnc'
-    custom_algorithm = 'laoccfdlpnc'
+    func_name = 'flux.tornadoes.tornado_mirages_nirvana_matrixprofile'
+    custom_algorithm = 'mirages_nirvana_matrixprofile'
     anomalous = None
     anomalyScore = 0.0
     results = {}
@@ -80,22 +85,20 @@ def tornado_laoccfdlpnc(postData):
         'anomalyScore': anomalyScore,
         'results': results,
     }
-    
+    if isinstance(mirages_nirvana_matrixprofile, nullcontext):
+        logger.info('%s :: mirages_nirvana_matrixprofile is not available' % (
+            func_name))
+        response_dict['error'] = 'mirages_nirvana_matrixprofile is not available'
+        return response_dict
+
     requesting_skyline_app = 'mirage'
     postItems = {}
     for key in list(postData.keys()):
         if key == 'timeseries':
             continue
-        # @added 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
-        # Remove any api keys from the log if any are sent in the
-        # request
-        if 'api_key' in key:
-            continue
         postItems[key] = postData[key]
-    # @modified 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
-    # Added api keys to the excl message
-    logger.info('%s :: %s - postData (excl. timeseries and api_keys): %s' % (
-        func_name, custom_algorithm, str(postItems)))
+    logger.info('%s :: postData (excl. timeseries): %s' % (
+        func_name, str(postItems)))
     try:
         requesting_skyline_app = postData['skyline_app']
     except Exception as err:
@@ -137,8 +140,17 @@ def tornado_laoccfdlpnc(postData):
             debug_logging = False
 
     algorithm_parameters['metric'] = base_name
+
     labelled_metric_name = None
-    if '_tenant_id=' in base_name:
+    # @added 20251019 - Allow for another Skyline node to send metrics for
+    # analysis and pass the labelled_metric_name so it does not have to be
+    # looked up
+    try:
+        labelled_metric_name = algorithm_parameters['labelled_metric_name']
+    except:
+        labelled_metric_name = None
+
+    if '_tenant_id=' in base_name and not labelled_metric_name:
         metric_id = 0
         try:
             metric_id = get_metric_id_from_base_name(skyline_app, base_name)
@@ -151,27 +163,27 @@ def tornado_laoccfdlpnc(postData):
     start_compute = timer()
     try:
         if debug_logging:
-            logger.debug('debug :: %s :: calling laoccfdlpnc with algorithm_parameters: %s' % (
+            logger.debug('debug :: %s :: calling mirages_nirvana_matrixprofile with algorithm_parameters: %s' % (
                 func_name, str(algorithm_parameters)))
-        anomalous, anomalyScore, results = laoccfdlpnc(skyline_app, getpid(), timeseries, algorithm_parameters)
+        anomalous, anomalyScore, anomalies = mirages_nirvana_matrixprofile(skyline_app, getpid(), timeseries, algorithm_parameters)
         if debug_logging:
-            logger.debug('debug :: %s :: laoccfdlpnc returned anomalous: %s' % (
+            logger.debug('debug :: %s :: mirages_nirvana_matrixprofile returned anomalous: %s' % (
                 func_name, str(anomalous)))
     except Exception as err:
         traceback_msg = traceback.format_exc()
         if debug_logging:
             logger.error(traceback_msg)
-            logger.error('error :: debug_logging :: %s :: failed to run laoccfdlpnc, err: %s' % (
+            logger.error('error :: debug_logging :: %s :: failed to run mirages_nirvana_matrixprofile, err: %s' % (
                 func_name, err))
     end_compute = timer()
     compute_runtime = end_compute - start_compute
-    logger.info('%s :: laoccfdlpnc took %.6f seconds run with result anomalous: %s' % (
+    logger.info('%s :: mirages_nirvana_matrixprofile took %.6f seconds run with result anomalous: %s' % (
         func_name, compute_runtime, str(anomalous)))
 
     response_dict = {
         'anomalous': anomalous,
         'anomalyScore': anomalyScore,
-        'results': results,
+        'results': anomalies,
     }
 
     return response_dict

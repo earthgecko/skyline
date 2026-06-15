@@ -122,7 +122,7 @@ class PopulateMetricWorker(Process):
         # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
@@ -681,9 +681,14 @@ class PopulateMetricWorker(Process):
                 # @modified 20201207 - Task #3864: flux - try except everything
                 try:
                     time_now = int(time())
-                    current_minute_hour = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%H'))
-                    current_minute_minute = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%M'))
-                    current_datetime = datetime.datetime.utcfromtimestamp(time_now).replace(hour=current_minute_hour, minute=current_minute_minute, second=0, microsecond=0)
+                    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                    #current_minute_hour = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%H'))
+                    #current_minute_minute = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%M'))
+                    #current_datetime = datetime.datetime.utcfromtimestamp(time_now).replace(hour=current_minute_hour, minute=current_minute_minute, second=0, microsecond=0)
+                    current_minute_hour = int(datetime.datetime.fromtimestamp(time_now, tz=datetime.timezone.utc).strftime('%H'))
+                    current_minute_minute = int(datetime.datetime.fromtimestamp(time_now, tz=datetime.timezone.utc).strftime('%M'))
+                    current_datetime = datetime.datetime.fromtimestamp(time_now, tz=datetime.timezone.utc).replace(hour=current_minute_hour, minute=current_minute_minute, second=0, microsecond=0)
+
                     current_minute_timestamp_start = int(current_datetime.strftime('%s'))
                 except Exception as e:
                     logger.error('error :: populate_metric_worker :: error determining current_minute_timestamp_start - %s' % str(e))
