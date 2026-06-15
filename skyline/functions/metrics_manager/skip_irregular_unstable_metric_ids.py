@@ -5,6 +5,10 @@ import logging
 import traceback
 from time import time
 
+# @added 20260427 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+#                   Task #5713: Test CentOS Stream 10
+from random import randint
+
 import settings
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 # @added 20231223 - Task #5188: Optimise redis renames
@@ -105,12 +109,56 @@ def build_skip_irregular_unstable_metric_ids(self, metrics_with_ids, external_se
         logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: namespaces in external_settings processed in %s seconds' % (
             str((time() - start))))
 
+    # @added 20260427 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+    #                   Task #5713: Test CentOS Stream 10
+    # Optimise this function to only check metrics every x
+    redis_optimise_hash = 'metrics_manager.skip_irregular_unstable_metrics.timestamps'
+    skip_irregular_unstable_metrics_timestamps = {}
+    timestamp_check_errs = []
+    if SKIP_IRREGULAR_UNSTABLE:
+        try:
+            skip_irregular_unstable_metrics_timestamps = self.redis_conn_decoded.hgetall(redis_optimise_hash)
+        except Exception as err:
+            logger.error('error :: metrics_manager :: build_skip_irregular_unstable_metric_ids :: failed to create Redis set metrics_manager.skip_irregular_unstable_metric_ids - %s' % (
+                err))
+        logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: retrieved %s metrics and last check timestamps from %s' % (
+            str(len(skip_irregular_unstable_metrics_timestamps)),
+            redis_optimise_hash))
+    check_until = int(start) + 45
+
     if SKIP_IRREGULAR_UNSTABLE:
         start_local = time()
         logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: evaluating %s metrics to skip' % (
             str(len(active_base_names))))
         skipping_irregular_unstable = []
-        for base_name in active_base_names:
+        for index, base_name in enumerate(active_base_names):
+
+            # @added 20260427 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+            #                   Task #5713: Test CentOS Stream 10
+            # Optimise this function to only check metrics every x
+            now = int(time())
+            if now >= check_until:
+                logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: stopping - has run for %s seconds and processed %s metrics' % (
+                    str((time() - start)), str(index+1)))
+                break
+            if not index % 500:
+                logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: processed %s metrics' % (
+                    str(index)))
+            last_check_timestamp = 0
+            try:
+                last_check_timestamp = int(skip_irregular_unstable_metrics_timestamps[base_name])
+            except Exception as err:
+                timestamp_check_errs.append([base_name, err])
+                last_check_timestamp = 0
+            if last_check_timestamp:
+                # bandit - B311:blacklist
+                # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+                jitter_next_check_timestamp = 86400 + randint(0, 7200)  # nosec B311
+                if start < jitter_next_check_timestamp:
+                    continue
+            skip_irregular_unstable_metrics_timestamps[base_name] = int(start)
+            pattern_match = None
+
             try:
                 pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, SKIP_IRREGULAR_UNSTABLE)
                 try:
@@ -131,6 +179,12 @@ def build_skip_irregular_unstable_metric_ids(self, metrics_with_ids, external_se
             str(len(skipping_irregular_unstable))))
         logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: local namespaces processed in %s seconds' % (
             str((time() - start_local))))
+        if errors:
+            try:
+                logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: %s errors recorded, samples: %s, %s' % (
+                    str(len(errors)), str(errors[0:2]), str(errors[-2:])))
+            except Exception as err:
+                logger.error('error :: failed to log errors samples, err: %s' % err)
 
     success = 0
     if skip_irregular_unstable_metric_ids:
@@ -155,6 +209,19 @@ def build_skip_irregular_unstable_metric_ids(self, metrics_with_ids, external_se
                         str(success)))
             except:
                 pass
+
+    # @added 20260427 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+    #                   Task #5713: Test CentOS Stream 10
+    # Optimise this function to only check metrics every x
+    if skip_irregular_unstable_metrics_timestamps:
+        logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: adding %s metrics to %s' % (
+            str(len(skip_irregular_unstable_metrics_timestamps)),
+            redis_optimise_hash))
+        try:
+            self.redis_conn_decoded.hset(redis_optimise_hash, mapping=skip_irregular_unstable_metrics_timestamps)
+        except Exception as err:
+            logger.error('error :: metrics_manager :: build_skip_irregular_unstable_metric_ids :: failed to create Redis set %s, err: %s' % (
+                redis_optimise_hash, err))
 
     logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: took %s seconds' % (
         str((time() - start))))
