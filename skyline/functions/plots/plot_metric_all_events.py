@@ -145,7 +145,9 @@ def plot_metric_all_events(
         ax = fig.add_subplot(111)
         ax.set_title(title, fontsize='medium')
         ax.set_facecolor('white')
-        datetimes = [datetime.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #datetimes = [datetime.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+        datetimes = [datetime.datetime.fromtimestamp(int(ts), tz=datetime.timezone.utc) for ts in timeseries_x]
         plt.xticks(rotation=0, horizontalalignment='center')
 
         timeseries_duration = timeseries_x[-1] - timeseries_x[0]
@@ -178,7 +180,9 @@ def plot_metric_all_events(
         # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
         #                      Task #4778: v4.0.0 - update dependencies
         # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
-        if matplotlib_version < '3.7.0':
+        # @modified 20250610 - Task #5627: v5.0.0 update dependencies
+        #if matplotlib_version < '3.7.0':
+        if matplotlib_version == 'deprecated':
             ax.grid(b=True, which='both', axis='both', color='lightgray',
                     linestyle='solid', alpha=0.5, linewidth=0.6)
         else:
