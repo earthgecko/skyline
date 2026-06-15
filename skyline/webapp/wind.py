@@ -35,8 +35,8 @@ def wind(results):
     post_data = {
         'source_host': skyline_node,
         'app': 'ionosphere',
-        'job': 'motif_annihilation',
-        'redis_work_hash': 'ionosphere.find_repetitive_patterns.motif_annihilation.work',
+        'job': 'common_motifs',
+        'redis_work_hash': 'ionosphere.find_repetitive_patterns.common_motifs.work',
         'redis_work_hash_key': '1712230013.1507778',
         'data': {'metric_id': metric_id, 'metric': metric,
             'anomaly_id': anomaly_id,
@@ -99,9 +99,9 @@ def wind(results):
         'data', 'results', 'results_url'
     ]
     valid_jobs = {
-        'motif_annihilation': {
+        'common_motifs': {
             'app': 'ionosphere',
-            'redis_work_hash': 'ionosphere.find_repetitive_patterns.motif_annihilation.work',
+            'redis_work_hash': 'ionosphere.find_repetitive_patterns.common_motifs.work',
         },
     }
     results_dict = {}
@@ -159,7 +159,7 @@ def wind(results):
                         work_host = post_data['work_host']
                     except KeyError:
                         work_host = None
-    if job == 'motif_annihilation':
+    if job == 'common_motifs':
         if 'pw5_timeseries' not in post_data.keys():
             reason = 'invalid data passed'
             logger.error('error :: wind :: no pw5_timeseries passed')
@@ -192,6 +192,18 @@ def wind(results):
     post_data['redis_work_hash_key'] = new_redis_work_hash_key
 
     if results_dict:
+
+        # @added 20250923 - Feature #5644: ionosphere.learn_self_validation 
+        # Set the local key from external results
+        if job == 'common_motifs':
+            if 'fp_id' in post_data.keys():
+                fp_id_str = str(post_data['fp_id'])
+                try:
+                    redis_conn_decoded.hset('ionosphere.common_motifs.learn_self_validation.work_done', fp_id_str, str(post_data))
+                except Exception as err:
+                    logger.error('error :: wind :: hset failed on ionosphere.common_motifs.learn_self_validation.work_done, err: %s' % (
+                        err))
+
         try:
             redis_conn_decoded.hset(redis_work_hash, new_redis_work_hash_key, str(post_data))
             results['status_code'] = 200
@@ -211,6 +223,25 @@ def wind(results):
             logger.info('wind :: request results: %s' % str(results))
             return results
     if results_url:
+
+        # @added 20250923 - Feature #5644: ionosphere.learn_self_validation 
+        # Limit how many items can be added to the Add hash_key to the function
+        if job == 'common_motifs':
+            work_items_count = 0
+            try:
+                work_items_count = redis_conn_decoded.hlen(redis_work_hash)
+            except Exception as err:
+                logger.error('error :: wind :: redis_conn_decoded failed to hlen %s, err: %s' % (
+                    str(redis_work_hash), err))
+            if work_items_count >= 4:
+                results['status_code'] = 204
+                results['reason'] = 'full work queue'
+                results['job'] = job
+                job_result = 'job was not submitted %s' % redis_work_hash
+                results['action'] = job_result
+                logger.info('wind :: request results: %s' % str(results))
+                return results        
+        
         try:
             redis_conn_decoded.hset(redis_work_hash, new_redis_work_hash_key, str(post_data))
             results['status_code'] = 200
