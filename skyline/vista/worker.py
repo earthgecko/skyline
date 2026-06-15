@@ -108,7 +108,7 @@ class Worker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             exit(0)
 
     def run(self):
@@ -515,7 +515,14 @@ class Worker(Process):
                             settings.FLUX_SELF_API_KEY)
                         success = False
                         try:
-                            response = requests.get(flux_url)
+                            # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                            # Add timeout for bandit B113
+                            #response = requests.get(flux_url)
+                            connect_timeout = 5
+                            read_timeout = 45
+                            use_timeout = (int(connect_timeout), int(read_timeout))
+                            response = requests.get(flux_url, timeout=use_timeout)
+
                             if response.status_code == 200:
                                 success = True
                             elif response.status_code == 204:
@@ -524,7 +531,7 @@ class Worker(Process):
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to request %s - %s' % (str(flux_url), err))
                         if not success:
-                            logger.warning('warning :: worker :: failed to submit data to flux')
+                            logger.info('warning :: worker :: failed to submit data to flux')
                             logger.debug('debug :: timeseries - %s' % str(timeseries))
 
                     if success:

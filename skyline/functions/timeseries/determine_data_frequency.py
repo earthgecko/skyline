@@ -150,21 +150,39 @@ def determine_data_frequency(current_skyline_app, timeseries, log=False):
                         metric_resolution = min([resolution for resolution, count in ordered_timestamp_resolutions_count if count == max_count])
                         if log:
                             current_logger.info('%s :: %s :: multiple resolution counts - resolution adjusted to %s' % (
-                                current_skyline_app, function_str, str(resolution)))
+                                current_skyline_app, function_str, str(metric_resolution)))
 
         # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
         # Handle the slight variances that occur in real time
         # metric streams
         if metric_resolution and metric_resolution != 60:
-            # @modified 20230223 - Feature #3870: metrics_manager - check_data_sparsity
-            # Set to a sensible resolution because python protobuf remote_pb2 for Prometheus remote_write does
-            # not serialise 0s for gauges ...
-            # if metric_resolution in range(51, 69):
-            if metric_resolution in range(1, 69):
-                metric_resolution = 60
-                if log:
-                    current_logger.info('%s :: %s :: resolution in range(51, 69) - resolution adjusted to %s' % (
-                        current_skyline_app, function_str, str(resolution)))
+
+            # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                   Task #5178: Build and test skyline v4.1.0
+            # Although python protobuf remote_pb2 for Prometheus remote_write does
+            # not serialise 0s for gauges as migitated below, allow for standard
+            # possible scrape_interval
+            set_to_60 = True
+            if metric_resolution in [1, 2, 3, 5, 6, 10, 12, 15, 20, 30]:
+                set_to_60 = False
+
+            # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                   Task #5178: Build and test skyline v4.1.0
+            # Although python protobuf remote_pb2 for Prometheus remote_write does
+            # not serialise 0s for gauges as migitated below, allow for standard
+            # possible scrape_interval and only set to 60 if 60 is not a
+            # divisible by the metric_resolution
+            if set_to_60:
+
+                # @modified 20230223 - Feature #3870: metrics_manager - check_data_sparsity
+                # Set to a sensible resolution because python protobuf remote_pb2 for Prometheus remote_write does
+                # not serialise 0s for gauges ...
+                # if metric_resolution in range(51, 69):
+                if metric_resolution in range(1, 69):
+                    metric_resolution = 60
+                    if log:
+                        current_logger.info('%s :: %s :: resolution in range(51, 69) - resolution adjusted to %s' % (
+                            current_skyline_app, function_str, str(resolution)))
 
     except Exception as e:
         if log:

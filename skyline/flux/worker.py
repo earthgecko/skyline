@@ -54,6 +54,9 @@ if load_settings:
     # @added 20220726 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
     from functions.graphite.send_graphite_metric import send_graphite_metric
+    # @added 20231223 - Task #5188: Optimise redis renames
+    #                   Task #5178: Build and test skyline v4.1.0
+    from functions.redis.redis_rename_key import redis_rename_key
 
 # @added 20220428 - Feature #4536: Handle Redis failure
 if settings.MEMCACHE_ENABLED:
@@ -192,7 +195,7 @@ class Worker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def run(self):
@@ -481,7 +484,7 @@ class Worker(Process):
                                 logger.info('worker :: Redis connection established - RECOVERED')
                         except:
                             redis_up = False
-                            logger.warning('worker :: Redis connection not established')
+                            logger.info('warning :: worker :: Redis connection not established')
                             failed_over_to_memcache = True
                 except Exception as err:
                     if not failed_over_to_memcache:
@@ -500,7 +503,7 @@ class Worker(Process):
                     failed_over_to_memcache = False
                 if failed_over_to_memcache:
                     redis_up = True
-                    logger.warning('warning :: worker :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
+                    logger.info('warning :: worker :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
 
             if LOCAL_DEBUG:
                 try:
@@ -577,7 +580,9 @@ class Worker(Process):
                     if primary_worker:
                         flux_zero_fill_metrics = []
                         try:
-                            flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                            # @modified 20230929 - Task #5088: Change membership of the list checks to sets
+                            # flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                            flux_zero_fill_metrics = self.redis_conn_decoded.smembers('flux.zero_fill_metrics')
                         except:
                             if not failed_over_to_memcache:
                                 logger.error(traceback.format_exc())
@@ -589,6 +594,8 @@ class Worker(Process):
                                     if flux_zero_fill_metrics:
                                         logger.info('worker :: flux_zero_fill_metrics found in memcache')
                                         failed_over_to_memcache = True
+                                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                                        flux_zero_fill_metrics = set(flux_zero_fill_metrics)
                                     else:
                                         flux_zero_fill_metrics = []
                                 except:
@@ -597,7 +604,9 @@ class Worker(Process):
                         # @modified 20210408 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                         # Use Redis set
                         try:
-                            all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                            # @modified 20230929 - Task #5088: Change membership of the list checks to sets
+                            # all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                            all_metrics_sent = self.redis_conn_decoded.smembers('flux.workers.metrics_sent')
                         except:
                             if not failed_over_to_memcache:
                                 logger.error(traceback.format_exc())
@@ -609,6 +618,8 @@ class Worker(Process):
                                     if all_metrics_sent:
                                         logger.info('worker :: all_metrics_sent found in memcache')
                                         failed_over_to_memcache = True
+                                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                                        all_metrics_sent = set(all_metrics_sent)
                                     else:
                                         all_metrics_sent = []
                                 except:
@@ -617,6 +628,7 @@ class Worker(Process):
                         # @added 20220428 - Feature #4536: Handle Redis failure
                         metrics_which_were_zero_filled = []
 
+                        start_zero_fill = time()
                         for flux_zero_fill_metric in flux_zero_fill_metrics:
                             # if flux_zero_fill_metric not in metrics_sent:
                             if flux_zero_fill_metric not in all_metrics_sent:
@@ -655,6 +667,8 @@ class Worker(Process):
                                     if success:
                                         logger.info('worker :: added %s zero filled metrics to memcache flux.workers.metrics_sent as Redis unavailable' % str(len(metrics_which_were_zero_filled)))
                                         failed_over_to_memcache = True
+                            logger.info('worker :: zero fill filled %s metrics and took %s seconds ' % (
+                                str(len(metrics_which_were_zero_filled)), str(time() - start_zero_fill)))
 
                         last_zero_fill_to_graphite = current_time
 
@@ -701,7 +715,7 @@ class Worker(Process):
                                                     if not memcache_flux_last_metric_data:
                                                         # Only check once and fail once
                                                         memcache_flux_last_metric_data = False
-                                                        logger.warning('warning :: worker :: get_memcache_key flux.last.metric_data no data found')
+                                                        logger.info('warning :: worker :: get_memcache_key flux.last.metric_data no data found')
                                                     else:
                                                         logger.info('worker :: get_memcache_key flux.last.metric_data data loaded')
                                                 except Exception as err:
@@ -774,7 +788,15 @@ class Worker(Process):
                                 #                      Release #4562 - v3.0.4
                                 # Only rename if exists
                                 if all_metrics_sent_to_graphite:
-                                    self.redis_conn.rename('flux.workers.metrics_sent', 'aet.flux.workers.metrics_sent')
+                                    # @modified 20231223 - Task #5188: Optimise redis renames
+                                    #                      Task #5178: Build and test skyline v4.1.0
+                                    # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                                    # self.redis_conn.rename('flux.workers.metrics_sent', 'aet.flux.workers.metrics_sent')
+                                    redis_key_renamed = False
+                                    try:
+                                        redis_key_renamed = redis_rename_key(skyline_app, 'flux.workers.metrics_sent', 'aet.flux.workers.metrics_sent', log=True)
+                                    except Exception as err:
+                                        logger.error('error :: redis_rename_key failed renaming flux.workers.metrics_sent to aet.flux.workers.metrics_sent, err: %s' % err)
                             except:
                                 # pass
                                 # @added 20220428 - Feature #4536: Handle Redis failure
@@ -1079,7 +1101,15 @@ class Worker(Process):
                             try:
                                 over_quota_count = self.redis_conn_decoded.scard('flux.listen.over_quota.rejected_metrics')
                                 if over_quota_count:
-                                    self.redis_conn_decoded.rename('flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics')
+                                    # @modified 20231223 - Task #5188: Optimise redis renames
+                                    #                      Task #5178: Build and test skyline v4.1.0
+                                    # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                                    # self.redis_conn_decoded.rename('flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics')
+                                    redis_key_renamed = False
+                                    try:
+                                        redis_key_renamed = redis_rename_key(skyline_app, 'flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics', log=True)
+                                    except Exception as err:
+                                        logger.error('error :: redis_rename_key failed renaming flux.listen.over_quota.rejected_metrics to aet.flux.listen.over_quota.rejected_metrics, err: %s' % err)
                             except Exception as err:
                                 if not failed_over_to_memcache:
                                     logger.error('error :: worker :: failed to get Redis set flux.listen.over_quota.rejected_metrics - %s' % err)
@@ -1113,7 +1143,15 @@ class Worker(Process):
                         try:
                             dropped_non_numeric_metrics_count = self.redis_conn_decoded.scard('flux.listen.dropped_non_numeric_metrics')
                             if dropped_non_numeric_metrics_count:
-                                self.redis_conn_decoded.rename('flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics')
+                                # @modified 20231223 - Task #5188: Optimise redis renames
+                                #                      Task #5178: Build and test skyline v4.1.0
+                                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                                # self.redis_conn_decoded.rename('flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics')
+                                redis_key_renamed = False
+                                try:
+                                    redis_key_renamed = redis_rename_key(skyline_app, 'flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics', log=True)
+                                except Exception as err:
+                                    logger.error('error :: redis_rename_key failed renaming flux.listen.dropped_non_numeric_metrics to aet.flux.listen.dropped_non_numeric_metrics, err: %s' % err)
                         except Exception as err:
                             if not failed_over_to_memcache:
                                 logger.error('error :: worker :: failed to get Redis set flux.listen.dropped_non_numeric_metrics - %s' % err)
@@ -1165,6 +1203,50 @@ class Worker(Process):
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
                                 skyline_metric, str(metrics_sent_to_graphite)))
+
+                    # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                    #                   Feature #5192: skyline_graphite_metrics_single_submit
+                    # Send a flux.prometheus metric because currrently there is
+                    # only a horizon.prometheus.flux_received metric which is
+                    # submitted by horizon, there is no prometheus metric that
+                    # is generated by flux
+                    prometheus_received = 0
+
+                    # @added 20240104 - Task #5178: Build and test skyline v4.1.0
+                    #                   Feature #5192: skyline_graphite_metrics_single_submit
+                    flux_prometheus_metrics_last_key = 'flux.prometheus_metrics'
+                    try:
+                        flux_prometheus_metrics_last_key = self.redis_conn_decoded.get('flux.prometheus_metrics.last_key')
+                        if not flux_prometheus_metrics_last_key:
+                            flux_prometheus_metrics_last_key = 'flux.prometheus_metrics'
+                    except Exception as err:
+                        logger.error('error :: failed to get flux.prometheus_metrics.last_key, err: %s' % err)
+                    # @added 20240106 - Task #5178: Build and test skyline v4.1.0
+                    #                   Feature #5192: skyline_graphite_metrics_single_submit
+                    # Ensure the value is not None
+                    if not flux_prometheus_metrics_last_key:
+                        flux_prometheus_metrics_last_key = 'flux.prometheus_metrics'
+
+                    try:
+                        # @modified 20240104 - Task #5178: Build and test skyline v4.1.0
+                        #                      Feature #5192: skyline_graphite_metrics_single_submit
+                        # prometheus_received = int(self.redis_conn_decoded.scard('flux.prometheus_metrics'))
+                        prometheus_received = self.redis_conn_decoded.scard(flux_prometheus_metrics_last_key)
+                        logger.info('worker :: flux.prometheus.received count: %s, from %s' % (
+                            str(prometheus_received), flux_prometheus_metrics_last_key))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: scard failed on %s, err: %s' % (
+                            str(flux_prometheus_metrics_last_key), err))
+                    skyline_metric = 'skyline.%s%s.prometheus.received_metrics' % (parent_skyline_app, SERVER_METRIC_PATH)
+                    if primary_worker:
+                        try:
+                            send_graphite_metric(self, skyline_app, skyline_metric, prometheus_received)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                                skyline_metric, str(prometheus_received)))
+
                     # @added 20201019 - Feature #3790: flux - pickle to Graphite
                     if metric_data_queue_size > 10:
                         send_to_reciever = 'pickle'
@@ -1194,8 +1276,18 @@ class Worker(Process):
                             new_set = 'aet.flux.metrics_data_sent'
                         if primary_worker:
                             try:
-                                self.redis_conn.rename('flux.metrics_data_sent', new_set)
-                                logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
+                                # @modified 20231223 - Task #5188: Optimise redis renames
+                                #                      Task #5178: Build and test skyline v4.1.0
+                                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                                # self.redis_conn.rename('flux.metrics_data_sent', new_set)
+                                redis_key_renamed = False
+                                try:
+                                    redis_key_renamed = redis_rename_key(skyline_app, 'flux.metrics_data_sent', new_set, log=True)
+                                except Exception as err:
+                                    logger.error('error :: redis_rename_key failed renaming flux.metrics_data_sent to %s, err: %s' % (
+                                        str(new_set), err))
+                                if redis_key_renamed:
+                                    logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
                             # @added 20201128 - Feature #3820: HORIZON_SHARDS
                             # With metrics that come in at a frequency of less
                             # than 60 seconds, it is possible that this key will
@@ -1205,7 +1297,7 @@ class Worker(Process):
                                 traceback_str = traceback.format_exc()
                                 if not failed_over_to_memcache:
                                     if 'no such key' in str(err):
-                                        logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
+                                        logger.info('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
                                     else:
                                         logger.error(traceback_str)
                                         logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
@@ -1625,13 +1717,30 @@ class Worker(Process):
                                     # Redis key
                                     try:
                                         flux_filled_key = 'flux.filled.%s' % str(metric)
-                                        self.redis_conn.setex(
-                                            flux_filled_key, settings.FULL_DURATION,
-                                            int(time()))
-                                        logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
+                                        # @added 20230925 - Task #5000: Replace alert key scans with sets
+                                        # Switch to hash key instead of scan_iter
+                                        # self.redis_conn.setex(
+                                        #     flux_filled_key, settings.FULL_DURATION,
+                                        #     int(time()))
+                                        # logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
                                     except Exception as e:
                                         if not failed_over_to_memcache:
                                             logger.error('error :: failed to could not set Redis flux.filled key: %s' % e)
+
+                                    # @added 20230925 - Task #5000: Replace alert key scans with sets
+                                    # Instead of using expiring keys with have a compute cost with
+                                    # using scan_iter(match='[PATTERN]') switch to using entries in a
+                                    # hash key, the management of which has a must lower compute cost.
+                                    flux_filled_hash_key = 'flux.filled_metrics'
+                                    try:
+                                        key_data = {'expiry': settings.FULL_DURATION, 'filled_at': int(time())}
+                                        self.redis_conn.hset(flux_filled_hash_key, str(metric), str(key_data))
+                                        logger.info('worker :: added key for %s to Redis hash %s' % (
+                                            str(metric), flux_filled_hash_key))
+                                    except Exception as err:
+                                        if not failed_over_to_memcache:
+                                            logger.error('error :: failed to could not add key to Redis flux.filled_metrics hash - %s' % err)
+
                     else:
                         # modified 20201016 - Feature #3788: snab_flux_load_test
                         if FLUX_VERBOSE_LOGGING:
@@ -1723,7 +1832,9 @@ class Worker(Process):
                     if run_fill:
                         flux_zero_fill_metrics = []
                         try:
-                            flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                            # @modified 20230929 - Task #5088: Change membership of the list checks to sets
+                            # flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                            flux_zero_fill_metrics = self.redis_conn_decoded.smembers('flux.zero_fill_metrics')
                         except:
                             if not failed_over_to_memcache:
                                 logger.info(traceback.format_exc())
@@ -1735,6 +1846,8 @@ class Worker(Process):
                                     if flux_zero_fill_metrics:
                                         logger.info('worker :: flux_zero_fill_metrics found in flux.zero_fill_metrics memcache key')
                                         failed_over_to_memcache = True
+                                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                                        flux_zero_fill_metrics = set(flux_zero_fill_metrics)
                                     else:
                                         flux_zero_fill_metrics = []
                                 except Exception as err:
@@ -1745,7 +1858,9 @@ class Worker(Process):
                         # @added 20210408 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                         # Use Redis set
                         try:
-                            all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                            # @modified 20230929 - Task #5088: Change membership of the list checks to sets
+                            # all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                            all_metrics_sent = self.redis_conn_decoded.smembers('flux.workers.metrics_sent')
                         except:
                             if not failed_over_to_memcache:
                                 logger.error(traceback.format_exc())
@@ -1757,12 +1872,20 @@ class Worker(Process):
                                     if all_metrics_sent:
                                         logger.info('worker :: all_metrics_sent found in flux.workers.metrics_sent memcache key')
                                         failed_over_to_memcache = True
+                                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                                        all_metrics_sent = set(all_metrics_sent)
                                     else:
                                         all_metrics_sent = []
                                 except Exception as err:
                                     logger.error('error :: worker :: failed to get memcache key flux.workers.metrics_sent - %s' % (
                                         err))
                                     all_metrics_sent = int(metrics_sent_to_graphite)
+
+                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                        # Added timing and add to Redis set once
+                        zero_fill_metrics_sent = []
+                        added_to_set_once = True
+                        start_zero_fill = time()
 
                         for flux_zero_fill_metric in flux_zero_fill_metrics:
                             # if flux_zero_fill_metric not in metrics_sent:
@@ -1784,23 +1907,50 @@ class Worker(Process):
                                     metrics_sent.append(flux_zero_fill_metric)
                                     # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                                     # Better handle multiple workers
-                                    try:
-                                        self.redis_conn.sadd('flux.workers.metrics_sent', flux_zero_fill_metric)
-                                    except:
-                                        # pass
-                                        # @added 20220428 - Feature #4536: Handle Redis failure
-                                        if settings.MEMCACHE_ENABLED:
-                                            success = False
-                                            try:
-                                                success = add_to_memcache_flux_workers_metrics_sent([flux_zero_fill_metric])
-                                            except:
-                                                pass
-                                            if success:
-                                                failed_over_to_memcache = True
+
+                                    # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                                    # Add to Redis set once
+                                    zero_fill_metrics_sent.append(flux_zero_fill_metric)
+
+                                    # @modified 20230929 - Task #5088: Change membership of the list checks to sets
+                                    # Added timing and add to Redis set once
+                                    if not added_to_set_once:
+                                        try:
+                                            self.redis_conn.sadd('flux.workers.metrics_sent', flux_zero_fill_metric)
+                                        except:
+                                            # pass
+                                            # @added 20220428 - Feature #4536: Handle Redis failure
+                                            if settings.MEMCACHE_ENABLED:
+                                                success = False
+                                                try:
+                                                    success = add_to_memcache_flux_workers_metrics_sent([flux_zero_fill_metric])
+                                                except:
+                                                    pass
+                                                if success:
+                                                    failed_over_to_memcache = True
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: worker :: zero fill - failed to add metric data to pickle for %s' % str(flux_zero_fill_metric))
                                     metric = None
+
+                        # @added 20230929 - Task #5088: Change membership of the list checks to sets
+                        # Add to Redis set once
+                        if zero_fill_metrics_sent:
+                            try:
+                                self.redis_conn.sadd('flux.workers.metrics_sent', *set(zero_fill_metrics_sent))
+                            except:
+                                if settings.MEMCACHE_ENABLED:
+                                    success = False
+                                    for flux_zero_fill_metric in zero_fill_metrics_sent:
+                                        try:
+                                            success = add_to_memcache_flux_workers_metrics_sent([flux_zero_fill_metric])
+                                        except:
+                                            pass
+                                        if success:
+                                            failed_over_to_memcache = True
+                            logger.info('worker :: zero fill filled %s metrics and took %s seconds ' % (
+                                str(len(zero_fill_metrics_sent)), str(time() - start_zero_fill)))
+
                         last_zero_fill_to_graphite = time_now
 
                 # @added 20210406 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
@@ -2130,7 +2280,15 @@ class Worker(Process):
                         try:
                             over_quota_count = self.redis_conn_decoded.scard('flux.listen.over_quota.rejected_metrics')
                             if over_quota_count:
-                                self.redis_conn_decoded.rename('flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics')
+                                # @modified 20231223 - Task #5188: Optimise redis renames
+                                #                      Task #5178: Build and test skyline v4.1.0
+                                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                                # self.redis_conn_decoded.rename('flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics')
+                                redis_key_renamed = False
+                                try:
+                                    redis_key_renamed = redis_rename_key(skyline_app, 'flux.listen.over_quota.rejected_metrics', 'aet.flux.listen.over_quota.rejected_metrics', log=True)
+                                except Exception as err:
+                                    logger.error('error :: redis_rename_key failed renaming flux.listen.over_quota.rejected_metrics to aet.flux.listen.over_quota.rejected_metrics, err: %s' % err)
                         except Exception as err:
                             if not failed_over_to_memcache:
                                 logger.error('error :: worker :: failed to get Redis set flux.listen.over_quota.rejected_metrics - %s' % err)
@@ -2164,7 +2322,15 @@ class Worker(Process):
                     try:
                         dropped_non_numeric_metrics_count = self.redis_conn_decoded.scard('flux.listen.dropped_non_numeric_metrics')
                         if dropped_non_numeric_metrics_count:
-                            self.redis_conn_decoded.rename('flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn_decoded.rename('flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'flux.listen.dropped_non_numeric_metrics', 'aet.flux.listen.dropped_non_numeric_metrics', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming flux.listen.dropped_non_numeric_metrics to aet.flux.listen.dropped_non_numeric_metrics, err: %s' % err)
                     except Exception as err:
                         if not failed_over_to_memcache:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.dropped_non_numeric_metrics - %s' % err)
@@ -2215,6 +2381,46 @@ class Worker(Process):
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
                             skyline_metric, str(metrics_sent_to_graphite)))
+
+                # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                #                   Feature #5192: skyline_graphite_metrics_single_submit
+                # Send a flux.prometheus metric because currrently there is
+                # only a horizon.prometheus.flux_received metric which is
+                # submitted by horizon, there is no prometheus metric that
+                # is generated by flux
+                prometheus_received = 0
+
+                # @added 20240104 - Task #5178: Build and test skyline v4.1.0
+                #                   Feature #5192: skyline_graphite_metrics_single_submit
+                flux_prometheus_metrics_last_key = 'flux.prometheus_metrics'
+                try:
+                    flux_prometheus_metrics_last_key = self.redis_conn_decoded.get('flux.prometheus_metrics.last_key')
+                except Exception as err:
+                    logger.error('error :: failed to get flux.prometheus_metrics.last_key, err: %s' % err)
+                # @added 20240106 - Task #5178: Build and test skyline v4.1.0
+                #                   Feature #5192: skyline_graphite_metrics_single_submit
+                # Ensure the value is not None
+                if not flux_prometheus_metrics_last_key:
+                    flux_prometheus_metrics_last_key = 'flux.prometheus_metrics'
+
+                try:
+                    # @modified 20240104 - Task #5178: Build and test skyline v4.1.0
+                    #                      Feature #5192: skyline_graphite_metrics_single_submit
+                    # prometheus_received = int(self.redis_conn_decoded.scard('flux.prometheus_metrics'))
+                    prometheus_received = self.redis_conn_decoded.scard(flux_prometheus_metrics_last_key)
+                    logger.info('worker :: flux.prometheus.received count - %s' % str(prometheus_received))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: worker :: scard failed on flux.prometheus_metrics, err: %s' % err)
+                skyline_metric = 'skyline.%s%s.prometheus.received_metrics' % (parent_skyline_app, SERVER_METRIC_PATH)
+                if primary_worker:
+                    try:
+                        send_graphite_metric(self, skyline_app, skyline_metric, prometheus_received)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                            skyline_metric, str(prometheus_received)))
+
                 # @added 20201019 - Feature #3790: flux - pickle to Graphite
                 if metric_data_queue_size > 10:
                     send_to_reciever = 'pickle'
@@ -2259,8 +2465,18 @@ class Worker(Process):
                     new_set = 'aet.flux.metrics_data_sent'
                 if primary_worker:
                     try:
-                        self.redis_conn.rename('flux.metrics_data_sent', new_set)
-                        logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('flux.metrics_data_sent', new_set)
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'flux.metrics_data_sent', new_set, log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming flux.metrics_data_sent to %s, err: %s' % (
+                                str(new_set), err))
+                        if redis_key_renamed:
+                            logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
                     # @modified 20201128 - Feature #3820: HORIZON_SHARDS
                     # With metrics that come in at a frequency of less
                     # than 60 seconds, it is possible that this key will
@@ -2270,7 +2486,7 @@ class Worker(Process):
                         traceback_str = traceback.format_exc()
                         if not failed_over_to_memcache:
                             if 'no such key' in str(err):
-                                logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
+                                logger.info('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
                             else:
                                 logger.error(traceback_str)
                                 logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)

@@ -1,16 +1,33 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 <!-- BEGIN /flux_frontend block -->
 <!--
 # @added 20200517 - Feature #3538: webapp - upload_data endpoint
  -->
-	<ol class="breadcrumb">
+
+ {% if version == dev_ver %}
+ <nav aria-label="breadcrumb">
+   <ol class="breadcrumb">
+     <div class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/">Home</a></li>
+       <li class="breadcrumb-item"><a href="/flux_frontend">Flux</a></li>
+       <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Upload</span> <span class="re">data</span></span></li>
+     </div>
+   </ol>
+ </nav>
+{% else %}
+  <ol class="breadcrumb">
   	<div class="breadcrumb">
   		<li><a href="/">Home</a></li>
   		<li><a href="/flux_frontend">Flux</a></li>
-  		<li class="active"><span class="logo"><span class="sky">upload</span> <span class="re">data</span></li>
+  		<li class="active"><span class="logo"><span class="sky">upload</span> <span class="re">data</span><</span>/li>
     </div>
 	</ol>
+{% endif %}
   {% include "upload_data.html" %}
 
 <!-- END /flux_frontend block -->

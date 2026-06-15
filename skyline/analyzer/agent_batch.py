@@ -78,7 +78,7 @@ def run():
         interval=1,
         backupCount=5)
 
-    memory_handler = logging.handlers.MemoryHandler(256,
+    memory_handler = logging.handlers.MemoryHandler(30,
                                                     flushLevel=logging.DEBUG,
                                                     target=handler)
     handler.setFormatter(formatter)

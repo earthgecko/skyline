@@ -66,8 +66,24 @@ def get_vortex_training_data_graphs(current_skyline_app, metric_data_archive, un
             function_str, str(metric_data_archive)))
         return vortex_graphs
 
+    # @added 20230703 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    # Handle csv metrics
     try:
-        use_base_name = vortex_metric_data['labelled_metric_name']
+        use_base_name = vortex_metric_data['metric']
+    except Exception as err:
+        current_logger.error('error :: %s :: metric not found in vortex_metric_data - %s' % (
+            function_str, err))
+        return vortex_graphs
+
+    try:
+        # @modified 20230703 - Feature #4732: flux vortex
+        #                      Feature #4734: mirage_vortex
+        # Handle csv metrics
+        # use_base_name = vortex_metric_data['labelled_metric_name']
+        labelled_metric_name = vortex_metric_data['labelled_metric_name']
+        if str(labelled_metric_name) != '' and str(labelled_metric_name) != 'None':
+            use_base_name = str(labelled_metric_name)
     except Exception as err:
         current_logger.error('error :: %s :: labelled_metric_name not found in vortex_metric_data - %s' % (
             function_str, err))
@@ -101,8 +117,8 @@ def get_vortex_training_data_graphs(current_skyline_app, metric_data_archive, un
                     undownsampled_timeseries = undownsampled_timeseries_json['timeseries']
                     current_logger.info('%s :: loaded undownsampled timeseries from %s' % (function_str, undownsampled_archive))
                 except Exception as err:
-                    current_logger.error('error :: %s :: failed to load undownsampled timeseries from %s' % (
-                        function_str, undownsampled_archive))
+                    current_logger.error('error :: %s :: failed to load undownsampled timeseries from %s, err: %s' % (
+                        function_str, undownsampled_archive, err))
         if undownsampled_timeseries:
             try:
                 downsampled_resolution = vortex_metric_data['downsampled_resolution']
@@ -299,7 +315,10 @@ def get_vortex_training_data_graphs(current_skyline_app, metric_data_archive, un
         try:
             anomaly_window = vortex_metric_data['algorithms'][algorithm]['algorithm_parameters']['anomaly_window']
         except KeyError:
-            anomaly_window = 1
+            try:
+                anomaly_window = vortex_metric_data['algorithms'][algorithm]['anomaly_window']
+            except:
+                anomaly_window = 1
         except Exception as err:
             current_logger.error('error :: %s :: scores not found in vortex_metric_data[\'algorithms\'][\'%s\'][\'algorithm_parameters\'][\'anomaly_window\'] - %s' % (
                 function_str, algorithm, err))

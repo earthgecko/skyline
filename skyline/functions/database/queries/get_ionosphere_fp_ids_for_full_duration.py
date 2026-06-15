@@ -2,9 +2,12 @@ import logging
 import traceback
 
 from sqlalchemy.sql import select
+# @added 20241010 - Feature #5479: ionosphere.alias_features_profile
+from sqlalchemy import or_
 
 from database import get_engine, engine_disposal, ionosphere_table_meta
-
+# @added 20241010 - Feature #5479: ionosphere.alias_features_profile
+from functions.database.queries.get_alias_fps_for_metrics import get_alias_fps_for_metrics
 
 # @added 20210426  - Feature #4014: Ionosphere - inference
 # Add a global method to query the DB for enabled (or disabled) features
@@ -46,11 +49,22 @@ def get_ionosphere_fp_ids_for_full_duration(
         current_logger.error('error :: %s :: failed to get ionosphere_table meta for metric id %s - %s' % (
             function_str, str(metric_id), e))
         if engine:
-            engine_disposal(engine)
+            engine_disposal(current_skyline_app, engine)
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
         return fp_ids_full_duration
+
+    # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
+    metric_ids_alias_fps_dict = {}
+    try:
+        metric_ids_alias_fps_dict = get_alias_fps_for_metrics(current_skyline_app, [metric_id])
+    except Exception as err:
+        current_logger.error('error :: %s :: get_alias_fps_for_metrics failed, err: %s' % (
+            function_str, err))
+    alias_fp_ids = []
+    if len(metric_ids_alias_fps_dict) > 0:
+        alias_fp_ids = list(metric_ids_alias_fps_dict[metric_id])
 
     try:
         connection = engine.connect()
@@ -59,26 +73,52 @@ def get_ionosphere_fp_ids_for_full_duration(
                 where(ionosphere_table.c.metric_id == int(metric_id)).\
                 where(ionosphere_table.c.full_duration == int(full_duration)).\
                 where(ionosphere_table.c.enabled == enabled)
+            # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
+            if alias_fp_ids:
+                stmt = select([ionosphere_table]).where(
+                    or_(
+                        ionosphere_table.c.metric_id == int(metric_id),
+                        ionosphere_table.c.id.in_(alias_fp_ids)
+                    )
+                ).\
+                where(ionosphere_table.c.full_duration == int(full_duration)).\
+                where(ionosphere_table.c.enabled == enabled)
         else:
             stmt = select([ionosphere_table]).\
                 where(ionosphere_table.c.metric_id == int(metric_id)).\
+                where(ionosphere_table.c.enabled == enabled)
+            # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
+            if alias_fp_ids:
+                stmt = select([ionosphere_table]).where(
+                    or_(
+                        ionosphere_table.c.metric_id == int(metric_id),
+                        ionosphere_table.c.id.in_(alias_fp_ids)
+                    )
+                ).\
                 where(ionosphere_table.c.enabled == enabled)
         results = connection.execute(stmt)
         if results:
             for row in results:
                 fp_id = row['id']
-                fp_ids_full_duration[fp_id] = row
+                fp_ids_full_duration[fp_id] = dict(row)
         connection.close()
     except Exception as e:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get ionosphere rows for metric id %s - %s' % (
             function_str, str(metric_id), e))
         if engine:
-            engine_disposal(engine)
+            engine_disposal(current_skyline_app, engine)
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
         return fp_ids_full_duration
+
+    if len(alias_fp_ids) > 0:
+        for fp_id in list(fp_ids_full_duration.keys()):
+            if fp_id in alias_fp_ids:
+                fp_ids_full_duration[fp_id]['alias_fp_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['id']
+                fp_ids_full_duration[fp_id]['original_metric_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['original_metric_id']
+                fp_ids_full_duration[fp_id]['alias_metric_id'] = metric_ids_alias_fps_dict[metric_id][fp_id]['alias_metric_id']
 
     if engine:
         engine_disposal(current_skyline_app, engine)

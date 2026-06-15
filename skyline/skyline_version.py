@@ -31,9 +31,13 @@ version info
 # __version_tag__ = 'webapp - inactive_metrics'
 # __version_info__ = ('2', '1', '0-4448')
 __branch__ = 'master'
+__branch__ = 'v5.0.0-alpha'
 __version_tag__ = 'release'
+__version_tag__ = 'branch'
 # __version_info__ = ('3', '1', '0')
-__version_info__ = ('4', '0', '0')
+#__version_info__ = ('4', '0', '0')
+#__version_info__ = ('4', '1', '0')
+__version_info__ = ('5', '0', '0')
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11

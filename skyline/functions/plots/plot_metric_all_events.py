@@ -9,6 +9,10 @@ import datetime
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 load_libraries = True
 if load_libraries:
@@ -121,9 +125,22 @@ def plot_metric_all_events(
         timeseries_x = [int(ts) for ts in timestamps]
         timeseries_y = list(values)
 
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
         # Plot match
         title = '%s - all activity' % metric
         rcParams['figure.figsize'] = plot_parameters['figsize']
+
+        # Plot match
+        rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
         ax.set_title(title, fontsize='medium')

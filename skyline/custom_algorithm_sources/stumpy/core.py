@@ -24,11 +24,11 @@ def _compare_parameters(norm, non_norm, exclude=None):
 
     Parameters
     ----------
-    norm : object
+    norm : function
         The normalized function (or class) that is complementary to the
         non-normalized function (or class)
 
-    non_norm : object
+    non_norm : function
         The non-normalized function (or class) that is complementary to the
         z-normalized function (or class)
 
@@ -93,14 +93,15 @@ def non_normalized(non_norm, exclude=None, replace=None):
 
     Parameters
     ----------
-    non_norm : object
+    non_norm : function
         The non-normalized function (or class) that is complementary to the
         z-normalized function (or class)
 
     exclude : list, default None
         A list of function (or class) parameter names to exclude when comparing the
         function (or class) signatures. When `exlcude is None`, this parameter is
-        automatically set to `exclude = ["normalize", "p"]` by default.
+        automatically set to `exclude = ["normalize", "p", "T_A_subseq_isconstant",
+        T_B_subseq_isconstant]` by default.
 
     replace : dict, default None
         A dictionary of function (or class) parameter key-value pairs. Each key that
@@ -112,11 +113,16 @@ def non_normalized(non_norm, exclude=None, replace=None):
 
     Returns
     -------
-    outer_wrapper : object
+    outer_wrapper : function
         The desired z-normalized/non-normalized function (or class)
     """
     if exclude is None:
-        exclude = ["normalize", "p"]
+        exclude = [
+            "normalize",
+            "p",
+            "T_A_subseq_isconstant",
+            "T_B_subseq_isconstant",
+        ]
 
     @functools.wraps(non_norm)
     def outer_wrapper(norm):
@@ -184,6 +190,10 @@ def check_dtype(a, dtype=np.float64):  # pragma: no cover
     dtype : dtype, default np.float64
         NumPy `dtype`
 
+    Returns
+    -------
+    None
+
     Raises
     ------
     TypeError
@@ -193,6 +203,8 @@ def check_dtype(a, dtype=np.float64):  # pragma: no cover
         dtype = np.int64
     if dtype == float:
         dtype = np.float64
+    if dtype == bool:
+        dtype = np.bool_
     if not np.issubdtype(a.dtype, dtype):
         msg = f"{dtype} dtype expected but found {a.dtype} in input array\n"
         msg += "Please change your input `dtype` with `.astype(dtype)`"
@@ -242,7 +254,7 @@ def are_arrays_equal(a, b):  # pragma: no cover
     Returns
     -------
     output : bool
-        Returns `True` if the arrays are equal and `False` otherwise.
+        This is `True` if the arrays are equal and `False` otherwise.
     """
     if id(a) == id(b):
         return True
@@ -274,7 +286,7 @@ def are_distances_too_small(a, threshold=10e-6):  # pragma: no cover
     Returns
     -------
     output : bool
-        Returns `True` if the matrix profile distances are all below the
+        This is `True` if the matrix profile distances are all below the
         threshold and `False` if they are all above the threshold.
     """
     if a.mean() < threshold or np.all(a < threshold):
@@ -499,7 +511,7 @@ def _rolling_nanstd_1d(a, w):
     n = a.shape[0] - w + 1
     out = np.empty(n, dtype=np.float64)
     for i in prange(n):
-        out[i] = np.nanstd(a[i:(i + w)])
+        out[i] = np.nanstd(a[i : i + w])
 
     return out
 
@@ -626,38 +638,73 @@ def compute_mean_std(T, m):
             "Increase the number of chunks or maximal iterations."
         )
 
-
-def _preprocess(T):
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#def _preprocess(T):
+#    """
+#    Creates a copy of the time series, transposes all dataframes, converts to
+#    `numpy.ndarray`, and checks the `dtype`
+def _preprocess(T, copy=True):
     """
-    Creates a copy of the time series, transposes all dataframes, converts to
-    `numpy.ndarray`, and checks the `dtype`
+    Creates a copy of the time series when `copy` is True, transposes all dataframes,
+    converts to `numpy.ndarray`, and checks the `dtype`
 
     Parameters
     ----------
     T : numpy.ndarray
         Time series or sequence
 
+    copy : bool, default True
+        A boolean value that indicates whether the process should be done on
+        input `T` (False) or its copy (True).
+
     Returns
     -------
     T : numpy.ndarray
         Modified time series
     """
-    T = T.copy()
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T = T.copy()
+    if copy:
+        T = T.copy()
     T = transpose_dataframe(T)
     T = np.asarray(T)
     check_dtype(T)
 
     return T
 
-
-def preprocess(T, m):
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#def preprocess(T, m):
+#    """
+#    Creates a copy of the time series where all NaN and inf values
+#    are replaced with zero. Also computes mean and standard deviation
+#    for every subsequence. Every subsequence that contains at least
+#    one NaN or inf value, will have a mean of np.inf. For the standard
+#    deviation these values are ignored. If all values are illegal, the
+#    standard deviation will be 0 (see `core.compute_mean_std`)
+def preprocess(
+    T,
+    m,
+    copy=True,
+    M_T=None,
+    Σ_T=None,
+    T_subseq_isconstant=None,
+):
     """
     Creates a copy of the time series where all NaN and inf values
     are replaced with zero. Also computes mean and standard deviation
     for every subsequence. Every subsequence that contains at least
     one NaN or inf value, will have a mean of np.inf. For the standard
     deviation these values are ignored. If all values are illegal, the
-    standard deviation will be 0 (see `core.compute_mean_std`)
+    standard deviation will be 0 (see `core.compute_mean_std`). Also,
+    compute the rolling isconstant, a boolean array that indicates if
+    a subsequence is constant (True) or False. A subsequence is constant
+    if it contains finite values that are identical.
 
     Parameters
     ----------
@@ -667,6 +714,26 @@ def preprocess(T, m):
     m : int
         Window size
 
+    copy : bool, default True
+        A boolean value that indicates whether the process should be done on
+        input `T` (False) or its copy (True).
+
+    M_T : numpy.ndarray, default None
+        Rolling mean
+
+    Σ_T : numpy.ndarray, default None
+        Rolling standard deviation
+
+    T_subseq_isconstant : numpy.ndarray or function, default None
+        A boolean array that indicates whether a subsequence in `T` is constant
+        (True). Alternatively, a custom, user-defined function that returns a
+        boolean array that indicates whether a subsequence in `T` is constant
+        (True). The function must only take two arguments, `a`, a 1-D array,
+        and `w`, the window size, while additional arguments may be specified
+        by currying the user-defined function using `functools.partial`. Any
+        subsequence with at least one np.nan/np.inf will automatically have its
+        corresponding value set to False in this boolean array.
+
     Returns
     -------
     T : numpy.ndarray
@@ -675,17 +742,39 @@ def preprocess(T, m):
         Rolling mean
     Σ_T : numpy.ndarray
         Rolling standard deviation
+    T_subseq_isconstant : numpy.ndarray
+        A boolean array that indicates whether a subsequence in `T`
+        is constant (True)
     """
-    T = _preprocess(T)
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T = _preprocess(T)
+    T = _preprocess(T, copy)
     check_window_size(m, max_size=T.shape[-1])
+
     T[np.isinf(T)] = np.nan
+
+# @added 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                   Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+    T_subseq_isconstant = process_isconstant(T, m, T_subseq_isconstant)
+
     M_T, Σ_T = compute_mean_std(T, m)
     T[np.isnan(T)] = 0
 
-    return T, M_T, Σ_T
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    return T, M_T, Σ_T
+    return T, M_T, Σ_T, T_subseq_isconstant
 
 
-def preprocess_non_normalized(T, m):
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#def preprocess_non_normalized(T, m):
+def preprocess_non_normalized(T, m, copy=True):
     """
     Preprocess a time series that is to be used when computing a non-normalized (i.e.,
     without z-normalization) distance matrix.
@@ -703,6 +792,10 @@ def preprocess_non_normalized(T, m):
     m : int
         Window size
 
+    copy : bool, default True
+        A boolean value that indicates whether the process should be done on
+        input `T` (False) or its copy (True).
+
     Returns
     -------
     T : numpy.ndarray
@@ -711,21 +804,41 @@ def preprocess_non_normalized(T, m):
     T_subseq_isfinite : numpy.ndarray
         A boolean array that indicates whether a subsequence in `T` contains a
         `np.nan`/`np.inf` value (False)
-
-    T_subseq_isconstant : numpy.ndarray
-        A boolean array that indicates whether a subsequence in `T` is constant
-        (True)
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T_subseq_isconstant : numpy.ndarray
+#        A boolean array that indicates whether a subsequence in `T` is constant
+#        (True)
     """
-    T = _preprocess(T)
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T = _preprocess(T)
+    T = _preprocess(T, copy)
     check_window_size(m, max_size=T.shape[-1])
     T_subseq_isfinite = rolling_isfinite(T, m)
-    T[~np.isfinite(T)] = 0.0
-    T_subseq_isconstant = rolling_isconstant(T, m)
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T[~np.isfinite(T)] = 0.0
+#    T_subseq_isconstant = rolling_isconstant(T, m)
+#    return T, T_subseq_isfinite, T_subseq_isconstant
+    T[~np.isfinite(T)] = np.nan
+    T[np.isnan(T)] = 0
 
-    return T, T_subseq_isfinite, T_subseq_isconstant
+    return T, T_subseq_isfinite
 
-
-def preprocess_diagonal(T, m):
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#def preprocess_diagonal(T, m):
+def preprocess_diagonal(
+    T,
+    m,
+    T_subseq_isconstant=None,
+    copy=True,
+):
     """
     Preprocess a time series that is to be used when traversing the diagonals of a
     distance matrix.
@@ -748,6 +861,20 @@ def preprocess_diagonal(T, m):
     m : int
         Window size
 
+    T_subseq_isconstant : numpy.ndarray or function, default None
+        A boolean array that indicates whether a subsequence in `T` is constant
+        (True). Alternatively, a custom, user-defined function that returns a
+        boolean array that indicates whether a subsequence in `T` is constant
+        (True). The function must only take two arguments, `a`, a 1-D array,
+        and `w`, the window size, while additional arguments may be specified
+        by currying the user-defined function using `functools.partial`. Any
+        subsequence with at least one np.nan/np.inf will automatically have its
+        corresponding value set to False in this boolean array.
+
+    copy : bool, default True
+        A boolean value that indicates whether the process should be done on
+        input `T` (False) or its copy (True).
+
     Returns
     -------
     T : numpy.ndarray
@@ -769,7 +896,17 @@ def preprocess_diagonal(T, m):
     T_subseq_isconstant : numpy.ndarray
         A boolean array that indicates whether a subsequence in `T` is constant (True)
     """
-    T, T_subseq_isfinite, T_subseq_isconstant = preprocess_non_normalized(T, m)
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    T, T_subseq_isfinite, T_subseq_isconstant = preprocess_non_normalized(T, m)
+    T = _preprocess(T, copy)
+    check_window_size(m, max_size=T.shape[-1])
+    T_subseq_isfinite = rolling_isfinite(T, m)
+    T[~np.isfinite(T)] = np.nan
+    T_subseq_isconstant = process_isconstant(T, m, T_subseq_isconstant)
+    T[np.isnan(T)] = 0
+
     M_T, Σ_T = compute_mean_std(T, m)
     Σ_T[T_subseq_isconstant] = 1.0  # Avoid divide by zero in next inversion step
     Σ_T_inverse = 1.0 / Σ_T
@@ -860,7 +997,7 @@ def _get_array_ranges(a, n_chunks, truncate):
         if np.any(diff_idx == 0):
             row_truncation_idx = np.argmin(diff_idx) + 2
             array_ranges[row_truncation_idx:, 0] = a.shape[0]
-            array_ranges[(row_truncation_idx - 1):, 1] = a.shape[0]
+            array_ranges[row_truncation_idx - 1 :, 1] = a.shape[0]
             if truncate:
                 array_ranges = array_ranges[:row_truncation_idx]
 
@@ -879,8 +1016,8 @@ def _rolling_isfinite_1d(a, w):
     w : int
         The length of the rolling window
 
-    Return
-    ------
+    Returns
+    -------
     output : numpy.ndarray
         A boolean array of length `a.shape[0] - w + 1` that records whether each
         rolling window subsequence contain all finite values
@@ -897,7 +1034,7 @@ def _rolling_isfinite_1d(a, w):
         a_isfinite[: np.flatnonzero(a_first_subseq).max()] = False
 
     # Shift `a_isfinite` and fill forward by `w`
-    a_subseq_isfinite[~a_isfinite[(w - 1):]] = False
+    a_subseq_isfinite[~a_isfinite[w - 1 :]] = False
 
     return a_isfinite[: a_isfinite.shape[0] - w + 1]
 
@@ -934,7 +1071,7 @@ def rolling_isfinite(a, w):
 )
 def _rolling_isconstant(a, w):
     """
-    Compute the rolling isconstant for 1-D and 2-D arrays.
+    Compute the rolling isconstant for 1-D array.
 
     This is accomplished by comparing the min and max within each window and
     assigning `True` when the min and max are equal and `False` otherwise. If
@@ -958,11 +1095,41 @@ def _rolling_isconstant(a, w):
     out = np.empty(l)
     for i in prange(l):
         out[i] = np.ptp(a[i : i + w])
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#    return np.where(out == 0.0, True, False)
+    return out == 0
 
-    return np.where(out == 0.0, True, False)
-
-
-def rolling_isconstant(a, w):
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# Change to v1.13.0 method
+#def rolling_isconstant(a, w):
+#    """
+#    Compute the rolling isconstant for 1-D and 2-D arrays.
+#
+#    This is accomplished by comparing the min and max within each window and
+#    assigning `True` when the min and max are equal and `False` otherwise. If
+#    a subsequence contains at least one NaN, then the subsequence is not constant.
+#
+#    Parameters
+#    ----------
+#    a : numpy.ndarray
+#        The input array
+#
+#    w : numpy.ndarray
+#        The rolling window size
+#
+#    Returns
+#    -------
+#    a_subseq_isconstant : numpy.ndarray
+#        Rolling window isconstant
+#    """
+#    axis = a.ndim - 1
+#    return np.apply_along_axis(
+#        lambda a_row, w: _rolling_isconstant(a_row, w), axis=axis, arr=a, w=w
+#    )
+def rolling_isconstant(a, w, a_subseq_isconstant=None):
     """
     Compute the rolling isconstant for 1-D and 2-D arrays.
 
@@ -978,15 +1145,116 @@ def rolling_isconstant(a, w):
     w : numpy.ndarray
         The rolling window size
 
+    a_subseq_isconstant : numpy.ndarray or function, default None
+        A boolean array that indicates whether a subsequence in `a` is constant
+        (True). Alternatively, a custom, user-defined function that returns a
+        boolean array that indicates whether a subsequence in `a` is constant
+        (True). The function must only take two arguments, `a`, a 1-D array,
+        and `w`, the window size, while additional arguments may be specified
+        by currying the user-defined function using `functools.partial`. When
+        None, this defaults to `_rolling_isconstant`.
+
     Returns
     -------
-    output : numpy.ndarray
-        Rolling window isconstant.
+    a_subseq_isconstant : numpy.ndarray
+        Rolling window isconstant
     """
-    axis = a.ndim - 1
-    return np.apply_along_axis(
-        lambda a_row, w: _rolling_isconstant(a_row, w), axis=axis, arr=a, w=w
-    )
+    if a_subseq_isconstant is None:
+        a_subseq_isconstant = _rolling_isconstant
+
+    isconstant_func = None
+    if callable(a_subseq_isconstant):
+        incomp_args = _find_incompatible_args(a_subseq_isconstant, ["a", "w"])
+        if len(incomp_args) > 0:  # pragma: no cover
+            msg = (
+                f"Incompatible arguments {incomp_args} found in `T_subseq_isconstant`. "
+                + "Please provide the custom function `T_subseq_isconstant` with "
+                + "arguments `a`, a 1-D array, and `w`, the window size."
+            )
+            raise ValueError(msg)
+
+        isconstant_func = a_subseq_isconstant
+
+    elif isinstance(a_subseq_isconstant, np.ndarray):
+        isconstant_func = None
+        if a.ndim != a_subseq_isconstant.ndim:  # pragma: no cover
+            msg = (
+                "The arrays `a` and `a_subseq_isconstant` must have same "
+                + "number of dimensions, {a.ndim} != {a_subseq_isconstant.ndim}"
+            )
+            raise ValueError(msg)
+
+    else:  # pragma: no cover
+        msg = (
+            "`T_subseq_isconstant` must be of type `np.ndarray` or a callable "
+            + f"function. Found {type(a_subseq_isconstant)} instead."
+        )
+        raise ValueError(msg)
+
+    if isconstant_func is not None:
+        axis = a.ndim - 1
+        a_subseq_isconstant = np.apply_along_axis(
+            lambda a_row, w: isconstant_func(a_row, w), axis=axis, arr=a, w=w
+        )
+
+    if not issubclass(a_subseq_isconstant.dtype.type, np.bool_):  # pragma: no cover
+        msg = (
+            f"The output dtype of `T_subseq_isconstant` is {a_subseq_isconstant.dtype} "
+            + "but dtype `np.bool` was expected"
+        )
+        raise ValueError(msg)
+
+    return a_subseq_isconstant
+
+
+# @added 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                   Task #5526: Build v5.0.0 and upgrade deps
+# Required for v1.13.0 methods
+def fix_isconstant_isfinite_conflicts(
+    T, m, T_subseq_isconstant, T_subseq_isfinite=None
+):
+    """
+    Fix `T_subseq_isconstant` by setting its element to False if their
+    corresponding value in `T_subseq_isfinite` is False.
+
+    Parameters
+    ----------
+    T : numpy.ndarray
+        Time series
+
+    m : int
+        Subsequence window size
+
+    T_subseq_isconstant : numpy.ndarray
+        A numpy array `dtype` of boolean that indicates whether a subsequence
+        is constant (True)  or not (False).
+
+    T_subseq_isfinite : numpy.ndarray, default None
+        A boolean array that indicates whether a subsequence in `T` contains a
+        `np.nan`/`np.inf` value (False)
+
+    Returns
+    -------
+    fixed : numpy.ndarray
+        The same as input `T_subseq_isconstant` but with indices set to False
+        if their corresponding subsequence are not finite.
+    """
+    if T_subseq_isfinite is None:
+        T_subseq_isfinite = rolling_isfinite(T, m)
+
+    fixed = np.logical_and(T_subseq_isconstant, T_subseq_isfinite)
+
+    conflicts = fixed != T_subseq_isconstant
+    if np.any(conflicts):  # pragma: no cover
+        msg = (
+            f"Subsequences located at indices {np.nonzero(conflicts)} contain one "
+            + "or more np.nan/np.inf and so their corresponding values in "
+            + "`T_subseq_isconstant` have been automatically switched from True "
+            + " to False."
+        )
+        warnings.warn(msg)
+
+    return fixed
 
 
 @njit(
@@ -1111,7 +1379,7 @@ def _shift_insert_at_index(a, idx, v, shift="right"):
             a[idx - 1] = v
     else:
         if 0 <= idx < len(a):
-            a[(idx + 1):] = a[idx:-1]
+            a[idx + 1 :] = a[idx:-1]
             a[idx] = v
 
 
@@ -1195,3 +1463,113 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
         ignore_trivial = False
 
     return ignore_trivial
+
+
+# @added 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                   Task #5526: Build v5.0.0 and upgrade deps
+# Required for v1.13.0 methods
+def _find_incompatible_args(func, required_args):
+    """
+    For a given `func` and `requried_args`, return non-default
+    arguments in `func` that are not in `required_args`
+
+    Parameters
+    ----------
+    func : function
+        A function
+
+    required_args : list
+        A list containing the name of required arguments.
+
+    Returns
+    -------
+    out : set
+        A set of non-default arguments in `func` which are not in
+        required_args
+    """
+    if not isinstance(required_args, list):  # pragma: no cover
+        required_args = list(required_args)
+
+    non_default_args = []
+    for arg_name, arg in inspect.signature(func).parameters.items():
+        # inspect.signature(functools.partial(func)) returns all arguments
+        # including the ones with default values. the following if block
+        # is to find non-default arguments.
+        if arg.default == inspect.Parameter.empty:
+            non_default_args.append(arg_name)
+
+    return set(non_default_args).difference(set(required_args))
+
+
+# @added 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                   Task #5526: Build v5.0.0 and upgrade deps
+# Required for v1.13.0 methods
+def process_isconstant(T, m, T_subseq_isconstant, T_subseq_isfinite=None):
+    """
+    A convenience wrapper around the `rolling_isconstant` and
+    `fix_isconstant_isfinite_conflicts`.
+
+    It computes the rolling isconstant for 1-D and 2-D arrays. This is accomplished by
+    comparing the min and max within each window and assigning `True` when the min and
+    max are equal and `False` otherwise. If a subsequence contains at least one NaN,
+    then the subsequence is not constant. If `T_subseq_isconstant` is provided as
+    boolean array, its element will be set to False if their corresponding value in
+    `T_subseq_isfinite` is False.
+
+    Parameters
+    ----------
+    T : numpy.ndarray
+        The input 1D or 2D array
+
+    m : numpy.ndarray
+        The rolling window size
+
+    T_subseq_isconstant : numpy.ndarray, function, or list, default None
+        A parameter that is used to show whether a subsequence of a time series in ``T``
+        is constant (``True``) or not. ``T_subseq_isconstant`` can be a 1D or 2D
+        boolean ``numpy.ndarray`` (depending on the dimension of ``T``) or a function
+        that can be applied to each time series in ``T``. Alternatively, for  maximum
+        flexibility, a list (with length equal to the total number of time series) may
+        also be used. In this case, ``T_subseq_isconstant[i]`` corresponds to the
+        ``i``-th time series ``T[i]`` and each element in the list can either be 1D
+        boolean ``numpy.ndarray``, a function, or ``None``.
+
+    T_subseq_isfinite : numpy.ndarray, default None
+        A boolean array that indicates whether a subsequence in `T` contains a
+        `np.nan`/`np.inf` value (False)
+
+    Returns
+    -------
+    T_subseq_isconstant : numpy.ndarray
+        Rolling window isconstant
+    """
+    if isinstance(T_subseq_isconstant, list):
+        if T.ndim != 2:  # pragma: no cover
+            msg = (
+                "When `T_subseq_isconstant` is provided as a list, `T` "
+                + f"must be a 2D array. Found {T.ndim} dimension instead."
+            )
+            raise ValueError(msg)
+
+        if len(T_subseq_isconstant) != T.shape[0]:  # pragma: no cover
+            msg = (
+                "The lenght of the list `T_subseq_isconstant` must be "
+                + "equal to the number of time series in `T`."
+            )
+            raise ValueError(msg)
+
+        T_subseq_isconstant = np.array(
+            [
+                rolling_isconstant(T[i], m, T_subseq_isconstant[i])
+                for i in range(T.shape[0])
+            ]
+        )
+    else:
+        T_subseq_isconstant = rolling_isconstant(T, m, T_subseq_isconstant)
+
+    T_subseq_isconstant[...] = fix_isconstant_isfinite_conflicts(
+        T, m, T_subseq_isconstant, T_subseq_isfinite
+    )
+
+    return T_subseq_isconstant
+

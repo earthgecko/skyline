@@ -180,7 +180,16 @@ def get_related_metrics(current_skyline_app, cluster_data, full_details, base_na
             avg_coefficient = related_metrics['related_metrics'][related_metric]['avg_coefficient']
             avg_coefficients.append(avg_coefficient)
             avg_coefficients_dict[related_metric_id] = avg_coefficient
-            shifted_counts = related_metrics['related_metrics'][related_metric]['shifted_counts']
+            shifted_counts = {}
+            try:
+                shifted_counts = related_metrics['related_metrics'][related_metric]['shifted_counts']
+                if isinstance(shifted_counts, str):
+                    shifted_counts = literal_eval(shifted_counts)
+            except Exception as err:
+                current_logger.error('error :: %s :: %s :: failed to literal_eval shifted_counts for metric_id: %s - %s' % (
+                    current_skyline_app, function_str, str(related_metric_id),
+                    str(err)))
+
             shifted_count = 0
             for key in list(shifted_counts.keys()):
                 shifted_count += shifted_counts[key]

@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1.2.12 &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>1.2.12 &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -184,11 +184,11 @@
            <div itemprop="articleBody">
              
   <section id="id1">
-<h1>1.2.12<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<h1>1.2.12<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
 <p>v1.2.12 - April 3, 2019</p>
 <p>Stable for new installs.  Beta if upgrading.</p>
 <section id="downgraded-to-a-pre-release-as-an-update">
-<h2>DOWNGRADED to a pre-release as an update<a class="headerlink" href="#downgraded-to-a-pre-release-as-an-update" title="Permalink to this heading"></a></h2>
+<h2>DOWNGRADED to a pre-release as an update<a class="headerlink" href="#downgraded-to-a-pre-release-as-an-update" title="Link to this heading"></a></h2>
 <p>Downgrade to a pre-release - April 4, 2019</p>
 <p>To add a mechanism that reduces to initial load on Ionosphere when Ionosphere
 echo is enabled if there are a lot of existing Mirage feature profiles and to
@@ -196,7 +196,7 @@ add some self load management to Ionosphere in general under the new Ionosphere
 echo paradigm.</p>
 </section>
 <section id="new-functionality">
-<h2>New functionality<a class="headerlink" href="#new-functionality" title="Permalink to this heading"></a></h2>
+<h2>New functionality<a class="headerlink" href="#new-functionality" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Adds the new Ionosphere echo functionality related to improving the matching
 of Mirage based features profiles by between 30-50% depending on the metric.
@@ -204,7 +204,7 @@ See <a class="reference external" href="https://earthgecko-skyline.readthedocs.i
 </ul>
 </section>
 <section id="fixes">
-<h2>Fixes<a class="headerlink" href="#fixes" title="Permalink to this heading"></a></h2>
+<h2>Fixes<a class="headerlink" href="#fixes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Adds the ability for Skyline Boundary to handle very short time series.</p></li>
 <li><p>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
@@ -212,7 +212,7 @@ decimal values introduced by numpy==1.15.1 pandas==0.24.3</p></li>
 </ul>
 </section>
 <section id="changes-from-v1-2-11">
-<h2>Changes from v1.2.11<a class="headerlink" href="#changes-from-v1-2-11" title="Permalink to this heading"></a></h2>
+<h2>Changes from v1.2.11<a class="headerlink" href="#changes-from-v1-2-11" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Allow Boundary to analyse short time series (#88, #2862)</p></li>
 <li><p>Bifurcate dependencies for py3 testing (#2588, #2828)</p></li>
@@ -222,7 +222,7 @@ decimal values introduced by numpy==1.15.1 pandas==0.24.3 (2902)</p></li>
 </ul>
 </section>
 <section id="update-notes">
-<h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this heading"></a></h2>
+<h2>Update notes<a class="headerlink" href="#update-notes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>You can only upgrade to v1.2.12 from v1.2.11</p></li>
 <li><p>There are changes to the DB</p></li>
@@ -230,7 +230,7 @@ decimal values introduced by numpy==1.15.1 pandas==0.24.3 (2902)</p></li>
 </ul>
 </section>
 <section id="how-to-update-from-v1-2-11">
-<h2>How to update from v1.2.11<a class="headerlink" href="#how-to-update-from-v1-2-11" title="Permalink to this heading"></a></h2>
+<h2>How to update from v1.2.11<a class="headerlink" href="#how-to-update-from-v1-2-11" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Download the new release tag or clone/update to get it to a temp location,
 ready to be deployed.</p></li>
@@ -416,7 +416,7 @@ find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span c
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

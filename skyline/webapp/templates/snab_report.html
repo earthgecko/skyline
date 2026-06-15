@@ -1,0 +1,418 @@
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
+{% block body %}
+<!-- BEGIN /snab?report=true block -->
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/snab">SNAB</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/snab">SNAB</a></li>
+  		<li class="active"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></li>
+    </div>
+	</ol>
+{% endif %}
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs" id="view" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="/snab" role="tab" aria-controls="view" aria-selected="false"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="/snab?report=true" role="tab" aria-controls="results" aria-selected="true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a>
+    </li>
+  </ul>
+</div>
+<br>
+{% else %}
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/snab"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
+		  <li class="active"><a href="/snab?report=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a></li>
+
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+{% endif %}
+
+	<div class="col-md-12">
+	  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">report</span></span></h4>
+{% if snab_report %}
+	{% if version == dev_ver %}
+  	<button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#get_report">Show options</button>
+  {% else %}
+    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#get_report">Show options</button>
+  {% endif %}
+		<div id="get_report" class="collapse">
+{% endif %}
+      <form action="snab">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>SNAB report</td>
+  		        <td><select name="report">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp <code>[required]</code></td>
+  		        <td><input type="text" name="from_timestamp" value=""> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="0"> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+              <td>algorithm</td>
+  		        <td><select name="algorithm">
+  {% for algorithm in algorithms %}
+                <option value="{{ algorithm }}">{{ algorithm }}</option>
+  {% endfor %}
+              </select><br>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Get report">
+      </form>
+      </div>
+  {% if snab_report %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+
+{% if cached_snab_reports %}
+  <h4><span class="logo"><span class="sky">Cached ::</span> <span class="re">reports</span></span></h4>
+  These are previous SNAB reports that have been cached.   Click on the hash link to load the report.
+  <table class="table table-hover">
+    <thead>
+      <tr>
+      <th>id</th>
+      <th>algorithm</th>
+      <th>from_date</th>
+      <th>until_date</th>
+      <th>hash</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for index in cached_snab_reports %}
+      <tr>
+        <td>{{ index }}</td>
+        <td>{{ cached_snab_reports[index]['algorithm'] }}</td>
+        <td>{{ cached_snab_reports[index]['from_date'] }}</td>
+        <td>{{ cached_snab_reports[index]['until_date'] }}</td>
+        <td><a href="?report=true&cache_key={{ cached_snab_reports[index]['cache_key'] }}">{{ cached_snab_reports[index]['hash'] }}</a></td>
+      </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+  {% if snab_report %}
+	  {% set algorithm = snab_report['algorithm'] %}
+	  {% set snab_algorithm = snab_report['algorithm'] %}
+	  {% set red_keys = ['fP', 'fP %', 'fN', 'fN %'] %}
+	  {% set green_keys = ['tP', 'tP %', 'tN', 'tN %'] %}
+	  {% set ad_metric_keys = ['f1_score', 'precision', 'recall', 'accuracy', 'fP_rate', 'fN_rate', 'tP_rate', 'tN_rate', 'auc_roc'] %}
+    {% if version == dev_ver %}
+    <div class="tab-pane fade show active" id="results" role="tabpanel" aria-labelledby="results-tab">
+    {% else %}
+	  <div class="tab-pane active" id="results">
+    {% endif %}
+      <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">report ::</span></span> performance of <strong>{{ algorithm }}</strong> comparing <code>{{ snab_report['algorithms'] }}</code></h4>
+		Report date: {{ human_date }}
+		Report period - from: {{ report_start_human_date }}, until: {{ report_end_human_date }}
+    {% if version == dev_ver %}
+		<table class="table">
+    {% else %}
+		<table class="table table-hover">
+    {% endif %}
+			<thead>
+			  <tr>
+				<th>Algorithm</th>
+    {% for key in snab_report['results'][algorithm] %}
+	    {% set anomaly_detection_metrics_keys = snab_report['results'][algorithm]['anomaly_detection_metrics'] %}	
+      {% if not 'heatmap_html_color_code_' in key %}
+        {% if key != 'algorithm_group_name' %}
+          {% if key != 'anomaly_detection_metrics' %}
+            	<th style="word-wrap: break-word; min-width: 10px; max-width: 100px;">{{ key }}</th>
+          {% endif %}
+        {% endif %}
+    	{% elif key == 'anomaly_detection_metrics' %}
+		    {% for ad_key in snab_report['results'][algorithm]['anomaly_detection_metrics'] %}
+			    {% if ad_key in ad_metric_keys %}
+				<th style="word-wrap: break-word; min-width: 10px; max-width: 100px;">{{ ad_key }}</th>
+			    {% endif %}
+		    {% endfor %}
+	    {% elif key == 'algorithm_group_name' %}
+		    {% set skip = 1 %}
+	    {% else %}
+		    {% set skip = 1 %}
+	    {% endif %}
+    {% endfor %}
+			  </tr>
+			</thead>
+			<tbody>
+
+    {% for algo in snab_report['algorithms'] %}
+          <tr>
+            <td>{{ algo }}</td>
+	    {% for key in snab_report['results'][algo] %}
+	      {% set value = snab_report['results'][algo][key] %}
+		    {% set color_key = 'heatmap_html_color_code_' + key %}
+        {% if color_key in snab_report['results'][algo] %}
+          {% set td_color = snab_report['results'][algo][color_key] %}
+        {% else %}
+          {% set td_color = '#f5f5f1' %}
+        {% endif %}
+        {% if key == 'anomaly_detection_metrics' %}
+          {% for ad_key in snab_report['results'][algorithm]['anomaly_detection_metrics'] %}
+            {% if ad_key in ad_metric_keys %}
+			<td style="background-color: {{ td_color }};">{{ snab_report['results'][algorithm]['anomaly_detection_metrics'][ad_key] }}</td>
+      			{% endif %}
+		      {% endfor %}
+	      {% endif %}
+
+        {% if not 'heatmap_html_color_code_' in key %}
+          {% if (key == 'accuracy % ((tP+tN)/(evaluated-unsure)*100)') or (key == 'fN penalty accuracy % ((tP+tN)/(evaluated-unsure)*100)-fN%') %}
+            {% if value < 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+      			{% elif value < 70 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			      {% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			      {% endif %}
+		      {% elif key == 'incorrect % ((fP+fN)/(evaluated-unsure)*100)' %}
+			      {% if value > 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			      {% elif value > 20 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			      {% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			      {% endif %}
+		      {% elif key == 'algorithm_group_name' %}
+            {% set skip = 1 %}
+          {% else %}
+            {% if key in red_keys %}
+              {% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="red"><strong>{{ value }}</strong></font></td>
+    				  {% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+		    		  {% endif %}
+			      {% elif key in green_keys %}
+				      {% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="green"><strong>{{ value }}</strong></font></td>
+				      {% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+				      {% endif %}
+			    {% else %}
+			<td style="background-color: {{ td_color }};">{{ value }}</td>
+			    {% endif %}
+		    {% endif %}
+	    {% endif %}
+	  {% endfor %}
+          </tr>
+  {% endfor %}
+			</tbody>
+		</table>
+		</div>
+
+	{% if snab_report['algorithm_results'] %}
+	<h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">algorithms report ::</span></span> performance per algorithm run with <strong>{{ snab_algorithm }}</strong></h4>
+    {% if version == dev_ver %}
+	<table class="table">
+    {% else %}
+	<table class="table table-hover">
+    {% endif %}
+		<thead>
+		  <tr>
+			<th>Algorithm</th>
+		{% for key in snab_report['algorithm_results']['keys'] %}
+			{% if not 'heatmap_html_color_code_' in key %}
+			<th style="word-wrap: break-word; min-width: 10px; max-width: 100px;">{{ key }}</th>
+			{% endif %}
+		{% endfor %}
+		  </tr>
+		</thead>
+		<tbody>
+
+		{% for algo in snab_report['algorithm_results']['results'] %}
+	  <tr>
+		<td>{{ algo }}</td>
+{% for key in snab_report['algorithm_results']['results'][algo] %}
+	{% set value = snab_report['algorithm_results']['results'][algo][key] %}
+	{% set color_key = 'heatmap_html_color_code_' + key %}
+	{% if color_key in snab_report['algorithm_results']['results'][algo] %}
+		{% set td_color = snab_report['algorithm_results']['results'][algo][color_key] %}
+	{% else %}
+		{% set td_color = '#f5f5f1' %}
+	{% endif %}
+
+	{% if not 'heatmap_html_color_code_' in key %}
+		{% if (key == 'accuracy % ((tP+tN)/(evaluated-unsure)*100)') or (key == 'fN penalty accuracy % ((tP+tN)/(evaluated-unsure)*100)-fN%') %}
+			{% if value < 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% elif value < 70 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% endif %}
+		{% elif key == 'incorrect % ((fP+fN)/(evaluated-unsure)*100)' %}
+			{% if value > 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% elif value > 20 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% endif %}
+		{% else %}
+			{% if key in red_keys %}
+				{% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="red"><strong>{{ value }}</strong></font></td>
+				{% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+				{% endif %}
+			{% elif key in green_keys %}
+				{% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="green"><strong>{{ value }}</strong></font></td>
+				{% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+				{% endif %}
+			{% else %}
+				<td style="background-color: {{ td_color }};">{{ value }}</td>
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endfor %}
+	  </tr>
+{% endfor %}
+		</tbody>
+	</table>
+	</div>
+
+	{% endif %}
+
+
+	{% if snab_report['consensuses'] %}
+	<h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">consensuses report ::</span></span> performance per consensus run with <strong>{{ snab_algorithm }}</strong></h4>
+    {% if version == dev_ver %}
+	<table class="table">
+    {% else %}
+	<table class="table table-hover">
+    {% endif %}
+
+		<thead>
+		  <tr>
+			<th>Consensus</th>
+{% for key in snab_report['consensuses']['keys'] %}
+	{% if not 'heatmap_html_color_code_' in key %}
+			<th style="word-wrap: break-word; min-width: 10px; max-width: 100px;">{{ key }}</th>
+	{% endif %}
+{% endfor %}
+		  </tr>
+		</thead>
+		<tbody>
+
+{% for consensus in snab_report['consensuses']['results'] %}
+	  <tr>
+		<td><code>{{ consensus }}</code></td>
+	{% for key in snab_report['consensuses']['results'][consensus] %}
+		{% set value = snab_report['consensuses']['results'][consensus][key] %}
+
+		{% set color_key = 'heatmap_html_color_code_' + key %}
+		{% if color_key in snab_report['consensuses']['results'][consensus] %}
+			{% set td_color = snab_report['consensuses']['results'][consensus][color_key] %}
+		{% else %}
+			{% set td_color = '#f5f5f1' %}
+		{% endif %}
+	{% if not 'heatmap_html_color_code_' in key %}
+		{% if (key == 'accuracy % ((tP+tN)/(evaluated-unsure)*100)') or (key == 'fN penalty accuracy % ((tP+tN)/(evaluated-unsure)*100)-fN%') %}
+			{% if value < 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% elif value < 70 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% endif %}
+		{% elif key == 'incorrect % ((fP+fN)/(evaluated-unsure)*100)' %}
+			{% if value > 50 %}
+			<td style="background-color: {{ td_color }};"><font color="red"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% elif value > 20 %}
+			<td style="background-color: {{ td_color }};"><font color="orange"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% else %}
+			<td style="background-color: {{ td_color }};"><font color="green"></font><font color="black"><strong>{{ value }}</strong></font></td>
+			{% endif %}
+		{% else %}
+			{% if key in red_keys %}
+				{% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="red"><strong>{{ value }}</strong></font></td>
+				{% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+				{% endif %}
+			{% elif key in green_keys %}
+				{% if td_color == '#f5f5f1' %}
+			<td style="background-color: {{ td_color }};"><font color="green"><strong>{{ value }}</strong></font></td>
+				{% else %}
+			<td style="background-color: {{ td_color }};"><font color="black"><strong>{{ value }}</strong></font></td>
+				{% endif %}
+			{% else %}
+				<td style="background-color: {{ td_color }};">{{ value }}</td>
+			{% endif %}
+		{% endif %}
+	{% endif %}
+	{% endfor %}
+	  </tr>
+{% endfor %}
+		</tbody>
+	</table>
+	</div>
+
+	{% endif %}
+
+  {% endif %}
+
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /snab?report=true block -->
+{% endblock %}

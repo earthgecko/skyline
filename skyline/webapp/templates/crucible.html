@@ -5,33 +5,68 @@
 # @added 20200420 - Feature #1448: Crucible web UI
 #                   Branch #868: crucible
  -->
-{% if process_metrics %}
-	<ol class="breadcrumb">
-  	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/crucible">Crucible</a></li>
-  		<li class="active"><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></li>
+{% if version == dev_ver %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <div class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/crucible">Crucible</a></li>
+  {% if process_metrics %}
+      <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Process ::</span> <span class="re">metrics</span></span></li>
+      {% include "crucible_process_metrics.html" %}
+  {% elif crucible_job %}
+      <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Crucible ::</span> <span class="re">job</span></span></li>
+      {% include "crucible_job.html" %}
+  {% else %}
+      <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Crucible ::</span> <span class="re">jobs</span></span></li>
+  {% endif %}
     </div>
-	</ol>
-  {% include "crucible_process_metrics.html" %}
-{% elif crucible_job %}
-	<ol class="breadcrumb">
-  	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/crucible">Crucible</a></li>
-  		<li><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></li>
-  		<li class="active"><span class="logo"><span class="sky">crucible</span> <span class="re">job</span></li>
-    </div>
-	</ol>
-  {% include "crucible_job.html" %}
+  </ol>
+</nav>
+
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="?process_metrics=true" data-bs-toggle="tooltip" title="Process metrics adhoc with selected algorithms"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="?crucible_job=true" data-bs-toggle="tooltip" title="Explore Crucible job results"><span class="logo"><span class="sky">Crucible</span><span class="re"> jobs</span></span></a>
+      </li>
+    </ul>
+  <!--</div>-->
+  <br>
 {% else %}
+  {% if process_metrics %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/crucible">Crucible</a></li>
+  		<li class="active"><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></span></li>
+    </div>
+	</ol>
+    {% include "crucible_process_metrics.html" %}
+  {% elif crucible_job %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/crucible">Crucible</a></li>
+  		<li><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></span></li>
+  		<li class="active"><span class="logo"><span class="sky">Process</span> <span class="re">job</span></span></li>
+    </div>
+	</ol>
+    {% include "crucible_job.html" %}
+  {% else %}
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
   		<li><a href="/">Home</a></li>
   		<li class="active"><a href="/crucible">Crucible</a></li>
-  		<li><span class="logo"><span class="sky">crucible</span> <span class="re">jobs</span></li>
+  		<li><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></li>
     </div>
 	</ol>
+  {% endif %}
 
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -55,6 +90,7 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+{% endif %}
 
   <div class="tab-pane active" id="crucible_jobs">
     {% if not crucible_enabled %}
@@ -96,25 +132,22 @@
 
 	{% if total_crucible_jobs > crucible_jobs|length %}
   	<ul class="pagination">
-  {% set jobs_pages = ((total_crucible_jobs / offset)+1)|int %}
-  {% set count = namespace(value=1) %}
-  {% for page_number in range(jobs_pages) %}
-    {% if page_number == 0 %}
+    {% set jobs_pages = ((total_crucible_jobs / offset)+1)|int %}
+    {% set count = namespace(value=1) %}
+    {% for page_number in range(jobs_pages) %}
+      {% if page_number == 0 %}
   	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=0, pagination_end=(offset)) }}">{{ count.value }}</a></li>
-    {% elif page_number == 1 %}
+      {% elif page_number == 1 %}
   	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=(pagination_end), pagination_end=(pagination_end*count.value)) }}">{{ count.value }}</a></li>
-    {% else %}
+      {% else %}
   	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=(pagination_end*(count.value-1)), pagination_end=((pagination_end*(count.value-1)+offset))) }}">{{ count.value }}</a></li>
-    {% endif %}
-    {% set count.value = count.value + 1 %}
-  {% endfor %}
+      {% endif %}
+      {% set count.value = count.value + 1 %}
+    {% endfor %}
   	</ul>
 	{% endif %}
 
 	</div>
-
-
-{% endif %}
 
 <!-- END /crucible block -->
 {% endblock %}

@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline_functions &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline_functions &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -223,6 +223,26 @@
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">opentelemetry.instrumentation.pymemcache</span> <span class="kn">import</span> <span class="n">PymemcacheInstrumentor</span>
 
+<span class="c1"># @added 20240625 - Feature #5378: functions.skyline.get_remote_data</span>
+<span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">running_on_docker</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+    <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">overall_verify_ssl</span><span class="p">:</span>
+    <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">user</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
+
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
           <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
           <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
@@ -235,7 +255,9 @@
 <span class="c1">#                   Branch #3262: py3</span>
 <span class="c1"># Added a single functions to deal with Redis connection and the</span>
 <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
-<div class="viewcode-block" id="get_redis_conn"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn">[docs]</a><span class="k">def</span> <span class="nf">get_redis_conn</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+<div class="viewcode-block" id="get_redis_conn">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn">[docs]</a>
+<span class="k">def</span> <span class="nf">get_redis_conn</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a Redis connection</span>
 
@@ -295,7 +317,10 @@
     <span class="k">return</span> <span class="n">REDIS_CONN</span></div>
 
 
-<div class="viewcode-block" id="get_redis_conn_decoded"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn_decoded">[docs]</a><span class="k">def</span> <span class="nf">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_redis_conn_decoded">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn_decoded">[docs]</a>
+<span class="k">def</span> <span class="nf">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a Redis connection with decoded responses, to read sets</span>
 
@@ -382,7 +407,10 @@
     <span class="k">return</span> <span class="n">REDIS_CONN_DECODED</span></div>
 
 
-<div class="viewcode-block" id="send_graphite_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.send_graphite_metric">[docs]</a><span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="send_graphite_metric">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.send_graphite_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sends the skyline_app metrics to the `GRAPHITE_HOST` if a graphite</span>
 <span class="sd">    host is defined.</span>
@@ -478,7 +506,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="mkdir_p"><a class="viewcode-back" href="../skyline.html#skyline_functions.mkdir_p">[docs]</a><span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="n">make_path</span><span class="p">):</span>
+
+<div class="viewcode-block" id="mkdir_p">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.mkdir_p">[docs]</a>
+<span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="n">make_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create nested directories.</span>
 
@@ -492,7 +523,26 @@
     <span class="c1"># except:</span>
     <span class="c1">#     import os</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">make_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
+        <span class="c1"># @modified 20240206 - Task #5258: Handle change in makedirs and mkdir</span>
+        <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+        <span class="c1"># https://docs.python.org/3/library/os.html#os.makedirs</span>
+        <span class="c1"># os.makedirs - Changed in version 3.7: The mode argument no longer</span>
+        <span class="c1"># affects the file permission bits of newly created intermediate-level</span>
+        <span class="c1"># directories.</span>
+        <span class="c1"># So create them individually with the correct mode if they do not</span>
+        <span class="c1"># exist, instead of makedirs creating all the intermediate-level</span>
+        <span class="c1"># directories with 0o777, which the default mkdir mode.</span>
+        <span class="c1"># os.makedirs(make_path, mode=0o755)</span>
+        <span class="n">last_path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">make_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">check_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">last_path</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+            <span class="n">check_path</span> <span class="o">=</span> <span class="n">check_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">last_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">check_path</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">check_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="kc">True</span>
     <span class="c1"># Python &gt;2.5</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -502,10 +552,13 @@
             <span class="k">raise</span></div>
 
 
+
 <span class="c1"># @added 20191023 - Task #3290: Handle urllib2 in py3</span>
 <span class="c1">#                   Branch #3262: py3</span>
 <span class="c1"># Use urlretrieve</span>
-<div class="viewcode-block" id="get_graphite_graph_image"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_graph_image">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_graph_image</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">image_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_graphite_graph_image">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_graph_image">[docs]</a>
+<span class="k">def</span> <span class="nf">get_graphite_graph_image</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">image_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetches a Graphite graph image of a metric and saves the image to the</span>
 <span class="sd">    specified file.</span>
@@ -563,7 +616,14 @@
             <span class="c1"># Use requests</span>
             <span class="c1"># urllib.request.urlretrieve(url, image_file)  # nosec</span>
             <span class="c1"># os.chmod(image_file, mode=0o644)</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+            <span class="c1"># Add timeout for bandit B113</span>
+            <span class="c1">#r = requests.get(url)</span>
+            <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">20</span>
+            <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -583,7 +643,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="load_metric_vars"><a class="viewcode-back" href="../skyline.html#skyline_functions.load_metric_vars">[docs]</a><span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="load_metric_vars">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.load_metric_vars">[docs]</a>
+<span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Import the metric variables for a check from a metric check variables file</span>
 
@@ -636,7 +699,10 @@
     <span class="k">return</span> <span class="n">metric_vars</span></div>
 
 
-<div class="viewcode-block" id="write_data_to_file"><a class="viewcode-back" href="../skyline.html#skyline_functions.write_data_to_file">[docs]</a><span class="k">def</span> <span class="nf">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="write_data_to_file">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.write_data_to_file">[docs]</a>
+<span class="k">def</span> <span class="nf">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write date to a file</span>
 
@@ -695,7 +761,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="fail_check"><a class="viewcode-back" href="../skyline.html#skyline_functions.fail_check">[docs]</a><span class="k">def</span> <span class="nf">fail_check</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">failed_check_dir</span><span class="p">,</span> <span class="n">check_file_to_fail</span><span class="p">):</span>
+
+<div class="viewcode-block" id="fail_check">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.fail_check">[docs]</a>
+<span class="k">def</span> <span class="nf">fail_check</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">failed_check_dir</span><span class="p">,</span> <span class="n">check_file_to_fail</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Move a failed check file.</span>
 
@@ -760,8 +829,11 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @modified 20220419 -</span>
-<div class="viewcode-block" id="get_graphite_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_metric">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_metric</span><span class="p">(</span>
+<div class="viewcode-block" id="get_graphite_metric">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">get_graphite_metric</span><span class="p">(</span>
     <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span>
         <span class="n">output_object</span><span class="p">,</span> <span class="n">check_for_derivative</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -928,9 +1000,22 @@
             <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
 
+        <span class="c1"># @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1">#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+        <span class="c1"># Also check the metrics_manager.non_derivative_metrics set</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_manager_non_derivative_metrics</span> <span class="o">=</span> <span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;metrics_manager.non_derivative_metrics&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">metrics_manager_non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics_manager_non_derivative_metrics</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># @added 20180423 - Feature #2034: analyse_derivatives</span>
     <span class="c1">#                   Branch #2270: luminosity</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_found_in_redis</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
+    <span class="n">deprecate_old_redis_method</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_found_in_redis</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">deprecate_old_redis_method</span><span class="p">:</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
         <span class="c1"># for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:</span>
         <span class="k">for</span> <span class="n">redis_ip</span><span class="p">,</span> <span class="n">redis_port</span><span class="p">,</span> <span class="n">redis_password</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
@@ -949,6 +1034,41 @@
                     <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="n">write_to_log</span><span class="p">:</span>
                         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_graphite_metric :: </span><span class="si">%s</span><span class="s1"> found in derivative_metrics in Redis at </span><span class="si">%s</span><span class="s1"> on port </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_port</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20240625 - Feature #5372: vista - bq_update</span>
+    <span class="c1"># Replace the old above direct Redis connect method for cluster nodes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_found_in_redis</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">REMOTE_SKYLINE_INSTANCES</span><span class="p">:</span>
+        <span class="n">remote_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/api?derivative_metrics&amp;cluster_data=true&amp;include_labelled_metrics=true&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="n">password</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error ::get_graphite_metric :: failed get data from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">json_response</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">json_response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_graphite_metric :: failed get json from the reponse from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">json_response</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">remote_derivative_metrics</span> <span class="o">=</span> <span class="n">json_response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;metrics&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_graphite_metric :: failed get metrics list from json_response, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">remote_derivative_metrics</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">target_metric</span> <span class="o">=</span> <span class="n">metric</span>
 
@@ -1273,8 +1393,11 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
+
 <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
-<div class="viewcode-block" id="filesafe_metricname"><a class="viewcode-back" href="../skyline.html#skyline_functions.filesafe_metricname">[docs]</a><span class="k">def</span> <span class="nf">filesafe_metricname</span><span class="p">(</span><span class="n">metricname</span><span class="p">):</span>
+<div class="viewcode-block" id="filesafe_metricname">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.filesafe_metricname">[docs]</a>
+<span class="k">def</span> <span class="nf">filesafe_metricname</span><span class="p">(</span><span class="n">metricname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Returns a file system safe name for a metric name in terms of creating</span>
 <span class="sd">    check files, etc</span>
@@ -1287,6 +1410,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20160922 - Branch #922: Ionosphere</span>
 <span class="c1"># Added the send_anomalous_metric_to function for Analyzer and Mirage</span>
 <span class="c1"># @modified 20161228 Feature #1828: ionosphere - mirage Redis data features</span>
@@ -1297,7 +1421,9 @@
 <span class="c1"># Added parent_id, always zero from Analyzer and Mirage</span>
 
 
-<div class="viewcode-block" id="send_anomalous_metric_to"><a class="viewcode-back" href="../skyline.html#skyline_functions.send_anomalous_metric_to">[docs]</a><span class="k">def</span> <span class="nf">send_anomalous_metric_to</span><span class="p">(</span>
+<div class="viewcode-block" id="send_anomalous_metric_to">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.send_anomalous_metric_to">[docs]</a>
+<span class="k">def</span> <span class="nf">send_anomalous_metric_to</span><span class="p">(</span>
     <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">send_to_app</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
         <span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span>
         <span class="c1"># @added 20201001 - Task #3748: POC SNAB</span>
@@ -1486,7 +1612,10 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">check_file</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="RepresentsInt"><a class="viewcode-back" href="../skyline.html#skyline_functions.RepresentsInt">[docs]</a><span class="k">def</span> <span class="nf">RepresentsInt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RepresentsInt">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.RepresentsInt">[docs]</a>
+<span class="k">def</span> <span class="nf">RepresentsInt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    As per http://stackoverflow.com/a/1267145 and @Aivar I must agree with</span>
 <span class="sd">    @Triptycha &gt; &quot;This 5 line function is not a complex mechanism.&quot;</span>
@@ -1498,10 +1627,13 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1">################################################################################</span>
 
 
-<div class="viewcode-block" id="mysql_select"><a class="viewcode-back" href="../skyline.html#skyline_functions.mysql_select">[docs]</a><span class="k">def</span> <span class="nf">mysql_select</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
+<div class="viewcode-block" id="mysql_select">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.mysql_select">[docs]</a>
+<span class="k">def</span> <span class="nf">mysql_select</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Select data from mysql database</span>
 
@@ -1644,8 +1776,11 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
-<div class="viewcode-block" id="nonNegativeDerivative"><a class="viewcode-back" href="../skyline.html#skyline_functions.nonNegativeDerivative">[docs]</a><span class="k">def</span> <span class="nf">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+<div class="viewcode-block" id="nonNegativeDerivative">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.nonNegativeDerivative">[docs]</a>
+<span class="k">def</span> <span class="nf">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is used to convert an integral or incrementing count to a</span>
 <span class="sd">    derivative by calculating the delta between subsequent datapoints.  The</span>
@@ -1675,7 +1810,10 @@
     <span class="k">return</span> <span class="n">derivative_timeseries</span></div>
 
 
-<div class="viewcode-block" id="strictly_increasing_monotonicity"><a class="viewcode-back" href="../skyline.html#skyline_functions.strictly_increasing_monotonicity">[docs]</a><span class="k">def</span> <span class="nf">strictly_increasing_monotonicity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+
+<div class="viewcode-block" id="strictly_increasing_monotonicity">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.strictly_increasing_monotonicity">[docs]</a>
+<span class="k">def</span> <span class="nf">strictly_increasing_monotonicity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is used to determine whether timeseries is strictly increasing</span>
 <span class="sd">    monotonically, it will only return True if the values are strictly</span>
@@ -1712,7 +1850,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">diff_ts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="in_list"><a class="viewcode-back" href="../skyline.html#skyline_functions.in_list">[docs]</a><span class="k">def</span> <span class="nf">in_list</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">check_list</span><span class="p">):</span>
+
+<div class="viewcode-block" id="in_list">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.in_list">[docs]</a>
+<span class="k">def</span> <span class="nf">in_list</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">check_list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if the metric is in list.</span>
 
@@ -1741,9 +1882,12 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
 <span class="c1"># Get the metric db object data to memcache</span>
-<div class="viewcode-block" id="get_memcache_metric_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_metric_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_metric_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="get_memcache_metric_object">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_metric_object">[docs]</a>
+<span class="k">def</span> <span class="nf">get_memcache_metric_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the metrics_db_object from memcache if it exists.</span>
 
@@ -1868,9 +2012,12 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20170826 - Task #2132: Optimise Ionosphere DB usage</span>
 <span class="c1"># Get the fp_ids list object data to memcache</span>
-<div class="viewcode-block" id="get_memcache_fp_ids_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_fp_ids_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_fp_ids_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="get_memcache_fp_ids_object">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_fp_ids_object">[docs]</a>
+<span class="k">def</span> <span class="nf">get_memcache_fp_ids_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the fp_ids list from memcache if it exists.</span>
 
@@ -1943,8 +2090,11 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
+
 <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
-<div class="viewcode-block" id="move_file"><a class="viewcode-back" href="../skyline.html#skyline_functions.move_file">[docs]</a><span class="k">def</span> <span class="nf">move_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">file_to_move</span><span class="p">):</span>
+<div class="viewcode-block" id="move_file">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.move_file">[docs]</a>
+<span class="k">def</span> <span class="nf">move_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">file_to_move</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Move a file.</span>
 
@@ -2010,8 +2160,11 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20180107 - Branch #2270: luminosity</span>
-<div class="viewcode-block" id="is_derivative_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_derivative_metric">[docs]</a><span class="k">def</span> <span class="nf">is_derivative_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="is_derivative_metric">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.is_derivative_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">is_derivative_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if a metric is a known derivative metric.</span>
 
@@ -2103,12 +2256,15 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
-            <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
+            <span class="c1"># @modified 20240104 - Task #5178: Build and test skyline v4.1.0</span>
+            <span class="c1"># Just use REDIS_CONN_DECODED and exists</span>
+            <span class="c1"># REDIS_CONN = None</span>
+            <span class="c1"># try:</span>
+            <span class="c1">#     REDIS_CONN = get_redis_conn(current_skyline_app)</span>
+            <span class="c1"># except Exception as err:</span>
+            <span class="c1">#     current_logger.error(&#39;error :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed - %s&#39; % err)</span>
+            <span class="c1"># last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)</span>
+            <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: is_derivative_metric :: could not query Redis for last_derivative_metric_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
@@ -2121,6 +2277,18 @@
     <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
         <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+    <span class="c1">#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+    <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+    <span class="c1"># Also check the metrics_manager.non_derivative_metrics set</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_manager_non_derivative_metrics</span> <span class="o">=</span> <span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;metrics_manager.non_derivative_metrics&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">metrics_manager_non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">metrics_manager_non_derivative_metrics</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
             <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2131,8 +2299,11 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data</span>
-<div class="viewcode-block" id="set_metric_as_derivative"><a class="viewcode-back" href="../skyline.html#skyline_functions.set_metric_as_derivative">[docs]</a><span class="k">def</span> <span class="nf">set_metric_as_derivative</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="set_metric_as_derivative">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.set_metric_as_derivative">[docs]</a>
+<span class="k">def</span> <span class="nf">set_metric_as_derivative</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add the metric to the derivative_metrics Redis set and create a</span>
 <span class="sd">    z_derivative_metrics Redis key.</span>
@@ -2246,10 +2417,13 @@
     <span class="k">return</span> <span class="n">return_boolean</span></div>
 
 
+
 <span class="c1"># @added 20190920 - Feature #3230: users DB table</span>
 <span class="c1">#                   Ideas #2476: Label and relate anomalies</span>
 <span class="c1">#                   Feature #2516: Add label to features profile</span>
-<div class="viewcode-block" id="get_user_details"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_user_details">[docs]</a><span class="k">def</span> <span class="nf">get_user_details</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">desired_value</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="get_user_details">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_user_details">[docs]</a>
+<span class="k">def</span> <span class="nf">get_user_details</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">desired_value</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines the user details for a user given the desired_value, key and</span>
 <span class="sd">    value.  If you want the username of the user with id 1 then:</span>
@@ -2271,6 +2445,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span>
         <span class="n">select_field</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span>
@@ -2340,9 +2516,6 @@
             <span class="k">raise</span>
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
 
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: get_user_details :: determined </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> for users.</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">select_field</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">select_where</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
-
     <span class="c1"># @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
     <span class="c1">#                   Task #4778: v4.0.0 - update dependencies</span>
     <span class="c1"># Use sqlalchemy rather than string-based query construction</span>
@@ -2352,14 +2525,21 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_user_details :: engine_disposal failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
 
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: get_user_details :: determined </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> for users.</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">, took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">select_field</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">select_where</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)))</span>
+
     <span class="k">if</span> <span class="n">select_field</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># @added 20191106 - Branch #3002: docker</span>
 <span class="c1">#                   Branch #3262: py3</span>
-<div class="viewcode-block" id="get_graphite_port"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_port">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_port</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+<div class="viewcode-block" id="get_graphite_port">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_port">[docs]</a>
+<span class="k">def</span> <span class="nf">get_graphite_port</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns graphite port based on configuration in settings.py</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2372,7 +2552,10 @@
     <span class="k">return</span> <span class="n">graphite_port</span></div>
 
 
-<div class="viewcode-block" id="get_graphite_render_uri"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_render_uri">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_render_uri</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_graphite_render_uri">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_render_uri">[docs]</a>
+<span class="k">def</span> <span class="nf">get_graphite_render_uri</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns graphite render uri based on configuration in settings.py</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2386,7 +2569,10 @@
     <span class="k">return</span> <span class="n">graphite_render_uri</span></div>
 
 
-<div class="viewcode-block" id="get_graphite_custom_headers"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_custom_headers">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_custom_headers</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_graphite_custom_headers">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_custom_headers">[docs]</a>
+<span class="k">def</span> <span class="nf">get_graphite_custom_headers</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns custom http headers</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2401,8 +2587,11 @@
     <span class="k">return</span> <span class="n">headers</span></div>
 
 
+
 <span class="c1"># @added 20191113 - Feature #: forward_alert</span>
-<div class="viewcode-block" id="forward_alert"><a class="viewcode-back" href="../skyline.html#skyline_functions.forward_alert">[docs]</a><span class="k">def</span> <span class="nf">forward_alert</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">alert_data</span><span class="p">):</span>
+<div class="viewcode-block" id="forward_alert">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.forward_alert">[docs]</a>
+<span class="k">def</span> <span class="nf">forward_alert</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">alert_data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sends alert data to a HTTP endpoint</span>
 
@@ -2422,17 +2611,24 @@
         <span class="n">current_skyline_app</span><span class="p">))</span></div>
 
 
+
 <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
 <span class="c1">#                   Feature #3480: batch_processing</span>
-<div class="viewcode-block" id="is_batch_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_batch_metric">[docs]</a><span class="k">def</span> <span class="nf">is_batch_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<span class="c1"># @modified 20240518 - Feature #5356: get_batch_processing_namespaces</span>
+<span class="c1"># Added the ability to pass the batch_processing_namespaces</span>
+<div class="viewcode-block" id="is_batch_metric">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.is_batch_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">is_batch_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">batch_processing_namespaces</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if the metric is designated as an analyzer batch processing metric</span>
 
 <span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
 <span class="sd">        knows which log to write too.</span>
-<span class="sd">    :param metric_name: the metric name</span>
+<span class="sd">    :param base_name: the metric base_name</span>
+<span class="sd">    :param batch_processing_namespaces: the list of batch_processing_namespaces</span>
 <span class="sd">    :type current_skyline_app: str</span>
-<span class="sd">    :type metric_name: str</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type batch_processing_namespaces: list</span>
 <span class="sd">    :return: False</span>
 <span class="sd">    :rtype:  boolean</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2455,6 +2651,20 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1"># @added 20240518 - Feature #5356: get_batch_processing_namespaces</span>
+    <span class="c1">#                   Feature #5352: vista - bigquery</span>
+    <span class="c1">#                   Feature #3480: batch_processing</span>
+    <span class="c1"># Use the metrics_manager set to also include BiqQuery batch metrics</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">batch_processing_namespaces</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">batch_processing_namespaces</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;metrics_manager.batch_processing_namespaces&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">batch_processing_namespaces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">batch_processing_namespaces</span><span class="p">:</span>
+        <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">batch_processing_namespaces</span><span class="p">)</span>
+        <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED</span>
@@ -2468,7 +2678,12 @@
 
     <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
-        <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @modified 20240605 - Feature #5356: get_batch_processing_namespaces</span>
+        <span class="c1">#                      Feature #5352: vista - bigquery</span>
+        <span class="c1"># Do not just set everything to True if BATCH_PROCESSING</span>
+        <span class="c1"># batch_metric = True</span>
+
         <span class="k">if</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">:</span>
             <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">base_name_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
@@ -2503,6 +2718,7 @@
     <span class="k">return</span> <span class="n">batch_metric</span></div>
 
 
+
 <span class="c1"># @added 20200424 - Feature #3504: Handle airgaps in batch metrics</span>
 <span class="c1">#                   Feature #3480: batch_processing</span>
 <span class="c1">#                   Feature #3486: analyzer_batch</span>
@@ -2510,7 +2726,9 @@
 <span class="c1"># Moved to skyline_functions from its original definition analyzer/algorithms.py</span>
 <span class="c1"># as is required in analyzer/analyzer.py now as well to identify which batch</span>
 <span class="c1"># metrics should also be checked for airgaps.</span>
-<div class="viewcode-block" id="is_check_airgap_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_check_airgap_metric">[docs]</a><span class="k">def</span> <span class="nf">is_check_airgap_metric</span><span class="p">(</span><span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="is_check_airgap_metric">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.is_check_airgap_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">is_check_airgap_metric</span><span class="p">(</span><span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if a metric matches a metric namespace in CHECK_AIRGAPS or one in</span>
 <span class="sd">    SKIP_AIRGAPS.</span>
@@ -2573,8 +2791,11 @@
     <span class="k">return</span> <span class="n">check_metric_for_airgaps</span></div>
 
 
+
 <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
-<div class="viewcode-block" id="sort_timeseries"><a class="viewcode-back" href="../skyline.html#skyline_functions.sort_timeseries">[docs]</a><span class="k">def</span> <span class="nf">sort_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+<div class="viewcode-block" id="sort_timeseries">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.sort_timeseries">[docs]</a>
+<span class="k">def</span> <span class="nf">sort_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is used to sort a time series by timestamp to ensure that</span>
 <span class="sd">    there are no unordered timestamps in the time series which are artefacts of</span>
@@ -2589,8 +2810,11 @@
     <span class="k">return</span> <span class="n">sorted_timeseries</span></div>
 
 
+
 <span class="c1"># @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</span>
-<div class="viewcode-block" id="historical_data_dir_exists"><a class="viewcode-back" href="../skyline.html#skyline_functions.historical_data_dir_exists">[docs]</a><span class="k">def</span> <span class="nf">historical_data_dir_exists</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_data_dir</span><span class="p">):</span>
+<div class="viewcode-block" id="historical_data_dir_exists">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.historical_data_dir_exists">[docs]</a>
+<span class="k">def</span> <span class="nf">historical_data_dir_exists</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_data_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is used to determine if an ionosphere data dir exists and if</span>
 <span class="sd">    it does return the path.</span>
@@ -2633,8 +2857,11 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">historical_data_path_exists</span><span class="p">,</span> <span class="n">ionosphere_data_dir</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># @added 20200825 - Feature #3704: Add alert to anomalies</span>
-<div class="viewcode-block" id="add_panorama_alert"><a class="viewcode-back" href="../skyline.html#skyline_functions.add_panorama_alert">[docs]</a><span class="k">def</span> <span class="nf">add_panorama_alert</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+<div class="viewcode-block" id="add_panorama_alert">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.add_panorama_alert">[docs]</a>
+<span class="k">def</span> <span class="nf">add_panorama_alert</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Send an event to Panorama to update an anomaly as alerted on.</span>
 
@@ -2658,6 +2885,12 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: add_panorama_alert - get_redis_conn failed&#39;</span><span class="p">)</span>
 
+    <span class="c1"># @added 20230908 - Task #5000: Replace alert key scans with sets</span>
+    <span class="n">hash_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.alerts&#39;</span>
+    <span class="n">hash_key_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="n">added_at</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">hash_key_value</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">base_name</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="s1">&#39;alerted_at&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">added_at</span><span class="p">)}</span>
+
     <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
     <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())]</span>
     <span class="k">if</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
@@ -2666,6 +2899,13 @@
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;added Panorama alert Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                 <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20230908 - Task #5000: Replace alert key scans with sets</span>
+            <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">hash_key</span><span class="p">,</span> <span class="n">hash_key_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hash_key_value</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: added entry to </span><span class="si">%s</span><span class="s1"> Redis hash - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">hash_key</span><span class="p">,</span> <span class="n">hash_key_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hash_key_value</span><span class="p">)))</span>
+
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -2679,12 +2919,15 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20200912 - Branch #3068: SNAB</span>
 <span class="c1">#                   Info #3742: matrixprofile</span>
 <span class="c1">#                   Task #3744: POC matrixprofile</span>
 <span class="c1">#                   Info #2726: pytsmp</span>
 <span class="c1">#                   Info #1792: Shapelet extraction</span>
-<div class="viewcode-block" id="update_item_in_redis_set"><a class="viewcode-back" href="../skyline.html#skyline_functions.update_item_in_redis_set">[docs]</a><span class="k">def</span> <span class="nf">update_item_in_redis_set</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">redis_set</span><span class="p">,</span> <span class="n">original_item</span><span class="p">,</span> <span class="n">updated_item</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="update_item_in_redis_set">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.update_item_in_redis_set">[docs]</a>
+<span class="k">def</span> <span class="nf">update_item_in_redis_set</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">redis_set</span><span class="p">,</span> <span class="n">original_item</span><span class="p">,</span> <span class="n">updated_item</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update a list, dict or str item in a Redis set.</span>
 
@@ -2747,9 +2990,12 @@
     <span class="k">return</span> <span class="n">return_value</span></div>
 
 
+
 <span class="c1"># @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
 <span class="c1">#                   Bug #3778: Handle single encoded forward slash requests to Graphite</span>
-<div class="viewcode-block" id="sanitise_graphite_url"><a class="viewcode-back" href="../skyline.html#skyline_functions.sanitise_graphite_url">[docs]</a><span class="k">def</span> <span class="nf">sanitise_graphite_url</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">graphite_url</span><span class="p">):</span>
+<div class="viewcode-block" id="sanitise_graphite_url">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.sanitise_graphite_url">[docs]</a>
+<span class="k">def</span> <span class="nf">sanitise_graphite_url</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">graphite_url</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform any targets in the URL that need modifications like double encoded</span>
 <span class="sd">    forward slash and return whether the URL was sanitised and the url.</span>
@@ -2801,8 +3047,11 @@
     <span class="k">return</span> <span class="n">sanitised</span><span class="p">,</span> <span class="n">sanitised_url</span></div>
 
 
+
 <span class="c1"># @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
-<div class="viewcode-block" id="encode_graphite_metric_name"><a class="viewcode-back" href="../skyline.html#skyline_functions.encode_graphite_metric_name">[docs]</a><span class="k">def</span> <span class="nf">encode_graphite_metric_name</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+<div class="viewcode-block" id="encode_graphite_metric_name">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.encode_graphite_metric_name">[docs]</a>
+<span class="k">def</span> <span class="nf">encode_graphite_metric_name</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform a metric name into a Graphite compliant encoded url name</span>
 
@@ -2868,6 +3117,7 @@
 
     <span class="k">return</span> <span class="n">encoded_graphite_metric_name</span></div>
 
+
 <span class="c1"># @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with</span>
 <span class="c1"># @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with</span>
 <span class="c1">#                      Feature #3858: skyline_functions - correlate_or_relate_with</span>
@@ -2882,7 +3132,9 @@
 
 
 <span class="c1"># @added 20210324 - Feature #3642: Anomaly type classification</span>
-<div class="viewcode-block" id="get_anomaly_type"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_anomaly_type">[docs]</a><span class="k">def</span> <span class="nf">get_anomaly_type</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
+<div class="viewcode-block" id="get_anomaly_type">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.get_anomaly_type">[docs]</a>
+<span class="k">def</span> <span class="nf">get_anomaly_type</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given an anomaly id return any classified types</span>
 
@@ -2963,7 +3215,11 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">anomaly_type_list</span><span class="p">,</span> <span class="n">anomaly_type_id_list</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="mirage_load_metric_vars"><a class="viewcode-back" href="../skyline.html#skyline_functions.mirage_load_metric_vars">[docs]</a><span class="k">def</span> <span class="nf">mirage_load_metric_vars</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">return_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="c1"># @modified 20231225 - Feature #5102: webapp - api smoke</span>
+<span class="c1"># Added log parameter and made logging conditional</span>
+<div class="viewcode-block" id="mirage_load_metric_vars">
+<a class="viewcode-back" href="../skyline.html#skyline_functions.mirage_load_metric_vars">[docs]</a>
+<span class="k">def</span> <span class="nf">mirage_load_metric_vars</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">return_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load the mirage metric variables for a check from a metric check variables</span>
 <span class="sd">    file</span>
@@ -2981,9 +3237,10 @@
         <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">):</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s1">&#39;loading the mirage metric variables from metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;loading the mirage metric variables from metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
             <span class="s1">&#39;error :: loading metric variables from metric_check_file - file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -3121,10 +3378,12 @@
             <span class="n">variable</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: metric_vars_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_dict</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: metric_vars_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_dict</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">metric_vars_dict</span>
 
     <span class="k">return</span> <span class="n">metric_vars_array</span></div>
+
 </pre></div>
 
            </div>
@@ -3134,7 +3393,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

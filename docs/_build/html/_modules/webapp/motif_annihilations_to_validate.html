@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.motif_annihilations_to_validate &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.motif_annihilations_to_validate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.motif_annihilations_to_validate</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">motif_annihilations_to_validate.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_metric_id</span> <span class="kn">import</span> <span class="n">get_base_name_from_metric_id</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_motif_annihilations_to_validate">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.motif_annihilations_to_validate.get_motif_annihilations_to_validate">[docs]</a>
+<span class="k">def</span> <span class="nf">get_motif_annihilations_to_validate</span><span class="p">(</span>
+        <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s1">&#39;unvalidated&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;get_motif_annihilations_to_validate&#39;</span>
+
+    <span class="n">motif_annihilation_fps</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: determining all </span><span class="si">%s</span><span class="s1"> motif_annihilation feature profiles for namespace </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get MySQL engine, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return None, fail_msg, trace</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error ::  </span><span class="si">%s</span><span class="s1"> :: failed to get ionosphere_table meta, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">dispose_err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: calling engine.dispose(), err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">dispose_err</span><span class="p">))</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;validated&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">validated</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="s1">&#39;LEARNT - motif_annihilation&#39;</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;invalid&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="s1">&#39;LEARNT - motif_annihilation&#39;</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">validated</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="s1">&#39;LEARNT - motif_annihilation&#39;</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="c1"># Coerce for json</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="s1">&#39;decimal.Decimal&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">key</span><span class="p">])):</span>
+                        <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="s1">&#39;datetime.datetime&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">key</span><span class="p">])):</span>
+                        <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">row_err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: bad row data, row: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">row_err</span><span class="p">))</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: select error, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">dispose_err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: calling engine.dispose(), err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">dispose_err</span><span class="p">))</span>
+
+    <span class="n">remove_non_namespace_fps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">motif_annihilation_fps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_metric_id</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_base_name_from_metric_id failed to determine base_name for metric_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+        <span class="k">if</span> <span class="n">namespace</span> <span class="ow">and</span> <span class="n">namespace</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+            <span class="n">remove_non_namespace_fps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+        <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;{&#39;</span> <span class="ow">in</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="s1">&#39;}&#39;</span> <span class="ow">in</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+            <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="s1">&#39;labelled_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+            <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_name</span><span class="p">)</span>
+        <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labelled_metric_name</span>
+        <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">use_base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]))</span>
+        <span class="n">validation_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;validate_fp=true&amp;format=json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]),</span> <span class="n">use_base_name</span><span class="p">)</span>
+        <span class="n">validation_uri</span> <span class="o">=</span> <span class="s1">&#39;?fp_view=true&amp;timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;validate_fp=true&amp;format=json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]),</span> <span class="n">use_base_name</span><span class="p">)</span>
+        <span class="n">graphs_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">)</span>
+        <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;graphs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                        <span class="n">path_and_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;motif_annihilation.&#39;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;motif_annihilation.png&#39;</span><span class="p">):</span>
+                                <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphs_url</span><span class="p">,</span> <span class="n">path_and_file</span><span class="p">)</span>
+                                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;graphs&#39;</span><span class="p">][</span><span class="s1">&#39;features_profile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_url</span>
+                            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;motif_annihilation.derived.png&#39;</span><span class="p">):</span>
+                                <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphs_url</span><span class="p">,</span> <span class="n">path_and_file</span><span class="p">)</span>
+                                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;graphs&#39;</span><span class="p">][</span><span class="s1">&#39;derived&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_url</span>
+                            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;motif_annihilation.pw5_timeseries.png&#39;</span><span class="p">):</span>
+                                <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphs_url</span><span class="p">,</span> <span class="n">path_and_file</span><span class="p">)</span>
+                                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;graphs&#39;</span><span class="p">][</span><span class="s1">&#39;pw5_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_url</span>
+                                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;validation_link&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">validation_link</span>
+                                <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="s1">&#39;validation_uri&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">validation_uri</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: os.walk failed on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">remove_non_namespace_fps</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removing </span><span class="si">%s</span><span class="s1"> unvalidated motif_annihilation feature profiles that are not for namespace </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">remove_non_namespace_fps</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">remove_non_namespace_fps</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">motif_annihilation_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">motif_annihilation_fps</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

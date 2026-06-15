@@ -1,0 +1,893 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>custom_algorithms.low_variance_anomalous_peak_trough &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_algorithms.html">custom_algorithms</a></li>
+      <li class="breadcrumb-item active">custom_algorithms.low_variance_anomalous_peak_trough</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for custom_algorithms.low_variance_anomalous_peak_trough</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">low_variance_anomalous_peak_trough.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># REQUIRED Skyline imports.  All custom algorithms MUST have the following two</span>
+<span class="c1"># imports.  These are required for exception handling and to record algorithm</span>
+<span class="c1"># errors regardless of debug_logging setting for the custom_algorithm</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c1"># Import ALL modules that the custom algorithm requires.  Remember that if a</span>
+<span class="c1"># requirement is not one that is provided by the Skyline requirements.txt you</span>
+<span class="c1"># must ensure it is installed in the Skyline virtualenv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
+
+<span class="kn">from</span> <span class="nn">functions.timeseries_predictions.fft_extrapolation</span> <span class="kn">import</span> <span class="n">fft_extrapolation</span>
+
+<span class="c1"># The name of the function MUST be the same as the name declared in</span>
+<span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
+<span class="c1"># It MUST have 3 parameters:</span>
+<span class="c1"># current_skyline_app, timeseries, algorithm_parameters</span>
+<span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
+<span class="c1"># for a full explanation about each.</span>
+<span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
+
+
+<span class="c1"># @added 20230717 - Feature #4994: custom_algorithm - mirages</span>
+<div class="viewcode-block" id="low_variance_anomalous_peak_trough">
+<a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.low_variance_anomalous_peak_trough.low_variance_anomalous_peak_trough">[docs]</a>
+<span class="k">def</span> <span class="nf">low_variance_anomalous_peak_trough</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A time series with low variance or few peaks/troughs is anomalous if the</span>
+<span class="sd">    data point is &gt; 3sigma of the peaks/troughs:</span>
+<span class="sd">    peak_values_mean + (3 * peak_values_stdDev).</span>
+<span class="sd">    trough_values_mean - (3 * trough_values_stdDev).</span>
+<span class="sd">    This algorithm is ONLY suited to assessing the last datapoints and is NOT</span>
+<span class="sd">    suited to an anomaly_window &gt; 10</span>
+<span class="sd">    </span>
+<span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
+<span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
+<span class="sd">        error handling and logging.  You do not have to worry about handling the</span>
+<span class="sd">        argument in the scope of the custom algorithm itself,  but the algorithm</span>
+<span class="sd">        must accept it as the first agrument.</span>
+<span class="sd">    :param parent_pid: the parent pid which is executing the algorithm, this is</span>
+<span class="sd">        **required** for error handling and logging.  You do not have to worry</span>
+<span class="sd">        about handling this argument in the scope of algorithm, but the</span>
+<span class="sd">        algorithm must accept it as the second argument.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1690920000, 0.0], ...,</span>
+<span class="sd">        [1691524200.0, 0.0], [1691524800.0, 0.5]]``</span>
+<span class="sd">    :param algorithm_parameters: {</span>
+<span class="sd">            &#39;currently_anomalous&#39;: False,  # whether instance state is anomalous or not, default False</span>
+<span class="sd">            &#39;anomaly_window&#39;: 4,           # should be &gt; 1 &lt;= 10, default 4</span>
+<span class="sd">            &#39;return_results&#39;: False,       # whether to return the result dict, default False</span>
+<span class="sd">            &#39;debug_logging&#39;:  False,       # whether to log, default False</span>
+<span class="sd">        }</span>
+<span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
+<span class="sd">        custom_algorithm and algorithm itself.  For the</span>
+<span class="sd">        low_variance_anomalous_peak_trough custom algorithm no specific</span>
+<span class="sd">        algorithm_parameters are required apart from an empty dict but</span>
+<span class="sd">        the algorithm_parameters that can be passed are:</span>
+
+<span class="sd">        - ``&#39;anomaly_window&#39;`` (int): The anomaly_window value.</span>
+<span class="sd">            This specifies how many of the last data points should be considered</span>
+<span class="sd">            when determining if the metric is anomalous. Only the last</span>
+<span class="sd">            ``anomaly_window`` data points in the time series will be used to</span>
+<span class="sd">            determine if the metric is anomalous.  Default is ``1``.</span>
+<span class="sd">        - ``&#39;currently_anomalous&#39;`` (bool): Optional.</span>
+<span class="sd">            Whether the instance state is anomalous or not. Default is ``False``.</span>
+<span class="sd">         - ``&#39;return_results&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, returns the results dict in addition to anomalous and</span>
+<span class="sd">            anomalyScore.  Default is ``False``.</span>
+<span class="sd">        - ``&#39;debug_logging&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug logging.</span>
+<span class="sd">        - ``&#39;debug_print&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug printing  (for Jupyter testing). Default</span>
+<span class="sd">            is ``False``.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">        </span>
+<span class="sd">            algorithm_parameters={</span>
+<span class="sd">                &#39;anomaly_window&#39;: 4,</span>
+<span class="sd">                &#39;currently_anomalous&#39;: True,</span>
+<span class="sd">                &#39;debug_logging&#39;: True,</span>
+<span class="sd">                &#39;return_results&#39;: True,</span>
+<span class="sd">            }</span>
+
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type algorithm_parameters: dict</span>
+<span class="sd">    :return: anomalous, anomalyScore, results</span>
+<span class="sd">    :rtype: tuple(boolean, float, dict)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># You MUST define the algorithm_name</span>
+    <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;low_variance_anomalous_peak_trough&#39;</span>
+
+    <span class="c1"># If you wanted to log, you can but this should only be done during</span>
+    <span class="c1"># testing and development</span>
+    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">current_logger</span>
+
+    <span class="c1"># Define the default state of None and None, anomalous does not default to</span>
+    <span class="c1"># False as that is not correct, False is only correct if the algorithm</span>
+    <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
+    <span class="c1"># anomalyScore.</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;algorithm&#39;</span><span class="p">:</span> <span class="n">algorithm_name</span><span class="p">,</span>
+        <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+        <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">anomalies</span><span class="p">,</span>
+        <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
+        <span class="s1">&#39;analysed&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">currently_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">currently_anomalous</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;currently_anomalous&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">currently_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="n">currently_anomalous</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+    <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomaly_window</span>
+
+    <span class="c1"># @added 20230925 - variable sigma added</span>
+    <span class="c1"># This allows for the sigma value used in low_variance_anomalous_peak_trough</span>
+    <span class="c1"># be passed and reduced if certain criteria are met</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma</span>
+
+    <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">return_results</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_results&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Use the algorithm_parameters to determine whether to log</span>
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_logging enabled with algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+            <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+            <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+            <span class="c1"># But we do not want the function returning and not reporting</span>
+            <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+            <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+            <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+            <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+    <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;print_debug&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">analyse_peaks_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">number_of_peaks</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">number_of_troughs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">last_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;datapoint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">last_index</span>
+
+        <span class="c1"># @added 20230925 - Feature #4994: custom_algorithm - mirages</span>
+        <span class="c1"># Handle mostly positive strictly increasing monotonity on metrics.</span>
+        <span class="c1"># There are metrics that can exhibit &gt; 98% positive strictly increasing</span>
+        <span class="c1"># monotonocity over the period.  Metrics such as things like memory_usage</span>
+        <span class="c1"># and memory_rss can slowly increment positively and over a 7 day period</span>
+        <span class="c1"># and only experience the smallest of reductions in the values such as</span>
+        <span class="c1"># {85: {&#39;diff&#39;: 0.00012254714900006292, &#39;value&#39;: 3.267296552658},</span>
+        <span class="c1"># 86: {&#39;diff&#39;: -0.00011038780199967846, &#39;value&#39;: 3.267419099807},</span>
+        <span class="c1"># 87: {&#39;diff&#39;: 0.0, &#39;value&#39;: 3.267308712005},</span>
+        <span class="c1"># 88: {&#39;diff&#39;: -0.00012254715000015182, &#39;value&#39;: 3.267308712005},</span>
+        <span class="c1"># 89: {&#39;diff&#39;: 0.0, &#39;value&#39;: 3.267186164855},</span>
+        <span class="c1"># 90: {&#39;diff&#39;: 0.0006616115570001746, &#39;value&#39;: 3.267186164855}}</span>
+        <span class="c1"># resulting in data such as this:</span>
+        <span class="c1"># {&#39;analysis_type&#39;: &#39;peak&#39;, &#39;number_of_peaks&#39;: 7, &#39;peak_index&#39;: 1007,</span>
+        <span class="c1"># &#39;peak_value&#39;: 3.363199234008,</span>
+        <span class="c1"># &#39;peaks&#39;: [</span>
+        <span class="c1">#   [1007, 3.363199234008], [912, 3.302538871765], [854, 3.302367448806],</span>
+        <span class="c1">#   [834, 3.302097797393], [767, 3.301387310028], [226, 3.2808201313],</span>
+        <span class="c1">#   [86, 3.267419099807]],</span>
+        <span class="c1"># &#39;sorted_peak_values_list&#39;: [</span>
+        <span class="c1">#   [1007, 3.363199234008], [912, 3.302538871765], [854, 3.302367448806],</span>
+        <span class="c1">#   [834, 3.302097797393], [767, 3.301387310028], [226, 3.2808201313],</span>
+        <span class="c1">#   [86, 3.267419099807]],</span>
+        <span class="c1"># &#39;anomalous_peak&#39;: False, &#39;anomalyScore&#39;: 0.0,</span>
+        <span class="c1"># &#39;peak_values_mean&#39;: 3.3028328418724278, &#39;peak_values_median&#39;: 3.302097797393, </span>
+        <span class="c1"># &#39;peak_values_stdDev&#39;: 0.027737871777249984, &#39;mean_threshold&#39;: 3.3860464572041775,</span>
+        <span class="c1"># &#39;median_threshold&#39;: 3.3853114127247497, &#39;all_peak_values_mean&#39;: 3.3028328418724278,</span>
+        <span class="c1"># &#39;all_peak_values_median&#39;: 3.302097797393, &#39;all_peak_values_stdDev&#39;: 0.027737871777249984, </span>
+        <span class="c1"># &#39;all_peak_median_threshold&#39;: 3.3853114127247497, &#39;peak_outliers&#39;: [],</span>
+        <span class="c1"># &#39;outlier_in_peak_values&#39;: True, &#39;threshold_on&#39;: &#39;all_peak_median&#39;,</span>
+        <span class="c1"># &#39;threshold (all_peak_values_median + (3 * all_peak_values_stdDev))&#39;: 3.3853114127247497,</span>
+        <span class="c1"># &#39;threshold&#39;: 3.3853114127247497,</span>
+        <span class="c1"># &#39;peak_values&#39;: [</span>
+        <span class="c1">#   3.267419099807, 3.2808201313, 3.301387310028, 3.302097797393,</span>
+        <span class="c1">#   3.302367448806, 3.302538871765, 3.363199234008]}</span>
+        <span class="c1">#</span>
+        <span class="c1"># As per https://github.com/earthgecko/skyline/blob/master/docs/images/mostly.monotonic.lvapt.png</span>
+        <span class="c1"># Running low_variance_anomalous_peak_trough on this type of data can</span>
+        <span class="c1"># and will result in fNs.  Although a preprocessing stage could be added</span>
+        <span class="c1"># to identify these types of data and convert to the derivative format,</span>
+        <span class="c1"># excluding very small dips, for analysis if the mass majority of the</span>
+        <span class="c1"># diffs are 0 or positive/negative, it is too contrived.  There is no</span>
+        <span class="c1"># guarentee that preprocessing the data will have the desired results in</span>
+        <span class="c1"># all circumstances, even if the decreases are less than the changes</span>
+        <span class="c1"># mean and are less the 2% of the changes.</span>
+        <span class="c1"># Therefore if data like this is identified just skip analysis on this</span>
+        <span class="c1"># data and return what was passed as currently_anomalous</span>
+        <span class="c1"># </span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">near_monotonic</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">start_near_mono_check</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">np_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">increases_and_zeros</span> <span class="o">=</span> <span class="p">[[</span><span class="n">index</span><span class="p">,</span> <span class="n">diff</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_values</span><span class="p">)))</span> <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">decreases_and_zeros</span> <span class="o">=</span> <span class="p">[[</span><span class="n">index</span><span class="p">,</span> <span class="n">diff</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_values</span><span class="p">)))</span> <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">check_monotonicity</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">increases_and_zeros</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">np_values</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">95.0</span><span class="p">:</span>
+            <span class="n">check_monotonicity</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">decreases_and_zeros</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">np_values</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">95.0</span><span class="p">:</span>
+            <span class="n">check_monotonicity</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">check_monotonicity</span><span class="p">:</span>
+            <span class="n">decreases</span> <span class="o">=</span> <span class="p">[[</span><span class="n">index</span><span class="p">,</span> <span class="n">diff</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_values</span><span class="p">)))</span> <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">increases</span> <span class="o">=</span> <span class="p">[[</span><span class="n">index</span><span class="p">,</span> <span class="n">diff</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_values</span><span class="p">)))</span> <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">decrease_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">decreases</span><span class="p">])</span>
+            <span class="n">increase_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">increases</span><span class="p">])</span>
+            <span class="n">total_change</span> <span class="o">=</span> <span class="n">increase_sum</span> <span class="o">+</span> <span class="p">(</span><span class="n">decrease_sum</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">perc_increasing</span> <span class="o">=</span> <span class="p">(</span><span class="n">increase_sum</span> <span class="o">/</span> <span class="n">total_change</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="n">perc_decreasing</span> <span class="o">=</span> <span class="p">((</span><span class="n">decrease_sum</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_change</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="k">if</span> <span class="n">perc_increasing</span> <span class="o">&gt;=</span> <span class="mf">98.0</span> <span class="ow">and</span> <span class="n">perc_decreasing</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
+                <span class="n">near_monotonic</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">monotonicity</span> <span class="o">=</span> <span class="s1">&#39;increasing&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">near_monotonic</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">perc_decreasing</span> <span class="o">&gt;=</span> <span class="mf">98.0</span> <span class="ow">and</span> <span class="n">perc_increasing</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
+                    <span class="n">near_monotonic</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">monotonicity</span> <span class="o">=</span> <span class="s1">&#39;decreasing&#39;</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timings&#39;</span><span class="p">][</span><span class="s1">&#39;near_monotonic_checks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_near_mono_check</span>
+        <span class="c1"># Skip running the algorithm and return what was passed as currently_anomalous</span>
+        <span class="k">if</span> <span class="n">near_monotonic</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;near strictly monotonically </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">monotonicity</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reason&#39;</span><span class="p">:</span> <span class="n">reason</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+            <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+        <span class="c1"># Determine whether this is peak or trough analysis</span>
+        <span class="k">if</span> <span class="n">anomaly_window</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">tail_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">anomaly_window</span><span class="p">:]])</span> <span class="o">/</span> <span class="n">anomaly_window</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tail_avg</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]])</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="c1"># mean = np.mean([v for t, v in timeseries])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np_values</span><span class="p">)</span>
+        
+        <span class="n">analysis_type</span> <span class="o">=</span> <span class="s1">&#39;peak&#39;</span>
+        <span class="k">if</span> <span class="n">tail_avg</span> <span class="o">&lt;</span> <span class="n">mean</span><span class="p">:</span>
+            <span class="n">analysis_type</span> <span class="o">=</span> <span class="s1">&#39;trough&#39;</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analysis_type</span>
+        <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">number_of_peaks</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">troughs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">number_of_troughs</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># If the last data point is a peak find_peaks will not report it so add</span>
+        <span class="c1"># predictions of 10 data points</span>
+        <span class="n">start_pred</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">pred_timeseries</span> <span class="o">=</span> <span class="n">fft_extrapolation</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">n_predict</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">debug_logging</span><span class="p">)</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pred_timeseries</span><span class="p">])</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timings&#39;</span><span class="p">][</span><span class="s1">&#39;fft_extrapolation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_pred</span>
+
+        <span class="n">start_find_peaks</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">analysis_type</span> <span class="o">==</span> <span class="s1">&#39;peak&#39;</span><span class="p">:</span>
+            <span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Remove predictions</span>
+            <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">last_index</span><span class="p">]</span>
+            <span class="n">number_of_peaks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;number_of_peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_peaks</span>
+            <span class="n">all_peaks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">analysis_type</span> <span class="o">==</span> <span class="s1">&#39;trough&#39;</span><span class="p">:</span>
+            <span class="n">troughs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Remove predictions</span>
+            <span class="n">troughs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">troughs</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">last_index</span><span class="p">]</span>
+            <span class="n">number_of_troughs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">troughs</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;number_of_troughs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_troughs</span>
+            <span class="n">all_troughs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">troughs</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timings&#39;</span><span class="p">][</span><span class="s1">&#39;find_peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_find_peaks</span>
+
+        <span class="n">peak_analysis</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">number_of_peaks</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">peak_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_index</span><span class="p">)</span>
+            <span class="n">not_in_peaks</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># peaks and troughs are identified one the leading side</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_index</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                    <span class="n">not_in_peaks</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">peak_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">peak_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">peak_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_index</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_value</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">not_in_peaks</span><span class="p">:</span>
+                <span class="n">analyse_peaks_only</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">peak_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">trough_analysis</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">number_of_troughs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">trough_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_index</span><span class="p">)</span>
+            <span class="n">not_in_troughs</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># peaks and troughs are identified one the leading side</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_index</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
+                    <span class="n">not_in_troughs</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">trough_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">trough_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">trough_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trough_index</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trough_value</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">not_in_troughs</span><span class="p">:</span>
+                <span class="n">analyse_peaks_only</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">trough_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">analyse_peaks_only</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: criteria not met, not running, results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+            <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: running analysis_type: </span><span class="si">%s</span><span class="s1">, for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_type&#39;</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+
+        <span class="n">all_peak_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Only sample to 10 largest peaks if there are many peaks</span>
+        <span class="k">if</span> <span class="n">peak_analysis</span><span class="p">:</span>
+            <span class="n">peak_values_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">last_index</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">all_peak_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">peak_values_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+            <span class="n">sorted_peak_values_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">peak_values_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">number_of_peaks</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="n">peaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sorted_peak_values_list</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+                <span class="n">sorted_peak_values_list</span> <span class="o">=</span> <span class="n">sorted_peak_values_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+            <span class="n">peaks</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_peak_values_list</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;sorted_peak_values_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_peak_values_list</span>
+        <span class="k">if</span> <span class="n">peak_analysis</span><span class="p">:</span>
+            <span class="n">peak_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_index</span><span class="p">)</span>
+            <span class="n">check_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">peak_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">not_in_peaks</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># peaks and troughs are identified one the leading side</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_index</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                    <span class="n">not_in_peaks</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">peak_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">check_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">not_in_peaks</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;last_datapoint_not_in_peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: criteria not met, results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+                <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+        <span class="k">if</span> <span class="n">trough_analysis</span><span class="p">:</span>
+            <span class="n">trough_values_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">last_index</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">trough_values_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+            <span class="n">sorted_troughs_values_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trough_values_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># Only sample to 10 largest troughs if there are many troughs</span>
+            <span class="k">if</span> <span class="n">number_of_troughs</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="n">troughs</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sorted_troughs_values_list</span><span class="p">][</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>
+                <span class="n">sorted_troughs_values_list</span> <span class="o">=</span> <span class="n">sorted_troughs_values_list</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>
+            <span class="n">troughs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;troughs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_troughs_values_list</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;sorted_troughs_values_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_troughs_values_list</span>
+        <span class="k">if</span> <span class="n">trough_analysis</span><span class="p">:</span>
+            <span class="n">trough_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_index</span><span class="p">)</span>
+            <span class="n">check_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">trough_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">not_in_troughs</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># peaks and troughs are identified one the leading side</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_index</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">last_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
+                    <span class="n">not_in_troughs</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">trough_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">check_value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">trough_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">not_in_troughs</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;last_datapoint_not_in_troughs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: criteria not met, results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+                <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+        <span class="k">if</span> <span class="n">analyse_peaks_only</span> <span class="ow">and</span> <span class="n">peak_analysis</span><span class="p">:</span>
+            <span class="n">peak_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">peak_values_mean</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">peak_values_median</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">peak_values_stdDev</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span>
+            <span class="c1"># @modified 20230925 - variable sigma added</span>
+            <span class="c1"># threshold_key = &#39;threshold (peak_values_mean + (3 * peak_values_stdDev))&#39;</span>
+            <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (peak_values_mean + (</span><span class="si">%s</span><span class="s1"> * peak_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">last_index</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">peak_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Coerce into floats</span>
+                <span class="n">peak_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">peak_values</span><span class="p">))</span>
+                <span class="n">peak_values_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">peak_values</span><span class="p">))</span>
+                <span class="n">peak_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">peak_values</span><span class="p">))</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># mean_threshold = peak_values_mean + (3 * peak_values_stdDev)</span>
+                <span class="n">mean_threshold</span> <span class="o">=</span> <span class="n">peak_values_mean</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">peak_values_stdDev</span><span class="p">)</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">mean_threshold</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># median_threshold = peak_values_median + (3 * peak_values_stdDev)</span>
+                <span class="n">median_threshold</span> <span class="o">=</span> <span class="n">peak_values_median</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">peak_values_stdDev</span><span class="p">)</span>
+
+                <span class="n">use_median</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># Are there outlier peaks?</span>
+                <span class="n">all_peak_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">all_peaks</span><span class="p">]</span>
+
+                <span class="c1"># @added 20230812</span>
+                <span class="c1"># Only access if there are more than 2 peak values</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_peak_values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: only 2 peaks not evaluating, results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+                    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+                <span class="c1"># Coerce into floats</span>
+                <span class="n">all_peak_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_peak_values</span><span class="p">))</span>
+                <span class="n">all_peak_values_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">all_peak_values</span><span class="p">))</span>
+                <span class="n">all_peak_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">all_peak_values</span><span class="p">))</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># all_peak_median_threshold = all_peak_values_median + (3 * all_peak_values_stdDev)</span>
+                <span class="n">all_peak_median_threshold</span> <span class="o">=</span> <span class="n">all_peak_values_median</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">all_peak_values_stdDev</span><span class="p">)</span>
+                <span class="n">peak_outliers</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">all_peak_values</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;</span> <span class="n">all_peak_median_threshold</span><span class="p">]</span>
+
+                <span class="c1"># If there are outlier peaks then use the median</span>
+                <span class="k">if</span> <span class="n">peak_outliers</span><span class="p">:</span>
+                    <span class="n">use_median</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="c1"># If the peak itself is an outlier in the peak_values being</span>
+                <span class="c1"># considered, then use the median</span>
+                <span class="c1"># Coerce into floats</span>
+
+                <span class="c1"># other_peak_values_mean = float(np.mean(peak_values[0:-2]))</span>
+                <span class="c1"># other_peak_values_stdDev = float(np.std(peak_values[0:-2]))</span>
+                <span class="n">other_peak_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">peak_values</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">check_value</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">other_peak_values</span><span class="p">:</span>
+                    <span class="n">other_peak_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">other_peak_values</span><span class="p">))</span>
+                    <span class="n">other_peak_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">other_peak_values</span><span class="p">))</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># other_mean_threshold = other_peak_values_mean + (3 * other_peak_values_stdDev)</span>
+                    <span class="n">other_mean_threshold</span> <span class="o">=</span> <span class="n">other_peak_values_mean</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">other_peak_values_stdDev</span><span class="p">)</span>
+                    <span class="n">outlier_in_peak_values</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">check_value</span> <span class="o">&gt;</span> <span class="n">other_mean_threshold</span><span class="p">:</span>
+                        <span class="n">use_median</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">outlier_in_peak_values</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">outlier_in_peak_values</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">use_median</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">use_median</span><span class="p">:</span>
+                    <span class="n">threshold</span> <span class="o">=</span> <span class="n">median_threshold</span>
+                    <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># threshold_key = &#39;threshold (peak_values_median + (3 * peak_values_stdDev))&#39;</span>
+                    <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (peak_values_median + (</span><span class="si">%s</span><span class="s1"> * peak_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+                <span class="c1"># @added 20230812 - increase sensitivity to outliers to negate fNs</span>
+                <span class="k">if</span> <span class="n">outlier_in_peak_values</span><span class="p">:</span>
+                    <span class="n">threshold</span> <span class="o">=</span> <span class="n">all_peak_median_threshold</span>
+                    <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;all_peak_median&#39;</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># threshold_key = &#39;threshold (all_peak_values_median + (3 * all_peak_values_stdDev))&#39;</span>
+                    <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (all_peak_values_median + (</span><span class="si">%s</span><span class="s1"> * all_peak_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+                <span class="c1"># if timeseries[-1][1] &gt; threshold:</span>
+                <span class="k">if</span> <span class="n">check_value</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                        <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+                                <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span>
+                                <span class="n">anomalies</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                        <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous_peak&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;number_of_peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_peaks</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_values_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_values_mean</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_values_median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_values_median</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_values_stdDev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_values_stdDev</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;mean_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;median_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">median_threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_peak_values_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_peak_values_mean</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_peak_values_median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_peak_values_median</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_peak_values_stdDev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_peak_values_stdDev</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_peak_median_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_peak_median_threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_outliers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_outliers</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;outlier_in_peak_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlier_in_peak_values</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;threshold_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold_on</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">threshold_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peak_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_values</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="c1"># Place this at the end</span>
+            <span class="k">del</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore_list</span>
+
+        <span class="k">if</span> <span class="n">analyse_peaks_only</span> <span class="ow">and</span> <span class="n">trough_analysis</span><span class="p">:</span>
+            <span class="n">trough_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">trough_values_mean</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">trough_values_median</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">trough_values_stdDev</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span>
+            <span class="c1"># threshold_key = &#39;threshold ((3 * trough_values_stdDev) - trough_values_mean)&#39;</span>
+            <span class="c1"># @modified 20230925 - variable sigma added</span>
+            <span class="c1"># threshold_key = &#39;threshold (trough_values_mean - (3 * trough_values_stdDev))&#39;</span>
+            <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (trough_values_mean - (</span><span class="si">%s</span><span class="s1"> * trough_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">troughs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="n">last_index</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">trough_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trough_values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trough_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Coerce into floats</span>
+                <span class="n">trough_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">trough_values</span><span class="p">))</span>
+                <span class="n">trough_values_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">trough_values</span><span class="p">))</span>
+                <span class="n">trough_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">trough_values</span><span class="p">))</span>
+                <span class="c1"># mean_threshold = trough_values_mean - (3 * trough_values_stdDev)</span>
+                <span class="c1"># mean_threshold = (3 * trough_values_stdDev) - trough_values_mean</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># mean_threshold = trough_values_mean - (3 * trough_values_stdDev)</span>
+                <span class="n">mean_threshold</span> <span class="o">=</span> <span class="n">trough_values_mean</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">trough_values_stdDev</span><span class="p">)</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="n">mean_threshold</span>
+                <span class="c1"># median_threshold = trough_values_median - (3 * trough_values_stdDev)</span>
+                <span class="c1"># median_threshold = (3 * trough_values_stdDev) - trough_values_median</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># median_threshold = trough_values_median - (3 * trough_values_stdDev)</span>
+                <span class="n">median_threshold</span> <span class="o">=</span> <span class="n">trough_values_median</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">trough_values_stdDev</span><span class="p">)</span>
+                <span class="n">use_median</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># Are there outlier troughs</span>
+                <span class="n">all_trough_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">all_troughs</span><span class="p">]</span>
+
+                <span class="c1"># @added 20230812</span>
+                <span class="c1"># Only access if there are more than 2 trough values</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_trough_values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: only 2 trough not evaluating, results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+                    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+                <span class="c1"># Coerce into floats</span>
+                <span class="n">all_trough_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_trough_values</span><span class="p">))</span>
+                <span class="n">all_trough_values_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">all_trough_values</span><span class="p">))</span>
+                <span class="n">all_trough_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">all_trough_values</span><span class="p">))</span>
+                <span class="c1"># all_trough_median_threshold = all_trough_values_median - (3 * all_trough_values_stdDev)</span>
+                <span class="c1"># all_trough_median_threshold = (3 * all_trough_values_stdDev) - all_trough_values_median</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># all_trough_median_threshold = all_trough_values_median - (3 * all_trough_values_stdDev)</span>
+                <span class="n">all_trough_median_threshold</span> <span class="o">=</span> <span class="n">all_trough_values_median</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">all_trough_values_stdDev</span><span class="p">)</span>
+
+                <span class="n">trough_outliers</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">all_trough_values</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="n">all_trough_median_threshold</span><span class="p">]</span>
+                <span class="c1"># If there are outlier troughs then use the median</span>
+                <span class="k">if</span> <span class="n">trough_outliers</span><span class="p">:</span>
+                    <span class="n">use_median</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># If it is an outlier trough then use the median</span>
+                <span class="c1"># Coerce into floats</span>
+                <span class="n">other_trough_values_mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">trough_values</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">other_trough_values_stdDev</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">trough_values</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="c1"># @modified 20230925 - variable sigma added</span>
+                <span class="c1"># other_median_threshold = other_trough_values_mean - (3 * other_trough_values_stdDev)</span>
+                <span class="n">other_median_threshold</span> <span class="o">=</span> <span class="n">other_trough_values_mean</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">other_trough_values_stdDev</span><span class="p">)</span>
+                <span class="n">outlier_in_trough_values</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">check_value</span> <span class="o">&lt;</span> <span class="n">other_median_threshold</span><span class="p">:</span>
+                    <span class="n">use_median</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">outlier_in_trough_values</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">use_median</span><span class="p">:</span>
+                    <span class="c1"># threshold = trough_values_median - (3 * trough_values_stdDev)</span>
+                    <span class="c1"># threshold = (3 * trough_values_stdDev) - trough_values_median</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># threshold = trough_values_median - (3 * trough_values_stdDev)</span>
+                    <span class="n">threshold</span> <span class="o">=</span> <span class="n">trough_values_median</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">trough_values_stdDev</span><span class="p">)</span>
+                    <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
+                    <span class="c1"># threshold_key = &#39;threshold ((3 * trough_values_stdDev) - trough_values_median)&#39;</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># threshold_key = &#39;threshold (trough_values_median - (3 * trough_values_stdDev))&#39;</span>
+                    <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (trough_values_median - (</span><span class="si">%s</span><span class="s1"> * trough_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+                <span class="c1"># @added 20230812 - increase sensitivity to outliers to negate fNs</span>
+                <span class="k">if</span> <span class="n">outlier_in_trough_values</span><span class="p">:</span>
+                    <span class="n">threshold</span> <span class="o">=</span> <span class="n">all_trough_median_threshold</span>
+                    <span class="n">threshold_on</span> <span class="o">=</span> <span class="s1">&#39;all_trough_median&#39;</span>
+                    <span class="c1"># threshold_key = &#39;threshold (other_tough_values_mean + (3 * other_trough_values_stdDev))&#39;</span>
+                    <span class="c1"># @modified 20230925 - variable sigma added</span>
+                    <span class="c1"># threshold_key = &#39;threshold (all_trough_values_median + (3 * all_trough_values_stdDev))&#39;</span>
+                    <span class="n">threshold_key</span> <span class="o">=</span> <span class="s1">&#39;threshold (all_trough_values_median + (</span><span class="si">%s</span><span class="s1"> * all_trough_values_stdDev))&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+                    
+                <span class="c1"># if timeseries[-1][1] &lt; threshold:</span>
+                <span class="k">if</span> <span class="n">check_value</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                        <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+                                <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span>
+                                <span class="n">anomalies</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                        <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous_trough&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;number_of_troughs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_peaks</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_values_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trough_values_mean</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_values_stdDev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trough_values_stdDev</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;mean_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mean_threshold</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;median_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">median_threshold</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_trough_values_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">all_trough_values_mean</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_trough_values_median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">all_trough_values_median</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_trough_values_stdDev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">all_trough_values_stdDev</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;all_trough_median_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">all_trough_median_threshold</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_outliers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trough_outliers</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;outlier_in_trough_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outlier_in_trough_values</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;threshold_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold_on</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">threshold_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;trough_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trough_values</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="c1"># Place this at the end</span>
+            <span class="k">del</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore_list</span>
+
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error:&#39;</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error - on low_variance_anomalous_peak_trough - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+        <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span>
+
+    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span>
+    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

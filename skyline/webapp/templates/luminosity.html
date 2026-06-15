@@ -1,8 +1,37 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 <!-- BEGIN /luminosity block -->
 
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/luminosity">Luminosity</a></li>
+  {% if classify_metrics %}
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></li>
+  {% elif cloudbursts %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Cloud</span> <span class="re">bursts</span></span></li>
+  {% elif plot_cloudburst %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Plot</span> <span class="re">cloudburst</span></span></li>
+  {% elif related_metrics %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Related</span> <span class="re">metrics</span></span></li>
+  {% elif related_to_metrics %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Related</span> <span class="re">to metrics</span></span></li>
+  {% elif pearson_closest %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Pearson</span> <span class="re">closest</span></span></li>
+  {% else %}
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></li>
+  {% endif %}
+      </div>
+    </ol>
+  </nav>
+{% else %}
 {% if classify_metrics %}
 <ol class="breadcrumb">
 	<div class="breadcrumb">
@@ -44,6 +73,14 @@
 		<li><span class="logo"><span class="sky">Related</span><span class="re"> to metrics</span></span></li>
   </div>
 </ol>
+{% elif pearson_closest %}
+<ol class="breadcrumb">
+  <div class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li><a href="/luminosity">Luminosity</a></li>
+    <li><span class="logo"><span class="sky">Pearson</span> - <span class="re">closest</span></span></li>
+  </div>
+</ol>
 {% else %}
 <ol class="breadcrumb">
 	<div class="breadcrumb">
@@ -53,6 +90,8 @@
   </div>
 </ol>
 {% endif %}
+{% endif %}
+
 
 {% if classify_metrics %}
   {% include "classify_metrics.html" %}
@@ -90,6 +129,10 @@
 
 {% if related_to_metrics and metric %}
   {% include "metric_related_to_metrics.html" %}
+{% endif %}
+
+{% if pearson_closest %}
+  {% include "luminosity_pearson_closest.html" %}
 {% endif %}
 
 <!-- END /luminosity block -->

@@ -7,6 +7,11 @@ import traceback
 import datetime as dt
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
+
 if True:
     import matplotlib.pyplot as plt
     # import matplotlib.image as mpimg
@@ -51,7 +56,7 @@ def plot_motif_window(
         current_logger.info('plot_motif_window - creating graph image - %s' % output_file)
         matched_timeseries_length = len(matched_timeseries)
 
-        # Ensure timesereis are same length
+        # Ensure timeseries are same length
         if len(fp_values) > matched_timeseries_length:
             fp_values = fp_values[-matched_timeseries_length:]
         if len(fp_values) < matched_timeseries_length:
@@ -59,8 +64,18 @@ def plot_motif_window(
 
         not_anomalous_motif = [item[1] for item in not_anomalous_timeseries]
 
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
         # Plot match
         rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
         not_anomalous_timestamp = int(not_anomalous_timeseries[-1][0])

@@ -85,7 +85,7 @@ def get_ionosphere_fp_row_from_match_id(current_skyline_app, match_id, layers_ma
                 return matched
         else:
             matched['match'] = {}
-            current_logger.warning('warning :: %s :: failed to get matched DB row for match id %s' % (
+            current_logger.info('warning :: %s :: failed to get matched DB row for match id %s' % (
                 function_str, str(match_id)))
 
         connection.close()

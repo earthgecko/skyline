@@ -163,7 +163,7 @@ def set_fp_minmax_scaled_data(current_skyline_app, fp_minmax_scaled_dict):
         current_logger.info('%s :: %s fp %s minmax values run - %s' % (
             function_str, db_method, str(fp_id), str(success)))
     else:
-        current_logger.warning('warning :: %s :: failed to %s fp %s minmax values in the DB' % (
+        current_logger.info('warning :: %s :: failed to %s fp %s minmax values in the DB' % (
             function_str, db_method, str(fp_id)))
 
     return success

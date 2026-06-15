@@ -94,12 +94,12 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
     try:
         local_metric = redis_conn_decoded.exists(redis_metric_name)
     except Exception as err:
-        current_logger.error('error :: %s :: %s :: get_redis_conn_decoded failed - %s' % (
+        current_logger.error('error :: %s :: %s :: redis_conn_decoded.exists failed, err: %s' % (
             current_skyline_app, function_str, err))
         return analysed_events
 
     if not local_metric and not cluster_data:
-        current_logger.warning('warning :: %s :: no analysed_events, metric not found in Redis - %s' % (
+        current_logger.info('warning :: %s :: no analysed_events, metric not found in Redis - %s' % (
             function_str, base_name))
         return analysed_events
 
@@ -107,7 +107,7 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
         try:
             analysed_events = get_metric_analysed_events(current_skyline_app, base_name, from_timestamp, until_timestamp)
         except Exception as err:
-            current_logger.error('error :: %s :: %s :: get_redis_conn_decoded failed - %s' % (
+            current_logger.error('error :: %s :: %s :: get_metric_analysed_events, err: %s' % (
                 current_skyline_app, function_str, err))
             return analysed_events
 
@@ -138,4 +138,15 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
 
     current_logger.info('%s :: determined remotely - %s' % (
         function_str, str(analysed_events)))
+    
+    # @added 20240531 - Feature #5352: vista - bigquery
+    # If none return dict with 0 count
+    if not analysed_events:
+        analysed_events = {}
+        analysed_events['metric'] = base_name
+        analysed_events['from'] = from_timestamp
+        analysed_events['until'] = until_timestamp
+        analysed_events['analyzer'] = 0
+        analysed_events['total'] = 0
+
     return analysed_events

@@ -20,8 +20,8 @@ The Boundary concept is quite like Skyline backwards, enilyks. This is
 because where Analyzer is almost all to one configuration, Boundary is
 more one configuration to one or many. Where Analyzer is all metrics
 through all algorithms, Boundary is each metric through one algorithm.
-Analyzer uses a large range of the timeseries data, Boundary uses the
-most recent (the now) portion of the timeseries data.
+Analyzer uses a large range of the time series data, Boundary uses the
+most recent (the now) portion of the time series data.
 
 Boundary currently has 3 defined algorithms:
 
@@ -111,12 +111,12 @@ detect\_drop\_off\_cliff algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The detect\_drop\_off\_cliff algorithm provides a method for analysing a
-timeseries to determine is the timeseries "dropped off a cliff". The
+time series to determine is the time series "dropped off a cliff". The
 standard Skyline Analyzer algorithms do not detect the drop off cliff
 pattern very well at all, testing with Crucible has proven. Further to
 this, the ``CONSENSUS`` methodology used to determine whether a
-timeseries deemed anomalous or not, means that even if one or two
-algorithms did detect a drop off cliff type event in a timeseries, it
+time series deemed anomalous or not, means that even if one or two
+algorithms did detect a drop off cliff type event in a time series, it
 would not be flagged as anomalous if the ``CONSENSUS`` threshold was not
 breached.
 
@@ -125,16 +125,16 @@ tin. Although this may seem like setting and matching a threshold, it is
 more effective than a threshold as it is dynamically set depending on
 the data range.
 
-Some things to note about analyzing a timeseries with the algorithm are:
+Some things to note about analyzing a time series with the algorithm are:
 
-- This algorithm is most suited (accurate) with timeseries where there is a
-  large range in the timeseries most datapoints are > 100 (e.g high rate).
+- This algorithm is most suited (accurate) with time series where there is a
+  large range in the time series most datapoints are > 100 (e.g high rate).
   Arbitrary ``trigger`` values in the algorithm do filter peaky low rate
-  timeseries, but they can become more noisy with lower value data points, as
+  time series, but they can become more noisy with lower value data points, as
   significant cliff drops are from a lower height, however it still generally
   matches drops off cliffs on low range metrics.
-- The trigger tuning based on the timeseries sample range is fairly arbitrary,
-  but has been tested and does filter peaky noise in low range timeseries, which
+- The trigger tuning based on the time series sample range is fairly arbitrary,
+  but has been tested and does filter peaky noise in low range time series, which
   filters most/lots of noise.
 - The alogrithm is more suited to data sets which come from multiple sources,
   e.g. an aggregation of a count from all servers, rather than from individual
@@ -143,8 +143,8 @@ Some things to note about analyzing a timeseries with the algorithm are:
   experience true cliff drops.
 - **ONLY WORKS WITH**:
 
-  - Positive, whole number timeseries data
-  - Does **not** currently work with negative integers in the timeseries values
+  - Positive, whole number time series data
+  - Does **not** currently work with negative integers in the time series values
     (although it will not break, will just skip if a negative integer is encountered)
 
 For more info see:
@@ -161,9 +161,9 @@ surfaces and analyzes metrics.
   ``BOUNDARY_METRICS`` tuple in ``settings.py``, matching the defined
   namespaces to all the unique\_metrics list from Redis.
 - These are divided between the ``BOUNDARY_PROCESSES`` to be analyzed.
-- Boundary's spawned processes pull the all timeseries for the metrics
+- Boundary's spawned processes pull the all time series for the metrics
   they are assigned from Redis and iterate through each metric and
-  analyses it's timeseries against the algorithm declared for the
+  analyses it's time series against the algorithm declared for the
   metric in the matching ``BOUNDARY_METRICS`` tuple/s in
   ``settings.py``
 - The Boundary process will add any metric that it finds anomalous to a

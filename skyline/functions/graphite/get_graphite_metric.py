@@ -444,7 +444,7 @@ def get_graphite_metric(
                     current_logger.error(traceback.format_exc())
                     current_logger.error(
                         'error :: failed to create output_object_path - %s - %s' %
-                        str(output_object_path))
+                        str(output_object_path), err)
                     return False
 
             with open(output_object, 'w') as f:

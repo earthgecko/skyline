@@ -181,7 +181,7 @@ wanted directly into algorithms.py:
   """
   This is no man's land. Do anything you want in here,
   as long as you return a boolean that determines whether the input
-  timeseries is anomalous or not.
+  time series is anomalous or not.
 
   To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
   """
@@ -396,7 +396,7 @@ the Analyzer metrics_manager can be enabled to monitor how sparsely populated
 the metric population is.  If the Analyzer metrics_manager is enabled via
 :mod:`settings.CHECK_DATA_SPARSITY`, the metric population will be analysed
 every ``RUN_EVERY`` (which for metrics_manager is 300 seconds) and the
-resolution of each metric will be dynamically determined from the timeseries
+resolution of each metric will be dynamically determined from the time series
 data, the expected number of data points in :mod:`settings.FULL_DURATION` will
 be determined and the data sparsity value will be calculated for each metric.
 A data sparsity of 100% means that the metric is fully populated, as the value

@@ -12,11 +12,12 @@ from ast import literal_eval
 import traceback
 # import json
 from timeit import default_timer as timer
+from contextlib import nullcontext
+
 import numpy as np
 import pandas as pd
 
 from tsfresh.feature_extraction import (
-
     # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
     # extract_features, ReasonableFeatureExtractionSettings)
     extract_features, EfficientFCParameters)
@@ -37,6 +38,13 @@ from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
+# @added 20240102 - Feature #4672: ionosphere_downsampled
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+from functions.timeseries.downsample import downsample_timeseries
+
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
+
 skyline_version = skyline_version.__absolute_version__
 
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -54,6 +62,16 @@ try:
     IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE = float(settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE)
 except:
     IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE = 100.0
+
+# @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training
+try:
+    IONOSPHERE_PREPROCESS_VALIDATE_TRAINING = settings.IONOSPHERE_PREPROCESS_VALIDATE_TRAINING
+except:
+    IONOSPHERE_PREPROCESS_VALIDATE_TRAINING = False
+if IONOSPHERE_PREPROCESS_VALIDATE_TRAINING:
+    from skyline_functions import get_redis_conn_decoded
+else:
+    get_redis_conn_decoded = nullcontext()
 
 
 def feature_name_id(current_skyline_app, feature_name):
@@ -80,21 +98,27 @@ def feature_name_id(current_skyline_app, feature_name):
     del f_name
     return 0
 
-
-def calculate_features_profile(current_skyline_app, timestamp, metric, context):
+# @modified 20240703 - Feature #5384: ionosphere - preprocess_validate_training
+# Added the preprocess_validate_training functionality
+def calculate_features_profile(current_skyline_app, timestamp, metric, context, preprocess_validate_training=False):
     """
     Calculates a tsfresh features profile from a training data set
 
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :type current_skyline_app: str
     :param timestamp: the timestamp of metric anomaly with training data
     :type timestamp: str
     :param metric: the base_name of the metric
     :type metric: str
     :param context: the context
-    :type metric: str
-
+    :type context: str
+    :param preprocess_validate_training: whether this is a preprocess_validate_training request
+    :type preprocess_validate_training: bool
     :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)
     :rtype: int
     :rtype: (str, boolean, str, str, str)
+
     """
 
     current_skyline_app_logger = current_skyline_app + 'Log'
@@ -108,14 +132,14 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     log_context = 'unknown'
 
     if context == 'training_data':
-        log_context = 'training data'
+        log_context = 'features_profile :: training data'
     if context == 'features_profiles':
-        log_context = 'features profile data'
+        log_context = 'features_profile :: features profile data'
     if context == 'ionosphere':
         log_context = 'ionosphere'
     # @added 20170114 - Feature #1854: Ionosphere learn
     if context == 'ionosphere_learn':
-        log_context = 'ionosphere :: learn'
+        log_context = 'features_profile :: ionosphere :: learn'
 
     # TODO
     # @added 20190314 - Feature #2484: FULL_DURATION feature profiles
@@ -128,18 +152,18 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     # skyline/ionosphere/ionosphere.py
     # skyline/webapp/webapp.py
     if context == 'ionosphere_echo':
-        log_context = 'ionosphere :: echo'
+        log_context = 'features_profile :: ionosphere :: echo'
     if context == 'ionosphere_echo_check':
-        log_context = 'ionosphere :: echo check'
+        log_context = 'features_profile :: ionosphere :: echo check'
 
     # @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns
     if context == 'adhoc':
-        log_context = 'ionosphere :: adhoc'
+        log_context = 'features_profile :: ionosphere :: adhoc'
     if context == 'learn_repetitive_patterns':
-        log_context = 'ionosphere :: learn_repetitive_patterns'
+        log_context = 'features_profile :: ionosphere :: learn_repetitive_patterns'
     # @added 20220915 - Feature #4658: ionosphere.learn_repetitive_patterns
     if context == 'find_repetitive_patterns':
-        log_context = 'ionosphere :: find_repetitive_patterns'
+        log_context = 'features_profile :: ionosphere :: find_repetitive_patterns'
 
     current_logger.info('%s feature profile creation requested for %s at %s' % (
         log_context, base_name, timestamp))
@@ -372,6 +396,75 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     del datapoints
 
+    # @added 20240102 - Feature #4672: ionosphere_downsampled
+    #                   Task #5178: Build and test skyline v4.1.0
+    # To ensure the good performance of features profiles we ensure that the
+    # data is downsampled to a suitable size.  The features profiles perform
+    # best on data sets between 1000 and 2000 data points in length, any data
+    # set larger than this will incur increased computation time and complexity
+    # and the larger the data set the more unlikely the features profiles will
+    # be similar.  Seeing as there is no way to force the input to sustainable
+    # sizes, whether that be due to retention resolutions or scrape_interval,
+    # the data must be preprocessed to be fit for purpose.
+    if not converted:
+        trace = 'None'
+        fail_msg = 'warning :: %s :: no data to create profile' % log_context
+        current_logger.info('%s' % fail_msg)
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+    metric_resolution = 60
+    expected_datapoints = int(int(ts_full_duration) / int(metric_resolution))
+    downsample_to = 60
+    if int(ts_full_duration) > 86400:
+        metric_resolution = 600
+        expected_datapoints = int(int(ts_full_duration) / metric_resolution)
+        downsample_to = 600
+    # Handle greater than 30 days of data and downsample at a lower resolution
+    # a 30 day data set at 600 seconds has 4320 data points this is the limit
+    # on fps and this is the standard that has been used in learning.
+    if int(ts_full_duration) > 2592000:
+        metric_resolution = 1800
+        expected_datapoints = int(int(ts_full_duration) / metric_resolution)
+        downsample_to = 1800
+    converted_length = len(converted)
+    current_logger.info('%s :: len(converted): %s, expected_datapoints: %s' % (
+        log_context, str(converted_length), str(expected_datapoints)))
+    do_downsample = False
+    if converted_length > expected_datapoints:
+        do_downsample = True
+    if converted_length > 4320:
+        do_downsample = True
+####
+# DISABLED for now
+    do_downsample = False
+
+    if do_downsample:
+        try:
+            metric_resolution = determine_data_frequency(current_skyline_app, converted, True)
+        except Exception as err:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: %s :: determine_data_frequency failed, err: %s' % (
+                log_context, err)
+            current_logger.error('%s' % fail_msg)
+            return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+        downsample_from = int(metric_resolution)
+        current_logger.info('%s :: downsampling data from %s second resoultion to %s second resolution' % (
+            log_context, str(downsample_from), str(downsample_to)))
+        downsampled_timeseries = []
+        try:
+            downsampled_timeseries = downsample_timeseries(current_skyline_app, converted, downsample_from, downsample_to, 'mean', 'end')
+        except Exception as err:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: %s :: downsample_timeseries failed, err: %s' % (
+                log_context, err)
+            current_logger.error('%s' % fail_msg)
+            return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+        if downsampled_timeseries:
+            current_logger.info('%s :: len(downsampled_timeseries): %s' % (
+                log_context, str(len(downsampled_timeseries))))
+            converted = list(downsampled_timeseries)
+
     # @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns
     # if context in ['adhoc', 'learn_repetitive_patterns', 'find_repetitive_patterns']:
     if context == 'adhoc':
@@ -384,12 +477,36 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             minmax_values = [x[1] for x in converted]
             x_np = np.asarray(minmax_values)
             # Min-Max scaling
-            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+            #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            try:
+                np_minmax = minmax_scale(x_np)                    
+            except Exception as err:
+                fail_msg = 'error :: %s :: minmax_scale failed, err: %s' % (
+                    log_context, err)
+                current_logger.error('%s' % fail_msg)
+                return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+
             for (ts, v) in zip(converted, np_minmax):
                 minmax_timeseries.append([ts[0], v])
             if minmax_timeseries:
                 converted = list(minmax_timeseries)
                 del minmax_timeseries
+
+    # @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training
+    # Added the preprocess_validate_training functionality
+    if preprocess_validate_training:
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+        except Exception as err:
+            current_logger.error('error :: get_redis_conn_decoded failed, err: %s' % err)
+    valid_training_data = True
+    if len(converted) < 800:
+        valid_training_data = False
+        trace = 'None'
+        fail_msg = 'warning :: %s :: insufficient data to create profile, len(timeseries): %s' % (
+            log_context, str(len(converted)))
+        current_logger.info('%s' % fail_msg)
 
     # @added 20220822 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -402,10 +519,45 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     timestamp_limit = last_timestamp - (int(ts_full_duration) - offset)
     if first_timestamp > timestamp_limit:
         trace = 'None'
+
+        # @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training
+        if preprocess_validate_training:
+            # Record the training in the ionosphere.training_data_too_short
+            # Redis hash
+            try:
+                key = '%s.%s' % (str(timestamp), str(use_base_name))
+                metric_timestamp = int(float(timestamp))
+                redis_conn_decoded.hset('ionosphere.training_data_too_short', key, metric_timestamp)
+            except Exception as err:
+                trace = traceback.format_exc()
+                current_logger.error(trace)
+                fail_msg = 'error :: %s :: hset on ionosphere.training_data_too_short failed, err: %s' % (
+                    log_context, err)
+                current_logger.error('%s' % fail_msg)
+
         fail_msg = 'warning :: %s :: insufficient data to create profile, last_timestamp: %s, ts_full_duration: %s, first_timestamp: %s, timestamp_limit: %s' % (
             log_context, str(last_timestamp), str(ts_full_duration),
             str(first_timestamp), str(timestamp_limit))
-        current_logger.warning('%s' % fail_msg)
+        current_logger.info('%s' % fail_msg)
+
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+
+    # @added 20241011 - Feature #5384: ionosphere - preprocess_validate_training
+    # Finishing off this unfinished piece
+    if not valid_training_data and preprocess_validate_training:
+        # set the trainable parameter in the ionosphere.training_data_too_short Redis set
+        try:
+            key = '%s.%s' % (str(timestamp), str(use_base_name))
+            metric_timestamp = int(float(timestamp))
+            redis_conn_decoded.hset('ionosphere.training_data_too_short', key, metric_timestamp)
+        except Exception as err:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: %s :: hset on ionosphere.training_data_too_short failed, err: %s' % (
+                log_context, err)
+            current_logger.error('%s' % fail_msg)
+        fail_msg = 'warning :: %s :: insufficient data to create profile' % log_context
+        current_logger.info('%s' % fail_msg)
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     if os.path.isfile(ts_csv):

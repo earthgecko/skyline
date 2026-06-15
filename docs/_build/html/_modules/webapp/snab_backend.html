@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webapp.snab_backend &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>webapp.snab_backend &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -125,6 +125,9 @@
   <h1>Source code for webapp.snab_backend</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="c1"># @added 20230719 - Feature #5010: snab - save training_data</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">settings</span>
@@ -132,8 +135,14 @@
 
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
 
+<span class="c1"># @added 20230719 - Feature #5010: snab - save training_data</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
 <span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_engine</span><span class="p">,</span> <span class="n">snab_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span> <span class="n">anomalies_table_meta</span><span class="p">)</span>
+
+<span class="c1"># @added 20230804 - Feature #5010: snab - save training_data</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_algorithms</span> <span class="kn">import</span> <span class="n">get_algorithms</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
@@ -148,7 +157,9 @@
     <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="get_snab_engine"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.get_snab_engine">[docs]</a><span class="k">def</span> <span class="nf">get_snab_engine</span><span class="p">():</span>
+<div class="viewcode-block" id="get_snab_engine">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.get_snab_engine">[docs]</a>
+<span class="k">def</span> <span class="nf">get_snab_engine</span><span class="p">():</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
@@ -162,7 +173,10 @@
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span></div>
 
 
-<div class="viewcode-block" id="snab_engine_disposal"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.snab_engine_disposal">[docs]</a><span class="k">def</span> <span class="nf">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+
+<div class="viewcode-block" id="snab_engine_disposal">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.snab_engine_disposal">[docs]</a>
+<span class="k">def</span> <span class="nf">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
@@ -172,7 +186,13 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="update_snab_result"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.update_snab_result">[docs]</a><span class="k">def</span> <span class="nf">update_snab_result</span><span class="p">(</span><span class="n">snab_id</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">snab_result</span><span class="p">):</span>
+
+<span class="c1"># @modified 20230719 - Feature #5010: snab - save training_data</span>
+<span class="c1"># Added save_training_data</span>
+<span class="c1"># def update_snab_result(snab_id, anomaly_id, snab_result):</span>
+<div class="viewcode-block" id="update_snab_result">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.update_snab_result">[docs]</a>
+<span class="k">def</span> <span class="nf">update_snab_result</span><span class="p">(</span><span class="n">snab_id</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">snab_result</span><span class="p">,</span> <span class="n">save_training_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update the relevant field in the snab table.</span>
 
@@ -192,9 +212,12 @@
     <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># @modified 20230719 - Feature #5010: snab - save training_data</span>
+    <span class="c1"># Added save_training_data</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="s1">&#39;update_snab_result :: for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">)))</span>
+        <span class="s1">&#39;update_snab_result :: for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">, save_training_data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">save_training_data</span><span class="p">)))</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_snab_engine</span><span class="p">()</span>
@@ -220,6 +243,8 @@
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">algorithm_id</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># @modified 20201004 - Task #3748: POC SNAB</span>
     <span class="c1">#                   Branch #3068: SNAB</span>
@@ -249,6 +274,10 @@
             <span class="k">if</span> <span class="n">unsure_set</span><span class="p">:</span>
                 <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;unsure&#39;</span>
             <span class="n">determined_result</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># @added 20230804 - Feature #5010: snab - save training_data</span>
+            <span class="c1"># Add algorithm to label</span>
+            <span class="n">algorithm_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;algorithm_id&#39;</span><span class="p">]</span>
+
             <span class="k">break</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: current result values to snab id </span><span class="si">%s</span><span class="s1"> - tP: </span><span class="si">%s</span><span class="s1">, fP: </span><span class="si">%s</span><span class="s1">, tN: </span><span class="si">%s</span><span class="s1">, fN: </span><span class="si">%s</span><span class="s1">, unsure: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tP_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fP_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tN_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fN_set</span><span class="p">),</span>
@@ -310,29 +339,34 @@
                 <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
         <span class="n">snab_result_updated</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: updated result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">)))</span>
-    <span class="k">except</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: could not update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: could not update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: could not update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
-            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: snab_engine_disposal failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
         <span class="k">raise</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: metrics_table OK&#39;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -408,7 +442,217 @@
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">snab_result_updated</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">existing_result</span></div>
+
+    <span class="c1"># @added 20230719 - Feature #5010: snab - save training_data</span>
+    <span class="c1"># Allow snab to save training_data that is trained through the UI (not via</span>
+    <span class="c1"># the slack link) when the user evaluates the instance as fP or fN. These</span>
+    <span class="c1"># are the states that which the algorithm is failing at and saving the</span>
+    <span class="c1"># training_data gives the user (me) data to pattern with. Instances</span>
+    <span class="c1"># evaluated as tP or tN will not be saved because the algorithm is working</span>
+    <span class="c1"># as desired in these instances and therefore no data in required for</span>
+    <span class="c1"># patterning with.</span>
+    <span class="n">saved_training_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @added 20230924 - Feature #4988: Allow snab to return and save results</span>
+    <span class="c1"># Save all evaluated data.  The easiest way is just to save all evaluated</span>
+    <span class="c1"># results.  This will result in approx 820KB (1.6MB when the training_data</span>
+    <span class="c1"># is loaded with graphs) per evalaution.  All evaluations are required to</span>
+    <span class="c1"># reproduce the results and/or add evaluations from different parties.</span>
+    <span class="c1"># So base it on user input and settings.SNAB_SAVE_ALL_EVALUATED_TRAINING_DATA</span>
+    <span class="n">user_specified_training</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">save_all_evaluated_training_data</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_SAVE_ALL_EVALUATED_TRAINING_DATA</span>
+    <span class="k">except</span><span class="p">:</span> 
+        <span class="n">save_all_evaluated_training_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: save_all_evaluated_training_data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">save_all_evaluated_training_data</span><span class="p">)))</span>
+    <span class="n">do_save_training</span> <span class="o">=</span> <span class="n">save_all_evaluated_training_data</span>
+    <span class="k">if</span> <span class="n">save_training_data</span> <span class="ow">and</span> <span class="n">snab_result</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fP&#39;</span><span class="p">,</span> <span class="s1">&#39;fN&#39;</span><span class="p">,</span> <span class="s1">&#39;unsure&#39;</span><span class="p">]:</span>
+        <span class="n">do_save_training</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;_tenant_id=&#39;</span> <span class="ow">in</span> <span class="n">use_base_name</span><span class="p">:</span>
+        <span class="n">use_base_name</span> <span class="o">=</span> <span class="s1">&#39;labelled_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+    <span class="n">saved_training_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_saved&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span>
+    <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">use_base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">saved_training_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_saved/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span>
+        <span class="n">timeseries_dir</span><span class="p">)</span>
+    <span class="n">algorithms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">save_training_data</span> <span class="ow">and</span> <span class="n">do_save_training</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">saved_training_data_dir</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: training_data already saved&#39;</span><span class="p">)</span>
+            <span class="n">do_save_training</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_algorithms_by_id</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">algorithms_with_id</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithms</span><span class="p">,</span> <span class="n">all_algorithms_by_id</span> <span class="o">=</span> <span class="n">get_algorithms</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">return_all_algorithms_by_id</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: get_algorithms failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_algorithms_by_id</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">algorithms_with_id</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">current_snab_algos</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">snab_app</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SNAB_CHECKS</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">for</span> <span class="n">analysis_mode</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SNAB_CHECKS</span><span class="p">[</span><span class="n">snab_app</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="k">for</span> <span class="n">test_algo</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SNAB_CHECKS</span><span class="p">[</span><span class="n">snab_app</span><span class="p">][</span><span class="n">analysis_mode</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="n">current_snab_algos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_algo</span><span class="p">)</span>
+            <span class="n">current_snab_algo_ids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">snab_algo</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_snab_algos</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">current_snab_algo_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithms_with_id</span><span class="p">[</span><span class="n">snab_algo</span><span class="p">])</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="c1"># Only save the training_data if the SNAB testing algorithm is</span>
+            <span class="c1"># evaluated, not the normal algo evaluation to ensure that the</span>
+            <span class="c1"># training_data label reflects the evaluation of the SNAB algo.</span>
+            <span class="k">if</span> <span class="n">algorithm_id</span> <span class="ow">and</span> <span class="n">current_snab_algo_ids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_id</span> <span class="ow">in</span> <span class="n">current_snab_algo_ids</span><span class="p">:</span>
+                    <span class="n">do_save_training</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @modified 20230924 - Feature #4988: Allow snab to return and save results</span>
+    <span class="c1"># if save_training_data and snab_result in [&#39;fP&#39;, &#39;fN&#39;, &#39;unsure&#39;]:</span>
+    <span class="k">if</span> <span class="n">do_save_training</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: saving training_data&#39;</span><span class="p">)</span>
+        <span class="n">human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())))</span>
+        <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;_tenant_id=&#39;</span> <span class="ow">in</span> <span class="n">use_base_name</span><span class="p">:</span>
+            <span class="n">use_base_name</span> <span class="o">=</span> <span class="s1">&#39;labelled_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+        <span class="n">saved_td_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.snab.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">human_date</span><span class="p">,</span> <span class="n">snab_result</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+
+        <span class="c1"># @added 20230804 - Feature #5010: snab - save training_data</span>
+        <span class="c1"># Add algorithm to label</span>
+        <span class="k">if</span> <span class="n">algorithm_id</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithms</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">algorithms</span><span class="p">,</span> <span class="n">all_algorithms_by_id</span> <span class="o">=</span> <span class="n">get_algorithms</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">return_all_algorithms_by_id</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: get_algorithms failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">err</span><span class="p">))</span>
+            <span class="n">algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithm</span> <span class="o">=</span> <span class="n">all_algorithms_by_id</span><span class="p">[</span><span class="n">algorithm_id</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">algorithm</span><span class="p">:</span>
+                <span class="n">saved_td_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.snab.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">human_date</span><span class="p">,</span> <span class="n">snab_result</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?save_training_data=true&amp;saved_td_label=</span><span class="si">%s</span><span class="s1">&amp;timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;requested_timestamp=</span><span class="si">%s</span><span class="s1">&amp;format=json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">saved_td_label</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span>
+            <span class="n">use_base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">))</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
+        <span class="c1"># Handle self signed certificate</span>
+        <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">running_on_docker</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+            <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">overall_verify_ssl</span><span class="p">:</span>
+            <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="n">password</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: saved training_data&#39;</span><span class="p">)</span>
+                <span class="n">saved_training_data</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?saved_training_data=true&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;timestamp=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">use_base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed get training to save graphs from </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="c1"># @modified 20230719 - Feature #5010: snab - save training_data</span>
+    <span class="c1"># return snab_result_updated, base_name, anomaly_timestamp, existing_result</span>
+    <span class="k">return</span> <span class="n">snab_result_updated</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">existing_result</span><span class="p">,</span> <span class="n">saved_training_data</span></div>
+
+
+
+<span class="c1"># @added 20230721 - Feature #5008: webapp - snab report page</span>
+<div class="viewcode-block" id="get_snab_algorithms">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.get_snab_algorithms">[docs]</a>
+<span class="k">def</span> <span class="nf">get_snab_algorithms</span><span class="p">(</span><span class="n">algorithms</span><span class="p">):</span>
+    <span class="n">snab_algorithms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">algorithms_by_id</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">algorithms</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">algo_id</span> <span class="o">=</span> <span class="n">algorithms</span><span class="p">[</span><span class="n">algo</span><span class="p">]</span>
+        <span class="n">algorithms_by_id</span><span class="p">[</span><span class="n">algo_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">algo</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_snab_algorithms :: getting MySQL engine&#39;</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_snab_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_snab_algorithms :: could not get a MySQL engine to get update snab table&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: get_snab_algorithms :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">snab_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">snab_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_snab_algorithms :: snab_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_snab_algorithms :: failed to get snab_table meta&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">warnings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="c1"># Only include algorithms with an algorithm_id as the three-sigma (or</span>
+        <span class="c1"># current primary algorithm has no id)</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">algorithm_id</span><span class="p">])</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">algorithm_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithm_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;algorithm_id&#39;</span><span class="p">]</span>
+                <span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithms_by_id</span><span class="p">[</span><span class="n">algorithm_id</span><span class="p">]</span>
+                <span class="n">snab_algorithms</span><span class="p">[</span><span class="n">algorithm_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)),</span> <span class="n">err</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_snab_algorithms :: to query snab table&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">if</span> <span class="n">warnings</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: get_snab_algorithms :: failed to determine algorithm from some ids, last 3 warnings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">warnings</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])))</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">snab_algorithms</span></div>
+
 </pre></div>
 
            </div>
@@ -418,7 +662,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

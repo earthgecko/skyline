@@ -30,28 +30,50 @@ CREATE TABLE IF NOT EXISTS `hosts` (
 # Removed KEY_BLOCK_SIZE=255 from all CREATE TABLE statements as under
 # MySQL 5.7 breaks
 #  INDEX `host_id` (`id`, `host`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
-  INDEX `host_id` (`id`, `host`)) ENGINE=MyISAM;
+  INDEX `host_id` (`id`, `host`)) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `apps` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'app unique id',
   `app` VARCHAR(255) NOT NULL COMMENT 'app name, e.g. analyzer',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
-  INDEX `app` (`id`,`app`)) ENGINE=MyISAM;
+  INDEX `app` (`id`,`app`)) ENGINE=InnoDB;
+
+/*
+# @added 20240530 - Task #5364: Update sql schema to assign app ids
+# Assign app ids
+*/
+INSERT INTO `apps` (app) VALUES ('analyzer');
+INSERT INTO `apps` (app) VALUES ('mirage');
+INSERT INTO `apps` (app) VALUES ('boundary');
+INSERT INTO `apps` (app) VALUES ('ionosphere');
+INSERT INTO `apps` (app) VALUES ('analyzer_batch');
+INSERT INTO `apps` (app) VALUES ('webapp');
+INSERT INTO `apps` (app) VALUES ('snab');
+INSERT INTO `apps` (app) VALUES ('vortex');
 
 CREATE TABLE IF NOT EXISTS `algorithms` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'algorithm unique id',
   `algorithm` VARCHAR(255) NOT NULL COMMENT 'algorithm name, e.g. least_squares`',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
-  INDEX `algorithm_id` (`id`,`algorithm`)) ENGINE=MyISAM;
+  INDEX `algorithm_id` (`id`,`algorithm`)) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `sources` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'source unique id',
   `source` VARCHAR(255) NOT NULL COMMENT 'name of the data source, e.g. graphite, Kepler, webcam',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (`id`),
-  INDEX `app` (`id`,`source` ASC)) ENGINE=MyISAM;
+  INDEX `app` (`id`,`source` ASC)) ENGINE=InnoDB;
+
+/*
+# @added 20240531 - Task #5364: Update sql schema to assign app ids
+# Assign source ids
+*/
+INSERT INTO `sources` (source) VALUES ('graphite');
+INSERT INTO `sources` (source) VALUES ('redis');
+INSERT INTO `sources` (source) VALUES ('redistimeseries');
+INSERT INTO `sources` (source) VALUES ('victoriametrics');
 
 CREATE TABLE IF NOT EXISTS `metrics` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'metric unique id',
@@ -268,6 +290,12 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 */
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries on which the features profile was created',
 /*
+# @added 20240103 - Feature #4672: ionosphere_downsampled
+#                   Task #5178: Build and test skyline v4.1.0
+# Add resolution to ionosphere table
+*/
+  `resolution` SMALLINT DEFAULT 0 COMMENT 'the resolution of the features profile',
+/*
 # @modified 20170120 - Feature #1854: Ionosphere learn - generations
 # Added the anomaly_timestamp as the created_timestamp is different and in terms
 # of the features profile data dir the anomaly_timestamp is required to be
@@ -333,12 +361,23 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `user_id` INT DEFAULT 0 COMMENT 'the user id that created the features profile',
   `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the features profile',
   `validated_user_id` INT DEFAULT 0 COMMENT 'the user id that validated the features profiles',
+/*
+# @added 20241018 - Feature #5481: ionosphere.copy_features_profile
+#                   Feature #5479: ionosphere.alias_features_profile
+*/
+  `alias_id` INT(11) DEFAULT 0 COMMENT 'the alias_id of the alias_features_profile if it has one',
   PRIMARY KEY (id),
 /*
 # @modified 20180821 - Bug #2546: Fix SQL errors
   INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layer_id`))
 */
+/*
+# @added 20241021 - Feature #5481: ionosphere.copy_features_profile
+#                   Feature #5479: ionosphere.alias_features_profile
+# Added alias_id
   INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`))
+*/
+  INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`,`alias_id`))
   ENGINE=InnoDB;
 
 /* @added 20191231 - Feature #3370: Add additional indices to DB
@@ -483,7 +522,7 @@ CREATE TABLE IF NOT EXISTS `layers_algorithms` (
   `times_in_row` INT DEFAULT NULL COMMENT 'number of times in a row',
   PRIMARY KEY (id),
   INDEX `layer_id` (`id`,`layer_id`,`fp_id`,`metric_id`))
-  ENGINE=MyISAM;
+  ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `ionosphere_layers_matched` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere_layers matched unique id',
@@ -721,6 +760,96 @@ CREATE TABLE IF NOT EXISTS `metric_group_info` (
   ENGINE=InnoDB;
 
 /*
+# @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+# Added table to store the results of minmax scaled features profiles.
+*/
+CREATE TABLE IF NOT EXISTS `ionosphere_minmax` (
+  `fp_id` INT(11) NOT NULL COMMENT 'features profile id',
+  `minmax_min` DOUBLE DEFAULT NULL COMMENT 'the min value in the minmax timeseries',
+  `minmax_max` DOUBLE DEFAULT NULL COMMENT 'the max value in the minmax timeseries',
+  `values_count` INT(10) DEFAULT NULL COMMENT 'the number of values in the fp timeseries',
+  `features_count` INT(10) DEFAULT NULL COMMENT 'the number of features calculated',
+  `features_sum` DOUBLE DEFAULT NULL COMMENT 'the sum of the features',
+  `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
+  `calc_time` FLOAT DEFAULT NULL COMMENT 'the time taken in seconds to calcalute the features',
+  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+  PRIMARY KEY (fp_id),
+  INDEX `ionosphere_minmax` (`fp_id`,`tsfresh_version`))
+  ENGINE=InnoDB;
+
+/*
+# @added 20230831 - Feature #5038: snab_results_algorithms
+# This table records results per algorithm run in a snab check. This is
+# particularly useful where multiple algorithms are run in the algorithm run via
+# the snab check
+*/
+CREATE TABLE IF NOT EXISTS `snab_results_algorithms` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id',
+  `snab_id` INT(11) NOT NULL COMMENT 'snab_id',
+  `algorithm_group_id` INT(11) NOT NULL COMMENT 'algorithm group id',
+  `algorithm_id` INT(11) NOT NULL COMMENT 'algorithm id',
+  `anomalyScore` TINYINT(1) NOT NULL COMMENT 'whether the specific algorithm_id returned anomalous',
+  `runtime` DECIMAL(11,6) DEFAULT NULL COMMENT 'runtime',
+  `consensus_achieved` VARCHAR(255) DEFAULT NULL COMMENT 'a csv list of the consensus alogrithm ids e.g 1,2,4,6',
+  PRIMARY KEY (id),
+  INDEX `snab_id` (`algorithm_group_id`, `algorithm_id`,`anomalyScore`,`consensus_achieved`))
+  ENGINE=InnoDB;
+
+/*
+# @added 20230811 - Feature #5046: comments
+# This table records user comments for training_data, features_profile, etc.
+*/
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id',
+  `metric_id` INT(11) NOT NULL COMMENT 'the metric id',
+  `timestamp` INT(10) NOT NULL COMMENT 'unix timestamp of event',
+  `user_id` INT NOT NULL COMMENT 'the user id that created the label',
+  `anomaly_id` INT(11) DEFAULT NULL COMMENT 'anomaly id',
+  `fp_id` INT(11) DEFAULT NULL COMMENT 'fp id',
+  `match_id` INT(11) DEFAULT NULL COMMENT 'match id',
+  `motif_match_id` INT(11) DEFAULT NULL COMMENT 'motif_match id',
+  `snab_id` INT(11) DEFAULT NULL COMMENT 'snab id',
+  `comment` TEXT DEFAULT NULL COMMENT 'the comment, max 65KB',
+  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+  PRIMARY KEY (id),
+  INDEX `comments` (`id`,`metric_id`,`timestamp`,`user_id`,`anomaly_id`,`fp_id`,`match_id`,`motif_match_id`,`snab_id`))
+  ENGINE=InnoDB;
+
+/* @added 20240610 - Feature #5370: anomalies_updated
+#                    Feature #5352: vista - bigquery
+#                    Feature #5372: vista - bq_update
+# To record updates made to an anomalies
+*/
+CREATE TABLE IF NOT EXISTS `anomalies_updated` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id of the update',
+  `anomaly_id` INT(11) NOT NULL COMMENT 'anomaly unique id',
+  `metric_id` INT(11) NOT NULL COMMENT 'metric id',
+  `changed_timestamp` INT(11) NOT NULL COMMENT 'unix timestamp of when the anomaly was changed',
+  `column` VARCHAR(64) DEFAULT NULL COMMENT 'the column that was update',
+  `previous_value` DECIMAL(65,6) NOT NULL COMMENT 'anomalous datapoint',
+  `new_value` DECIMAL(65,6) NOT NULL COMMENT 'anomalous datapoint',
+  PRIMARY KEY (id),
+  INDEX `anomalies_updated` (`id`,`anomaly_id`,`metric_id`,`changed_timestamp`, `column`))
+    ENGINE=InnoDB;
+
+/*
+# @added 20241004 - Feature #5479: ionosphere.alias_features_profile
+# Table to record alias fps
+*/
+CREATE TABLE IF NOT EXISTS `alias_features_profile` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id of the alias',
+  `metric_id` INT(11) NOT NULL COMMENT 'the aliased metric id',
+  `original_metric_id` INT(11) NOT NULL COMMENT 'the original metric id',
+  `fp_id` INT(11) NOT NULL COMMENT 'fp id',
+  `enabled` tinyint(1) DEFAULT 1 COMMENT 'if the alias is enabled 1 or not enabled 0',
+  `created_timestamp` INT(11) NOT NULL COMMENT 'unix timestamp of when the alias was created',
+  `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the fp alias',
+  `user_id` INT DEFAULT 0 COMMENT 'the user id that created the fp alias',
+  PRIMARY KEY (id),
+  INDEX `alias_features_profile` (`id`,`metric_id`,`original_metric_id`,`fp_id`,`enabled`))
+    ENGINE=InnoDB;
+
+/*
 # @added 20200411 - Feature #3478: sql_versions table
 #                   Branch #3262: py3
 # Added a versions table to the DB as a method to track what version of the DB schema is being run.
@@ -737,9 +866,12 @@ CREATE TABLE IF NOT EXISTS `sql_versions` (
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0-patch-dev-4014'); */
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0-patch-4164'); */
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0'); */
+/* INSERT INTO `sql_versions` (version) VALUES ('3.1.0'); */
+/* INSERT INTO `sql_versions` (version) VALUES ('4.0.0'); */
 
-INSERT INTO `sql_versions` (version) VALUES ('3.1.0');
+/* INSERT INTO `sql_versions` (version) VALUES ('4.1.0'); */
 
+INSERT INTO `sql_versions` (version) VALUES ('5.0.0');
 /*
 # mariadb
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/

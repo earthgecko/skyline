@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>horizon.listen &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>horizon.listen &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -243,13 +243,17 @@
             <span class="k">return</span> <span class="n">pickle_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
 <span class="k">else</span><span class="p">:</span>
-<div class="viewcode-block" id="SafeUnpickler"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler">[docs]</a>    <span class="k">class</span> <span class="nc">SafeUnpickler</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">):</span>
+<div class="viewcode-block" id="SafeUnpickler">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler">[docs]</a>
+    <span class="k">class</span> <span class="nc">SafeUnpickler</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">):</span>
         <span class="n">PICKLE_SAFE</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;copy_reg&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;_reconstructor&#39;</span><span class="p">]),</span>
             <span class="s1">&#39;__builtin__&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;object&#39;</span><span class="p">]),</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="SafeUnpickler.find_class"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.find_class">[docs]</a>        <span class="k">def</span> <span class="nf">find_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="SafeUnpickler.find_class">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.find_class">[docs]</a>
+        <span class="k">def</span> <span class="nf">find_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">module</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PICKLE_SAFE</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe module </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="p">)</span>
             <span class="nb">__import__</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
@@ -258,7 +262,10 @@
                 <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SafeUnpickler.loads"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.loads">[docs]</a>        <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="SafeUnpickler.loads">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.loads">[docs]</a>
+        <span class="nd">@classmethod</span>
         <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pickle_string</span><span class="p">):</span>
             <span class="c1"># @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles</span>
             <span class="c1">#                      Branch #3262: py3</span>
@@ -266,11 +273,15 @@
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div></div>
+                <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
+</div>
+
 <span class="c1"># //SafeUnpickler</span>
 
 
-<div class="viewcode-block" id="Listen"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen">[docs]</a><span class="k">class</span> <span class="nc">Listen</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+<div class="viewcode-block" id="Listen">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen">[docs]</a>
+<span class="k">class</span> <span class="nc">Listen</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The listener is responsible for listening on a port.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -291,7 +302,9 @@
         <span class="c1"># Use the safe unpickler that comes with carbon rather than standard python pickle/cpickle</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unpickler</span> <span class="o">=</span> <span class="n">SafeUnpickler</span>
 
-<div class="viewcode-block" id="Listen.gen_unpickle"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.gen_unpickle">[docs]</a>    <span class="k">def</span> <span class="nf">gen_unpickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
+<div class="viewcode-block" id="Listen.gen_unpickle">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.gen_unpickle">[docs]</a>
+    <span class="k">def</span> <span class="nf">gen_unpickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a pickle from a stream</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -301,7 +314,10 @@
         <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
             <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Listen.read_all"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.read_all">[docs]</a>    <span class="k">def</span> <span class="nf">read_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Listen.read_all">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.read_all">[docs]</a>
+    <span class="k">def</span> <span class="nf">read_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read n bytes from a stream</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -351,7 +367,10 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="Listen.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Listen.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -364,7 +383,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Listen.listen_pickle"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">listen_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Listen.listen_pickle">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_pickle">[docs]</a>
+    <span class="k">def</span> <span class="nf">listen_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Listen for pickles over tcp</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -439,7 +461,10 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: can not connect to socket: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                 <span class="k">break</span></div>
 
-<div class="viewcode-block" id="Listen.listen_udp"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_udp">[docs]</a>    <span class="k">def</span> <span class="nf">listen_udp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Listen.listen_udp">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_udp">[docs]</a>
+    <span class="k">def</span> <span class="nf">listen_udp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Listen over udp for MessagePack strings</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -499,7 +524,10 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: cannot connect to socket: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                 <span class="k">break</span></div>
 
-<div class="viewcode-block" id="Listen.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Listen.run">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -539,7 +567,9 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_type</span> <span class="o">==</span> <span class="s1">&#39;udp&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">listen_udp</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: unknown listener format&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span></div></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: unknown listener format&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -549,7 +579,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

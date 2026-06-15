@@ -312,4 +312,74 @@
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related events </span></span>  None</h4>
   {% endif %}
 
+  {% if (illuminance_events_dict != False) or (correlations_with_graph_links != []) %}
+    {% if pearson_correlations|length > 0 %}
+    <h4><span class="logo"><span class="sky">Pearson ::</span> <span class="re">correlations</span> for possible related events metrics</span></h4>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Pearson cc</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for base_name, pearson_cc_dict in pearson_correlations.items() %}
+        {% if pearson_correlations[base_name]['pearson_cc'] < 0 %}
+          {% set use_cc = (pearson_correlations[base_name]['pearson_cc'] * -1) %}
+        {% else %}
+          {% set use_cc = pearson_correlations[base_name]['pearson_cc'] %}
+        {% endif %}
+        <tr>
+          <td>{{ base_name }}</td>
+        {% if use_cc >= 0.5 %}
+          <td><span class="logo"><span class="sky">{{ pearson_correlations[base_name]['pearson_cc'] }}</span></span></td>
+        {% else %}
+          <td><span class="logo"><span class="re">{{ pearson_correlations[base_name]['pearson_cc'] }}</span></span></td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+
+    {% endif %}
+
+  {% if features_profile_id %}
+    {% set use_fp_view = '&fp_view=true' %}
+  {% else %}
+    {% set use_fp_view = '' %}
+  {% endif %}
+
+  <h4><span class="logo"><span class="sky">Plots ::</span> <span class="re">pearson correlations</span> <code>(&gt abs(0.5))</code> of possible related events and cross correlation metrics</span></h4>
+    {% if pearson_correlation_graphs|length > 0 %}
+      {% if pearson_correlation_graphs|length < pearson_correlations|length %}
+      <div class="alert alert-warning">
+        Only the top {{ pearson_correlation_graphs|length }} Pearson correlations have been plotted either because the rest
+        are <code>&lt abs(0.5)</code> or the max run time reached.  If you want to plot more just refresh this page and the
+        next batch will be added.
+      </div>
+      {% endif %}
+      {% for image in pearson_correlation_graphs %}
+      <center><img src="ionosphere_images?image={{ image }}" loading="lazy" alt="pearson correlation timeseries graph" class="img-responsive center-block" /></center></center><br>
+        {% if 'labelled_metrics.' in image %}
+          {% for base_name, pearson_cc_dict in pearson_correlations.items() %}
+            {% if image == pearson_correlations[base_name]['graph'] %}
+  {{ pearson_correlations[base_name]['labelled_metric_name'] }}: <code>{{ base_name }}</code> correlation with {{ pearson_correlations[base_name]['metric_labelled_metric_name'] }}: <code>{{ pearson_correlations[base_name]['metric'] }}</code><br>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+  Image file: {{ image }}<br><br>
+      {% endfor %}
+    {% elif pearson_correlations|length > 0 %}
+      <button type="button">Nothing to plot</button> - no correlations <code>(&gt abs(0.5))</code>
+    {% else %}
+      {% if labelled_metric_name %}
+      <a href="?timestamp={{ timestamp }}&metric={{ labelled_metric_name }}&requested_timestamp={{ timestamp }}&show_pearson_correlations=true{{ use_fp_view }}">
+      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while
+      {% else %}
+      <a href="?timestamp={{ timestamp }}&metric={{ use_for_metric }}&requested_timestamp={{ timestamp }}&show_pearson_correlations=true{{ use_fp_view }}">
+      <button type="button" class="btn btn-primary">Plot pearson correlations for possible related events and cross correlations</button></a> - depending on the number this can take a while
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
 {% endblock %}

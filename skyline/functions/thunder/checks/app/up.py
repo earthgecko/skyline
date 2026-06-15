@@ -95,7 +95,14 @@ def thunder_check_app(self, check_app):
         try:
             webapp_up_url = 'http://%s:%s/webapp_up' % (
                 settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
-            response = requests.get(webapp_up_url)
+            # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+            # Add timeout for bandit B113
+            #response = requests.get(webapp_up_url)
+            connect_timeout = 5
+            read_timeout = 20
+            use_timeout = (int(connect_timeout), int(read_timeout))
+            response = requests.get(webapp_up_url, timeout=use_timeout)
+
             if not response:
                 logger.error('error :: no response from %s' % str(webapp_up_url))
         except:
@@ -117,7 +124,7 @@ def thunder_check_app(self, check_app):
     if not app_last_timestamp:
         success = False
         send_event = True
-        logger.warning('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
+        logger.info('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
             function_str, cache_key))
 
     # Determine what to last known app run timestamp was
@@ -131,6 +138,14 @@ def thunder_check_app(self, check_app):
         logger.error(traceback.format_exc())
         logger.error('error :: %s :: failed to get %s Redis key - %s' % (
             function_str, thunder_app_last_timestamp_cache_key, e))
+
+    # @added 20240313 - set the last known app run timestamp
+    if app_last_timestamp:
+        try:
+            self.redis_conn_decoded.set(thunder_app_last_timestamp_cache_key, int(float(app_last_timestamp)))
+        except Exception as err:
+            logger.error('error :: %s :: failed to set %s Redis key, err: %s' % (
+                function_str, thunder_app_last_timestamp_cache_key, err))
 
     # Determine if a DOWN thunder alert has been sent for the app
     check_down_alert = None
@@ -146,7 +161,7 @@ def thunder_check_app(self, check_app):
 
     # The app has not recovered yet still down, return
     if not app_last_timestamp and check_down_alert:
-        logger.warning('warning :: %s :: %s still down but alert key exists so not alerting' % (
+        logger.info('warning :: %s :: %s still down but alert key exists so not alerting' % (
             function_str, check_app))
         return False
 
@@ -173,8 +188,11 @@ def thunder_check_app(self, check_app):
         if thunder_app_last_timestamp:
             seconds_down = int(float(app_last_timestamp)) - int(float(thunder_app_last_timestamp))
             down_time = '%s' % str(seconds_down)
-        status = '%s has recovered after being down for %s seconds on %s' % (
+        # @modified 20231002 - Change the wording
+        # status = '%s has recovered after being down for %s seconds on %s' % (
+        status = '%s has recovered after not reporting to Redis for %s seconds on %s' % (
             check_app, down_time, this_host)
+
         logger.info('%s :: %s removing %s Redis key' % (
             function_str, status, cache_key))
         # Remove the alert key
@@ -215,7 +233,10 @@ def thunder_check_app(self, check_app):
         status = '%s last reported up %s seconds ago on %s' % (
             check_app, last_reported_up_seconds_ago, this_host)
         level = 'alert'
-        message = '%s - %s is DOWN on %s' % (level, check_app, this_host)
+        # @modified 20231002 - Change the wording
+        # message = '%s - %s is DOWN on %s' % (level, check_app, this_host)
+        message = '%s - %s is NOT UPDATING Redis on %s' % (level, check_app, this_host)
+
         thunder_event = {
             'level': level,
             'event_type': event_type,

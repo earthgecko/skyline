@@ -76,6 +76,7 @@ def validate_settings_variables(current_skyline_app):
         'CANARY_METRIC': str,
         'CARBON_HOST': str,
         'CARBON_PORT': int,
+        'CARBON_PICKLE_PORT': int,
         'CHECK_AIRGAPS': list,
         'CHECK_DATA_SPARSITY': bool,
         'CHUNK_SIZE': int,
@@ -140,6 +141,8 @@ def validate_settings_variables(current_skyline_app):
         'FLUX_WORKERS': int,
         'FLUX_ZERO_FILL_NAMESPACES': list,
         'FLUX_DROP_BUCKET_METRICS': bool,
+        'FLUX_TORNADO_ENABLED': bool,
+        'FLUX_TORNADO_URL': str,
         'FULLY_POPULATED_PERCENTAGE': float,
         'FULL_DURATION': int,
         'FULL_NAMESPACE': str,
@@ -302,6 +305,7 @@ def validate_settings_variables(current_skyline_app):
         'SKYLINE_FEEDBACK_NAMESPACES': list,
         'SKYLINE_METRICS_CARBON_HOST': str,
         'SKYLINE_METRICS_CARBON_PORT': int,
+        'SKYLINE_METRICS_CARBON_PICKLE_PORT': int,
         'SKYLINE_TMP_DIR': str,
         'SKYLINE_URL': str,
         'SLACK_ENABLED': bool,
@@ -311,6 +315,7 @@ def validate_settings_variables(current_skyline_app):
         'SNAB_CHECKS': dict,
         'SNAB_DATA_DIR': str,
         'SNAB_ENABLED': bool,
+        'SNAB_SAVE_ALL_EVALUATED_TRAINING_DATA': bool,
         'SNAB_FLUX_LOAD_TEST_ENABLED': bool,
         'SNAB_FLUX_LOAD_TEST_METRICS': int,
         'SNAB_FLUX_LOAD_TEST_METRICS_PER_POST': int,
@@ -370,6 +375,7 @@ def validate_settings_variables(current_skyline_app):
         'VORTEX_TIMESERIES_JSON_TO_DISK': bool,
         'VORTEX_FULL_DURATION_RESOLUTIONS': dict,
         'VORTEX_ALGORITHMS': dict,
+        'NUMBA_CACHE_DIR': str,
     }
     settings_tested = []
 
@@ -787,6 +793,21 @@ def validate_settings_variables(current_skyline_app):
         print('error :: the CARBON_PORT in settings.py - %s' % e)
         invalid_variables = True
 
+    settings_tested.append('CARBON_PICKLE_PORT')
+    try:
+        if settings.CARBON_PICKLE_PORT not in list(range(1, 65535)):
+            print('error :: CARBON_PICKLE_PORT in settings.py does not represent a valid port')
+            invalid_variables = True
+    except ValueError:
+        print('error :: CARBON_PICKLE_PORT in settings.py does not represent a valid port')
+        invalid_variables = True
+    except AttributeError:
+        print('error :: the CARBON_PICKLE_PORT is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: the CARBON_PICKLE_PORT in settings.py - %s' % e)
+        invalid_variables = True
+
     settings_tested.append('SKYLINE_METRICS_CARBON_HOST')
     try:
         if not isinstance(settings.SKYLINE_METRICS_CARBON_HOST, str):
@@ -816,6 +837,21 @@ def validate_settings_variables(current_skyline_app):
         invalid_variables = True
     except Exception as e:
         print('error :: the SKYLINE_METRICS_CARBON_PORT in settings.py - %s' % e)
+        invalid_variables = True
+
+    settings_tested.append('SKYLINE_METRICS_CARBON_PICKLE_PORT')
+    try:
+        if settings.SKYLINE_METRICS_CARBON_PICKLE_PORT not in list(range(1, 65535)):
+            print('error :: SKYLINE_METRICS_CARBON_PICKLE_PORT in settings.py does not represent a valid port')
+            invalid_variables = True
+    except ValueError:
+        print('error :: SKYLINE_METRICS_CARBON_PICKLE_PORT in settings.py does not represent a valid port')
+        invalid_variables = True
+    except AttributeError:
+        print('error :: the SKYLINE_METRICS_CARBON_PICKLE_PORT is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: the SKYLINE_METRICS_CARBON_PICKLE_PORT in settings.py - %s' % e)
         invalid_variables = True
 
     settings_tested.append('SERVER_METRICS_NAME')

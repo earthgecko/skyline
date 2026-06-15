@@ -17,9 +17,6 @@ import pandas as pd
 from statsforecast import StatsForecast
 from statsforecast.models import MSTL
 
-from skyline_functions import get_graphite_metric
-from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
-
 # The name of the function MUST be the same as the name declared in
 # settings.CUSTOM_ALGORITHMS.
 # It MUST have 3 parameters:
@@ -31,9 +28,12 @@ from functions.victoriametrics.get_victoriametrics_metric import get_victoriamet
 
 # @added 20230427 - Feature #4896: custom_algorithms - mstl
 def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
-
     """
     EXPERIMENTAL
+
+    A basic implementation of statsforecast MSTL - https://github.com/Nixtla/statsforecast
+
+    https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -47,21 +47,53 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the mstl
-        custom algorithm no specific algorithm_parameters are required apart
-        from an empty dict, example: ``algorithm_parameters={}``.  But the
-        number_of_daily_peaks can be passed define how many peaks must exist in
-        the window period to be classed as normal.  If this is set to 3 and say
-        that we are checking a possible anomaly at 00:05, there need to be 3
-        peaks that occur over the past 7 days in the dialy 23:35 to 00:05 window
-        if there are not at least 3 then this is considered as anomalous.
-        ``algorithm_parameters={'number_of_daily_peaks': 3}``
+        custom_algorithm and algorithm itself.  For the mstl custom algorithm no
+        specific algorithm_parameters are required apart from an empty dict but
+        the algorithm_parameters that can be passed are:
+
+        - ``'base_name'`` (str): The metric base_name.
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'level'`` (int): This is the confidence percentile.
+            This optional parameter is used for probabilistic forecasting. Set
+            the level (or confidence percentile) of your prediction interval.
+            For example, level=95 means that the model expects the real value to
+            be inside that interval 95% of the times.  Default is ``99``.
+        - ``'season_hours'`` (int): The first order seasonality.
+            The number of hours which represents the first order seasonality of
+            the data.  Default is ``24``.
+        - ``'season_days'`` (int): The second order seasonality.
+            The number of days which represent a cycle of the first order
+            seasonality of in the data.  Default is ``7``.
+         - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'level': 99,
+                'season_hours': 24,
+                'season_days': 7,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore
-    :rtype: tuple(boolean, float)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 
@@ -86,7 +118,19 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         return current_logger
-    
+
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+    except:
+        return_results = False
+
+    if not return_results:
+        try:
+            return_results = algorithm_parameters['return_anomalies']
+        except:
+            return_results = False
+
     # Use the algorithm_parameters to determine the sample_period
     debug_logging = None
     try:
@@ -118,18 +162,6 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     except:
         print_debug = False
 
-    return_results = False
-    try:
-        return_results = algorithm_parameters['return_results']
-    except:
-        return_results = False
-
-    if not return_results:
-        try:
-            return_results = algorithm_parameters['return_anomalies']
-        except:
-            return_results = False
-
     base_name = None
     try:
         if 'base_name' in list(algorithm_parameters.keys()):
@@ -142,6 +174,8 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             print("algorithm_parameters['metric']:", base_name)
         if not base_name:
             base_name = algorithm_parameters['metric']
+        if not base_name:
+            base_name = 'unknown'
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
@@ -195,6 +229,8 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     res_minute = int(resolution / 60)
     freq_str = '%sT' % str(res_minute)
+    # site-packages/utilsforecast/processing.py:384: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+    freq_str = '%smin' % str(res_minute)
 
     number_of_predictions = 1
     level = 99
@@ -229,8 +265,15 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         models = [MSTL(season_length=[season_hours, (season_hours * season_days)])]
         if debug_logging:
             current_logger.debug('debug :: mstl :: defined MSTL model for %s' % (base_name))
+        # @modified 20241122 - Feature #4896: custom_algorithms - mstl
+        # Commented out passing the df to quick_sf
+        #/opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/statsforecast/core.py:476: 
+        # FutureWarning: The `df` argument of the StatsForecast constructor as well as reusing stored dfs
+        # from other methods is deprecated and will raise an error in a future version. Please provide the
+        # `df` argument to the corresponding method instead, e.g. fit/forecast.
         quick_sf = StatsForecast(
-            df=df[-60:], 
+            # df=df[-60:],
+            df=df[-60:],
             models=models, 
             freq=freq_str, 
             n_jobs=2,
@@ -241,11 +284,23 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         start = time()
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculating quick_fcst for %s' % (base_name))
+
+        # @added 20241122 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        quick_sf_df = df[-60:].copy()
+        quick_sf.fit(df=quick_sf_df)
+
         quick_fcst = quick_sf.forecast(h=horizon, level=levels, fitted=True)
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated quick_fcst for %s' % (base_name))
+        # @modified 20241122 - Feature #4896: custom_algorithms - mstl
+        # Commented out passing the df to quick_sf
+        #/opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/statsforecast/core.py:476: 
+        # FutureWarning: The `df` argument of the StatsForecast constructor as well as reusing stored dfs
+        # from other methods is deprecated and will raise an error in a future version. Please provide the
+        # `df` argument to the corresponding method instead, e.g. fit/forecast.
         sf = StatsForecast(
-            df=df, 
+            #df=df,
             models=models, 
             freq=freq_str, 
             n_jobs=2,
@@ -255,6 +310,12 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         start = time()
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculating fcst for %s' % (base_name))
+
+        # @added 20241122 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        sf_df = df.copy()
+        sf.fit(df=sf_df)
+
         fcst = sf.forecast(h=horizon, level=levels, fitted=True)
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated fcst for %s' % (base_name))

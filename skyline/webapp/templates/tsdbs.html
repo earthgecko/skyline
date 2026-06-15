@@ -1,0 +1,63 @@
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
+{% block body %}
+
+{% if version == dev_ver %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <div class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><a href="/tsdbs"><span class="logo"><span class="sky">Sky</span><span class="re">line</span> TSDBs</span></a></li>
+    </div>
+  </ol>
+</nav>
+<div class="container-fluid">
+{% else %}
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li class="active"><a href="/tsdbs"><span class="logo"><span class="sky">Sky</span><span class="re">line</span> TSDBs</span></a></li>
+	</ol>
+{% endif %}
+	<div class="row">
+{% if version == dev_ver %}
+    <div class="col-md-6 md-offset-3">
+{% else %}
+		<div class="col-md-6 col-md-offset-3">
+{% endif %}
+      <h3><span class="logo"><span class="sky">Sky</span><span class="re">line</span> Configured TSDBs</span></h3>
+{% if tsdbs %}
+      <table class="table table-hover">
+        <thead>
+          <tr>
+          <th>TSDB</th>
+          <th>URL</th>
+          </tr>
+        </thead>
+        <tbody>
+  {% for tsdb in tsdbs %}
+          <tr>
+            <td>
+    {% if tsdb == 'graphite' %}
+              <img src="/static/images/graphite-logo_color.png" loading="lazy" alt="Graphite" class="img-responsive center-block" /">
+    {% else %}        
+              <img src="/static/images/victoriametrics.webp" width=300 loading="lazy" alt="VictoriaMetrics" class="img-responsive center-block" /">
+    {% endif %}
+            </td>
+            <td><a href="{{ tsdbs[tsdb] }}">{{ tsdbs[tsdb] }}</a></td>
+          </tr>
+  {% endfor %}
+        </tbody>
+      </table>
+{% endif %}
+    
+		</div>
+	</div>
+{% if version == dev_ver %}
+<!-- Close class="container-fluid" div -->
+</div>
+{% endif %}
+
+{% endblock %}

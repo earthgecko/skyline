@@ -29,10 +29,8 @@ import pandas as pd
 # ALWAYS WRAP YOUR ALGORITHM IN try and except
 def median_absolute_deviation(current_skyline_app, parent_pid, timeseries, algorithm_parameters={}):
     """
-    The last_same_hours algorithm determines the data points for the same hour
-    and minute as the current timestamp from the last x days and calculates the
-    mean of those values and determines whether the current data point is within
-    3 standard deviations of the mean.
+    A timeseries is anomalous if the deviation of its latest datapoint with
+    respect to the median is X times larger than the median of deviations.
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for

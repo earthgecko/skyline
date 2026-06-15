@@ -44,15 +44,45 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        "algorithm_parameters": {
-            "anomaly_window": 1,
-            "fast_window": 12,
-            "slow_window": 26,
-            "signal_window": 9,
-            "feature": "macd",  # This can be macd, macd_signal or macd_histogram
-            "return_results": True,
-        }
+        custom_algorithm and algorithm itself.  For the macd custom algorithm no
+        specific algorithm_parameters are required apart from an empty dict but
+        the algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'fast_window'`` (int): The size of the fast window.
+            Default is ``12``.
+        - ``'slow_window'`` (int): The size of the slow window.
+            Default is ``26``.
+        - ``'signal_window'`` (int): The size of the signal window.
+            Default is ``9``.
+        - ``'feature'`` (str): The macd feature to use.
+            Default is ``macd``.
+            Possible values: `macd` | `macd_signal` | `macd_histogram`.
+         - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'fast_window': 12,
+                'slow_window': 26,
+                'signal_window': 9,
+                'feature': 'macd',
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -209,7 +239,7 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             # of the df, that is just how it rolls.
             if str(score) == 'nan':
                 score = 0.0
-            macd_scores.append([index, score])
+            macd_scores.append([index, float(score)])
         # Sort the scores, lowest to highest
         sorted_scores = sorted(macd_scores, key=lambda x: x[1])
         scores = [s for i, s in sorted_scores]
@@ -225,10 +255,14 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
         # Determine the lowest value bin
         bins = h[1]
-        lowest_value_bin = bins[0]  # e.g. -90.16033348
-        second_lowest_value_bin = bins[1]  # e.g. -63.07251163
-        highest_value_bin = bins[-1]  # e.g. 316.15699428
-        second_highest_value_bin = bins[-2]  # e.g. 289.06917243
+        # @modified 20241114 - Bug #5541: np.float64 - yhat and sigma3
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha and 
+        # Coerce np.float64 to float to be literal_eval and json safe
+        lowest_value_bin = float(bins[0])  # e.g. -90.16033348
+        second_lowest_value_bin = float(bins[1])  # e.g. -63.07251163
+        highest_value_bin = float(bins[-1])  # e.g. 316.15699428
+        second_highest_value_bin = float(bins[-2])  # e.g. 289.06917243
 
         # In some cases the bin with the highest values will incorporate
         # most of the datapoints signifying that the upper value bins

@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>custom_algorithms.one_class_svm &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>custom_algorithms.one_class_svm &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -154,10 +154,18 @@
 
 
 <span class="c1"># @added 20221114 - Feature #4750: custom_algorithm - one_class_svm</span>
-<div class="viewcode-block" id="one_class_svm"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.one_class_svm.one_class_svm">[docs]</a><span class="k">def</span> <span class="nf">one_class_svm</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="one_class_svm">
+<a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.one_class_svm.one_class_svm">[docs]</a>
+<span class="k">def</span> <span class="nf">one_class_svm</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Outlier detector for time-series data using One Class SVM</span>
+<span class="sd">    Outlier detector for time-series data using One Class SVM base on the moving</span>
+<span class="sd">    mean and variance, unless the variance is low in which case the standard</span>
+<span class="sd">    deviation will be used in place of variance.  The algorithm parameters to</span>
+<span class="sd">    be concerned with are ``&#39;window&#39;`` which defines the length of sliding</span>
+<span class="sd">    window to use, ``nu`` which defines the percentage that can be considered as</span>
+<span class="sd">    outliers e.g. 0.1 would be 10%.  Do note that if the variance is low each</span>
+<span class="sd">    spike or trough will probably be identified as an outlier.</span>
 
 <span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
 <span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
@@ -171,12 +179,45 @@
 <span class="sd">    :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],</span>
 <span class="sd">        [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``</span>
 <span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
-<span class="sd">        custom_algorithm and algorithm itself.  Example:</span>
-<span class="sd">        &quot;algorithm_parameters&quot;: {</span>
-<span class="sd">            &quot;n_neighbors&quot;: 2,</span>
-<span class="sd">            &quot;anomaly_window&quot;: 5,</span>
-<span class="sd">            &quot;return_results&quot;: True,</span>
-<span class="sd">        }</span>
+<span class="sd">        custom_algorithm and algorithm itself.  For the one_class_svm custom</span>
+<span class="sd">        algorithm no specific algorithm_parameters are required apart from an</span>
+<span class="sd">        empty dict but the algorithm_parameters that can be passed are:</span>
+
+<span class="sd">        - ``&#39;anomaly_window&#39;`` (int): The anomaly_window value.</span>
+<span class="sd">            This specifies how many of the last data points should be considered</span>
+<span class="sd">            when determining if the metric is anomalous. Only the last</span>
+<span class="sd">            ``anomaly_window`` data points in the time series will be used to</span>
+<span class="sd">            determine if the metric is anomalous.  Default is ``1``.</span>
+<span class="sd">        - ``&#39;window&#39;`` (int): The sliding window size.</span>
+<span class="sd">            Default is ``3``.</span>
+<span class="sd">        - ``&#39;nu&#39;`` (float): The threshold value.</span>
+<span class="sd">            The value for nu which defines the percentage that can be considered</span>
+<span class="sd">            as outliers e.g. 0.1 would be 10%.  Default is ``0.01``.</span>
+<span class="sd">        - ``&#39;gamma&#39;`` (str): Kernel coefficient for ``rbf``, ``poly`` and ``sigmoid``.</span>
+<span class="sd">            Default is ``scale``.</span>
+<span class="sd">            Possible values: `scale` | `auto`.</span>
+<span class="sd">                - `scale` - uses 1 / (n_features * X.var()) as value of gamma.</span>
+<span class="sd">                - `auto` - uses 1 / n_features as value of gamma.</span>
+<span class="sd">        - ``&#39;return_results&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, returns the results dict in addition to anomalous and</span>
+<span class="sd">            anomalyScore.  Default is ``False``.</span>
+<span class="sd">        - ``&#39;debug_logging&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug logging.</span>
+<span class="sd">        - ``&#39;debug_print&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug printing  (for Jupyter testing). Default</span>
+<span class="sd">            is ``False``.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">        </span>
+<span class="sd">            algorithm_parameters={</span>
+<span class="sd">                &#39;anomaly_window&#39;: 1,</span>
+<span class="sd">                &#39;window&#39;: 3,</span>
+<span class="sd">                &#39;nu&#39;: 0.01,</span>
+<span class="sd">                &#39;gamma&#39;: &#39;scale&#39;,</span>
+<span class="sd">                &#39;debug_logging&#39;: True,</span>
+<span class="sd">                &#39;return_results&#39;: True,</span>
+<span class="sd">            }</span>
+
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type parent_pid: int</span>
 <span class="sd">    :type timeseries: list</span>
@@ -185,6 +226,19 @@
 <span class="sd">    :rtype: tuple(boolean, float, dict)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">normalised_variance</span><span class="p">(</span><span class="n">np_values</span><span class="p">):</span>
+        <span class="n">normalised_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># np_values = np.array(values)</span>
+            <span class="n">np_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">np_values</span><span class="p">)</span>
+            <span class="n">np_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">np_values</span><span class="p">)</span>
+            <span class="n">norm_np_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">np_values</span> <span class="o">-</span> <span class="n">np_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np_max</span> <span class="o">-</span> <span class="n">np_min</span><span class="p">)</span>
+            <span class="n">normalised_var</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">norm_np_values</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">normalised_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="n">normalised_var</span><span class="p">,</span> <span class="n">err</span>
 
     <span class="c1"># You MUST define the algorithm_name</span>
     <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;one_class_svm&#39;</span>
@@ -195,7 +249,15 @@
     <span class="c1"># anomalyScore.</span>
     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">one_class_svm_scores</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+        <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">anomalies</span><span class="p">,</span>
+        <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
+        <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">one_class_svm_scores</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -246,17 +308,19 @@
             <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># Use the algorithm_parameters to determine variables</span>
-    <span class="n">debug_print</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">debug_print</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_print&#39;</span><span class="p">]</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;print_debug&#39;</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">debug_print</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="c1"># nu = 0.01</span>
+    <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.09</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">nu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;nu&#39;</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="c1"># nu = 0.01</span>
+        <span class="n">nu</span> <span class="o">=</span> <span class="mf">0.09</span>
     <span class="n">window_shape</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">window_shape</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">])</span>
@@ -273,34 +337,71 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running one_class_svm with nu: </span><span class="si">%s</span><span class="s1">, window_shape: </span><span class="si">%s</span><span class="s1">, gamma: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">nu</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">window_shape</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">gamma</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: running one_class_svm with nu: </span><span class="si">%s</span><span class="s1">, window_shape: </span><span class="si">%s</span><span class="s1">, gamma: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">nu</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">window_shape</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">gamma</span><span class="p">)))</span>
 
-    <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running one_class_svm on timeseries with </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: running one_class_svm on timeseries with </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
 
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm_parameters_used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;anomaly_window&#39;</span><span class="p">:</span> <span class="n">anomaly_window</span><span class="p">,</span> <span class="s1">&#39;nu&#39;</span><span class="p">:</span> <span class="n">nu</span><span class="p">,</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span> <span class="n">gamma</span><span class="p">,</span> <span class="s1">&#39;window&#39;</span><span class="p">:</span> <span class="n">window_shape</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># @added 20230707 - Feature #4750: custom_algorithm - one_class_svm</span>
+    <span class="c1"># Use standard deviation instead of variance if the variance is low</span>
+    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;components&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">]</span>
+    <span class="n">low_variance</span> <span class="o">=</span> <span class="mf">0.009</span>
+    <span class="n">use_column</span> <span class="o">=</span> <span class="s1">&#39;variance&#39;</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">norm_var</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">normalised_variance</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalised_variance_error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: normalised_variance error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+        <span class="c1"># Only use json friendly values in results</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalised_variance</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalised_variance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_var</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalised_variance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">norm_var</span><span class="p">)</span>
+
         <span class="n">Xmean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">sliding_window_view</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">window_shape</span><span class="o">=</span><span class="n">window_shape</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">Xvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">sliding_window_view</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">window_shape</span><span class="o">=</span><span class="n">window_shape</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20230707 - Feature #4750: custom_algorithm - one_class_svm</span>
+        <span class="c1"># Use standard deviation instead of variance if the variance is low</span>
+        <span class="c1"># Xvar = np.var(sliding_window_view(X, window_shape=window_shape), axis=1)</span>
+        <span class="k">if</span> <span class="n">norm_var</span> <span class="o">&lt;=</span> <span class="n">low_variance</span><span class="p">:</span>
+            <span class="n">Xvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">sliding_window_view</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">window_shape</span><span class="o">=</span><span class="n">window_shape</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;components&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">]</span>
+            <span class="n">use_column</span> <span class="o">=</span> <span class="s1">&#39;std&#39;</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">Xvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">sliding_window_view</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">window_shape</span><span class="o">=</span><span class="n">window_shape</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
         <span class="n">xx</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">xmeans</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Xmean</span><span class="p">)</span>
         <span class="n">xvars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Xvar</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xmeans</span><span class="p">):</span>
             <span class="n">xx</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">value</span><span class="p">,</span> <span class="n">xvars</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
 
+        <span class="c1"># @modified 20230707 - Feature #4750: custom_algorithm - one_class_svm</span>
+        <span class="c1"># Use standard deviation instead of variance if the variance is low</span>
+        <span class="c1"># df = pd.DataFrame(xx, columns=[&#39;mean&#39;, &#39;variance&#39;])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">use_column</span><span class="p">])</span>
+
         <span class="c1"># Standardise</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">])</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
         <span class="n">stdDf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">stdMean</span> <span class="o">=</span> <span class="n">stdDf</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">stdVar</span> <span class="o">=</span> <span class="n">stdDf</span><span class="p">[</span><span class="s1">&#39;variance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1">#stdVar = stdDf[&#39;variance&#39;].tolist()</span>
+        <span class="n">stdVar</span> <span class="o">=</span> <span class="n">stdDf</span><span class="p">[</span><span class="n">use_column</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">xx</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stdMean</span><span class="p">):</span>
             <span class="n">xx</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">value</span><span class="p">,</span> <span class="n">stdVar</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
@@ -317,6 +418,7 @@
 
         <span class="c1"># Coerce numpy.int64 to int</span>
         <span class="n">one_class_svm_scores</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">one_class_svm_scores</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">one_class_svm_scores</span>
 
         <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
@@ -330,41 +432,59 @@
                     <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore_list</span>
+
+        <span class="c1"># @added 20230707</span>
+        <span class="c1"># This would be to handle the algorithm occasionally flagging all the</span>
+        <span class="c1"># values of 0 as anomalies</span>
+        <span class="c1"># if sum(anomalyScore_list) &gt;= len(timeseries) / 2:</span>
 
         <span class="n">anomaly_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">[</span><span class="o">-</span><span class="n">anomaly_window</span><span class="p">:])</span>
         <span class="k">if</span> <span class="n">anomaly_sum</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
-            <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">anomalies</span><span class="p">,</span>
-            <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
-            <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">one_class_svm_scores</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20230801</span>
+        <span class="c1"># If the algorithm identifies almost all of the data points as</span>
+        <span class="c1"># anomalous, class the results as invalid</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">95</span><span class="p">):</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;unreliable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;one_class_svm results unreliable, </span><span class="si">%s</span><span class="s1"> anomalies in timeseries of length </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: one_class_svm results unreliable, </span><span class="si">%s</span><span class="s1"> anomalies in timeseries of length </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ran one_class_svm OK in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: ran one_class_svm OK in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
             <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]:</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;anomalous: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: anomalous: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">))</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: one_class_svm - anomalous: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error - no results&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error - no results&#39;</span><span class="p">)</span>
 
     <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;warning - StopIteration called on one_class_svm&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: warning - StopIteration called on one_class_svm&#39;</span><span class="p">)</span>
@@ -381,7 +501,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error:&#39;</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error - on one_class_svm - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
@@ -396,6 +516,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -405,7 +526,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

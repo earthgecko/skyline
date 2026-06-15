@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skyline metrics &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Skyline metrics &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#metric-definitions">Metric definitions</a></li>
 </ul>
@@ -129,7 +129,7 @@
            <div itemprop="articleBody">
              
   <section id="skyline-metrics">
-<h1><span class="skyblue">Sky</span><span class="red">line</span> metrics<a class="headerlink" href="#skyline-metrics" title="Permalink to this heading"></a></h1>
+<h1><span class="skyblue">Sky</span><span class="red">line</span> metrics<a class="headerlink" href="#skyline-metrics" title="Link to this heading"></a></h1>
 <p>Like all applications, <span class="skyblue">Sky</span><span class="red">line</span> makes its own metrics.
 A lot of cloud native things expose a LOT of internal metrics and generally
 modern applications tend to make a lot of metrics, verbosely describing the
@@ -146,7 +146,7 @@ all.</p>
 <p><span class="skyblue">Sky</span><span class="red">line</span> has always attempted to not make too many metrics.</p>
 <p>Skyline metrics are sent to Graphite and can be viewed in the Graphite Browser.</p>
 <section id="metric-definitions">
-<h2>Metric definitions<a class="headerlink" href="#metric-definitions" title="Permalink to this heading"></a></h2>
+<h2>Metric definitions<a class="headerlink" href="#metric-definitions" title="Link to this heading"></a></h2>
 <p>Here each <span class="skyblue">Sky</span><span class="red">line</span> metric is described.  Metrics are only sent
 if you run a Skyline app or specific feature, if you are not running flux do not
 expect to get flux metrics.  <strong>This is list not complete it is a work in
@@ -184,14 +184,14 @@ being experienced.  By default not analysed and excluded via
 <a class="reference internal" href="skyline.html#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKIP_LIST</span></code></a> as they are feedback metrics.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.anomaly_breakdown.$algorithm</span></code>: How many times each
 algorithm triggerred.  Same category as the above metrics.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.Boring</span></code>: the number of metrics with timeseries
+<li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.Boring</span></code>: the number of metrics with time series
 that have the same value for <a class="reference internal" href="skyline.html#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MAX_TOLERABLE_BOREDOM</span></code></a> (default 100)
 in a row.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.Other</span></code>: unknown exceptions</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.TooShort</span></code>: the number of metrics that have
-timeseries that are too short to be analysed (<a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a>)</p></li>
+time series that are too short to be analysed (<a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a>)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.EmptyTimeseries</span></code>: the number of metrics
-that have empty timeseries.</p></li>
+that have empty time series.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.exceptions.Stale</span></code>: <strong>IMPORTANT</strong> the number of
 metrics that have not sent new data in <a class="reference internal" href="skyline.html#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.STALE_PERIOD</span></code></a>.  If this
 number spikes up it means that there is a problem with the data being fed to
@@ -266,12 +266,12 @@ number of metrics that are moving towards a fully populated state.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.metrics_sparsity.metrics_sparsity_increasing</span></code>: the
 number of metrics that are moving away from a fully populated state.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.metrics_sparsity.avg_sparsity</span></code>: <strong>IMPORTANT</strong> this
-is number describes how well populated the metric timeseries population is.
+is number describes how well populated the metric time series population is.
 100 is perfect, going below about 93% on high resolution metrics indicates a
 problem, either the metrics are missing data, some have gone offline or
 network partitions are being encountered.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.duration</span></code>: The duration (in hours) of the
-<a class="reference internal" href="skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CANARY_METRIC</span></code></a> timeseries data.</p></li>
+<a class="reference internal" href="skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CANARY_METRIC</span></code></a> time series data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.ionosphere_metrics</span></code>: the number of metrics in the
 population that have been trained.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skyline.analyzer.$host.metrics_manager_run_time</span></code>: <strong>IMPORTANT</strong> the number
@@ -438,7 +438,7 @@ via inclusion in <a class="reference internal" href="skyline.html#settings.DO_NO
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

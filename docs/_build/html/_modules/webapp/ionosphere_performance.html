@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webapp.ionosphere_performance &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>webapp.ionosphere_performance &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -124,6 +124,7 @@
              
   <h1>Source code for webapp.ionosphere_performance</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -137,6 +138,17 @@
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">text</span>
+
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># @added 20230713 - Task #4996: Improve matplotlib performance</span>
+<span class="c1"># Improve matplotlib render performance</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.style</span> <span class="k">as</span> <span class="nn">mplstyle</span>
+<span class="n">mplstyle</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fast&#39;</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
@@ -166,7 +178,9 @@
 
 
 <span class="c1"># @added 20210107 - Feature #3934: ionosphere_performance</span>
-<div class="viewcode-block" id="get_ionosphere_performance"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_performance.get_ionosphere_performance">[docs]</a><span class="k">def</span> <span class="nf">get_ionosphere_performance</span><span class="p">(</span>
+<div class="viewcode-block" id="get_ionosphere_performance">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_performance.get_ionosphere_performance">[docs]</a>
+<span class="k">def</span> <span class="nf">get_ionosphere_performance</span><span class="p">(</span>
         <span class="n">metric</span><span class="p">,</span> <span class="n">metric_like</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">output_format</span><span class="p">,</span>
         <span class="c1"># @added 20210128 - Feature #3934: ionosphere_performance</span>
         <span class="c1"># Improve performance and pass arguments to get_ionosphere_performance</span>
@@ -183,9 +197,6 @@
 <span class="sd">    :rtype:  dict</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">datetime</span>
-    <span class="kn">import</span> <span class="nn">pytz</span>
-    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
     <span class="n">dev_null</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ionosphere_performance_debug</span> <span class="o">=</span> <span class="kc">False</span>
@@ -498,12 +509,18 @@
         <span class="n">start_timestamp_date</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># If the from_timestamp is 0 or all</span>
         <span class="k">if</span> <span class="n">determine_start_timestamp</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - determining start_timestamp_str&#39;</span><span class="p">)</span>
             <span class="n">created_dates</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="c1"># stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)</span>
-                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">created_timestamp</span><span class="p">],</span> <span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span>
+                <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                <span class="c1">#stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))</span>
+                <span class="n">min_metric_id</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">)</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">created_timestamp</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">min_metric_id</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                     <span class="c1"># start_timestamp_date = row[&#39;created_timestamp&#39;]</span>
                     <span class="n">created_dates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;created_timestamp&#39;</span><span class="p">])</span>
@@ -707,11 +724,17 @@
             <span class="n">report_anomalies</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">anomalies_ts</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20240216 - Task #5088: Change membership of the list checks to sets</span>
+    <span class="c1">#                   Feature #3934: ionosphere_performance</span>
+    <span class="c1"># Quicker to test membership of the set</span>
+    <span class="n">metric_ids_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">report_anomalies</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalies_table OK&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - anomalies_table OK&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get anomalies_table meta&#39;</span><span class="p">)</span>
@@ -725,12 +748,24 @@
             <span class="c1"># Allow for a minimum full_duration to differential between analyzer and</span>
             <span class="c1"># mirage anomalies. Added min_full_duration</span>
             <span class="k">if</span> <span class="n">metric_ids</span><span class="p">:</span>
+                <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                <span class="c1"># Faster query and less iteration of results</span>
                 <span class="c1"># stmt = select([anomalies_table.c.id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\</span>
-                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">],</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">full_duration</span> <span class="o">&gt;=</span> <span class="n">min_full_duration</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - stmt: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">stmt</span><span class="p">))</span>
+                <span class="n">start_stmt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+
+                <span class="c1"># @added 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                <span class="c1">#                   Feature #3934: ionosphere_performance</span>
+                <span class="n">rows</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">rows</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - stmt completed with </span><span class="si">%s</span><span class="s1"> results in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)),</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_stmt</span><span class="p">)))</span>
             <span class="k">elif</span> <span class="n">metric_id</span><span class="p">:</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span><span class="o">.</span>\
@@ -750,7 +785,9 @@
                 <span class="k">if</span> <span class="n">r_metric_id</span> <span class="o">==</span> <span class="n">metric_id</span><span class="p">:</span>
                     <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">append_result</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">r_metric_id</span> <span class="ow">in</span> <span class="n">metric_ids</span><span class="p">:</span>
+                    <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                    <span class="c1"># if r_metric_id in metric_ids:</span>
+                    <span class="k">if</span> <span class="n">r_metric_id</span> <span class="ow">in</span> <span class="n">metric_ids_set</span><span class="p">:</span>
                         <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">append_result</span><span class="p">:</span>
                     <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
@@ -766,6 +803,55 @@
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - anomalies_ts length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies_ts</span><span class="p">)))</span>
+
+        <span class="c1"># @added 20231004 - Feature #3934: ionosphere_performance</span>
+        <span class="c1"># If there are no anomalies at min_full_duration at all then chances are</span>
+        <span class="c1"># these are new metrics so report on anomalies &lt; min_full_duration </span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalies_ts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - no anomalies found trying without min_full_duration&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">metric_ids</span><span class="p">:</span>
+                    <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                    <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                    <span class="c1"># Faster query and less iteration of results</span>
+                    <span class="c1"># stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">],</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">metric_id</span><span class="p">:</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                        <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="n">r_metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+                    <span class="n">append_result</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">r_metric_id</span> <span class="o">==</span> <span class="n">metric_id</span><span class="p">:</span>
+                        <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">append_result</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">r_metric_id</span> <span class="ow">in</span> <span class="n">metric_ids_set</span><span class="p">:</span>
+                            <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">append_result</span><span class="p">:</span>
+                        <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                        <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+                        <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">))</span>
+                        <span class="n">anomalies_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)])</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine anomaly ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">engine_disposal</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="k">raise</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - anomalies_ts length with no min_full_duration - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies_ts</span><span class="p">)))</span>
 
     <span class="n">fp_type</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
     <span class="k">if</span> <span class="s1">&#39;fp_type&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -848,7 +934,11 @@
                         <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">generation</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\</span>
-                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                    <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                    <span class="c1"># Faster query and less iteration of results</span>
+                    <span class="c1"># stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">],</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
                         <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>\
                         <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - determining fp ids of type </span><span class="si">%s</span><span class="s1"> for metric_ids&#39;</span> <span class="o">%</span> <span class="n">fp_type</span><span class="p">)</span>
@@ -953,22 +1043,50 @@
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="c1"># @added 20240216 - Task #5088: Change membership of the list checks to sets</span>
+    <span class="c1">#                   Feature #3934: ionosphere_performance</span>
+    <span class="n">fp_ids_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span>
+
     <span class="n">fps_matched_ts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">fp_ids</span><span class="p">:</span>
+
+        <span class="c1"># @added 20240216 - Task #5088: Change membership of the list checks to sets</span>
+        <span class="c1">#                   Feature #3934: ionosphere_performance</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - determining fps_matched_ts&#39;</span><span class="p">)</span>
+        <span class="n">start_matched</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
             <span class="c1"># stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\</span>
-            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_timestamp</span><span class="p">])</span><span class="o">.</span>\
+            <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+            <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+            <span class="c1"># Faster query and less iteration of results</span>
+            <span class="c1"># stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_timestamp</span><span class="p">],</span> <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">))</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
+            <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+            <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+            <span class="c1"># result = connection.execute(stmt)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - stmt: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">stmt</span><span class="p">))</span>
+            <span class="n">start_stmt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">rows</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - stmt completed with </span><span class="si">%s</span><span class="s1"> results in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)),</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_stmt</span><span class="p">)))</span>
+
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                 <span class="n">append_result</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span> <span class="ow">and</span> <span class="n">metric_like</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
                     <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">append_result</span><span class="p">:</span>
                     <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids</span><span class="p">:</span>
+                    <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                    <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                    <span class="c1"># if fp_id in fp_ids:</span>
+                    <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids_set</span><span class="p">:</span>
                         <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">append_result</span><span class="p">:</span>
                     <span class="n">matched_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
@@ -982,6 +1100,13 @@
             <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
+
+        <span class="c1"># @added 20240216 - Task #5088: Change membership of the list checks to sets</span>
+        <span class="c1">#                   Feature #3934: ionosphere_performance</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - determining fps_matched_ts took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_matched</span><span class="p">)</span>            
+        <span class="p">))</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - fps_matched_ts - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fps_matched_ts</span><span class="p">)))</span>
 
     <span class="c1"># Get layers matches</span>
@@ -1001,7 +1126,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
             <span class="c1"># stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\</span>
-            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">])</span><span class="o">.</span>\
+            <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+            <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+            <span class="c1"># Faster query and less iteration of results</span>
+            <span class="c1"># stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">],</span> <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">))</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
@@ -1011,7 +1140,10 @@
                     <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">append_result</span><span class="p">:</span>
                     <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids</span><span class="p">:</span>
+                    <span class="c1"># @modified 20240216 - Task #5088: Change membership of the list checks to sets</span>
+                    <span class="c1">#                      Feature #3934: ionosphere_performance</span>
+                    <span class="c1"># if fp_id in fp_ids:</span>
+                    <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids_set</span><span class="p">:</span>
                         <span class="n">append_result</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">append_result</span><span class="p">:</span>
                     <span class="n">matched_layers_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
@@ -1209,8 +1341,29 @@
         <span class="n">performance_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
         <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;ffill&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - second step of creating performance_df complete, dataframe length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">performance_df</span><span class="p">)))</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fps_total_df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">report_total_fps</span><span class="p">:</span>
         <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># @added 20240322 -</span>
+    <span class="k">if</span> <span class="n">report_total_fps</span><span class="p">:</span>
+        <span class="n">replace_total_fps</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">yesterday_fps_total_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">yesterday_data</span><span class="p">:</span>    
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">yesterday_fps_total_count</span> <span class="o">=</span> <span class="n">yesterday_data</span><span class="p">[</span><span class="n">yesterday_end_date</span><span class="p">][</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - could not determine fps_total_count from yesterday_data, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">performance_fps_total_count</span> <span class="o">=</span> <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">yesterday_fps_total_count</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">performance_fps_total_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">replace_total_fps</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">performance_fps_total_count</span><span class="p">):</span>
+                <span class="n">replace_total_fps</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">replace_total_fps</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_ionosphere_performance - replacing fps_total_count of </span><span class="si">%s</span><span class="s1"> in performance_df with </span><span class="si">%s</span><span class="s1"> from yesterday_data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">performance_fps_total_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">yesterday_fps_total_count</span><span class="p">)))</span>
+            <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">yesterday_fps_total_count</span>
 
     <span class="c1"># Report fps_matched_count per day</span>
     <span class="n">report_fps_matched_count</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1284,7 +1437,9 @@
 
         <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span>
         <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20240603 - Feature #5352: vista - bigquery</span>
+        <span class="c1"># ydf[&#39;date&#39;] = ydf[&#39;date&#39;].astype(&#39;datetime64&#39;)</span>
+        <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ydf</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[ns]&#39;</span><span class="p">)</span>
         <span class="c1"># @added 20210202 - Feature #3934: ionosphere_performance</span>
         <span class="c1"># Handle user timezone</span>
         <span class="k">if</span> <span class="n">timezone_str</span> <span class="o">!=</span> <span class="s1">&#39;UTC&#39;</span><span class="p">:</span>
@@ -1325,7 +1480,11 @@
         <span class="c1"># the last x days of the period being 0 because the cumsum of new_fps_count</span>
         <span class="c1"># is 0.  Recalculate the fps_total_count on the cumsum of new_fps_count</span>
         <span class="c1"># of the merged df</span>
-        <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;new_fps_count&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+        <span class="c1"># @modified 20240322</span>
+        <span class="c1"># Only use cumsum if fps_total_count is 0</span>
+        <span class="c1"># performance_df[&#39;fps_total_count&#39;] = performance_df[&#39;new_fps_count&#39;].cumsum()</span>
+        <span class="k">if</span> <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;fps_total_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">performance_df</span><span class="p">[</span><span class="s1">&#39;new_fps_count&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
 
     <span class="n">plot_png</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">output_format</span> <span class="o">!=</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
@@ -1377,6 +1536,10 @@
         <span class="n">plot_done</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="s1">&#39;fps_total_count&#39;</span> <span class="ow">in</span> <span class="n">performance_df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">report_total_fps</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+            <span class="c1"># @added 20230713 - Task #4996: Improve matplotlib performance</span>
+            <span class="c1"># Improve matplotlib render performance</span>
+            <span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;path.simplify_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
 
             <span class="c1"># @added 20210203 - Feature #3934: ionosphere_performance</span>
             <span class="c1"># Correct axes labels</span>
@@ -1554,6 +1717,7 @@
     <span class="k">if</span> <span class="n">dev_null</span><span class="p">:</span>
         <span class="k">del</span> <span class="n">dev_null</span>
     <span class="k">return</span> <span class="n">performance</span></div>
+
 </pre></div>
 
            </div>
@@ -1563,7 +1727,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

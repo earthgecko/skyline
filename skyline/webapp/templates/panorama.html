@@ -1,50 +1,76 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 <!-- BEGIN /panorama block -->
 <!-- # @added 20200226 - Ideas #2476: Label and relate anomalies -->
 {% if label_anomalies %}
 
+  <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/panorama">Panorama</a></li>
-  		<li class="active"><span class="logo"><span class="sky">label</span> <span class="re">anomalies</span></li>
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></li>
     </div>
 	</ol>
+  </nav>
+
   {% include "label_anomalies.html" %}
 <!-- # @added 20210326 - Feature #3994: Panorama - mirage not anomalous -->
 {% elif not_anomalous %}
+  <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/panorama">Panorama</a></li>
-  		<li class="active"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></li>
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></li>
     </div>
 	</ol>
+  </nav>
   {% include "not_anomalous.html" %}
 <!-- # @added 20210328 - Feature #3994: Panorama - mirage not anomalous -->
 {% elif not_anomalous_metric %}
+  <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/panorama">Panorama</a></li>
-  		<li><a href="/panorama/not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></a></li>
-  		<li class="active"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous metric</span></li>
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama/not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous metric</span></span></li>
     </div>
 	</ol>
+  </nav>
   {% include "not_anomalous_metric.html" %}
 
 <!-- # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies -->
 {% elif plot_metric_anomalies %}
+  <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/panorama">Panorama</a></li>
-  		<li class="active"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></li>
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></li>
     </div>
 	</ol>
+  </nav>
   {% include "plot_metric_anomalies.html" %}
+
+  {% elif smoke %}
+  <script src="/static/js/panorama_smoke.js"></script>
+  <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Smoke</span></span></li>
+    </div>
+	</ol>
+  </nav>
+  {% include "smoke.html" %}
 
 {% else %}
 
@@ -63,43 +89,62 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
   <script type="text/javascript" src="/static/moment-2.29.2/moment.min.js"></script>
   <script type="text/javascript" src="/static/moment-timezone-0.5.34/moment-timezone-with-data.min.js"></script>
 
+  <nav aria-label="breadcrumb">
 	<ol class="breadcrumb">
-  	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/panorama">Panorama</a></li>
-  		<li class="active"><span class="logo"><span class="sky">search</span> <span class="re">anomalies</span></li>
-    </div>
+  		<li class="breadcrumb-item"><a href="/">Home</a></li>
+  		<li class="breadcrumb-item"><a href="/panorama">Panorama</a></li>
+  		<li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">search</span> <span class="re">anomalies</span></span></li>
 	</ol>
+  </nav>
 
-<div class="container-fluid">
-<div class="navbar-header" role="navigation">
-  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
-		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
-		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
-		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
-		</ul>
-		<div class="tab-content">
-	  	<div class="tab-pane active" id="view">
-	<br>
-  <div class="navbar-header" role="navigation">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-  </div>
-  </div>
-  </div>
-  </div>
-  </div>
-
+<!--
+  <nav class="navbar navbar-expand-lg bg-body_teritary">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="/?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="/?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="/?not_anomalous=true"><span class="logo"><span class="re">Not</span> <span class="sky">anomalous</span></span></a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="/?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </nav>
+-->
+    <div class="container-fluid">
+      <ul class="nav nav-tabs">
+          <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a>
+          </li>
+          <li class="nav-item">
+          <a class="nav-link" href="/panorama?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a>
+          </li>
+          <li class="nav-item">
+          <a class="nav-link" href="/panorama?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a>
+          </li>
+          <li class="nav-item">
+          <a class="nav-link" href="/panorama?not_anomalous=true"><span class="logo"><span class="re">Not</span> <span class="sky">anomalous</span></span></a>
+          </li>
+          <li class="nav-item">
+          <a class="nav-link" href="/panorama?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a>
+          </li>
+      </ul>
+    </div>
+    <br>
 
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere

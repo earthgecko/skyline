@@ -137,6 +137,29 @@ status () {
 
 }
 
+# @added 20230929 - Feature #5090: flux.d reload
+#                   Feature #4324: flux - reload external_settings
+# Allow for bin/flux.d to call reload_flux
+# Reloading flux is complicated. Restarting flux on changes is undesirable due
+# to the shutdown down and spin up times of flux workers. A fact.
+# When flux is restarted, there is a probability of lost data, just a fact.
+# So allow the flux.d bin call the reload_flux(current_skyline_app, flux_pid_file)
+# Feature #4324: flux - reload external_settings, method of reloading flux and
+# add a systemctl reload flux option.
+# This is preferable to reproducing the process of kill master, waiting for new
+# master and new workers and killing original workers and master.
+reload () {
+    echo "reloading ${SERVICE_NAME} as user ${CURRENT_USER}"
+    $USE_PYTHON "$BASEDIR/skyline/functions/fluxd/fluxd_reload_flux.py" flux.d "$PID_PATH/${SERVICE_NAME}.pid"
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ]; then
+        echo "OK ${SERVICE_NAME} reloaded"
+    else
+        echo "ERROR ${SERVICE_NAME} failed to reload, exited with $EXITCODE"
+    fi
+    return $RETVAL
+}
+
 start () {
 
     if [ $RESTART -eq 1 ]; then
@@ -205,6 +228,13 @@ start () {
       RUNNING_PID=$(cat "$PID_PATH/${SERVICE_NAME}.pid" | head -n 1)
     else
       RUNNING_PID="unknown"
+    fi
+
+    if [ $RUNNING_PID == "unknown" ]; then
+      sleep 5
+      if [ -f "$PID_PATH/${SERVICE_NAME}.pid" ]; then
+        RUNNING_PID=$(cat "$PID_PATH/${SERVICE_NAME}.pid" | head -n 1)
+      fi
     fi
 
     echo "${SERVICE_NAME} started with pid $RUNNING_PID"
@@ -320,12 +350,17 @@ case "$1" in
     RESTART=1
     stop
     start
-       ;;
+        ;;
+# @added 20230929 - Feature #5090: flux.d reload
+#                   Feature #4324: flux - reload external_settings
+  reload)
+    reload
+        ;;
   status)
     status
         ;;
   *)
-        echo $"Usage: $0 {start|stop|status}"
+        echo $"Usage: $0 {reload|start|stop|status}"
         exit 2
         ;;
 esac

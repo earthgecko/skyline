@@ -157,6 +157,32 @@ from functions.metrics_manager.manage_labelled_metrics_longterm_metric_type impo
 # @added 20230605 - Feature #4932: mute_alerts_on
 from functions.metrics_manager.manage_mute_alerts_on import manage_mute_alerts_on
 
+# @added 20231016 - Feature #5102: webapp - api skip_analysis
+from slack_functions import slack_post_message
+
+# @added 20231121 - Feature #5104: boundary - external_settings
+# Limit cardinality
+from functions.thunder.send_event import thunder_send_event
+
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
+
+# @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+from functions.metrics_manager.manage_echo_fp_ids import manage_echo_fp_ids
+
+# @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+from functions.metrics_manager.manage_skyline_feedback_metrics import manage_skyline_feedback_metrics
+
+# @added 20240518 - Feature #5356: get_batch_processing_namespaces
+#                   Feature #5352: vista - bigquery
+#                   Feature #3480: batch_processing 
+from functions.metrics_manager.manage_batch_processing_namespaces import manage_batch_processing_namespaces
+from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
+
+# @added 20240610 - Feature #5352: vista - bigquery
+from functions.metrics_manager.cluster_sync_bq_archives import cluster_sync_bq_archives
+
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -397,6 +423,22 @@ try:
 except:
     VORTEX_SAVE_RESULTS_FOR = 86400
 
+# @added 20240111 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+#                   Task #5178: Build and test skyline v4.1.0
+# Allow to disable manage_inactive_metrics to debug is_in_shard with 100s of
+# 1000s of metrics
+MANAGE_INACTIVE_METRICS = True
+try:
+    MANAGE_INACTIVE_METRICS = settings.MANAGE_INACTIVE_METRICS
+except:
+    MANAGE_INACTIVE_METRICS = True
+
+# @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+try:
+    ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY = settings.ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY
+except:
+    ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 full_uniques = '%sunique_metrics' % settings.FULL_NAMESPACE
@@ -473,6 +515,7 @@ class Metrics_Manager(Thread):
                 logger.error('error :: metrics_manager :: failed to determine what shard %s is assigned to via modulo and HORIZON_SHARDS: %s' % (str(metric_name), e))
         return assigned_host
 
+
     def get_remote_data(self, remote_skyline_instance, data_required, endpoint, save_file=False):
         try:
             connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
@@ -513,7 +556,7 @@ class Metrics_Manager(Thread):
             # @modified 20220510 - Task #4568: Reduce cluster logging
             #                      Release #4562: v3.0.4
             if LOCAL_DEBUG:
-                logger.warning('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
+                logger.info('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
                     endpoint, str(remote_skyline_instance[0])))
             return data
         if r:
@@ -544,7 +587,6 @@ class Metrics_Manager(Thread):
                     endpoint, str(remote_skyline_instance)))
                 logger.debug('debug :: metrics_manager :: get_remote_data - data_required: %s, endpoint: %s, save_file: %s' % (
                     str(data_required), str(endpoint), str(save_file)))
-            data_required, endpoint, save_file
             if js:
                 # @modified 20220510 - Task #4568: Reduce cluster logging
                 #                      Release #4562: v3.0.4
@@ -633,7 +675,7 @@ class Metrics_Manager(Thread):
 
         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
             if training_data_fetched >= max_training_data_to_fetch:
-                logger.warning('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
+                logger.info('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
                 break
             remote_training_data = []
             data_required = 'metrics'
@@ -848,7 +890,7 @@ class Metrics_Manager(Thread):
         if get_features_profile_dirs:
             for fp_id in get_features_profile_dirs:
                 if fps_fetched >= max_fps_to_fetch:
-                    logger.warning('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
+                    logger.info('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
                     break
                 features_profile_dir = None
                 endpoint = None
@@ -1220,6 +1262,21 @@ class Metrics_Manager(Thread):
             quota_sync_duration = quota_sync_end - file_sync_spin_end
             logger.info('metrics_manager :: sync_cluster_files :: cluster quota sync of flux.quota.namespace_metrics Redis keys took %.2f seconds' % quota_sync_duration)
 
+        # @added 20240610 - Feature #5352: vista - bigquery
+        # Sync bq_archive files
+        bq_accounts_settings = {}
+        try:
+            bq_accounts_settings = get_bq_accounts_settings(skyline_app)
+            if isinstance(bq_accounts_settings, dict):
+                if len(bq_accounts_settings) == 0:
+                    bq_accounts_settings = None
+        except Exception as err:
+            logger.error('error :: metrics_manager :: sync_cluster_files :: get_bq_accounts_settings failed, err: %s' % err)
+        if len(bq_accounts_settings) > 0:
+            logger.info('metrics_manager :: sync_cluster_files :: running cluster_sync_bq_archives')
+            cluster_sync_bq_archives()
+            logger.info('metrics_manager :: sync_cluster_files :: cluster_sync_bq_archives complete')
+
         spin_end = time() - spin_start
         logger.info('metrics_manager :: sync_cluster_files took %.2f seconds' % spin_end)
         return
@@ -1253,11 +1310,38 @@ class Metrics_Manager(Thread):
             with memray_tracker:
 
                 if not self.redis_conn or not self.redis_conn_decoded:
-                    logger.warning('metrics_manager :: no redis connection, returning')
+                    logger.info('warning :: metrics_manager :: no redis connection, returning')
                     return
 
                 logger.info('metrics_manager :: metric_management_process :: memory usage at start of run - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
+
+                # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                load_shedding_active = False
+                try:
+                    load_shedding_active = self.redis_conn_decoded.exists('analyzer.metrics.last_analysis_timestamp')
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: metric_management_process :: load_shedding_active because analyzer.metrics.last_analysis_timestamp exists')
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: exists failed analyzer.metrics.last_analysis_timestamp, err: %s' % err)
+                if not load_shedding_active:
+                    try:
+                        load_shedding_active = self.redis_conn_decoded.get('analyzer_labelled_metrics.busy')
+                        if load_shedding_active:
+                            logger.info('metrics_manager :: metric_management_process :: load_shedding_active because analyzer_labelled_metrics.busy exists')
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to get analyzer_labelled_metrics.busy Redis key' % (
+                            err))
+                if not load_shedding_active:
+                    try:
+                        load_shedding_active = self.redis_conn_decoded.exists('analyzer_labelled_metrics.high_run_time')
+                        if load_shedding_active:
+                            logger.info('metrics_manager :: metric_management_process :: load_shedding_active because analyzer_labelled_metrics.high_run_time exists')
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: load_shedding_active failed to get key analyzer_labelled_metrics.high_run_time, err: %s' % err)
+                logger.info('metrics_manager :: metric_management_process :: load_shedding_active: %s' % (
+                    str(load_shedding_active)))
 
                 # @added 20230411 - Task #4872: Optimise luminosity for labelled_metrics
                 # Create a unique list of namespaces to create a hash to be used in
@@ -1282,13 +1366,21 @@ class Metrics_Manager(Thread):
                     logger.error('error :: metrics_manager ::: could not get skyline.external_settings.update.metrics_manager from Redis, err: %s' % err)
                 if external_settings_updated:
                     do_reload_flux = True
-                    logger.info('metrics_manager :: set to reload_flux as skyline.external_settings.update.metrics_manager is present')
-                    logger.info('metrics_manager :: removing Redis key metrics_manager.manage_flux_aggregate_namespaces to refresh')
-                    try:
-                        self.redis_conn.delete(manage_flux_aggregate_namespaces_redis_key)
-                    except Exception as err:
-                        if LOCAL_DEBUG:
-                            logger.error('error :: metrics_manager :: could not delete Redis key metrics_manager.manage_flux_aggregate_namespaces: %s' % str(err))
+
+                    # @added 20230929 - Feature #5090: flux.d reload
+                    #                   Feature #4324: flux - reload external_settings
+                    # Added reload option the bin/flux.d just use the same key
+                    # as reload external_settings
+                    if external_settings_updated == 'fluxd_reload_flux':
+                        logger.info('metrics_manager :: set to reload_flux as requested by fluxd_reload_flux')
+                    else:
+                        logger.info('metrics_manager :: set to reload_flux as skyline.external_settings.update.metrics_manager is present')
+                        logger.info('metrics_manager :: removing Redis key metrics_manager.manage_flux_aggregate_namespaces to refresh')
+                        try:
+                            self.redis_conn.delete(manage_flux_aggregate_namespaces_redis_key)
+                        except Exception as err:
+                            if LOCAL_DEBUG:
+                                logger.error('error :: metrics_manager :: could not delete Redis key metrics_manager.manage_flux_aggregate_namespaces: %s' % str(err))
 
                 last_run_timestamp = 0
                 try:
@@ -1312,11 +1404,13 @@ class Metrics_Manager(Thread):
                 algorithms = {}
                 try:
                     algorithms = get_algorithms(skyline_app)
+                    # algorithms dict example
+                    # {'histogram_bins': 1, 'first_hour_average': 2, ..., 'irregular_unstable': 253}
                 except Exception as err:
                     logger.error('error :: metrics_manager :: get_algorithms failed - %s' % str(err))
                 if algorithms:
                     try:
-                        last_run_timestamp = self.redis_conn_decoded.hset('metrics_manager.algorithms.ids', mapping=algorithms)
+                        self.redis_conn_decoded.hset('metrics_manager.algorithms.ids', mapping=algorithms)
                     except Exception as err:
                         logger.error('error :: metrics_manager :: failed to set metrics_manager.algorithms.ids - %s' % str(err))
 
@@ -1441,11 +1535,27 @@ class Metrics_Manager(Thread):
                     except:
                         pass
                     try:
-                        self.redis_conn.rename('analyzer.unique_base_names', 'analyzer.unique_base_names.old')
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('analyzer.unique_base_names', 'analyzer.unique_base_names.old')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.unique_base_names', 'analyzer.unique_base_names.old', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming analyzer.unique_base_names to analyzer.unique_base_names.old, err: %s' % err)
                     except:
                         pass
                     try:
-                        self.redis_conn.rename('new_analyzer.unique_base_names', 'analyzer.unique_base_names')
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('new_analyzer.unique_base_names', 'analyzer.unique_base_names')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'new_analyzer.unique_base_names', 'analyzer.unique_base_names', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming new_analyzer.unique_base_names to analyzer.unique_base_names, err: %s' % err)
                     except:
                         pass
                     try:
@@ -1612,6 +1722,12 @@ class Metrics_Manager(Thread):
 
                 refresh_redis_alert_sets = True
 
+                # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active, not refreshing Redis alert sets')
+                    refresh_redis_alert_sets = False
+
                 # @added 20220822 - Task #2732: Prometheus to Skyline
                 #                   Branch #4300: prometheus
                 # Add labelled_metrics to mirage.unique_metrics
@@ -1709,7 +1825,15 @@ class Metrics_Manager(Thread):
                         except:
                             pass
                         try:
-                            self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.smtp_alerter_metrics to analyzer.smtp_alerter_metrics.old, err: %s' % err)
                         except:
                             pass
                         try:
@@ -1717,7 +1841,15 @@ class Metrics_Manager(Thread):
                             #                   Branch #2270: luminosity
                             # Add a Redis set of smtp_alerter_metrics for Luminosity to only
                             # cross correlate on metrics with an alert setting
-                            self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming new_analyzer.smtp_alerter_metrics to analyzer.smtp_alerter_metrics, err: %s' % err)
                         except:
                             pass
                         try:
@@ -1755,11 +1887,28 @@ class Metrics_Manager(Thread):
                         except:
                             pass
                         try:
-                            self.redis_conn.rename('analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics.old')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics.old')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics.old', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.non_smtp_alerter_metrics to analyzer.non_smtp_alerter_metrics.old, err: %s' % err)
+
                         except:
                             pass
                         try:
-                            self.redis_conn.rename('new_analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('new_analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'new_analyzer.non_smtp_alerter_metrics', 'analyzer.non_smtp_alerter_metrics', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming new_analyzer.non_smtp_alerter_metrics to analyzer.non_smtp_alerter_metrics, err: %s' % err)
                         except:
                             pass
                         try:
@@ -2153,6 +2302,8 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: got %s metrics from horizon.skip_metrics Redis hash' % (
                     str(len(skip_metrics_dict))))
                 horizon_skip_metrics = list(skip_metrics_dict.keys())
+                logger.info('metrics_manager :: got %s metrics from horizon.skip_metrics' % (
+                    str(len(skip_metrics_dict))))
 
                 # @added 20220426 - Feature #4536: Handle Redis failure
                 # Add flux required data to memcache as well
@@ -2212,9 +2363,48 @@ class Metrics_Manager(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: smembers failed on aet.horizon.metrics_received - %s' % err)
                     horizon_metrics_received = []
+
                 all_unique_base_names = list(set(unique_base_names + horizon_metrics_received + horizon_skip_metrics + horizon_do_not_skip_metrics))
                 if ALL_SKIP_LIST:
+
+                    # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    # Do not create the metrics_manager_skip_list list because
+                    # resulting check and creation of metrics_manager_do_not_skip_list
+                    # and the Redis sets can take up to 1 minute to run under
+                    # high load or I/O wait.  Not doing this operation when busy
+                    # is not critical as it is just adding any new metrics or
+                    # removing any if the settings change, it is not super urgent
+                    # work, as long as it get done periodically.
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: functions.settings.manage_external_settings :: adding override to external settings external-1048 with value from LOCAL_EXTERNAL_SETTINGS
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: functions.settings.manage_external_settings :: set memcache skyline.external_settings key
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: 43 external_settings from cache None
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: got 9922 metrics from horizon.do_not_skip_metrics Redis hash
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: got 7776 metrics from horizon.skip_metrics Redis hash
+# 2024-02-14 19:49:39 :: 4081898 :: metrics_manager :: creating metrics_manager_skip_list and metrics_manager_do_not_skip_list
+# 2024-02-14 19:49:53 :: 4081898 :: metrics_manager :: added 9363 base_names to metrics_manager_skip_list
+# 2024-02-14 19:50:22 :: 4091154 :: did not determine any ANALYZER_SKIP metrics from from analyzer.metrics_manager.analyzer_skip Redis set, will check dynamically
+# 2024-02-14 19:50:22 :: 4091158 :: did not determine any ANALYZER_SKIP metrics from from analyzer.metrics_manager.analyzer_skip Redis set, will check dynamically
+# 2024-02-14 19:50:22 :: 4091166 :: did not determine any ANALYZER_SKIP metrics from from analyzer.metrics_manager.analyzer_skip Redis set, will check dynamically
+# 2024-02-14 19:50:28 :: 4081898 :: metrics_manager :: added 9922 base_names to metrics_manager_do_not_skip_list
+# 2024-02-14 19:50:28 :: 4081898 :: metrics_manager :: removed 1587 base_names from metrics_manager_skip_list that were found in metrics_manager_do_not_skip_list
+# 2024-02-14 19:50:28 :: 4081898 :: metrics_manager :: created metrics_manager.skip_list Redis hash with 7776 metrics
+# 2024-02-14 19:50:28 :: 4081898 :: functions.redis.redis_rename_key :: Redis key new.metrics_manager.do_not_skip_list exists, renaming
+# 2024-02-14 19:50:28 :: 4081898 :: functions.redis.redis_rename_key :: renamed Redis key new.metrics_manager.do_not_skip_list to metrics_manager.do_not_skip_list
+# 2024-02-14 19:50:28 :: 4081898 :: metrics_manager :: created metrics_manager.do_not_skip_list Redis hash with 9922 metrics
+
+                    # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: load_shedding_active not determining metrics_manager_skip_list')
+
                     for base_name in all_unique_base_names:
+
+                        # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        if load_shedding_active:
+                            break
+
                         pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, ALL_SKIP_LIST)
                         del metric_matched_by
                         if pattern_match:
@@ -2222,7 +2412,19 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: added %s base_names to metrics_manager_skip_list' % str(len(metrics_manager_skip_list)))
                 metrics_manager_removed_from_skip_list = []
                 if ALL_DO_NOT_SKIP_LIST:
+
+                    # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: load_shedding_active not determining metrics_manager_do_not_skip_list')
+
                     for base_name in all_unique_base_names:
+
+                        # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        if load_shedding_active:
+                            break
+
                         if base_name in metrics_manager_skip_list:
                             pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, ALL_DO_NOT_SKIP_LIST)
                             del metric_matched_by
@@ -2242,15 +2444,30 @@ class Metrics_Manager(Thread):
                         logger.info('metrics_manager :: created metrics_manager.skip_list Redis hash with %s metrics' % str(len(metrics_manager_skip_list)))
                     except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to create Redis set new.metrics_manager.skip_list and rename to metrics_manager.skip_list')
+                        logger.error('error :: failed to create Redis set new.metrics_manager.skip_list and rename to metrics_manager.skip_list, err: %s' % err)
                 if metrics_manager_do_not_skip_list:
                     try:
                         self.redis_conn.sadd('new.metrics_manager.do_not_skip_list', *set(metrics_manager_do_not_skip_list))
-                        self.redis_conn.rename('new.metrics_manager.do_not_skip_list', 'metrics_manager.do_not_skip_list')
-                        logger.info('metrics_manager :: created metrics_manager.do_not_skip_list Redis hash with %s metrics' % str(len(metrics_manager_do_not_skip_list)))
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('new.metrics_manager.do_not_skip_list', 'metrics_manager.do_not_skip_list')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'new.metrics_manager.do_not_skip_list', 'metrics_manager.do_not_skip_list', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming new.metrics_manager.do_not_skip_list to metrics_manager.do_not_skip_list, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created metrics_manager.do_not_skip_list Redis hash with %s metrics' % str(len(metrics_manager_do_not_skip_list)))
                     except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to create Redis set new.metrics_manager.do_not_skip_list and rename to metrics_manager.do_not_skip_list')
+                        logger.error('error :: failed to create Redis set new.metrics_manager.do_not_skip_list and rename to metrics_manager.do_not_skip_list, err: %s' % err)
+
+                # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active not determining new metrics to add to horizon.do_not_skip_metrics')
+                    do_not_skip_metrics_dict = {}
 
                 # @added 20220329 - Feature #4446: Optimise horizon worker in_skip_list
                 # Update the horizon.do_not_skip_metrics Redis hash periodically to
@@ -2356,6 +2573,13 @@ class Metrics_Manager(Thread):
                 horizon_skip_set = set(horizon_skip_metrics)
                 metrics_manager_skip_set = set(metrics_manager_skip_list)
                 missing_from_horizon_skip = list(metrics_manager_skip_set.difference(horizon_skip_set))
+
+                # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active not determining missing_from_horizon_skip')
+                    missing_from_horizon_skip = []
+
                 if missing_from_horizon_skip:
                     logger.info('metrics_manager :: adding %s metrics to horizon.skip_metrics Redis hash' % (
                         str(len(missing_from_horizon_skip))))
@@ -2372,6 +2596,13 @@ class Metrics_Manager(Thread):
                 else:
                     logger.info('metrics_manager :: no metrics missing from horizon.skip_metrics Redis hash')
                 remove_from_horizon_skip = list(horizon_skip_set.difference(metrics_manager_skip_set))
+
+                # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active not determining remove_from_horizon_skip')
+                    remove_from_horizon_skip = []
+
                 if remove_from_horizon_skip:
                     logger.info('metrics_manager :: removing %s metrics to horizon.skip_metrics Redis hash' % (
                         str(len(remove_from_horizon_skip))))
@@ -2393,6 +2624,39 @@ class Metrics_Manager(Thread):
 
                 logger.info('metrics_manager :: metric_management_process :: memory usage after skip management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
+
+                # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                skyline_feedback_metrics_count = 0
+                try:
+                    if ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY:
+                        skyline_feedback_metrics_count = manage_skyline_feedback_metrics(self, unique_base_names)
+                    else:
+                        logger.info('metrics_manager :: not manage_skyline_feedback_metrics, ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY: %s' % (
+                            str(ANALYZER_SKIP_FEEDBACK_METRICS_WHEN_BUSY)))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: manage_skyline_feedback_metrics failed - %s' % err)
+                if skyline_feedback_metrics_count:
+                    logger.info('metrics_manager :: manage_skyline_feedback_metrics reports %s feedback metrics' % (
+                        str(skyline_feedback_metrics_count)))
+
+                # @added 20240518 - Feature #5356: get_batch_processing_namespaces
+                #                   Feature #5352: vista - bigquery
+                #                   Feature #3480: batch_processing
+                logger.info('metrics_manager :: managing metrics_manager.batch_processing_namespaces')
+                batch_processing_namespaces = []
+                try:
+                    batch_processing_namespaces = manage_batch_processing_namespaces(self)
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: manage_batch_processing_namespaces failed, err: %s' % err)
+                logger.info('metrics_manager :: %s batch_processing_namespaces found' % str(len(batch_processing_namespaces)))
+                del batch_processing_namespaces
+                try:
+                    bq_accounts_settings = get_bq_accounts_settings(skyline_app)
+                    if isinstance(bq_accounts_settings, dict):
+                        if len(bq_accounts_settings) == 0:
+                            bq_accounts_settings = None
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: get_bq_accounts_settings failed, err: %s' % err)
 
                 # @added 20220610 - Task #2732: Prometheus to Skyline
                 #                   Branch #4300: prometheus
@@ -2823,7 +3087,15 @@ class Metrics_Manager(Thread):
                                 if LOCAL_DEBUG:
                                     logger.error('error :: metrics_manager :: could not add to metrics_manager.new.flux.aggregate_namespaces Redis hash key: %s' % str(err))
                         try:
-                            self.redis_conn.rename('metrics_manager.new.flux.aggregate_namespaces', 'metrics_manager.flux.aggregate_namespaces')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('metrics_manager.new.flux.aggregate_namespaces', 'metrics_manager.flux.aggregate_namespaces')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.new.flux.aggregate_namespaces', 'metrics_manager.flux.aggregate_namespaces', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming metrics_manager.new.flux.aggregate_namespaces to metrics_manager.flux.aggregate_namespaces, err: %s' % err)
                         except Exception as err:
                             if LOCAL_DEBUG:
                                 logger.error('error :: metrics_manager :: failed to rename Redis hash metrics_manager.new.flux.aggregate_namespaces to metrics_manager.flux.aggregate_namespaces, %s' % str(err))
@@ -3290,7 +3562,8 @@ class Metrics_Manager(Thread):
                             # @modified 20230410 - Task #2732: Prometheus to Skyline
                             #                      Branch #4300: prometheus
                             # Handle labelled_metrics
-                            full_parent_namespace = '%s.' % str(parent_namespace)
+                            #full_parent_namespace = '%s.' % str(parent_namespace)
+                            full_parent_namespace = '%s.' % str(namespace)
 
                             if redis_hash == 'flux.skipped_metrics':
                                 namespace_skipped = []
@@ -3332,14 +3605,98 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: metric_management_process :: memory usage after flux skip management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
 
+                # @added 20231016 - Feature #5102: webapp - api skip_analysis
+                api_skip_analysis_metrics = []
+                api_skip_analysis_metrics_dict = {}
+                try:
+                    api_skip_analysis_metrics_dict = self.redis_conn_decoded.hgetall('metrics_manager.api_skip_analysis')
+                    logger.info('metrics_manager :: %s metrics found in metrics_manager.api_skip_analysis' % (
+                        str(len(api_skip_analysis_metrics_dict))))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: hgetall failed on metrics_manager.api_skip_analysis - %s' % (
+                        err))
+                c_time = int(time())
+                expired_api_skip_analysis_metrics = []
+                if api_skip_analysis_metrics_dict:
+                    for metric, timestamp in api_skip_analysis_metrics_dict.items():
+                        if int(timestamp) <= c_time:
+                            expired_api_skip_analysis_metrics.append(metric)
+                        else:
+                           api_skip_analysis_metrics.append(metric) 
+                if api_skip_analysis_metrics:
+                    logger.info('metrics_manager :: %s metrics api_skip_analysis were determined' % (
+                        str(len(api_skip_analysis_metrics))))
+                if expired_api_skip_analysis_metrics:
+                    logger.info('metrics_manager :: removing %s expired api_skip_analysis metrics from metrics_manager.api_skip_analysis' % (
+                        str(len(expired_api_skip_analysis_metrics))))
+                    try:
+                        self.redis_conn_decoded.hdel('metrics_manager.api_skip_analysis', *set(expired_api_skip_analysis_metrics))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to hdel metrics from metrics_manager.api_skip_analysis - %s' % (
+                            err))
+                    logger.info('metrics_manager :: removing %s expired api_skip_analysis metrics from analyzer.metrics_manager.analyzer_skip' % (
+                        str(len(expired_api_skip_analysis_metrics))))
+                    try:
+                        self.redis_conn.srem('analyzer.metrics_manager.analyzer_skip', *set(expired_api_skip_analysis_metrics))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to srem metrics from analyzer.metrics_manager.analyzer_skip - %s' % (
+                            err))
+                    try:
+                        slack_enabled = len(settings.SLACK_OPTS['bot_user_oauth_access_token'])
+                    except:
+                        slack_enabled = False
+                    if slack_enabled:
+                        try:
+                            alert_slack_channel = None
+                            slack_message = '*Skyline - NOTICE* - enabling analysis on %s metrics again because the skip_analysis expiry has been reached' % (
+                                str(len(expired_api_skip_analysis_metrics)))
+                            slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
+                            logger.info('metrics_manager :: posted notice to slack - %s' % (slack_message))
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: slack_post_message failed - %s' % (
+                                err))
+
                 # @added 20210513 - Feature #4068: ANALYZER_SKIP
                 analyzer_skip_metrics = []
                 if ANALYZER_SKIP:
                     logger.info('metrics_manager :: determining ANALYZER_SKIP metrics')
-                    for i_metric in unique_metrics:
+                    # for i_metric in unique_metrics:
+                    for i_metric in unique_base_names:
                         pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_metric, ANALYZER_SKIP)
                         if pattern_match:
                             analyzer_skip_metrics.append(i_metric)
+
+                # @added 20231016 - Feature #5102: webapp - api skip_analysis
+                if api_skip_analysis_metrics:
+                    analyzer_skip_metrics = analyzer_skip_metrics + api_skip_analysis_metrics
+                    analyzer_skip_metrics = list(set(analyzer_skip_metrics))
+                    if analyzer_skip_metrics:
+                        # Although this is not as efficient as an sunion for now
+                        # just remove the key so it can be readded below which
+                        # ensures that the set is refreshed with the API added
+                        # entries
+                        try:
+                            self.redis_conn.delete('new.analyzer.metrics_manager.analyzer_skip')
+                            logger.info('metrics_manager :: removed new.analyzer.metrics_manager.analyzer_skip Redis set')
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to delete new.analyzer.metrics_manager.analyzer_skip - %s' % err)
+                # @added 20240305 - Feature #5102: webapp - api skip_analysis
+                # Remove the hash when all have expired
+                metrics_manager_api_skip_analysis_exists = True
+                try:
+                    metrics_manager_api_skip_analysis_exists = self.redis_conn_decoded.exists('metrics_manager.api_skip_analysis')
+                    logger.info('metrics_manager :: %s metrics found in metrics_manager.api_skip_analysis' % (
+                        str(len(api_skip_analysis_metrics_dict))))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: hgetall failed on metrics_manager.api_skip_analysis - %s' % (
+                        err))
+                if not metrics_manager_api_skip_analysis_exists:
+                    try:
+                        self.redis_conn.delete('new.analyzer.metrics_manager.analyzer_skip')
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to delete new.analyzer.metrics_manager.analyzer_skip - %s' % err)
+
                 if analyzer_skip_metrics:
                     logger.info('metrics_manager :: adding %s metrics to analyzer.metrics_manager.analyzer_skip' % str(len(analyzer_skip_metrics)))
                     try:
@@ -3377,12 +3734,37 @@ class Metrics_Manager(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to determine stale period from external_settings item - %s' % err)
 
+                # @added 20240522 - Feature #5352: vista - bigquery
+                namespaces_custom_stale_period = {}
+                try:
+                    namespaces_custom_stale_period = self.redis_conn_decoded.hgetall('metrics_manager.batch_processing_namespaces_custom_stale_period')
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: hgetall failed on metrics_manager.batch_processing_namespaces_custom_stale_period, err: %s' % err)
+                for namespace, stale_period_str in namespaces_custom_stale_period.items():
+                    CUSTOM_STALE_PERIOD[namespace] = int(stale_period_str)
+
+                # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                # Do not do the CUSTOM_STALE_PERIOD operations if load shedding
+                # this can take up to 20 seconds to run under high load or I/O
+                # wait.  Not doing this operation when busy is not critical as
+                # it is just managing rarely changing settings, it is not super
+                # urgent work, as long as it get done periodically.
+                do_custom_stale_period = True
+                if CUSTOM_STALE_PERIOD and load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active not doing CUSTOM_STALE_PERIOD operations')
+                    do_custom_stale_period = False
+
                 if not CUSTOM_STALE_PERIOD:
                     logger.info('metrics_manager :: no CUSTOM_STALE_PERIOD metrics defined')
                 known_custom_stale_metrics_dict = {}
                 known_custom_stale_metrics = []
                 start_custom_stale_period = time()
-                if CUSTOM_STALE_PERIOD:
+                # @modified 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                # if CUSTOM_STALE_PERIOD:
+                if CUSTOM_STALE_PERIOD and do_custom_stale_period:
                     logger.info('metrics_manager :: determining known CUSTOM_STALE_PERIOD metrics from analyzer.metrics_manager.custom_stale_period')
                     custom_stale_metrics_hash_key = 'analyzer.metrics_manager.custom_stale_periods'
                     try:
@@ -3422,7 +3804,9 @@ class Metrics_Manager(Thread):
                         try:
                             # @modified 20210601 - Feature #4000: EXTERNAL_SETTINGS
                             # Pass the external_settings as a custom_stale_period argument
-                            metric_stale_period = custom_stale_period(skyline_app, i_metric, external_settings, log=False)
+                            # @modified 20240520 - Feature #5352: vista - bigquery
+                            # Added bq_accounts_settings
+                            metric_stale_period = custom_stale_period(skyline_app, i_metric, external_settings=external_settings, bq_accounts_settings=bq_accounts_settings, log=False)
                         except Exception as e:
                             logger.error('error :: failed running custom_stale_period - %s' % e)
                             metric_stale_period = int(default_metric_stale_period)
@@ -3538,7 +3922,9 @@ class Metrics_Manager(Thread):
                 namespace_stale_metrics_dict = {}
                 namespace_recovered_metrics_dict = {}
                 try:
-                    namespace_stale_metrics_dict, namespace_recovered_metrics_dict = thunder_stale_metrics(skyline_app, log=True)
+                    # @modified 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    # Added load_shedding_active
+                    namespace_stale_metrics_dict, namespace_recovered_metrics_dict = thunder_stale_metrics(skyline_app, log=True, load_shedding_active=load_shedding_active)
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: thunder_stale_metrics falied to get get namespace_stale_metrics_dict via - %s' % (
@@ -3637,8 +4023,111 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: metric_management_process :: memory usage after thunder and stale management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
 
-                # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
+                # @added 20231025 - Feature #5104: boundary - external_settings
+                raw_external_boundary_metrics = {}
+                try:
+                    raw_external_boundary_metrics = self.redis_conn_decoded.hgetall('skyline.external_boundary_metrics')
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: failed to hgetall Redis hash key skyline.external_boundary_metrics - %s' % (
+                        err))
+                external_boundary_metrics = {}
+                if raw_external_boundary_metrics:
+                    for key in list(raw_external_boundary_metrics.keys()):
+                        try:
+                            external_boundary_metrics[key] = literal_eval(raw_external_boundary_metrics[key])
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: literal_eval failed on data from skyline.external_boundary_metrics - %s' % (
+                                err))
+                EXTERNAL_BOUNDARY_METRICS = []
+                for key in list(external_boundary_metrics.keys()):
+                    for algo in list(external_boundary_metrics[key]['boundary'].keys()):
+                        try:
+                            alerter = external_boundary_metrics[key]['alerter']
+                            namespace = external_boundary_metrics[key]['namespace']
+                            expiration = external_boundary_metrics[key]['expiration']
+                            minimum_avg = 0
+                            if 'minimum_avg' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                minimum_avg = float(external_boundary_metrics[key]['boundary'][algo]['minimum_avg'])
+                            minimum_avg_seconds = 0
+                            if 'minimum_avg_seconds' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                minimum_avg_seconds = int(external_boundary_metrics[key]['boundary'][algo]['minimum_avg_seconds'])
+                            trigger_value = 0
+                            if 'value' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                trigger_value = float(external_boundary_metrics[key]['boundary'][algo]['value'])
+                            alert_threshold = 0
+                            if 'times_in_a_row' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                alert_threshold = int(external_boundary_metrics[key]['boundary'][algo]['times_in_a_row'])
+
+                            # @added 20231026 - Feature #5108: boundary - functions
+                            boundary_function = None
+                            if 'function' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                boundary_function = external_boundary_metrics[key]['boundary'][algo]['function']
+                            boundary_function_seconds = 0
+                            if 'function_seconds' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                boundary_function_seconds = int(external_boundary_metrics[key]['boundary'][algo]['function_seconds'])
+                            boundary_function_value = None
+                            if 'function_value' in list(external_boundary_metrics[key]['boundary'][algo].keys()):
+                                boundary_function_value = int(external_boundary_metrics[key]['boundary'][algo]['function_value'])
+
+                            # @added 20231115 - Feature #5104: boundary - external_settings
+                            alerter_id = key
+
+                            # @added 20231121 - Feature #5104: boundary - external_settings
+                            # Limit cardinality
+                            try:
+                                namespace_prefix = external_boundary_metrics[key]['namespace_prefix']
+                            except:
+                                namespace_prefix = None
+
+                            EXTERNAL_BOUNDARY_METRICS.append([
+                                external_boundary_metrics[key]['namespace'],
+                                algo,
+                                expiration,
+                                minimum_avg,
+                                minimum_avg_seconds,
+                                trigger_value,
+                                alert_threshold,
+                                alerter,
+                                # @added 20231115 - Feature #5104: boundary - external_settings
+                                alerter_id,
+                                # @added 20231026 - Feature #5108: boundary - functions
+                                boundary_function,
+                                boundary_function_seconds,
+                                boundary_function_value,
+                                # @added 20231121 - Feature #5104: boundary - external_settings
+                                # Limit cardinality
+                                namespace_prefix,
+                                ]
+                            )
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: failed to add item to EXTERNAL_BOUNDARY_METRICS, %s - %s' % (
+                                str(external_boundary_metrics[key]), err))
+
+                ALL_BOUNDARY_METRICS = []
                 if settings.BOUNDARY_METRICS:
+                    for item in settings.BOUNDARY_METRICS:
+                        ALL_BOUNDARY_METRICS.append(item)
+                if EXTERNAL_BOUNDARY_METRICS:
+                    logger.info('metrics_manager :: got %s entries from skyline.external_boundary_metrics' % (
+                        str(len(external_boundary_metrics))))
+                    for item in EXTERNAL_BOUNDARY_METRICS:
+                        ALL_BOUNDARY_METRICS.append(item)
+
+                # @added 20231121 - Feature #5104: boundary - external_settings
+                # Limit cardinality
+                boundary_alert_rules = {}
+
+                # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active not managing metrics_manager.boundary_metrics')
+                    ALL_BOUNDARY_METRICS = []
+
+                # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
+                # @modified 20231025 - Feature #5104: boundary - external_settings
+                # if settings.BOUNDARY_METRICS:
+                start_create_boundary_metrics = time()
+                if ALL_BOUNDARY_METRICS:
                     # Build boundary metrics
                     boundary_metrics_hash_key = 'metrics_manager.boundary_metrics'
                     boundary_metrics = {}
@@ -3658,6 +4147,9 @@ class Metrics_Manager(Thread):
                                 err))
                         all_active_base_names = unique_base_names + list(active_labelled_metrics_with_id.keys())
 
+                    # @added 20240301 - Feature #5298: boundary - excludes
+                    int_ext_boundary_metrics_by_index = {}
+
                     # @added 20230220 - Feature #4854: boundary - labelled_metrics
                     #                   Task #2732: Prometheus to Skyline
                     #                   Branch #4300: prometheus
@@ -3668,8 +4160,72 @@ class Metrics_Manager(Thread):
                     # the boundary metric alert rules but altogether first and
                     # only checking if any match reduces this to 3 seconds
                     boundary_metric_patterns = []
-                    for metric in settings.BOUNDARY_METRICS:
+                    # @modified 20231025 - Feature #5104: boundary - external_settings
+                    # for metric in settings.BOUNDARY_METRICS:
+                    for index, metric in enumerate(ALL_BOUNDARY_METRICS):
+
+                        # @added 20240301 - Feature #5298: boundary - excludes
+                        internal_boundary_rule = False
+                        if settings.BOUNDARY_METRICS:
+                            if metric in settings.BOUNDARY_METRICS:
+                                int_ext_boundary_metrics_by_index[index] = 'internal'
+                                internal_boundary_rule = True
+                        if EXTERNAL_BOUNDARY_METRICS:
+                            if metric in EXTERNAL_BOUNDARY_METRICS:
+                                int_ext_boundary_metrics_by_index[index] = 'external'
+
                         boundary_metric_patterns.append(metric[0])
+
+                        # @added 20231121 - Feature #5104: boundary - external_settings
+                        # Limit cardinality
+                        namespace = metric[0]
+                        algo = metric[1]
+                        try:
+                            namespace_prefix = metric[12]
+                        except:
+                            namespace_prefix = None
+
+                        # @added 20240301 - Feature #5298: boundary - excludes
+                        excludes = []
+                        if internal_boundary_rule:
+                            try:
+                                if isinstance(metric[8], list):
+                                    excludes = list(metric[8])
+                            except:
+                                excludes = []
+
+                        try:
+                            # @modified 20240301 - Feature #5298: boundary - excludes
+                            # alerter_id = str(metric[8])
+                            set_alerter = False
+                            if isinstance(metric[8], str):
+                                set_alerter = True
+                            if not set_alerter:
+                                if isinstance(metric[8], int):
+                                    set_alerter = True
+                            if set_alerter:
+                                alerter_id = str(metric[8])
+                            else:
+                                alerter_id = 'None'
+                        except:
+                            alerter_id = 'None'
+
+                        if not internal_boundary_rule:
+                            try:
+                                alerter_id = str(metric[8])
+                            except:
+                                alerter_id = 'None'
+
+                        alert_rule = '%s.%s.%s' % (namespace_prefix, algo, alerter_id)
+                        if alert_rule not in boundary_alert_rules:
+                            boundary_alert_rules[alert_rule] = {}
+                            boundary_alert_rules[alert_rule]['index'] = index
+                            boundary_alert_rules[alert_rule]['algorithm'] = algo
+                            boundary_alert_rules[alert_rule]['namespace'] = namespace
+                            boundary_alert_rules[alert_rule]['namespace_prefix'] = namespace_prefix
+                            boundary_alert_rules[alert_rule]['metrics'] = []
+                            # @added 20240301 - Feature #5298: boundary - excludes
+                            boundary_alert_rules[alert_rule]['excludes'] = excludes
 
                     # @modified 20230217 - Feature #4854: boundary - labelled_metrics
                     #                      Task #2732: Prometheus to Skyline
@@ -3693,11 +4249,57 @@ class Metrics_Manager(Thread):
                             if not pattern_match:
                                 continue
 
-                            for metric in settings.BOUNDARY_METRICS:
+                            # @modified 20231025 - Feature #5104: boundary - external_settings
+                            # for metric in settings.BOUNDARY_METRICS:
+                            for index, metric in enumerate(ALL_BOUNDARY_METRICS):
+
+                                # @added 20240301 - Feature #5298: boundary - excludes
+                                boundary_metric_type = int_ext_boundary_metrics_by_index[index]
+
                                 pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [metric[0]])
                                 if pattern_match:
                                     if base_name not in boundary_metrics:
                                         boundary_metrics[base_name] = {}
+
+                                    # @added 20231121 - Feature #5104: boundary - external_settings
+                                    # Limit cardinality
+                                    namespace = metric[0]
+                                    algo = metric[1]
+                                    try:
+                                        namespace_prefix = metric[12]
+                                    except:
+                                        namespace_prefix = None
+
+                                    # @added 20240301 - Feature #5298: boundary - excludes
+                                    current_excludes = []
+                                    if boundary_metric_type == 'internal':
+                                        try:
+                                            if isinstance(metric[8], list):
+                                                current_excludes = list(metric[8])
+                                        except:
+                                            current_excludes = []
+
+                                    alerter_id = 'None'
+                                    # @modified 20240301 - Feature #5298: boundary - excludes
+                                    if boundary_metric_type == 'external':
+                                        try:
+                                            alerter_id = str(metric[8])
+                                        except:
+                                            alerter_id = 'None'
+
+                                    alert_rule = '%s.%s.%s' % (namespace, algo, alerter_id)
+                                    if alert_rule not in boundary_alert_rules:
+                                        boundary_alert_rules[alert_rule] = {}
+                                        boundary_alert_rules[alert_rule]['index'] = index
+                                        boundary_alert_rules[alert_rule]['algorithm'] = algo
+                                        boundary_alert_rules[alert_rule]['namespace'] = namespace
+                                        boundary_alert_rules[alert_rule]['namespace_prefix'] = namespace_prefix
+                                        boundary_alert_rules[alert_rule]['metrics'] = [base_name]
+                                        # @added 20240301 - Feature #5298: boundary - excludes
+                                        boundary_alert_rules[alert_rule]['excludes'] = current_excludes
+                                    else:
+                                        boundary_alert_rules[alert_rule]['metrics'].append(base_name)
+
                                     algorithm = metric[1]
                                     boundary_metrics[base_name][algorithm] = {}
                                     boundary_metrics[base_name][algorithm]['expiry'] = metric[2]
@@ -3706,9 +4308,230 @@ class Metrics_Manager(Thread):
                                     boundary_metrics[base_name][algorithm]['trigger_value'] = metric[5]
                                     boundary_metrics[base_name][algorithm]['alert_threshold'] = metric[6]
                                     boundary_metrics[base_name][algorithm]['alert_vias'] = metric[7]
+
+                                    # @added 20240301 - Feature #5298: boundary - excludes
+                                    boundary_metrics[base_name][algorithm]['excludes'] = current_excludes
+
+                                    # @added 20231115 - Feature #5104: boundary - external_settings
+                                    alerter_id = None
+                                    try:
+                                        # @modified 20240301 - Feature #5298: boundary - excludes
+                                        # alerter_id = metric[8]
+                                        set_alerter = False
+                                        if isinstance(metric[8], str):
+                                            set_alerter = True
+                                        if not set_alerter:
+                                            if isinstance(metric[8], int):
+                                                set_alerter = True
+                                        if set_alerter:
+                                            alerter_id = int(metric[8])
+                                        else:
+                                            alerter_id = None
+                                    except:
+                                        alerter_id = None
+
+                                    # @modified 20240301 - Feature #5298: boundary - excludes
+                                    if boundary_metric_type == 'external':
+                                        try:
+                                            alerter_id = str(metric[8])
+                                        except:
+                                            alerter_id = 'None'
+
+                                    boundary_metrics[base_name][algorithm]['id'] = alerter_id
+
+                                    # @added 20231026 - Feature #5108: boundary - functions
+                                    boundary_function = None
+                                    try:
+                                        boundary_function = metric[9]
+                                    except:
+                                        boundary_function = None
+                                    boundary_metrics[base_name][algorithm]['function'] = boundary_function
+                                    boundary_function_seconds = 0
+                                    try:
+                                        boundary_function_seconds = metric[10]
+                                    except:
+                                        boundary_function_seconds = 0
+                                    boundary_metrics[base_name][algorithm]['function_seconds'] = boundary_function_seconds
+                                    boundary_function_value = None
+                                    try:
+                                        boundary_function_value = metric[11]
+                                    except:
+                                        boundary_function_value = None
+                                    boundary_metrics[base_name][algorithm]['function_value'] = boundary_function_value
+
+                                    # @added 20231121 - Feature #5104: boundary - external_settings
+                                    # Limit cardinality
+                                    boundary_metrics[base_name][algorithm]['namespace_prefix'] = namespace_prefix
+
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to determine boundary_metrics - %s' % err)
+
+                    # @added 20231121 - Feature #5104: boundary - external_settings
+                    # Limit cardinality, this is EXPENSIVE when lots of
+                    # Prometheus/labelled metrics are in the mix.
+                    limited_boundary_metrics = False
+                    for alert_rule in list(boundary_alert_rules.keys()):
+                        try:
+                            algorithm = boundary_alert_rules[alert_rule]['algorithm']
+                            rule_count = len(list(set(boundary_alert_rules[alert_rule]['metrics'])))
+                            boundary_alert_rules[alert_rule]['count'] = rule_count
+                            rule_remove_cardinality_limited_metrics = []
+                            if rule_count > 200:
+                                rule_remove_cardinality_limited_metrics = list(set(boundary_alert_rules[alert_rule]['metrics']))
+                            if len(rule_remove_cardinality_limited_metrics) > 0:
+                                limited_boundary_metrics = True
+                                metric_index = boundary_alert_rules[alert_rule]['index']
+                                metric = ALL_BOUNDARY_METRICS[metric_index]
+
+                                # @added 20240301 - Feature #5298: boundary - excludes
+                                boundary_metric_type = int_ext_boundary_metrics_by_index[index]
+
+                                # @added 20240301 - Feature #5298: boundary - excludes
+                                excludes = []
+                                try:
+                                    if isinstance(metric[8], list):
+                                        excludes = list(metric[8])
+                                except:
+                                    excludes = []
+
+                                try:
+                                    # @modified 20240301 - Feature #5298: boundary - excludes
+                                    # alerter_id = metric[8]
+                                    set_alerter = False
+                                    if isinstance(metric[8], str):
+                                        set_alerter = True
+                                    if not set_alerter:
+                                        if isinstance(metric[8], int):
+                                            set_alerter = True
+                                    if set_alerter:
+                                        alerter_id = int(metric[8])
+                                    else:
+                                        alerter_id = None
+                                except:
+                                    alerter_id = None
+
+                                if boundary_metric_type == 'external':
+                                    try:
+                                        alerter_id = metric[8]
+                                    except:
+                                        alerter_id = None
+
+                                logger.info('warning :: metrics_manager :: removing %s metrics for boundary alert for alerter_id: %s, on %s, %s' % (
+                                    str(len(rule_remove_cardinality_limited_metrics)),
+                                    str(alerter_id), algorithm, str(metric)))
+                                removal_errors = []
+                                rule_remove_cardinality_limited_metrics = list(set(rule_remove_cardinality_limited_metrics))
+                                for i in rule_remove_cardinality_limited_metrics:
+                                    try:
+                                        del boundary_metrics[i][algorithm]
+                                    except Exception as err:
+                                        removal_errors.append([i, alert_rule, err])
+                                level = 'alert'
+                                event_type = 'boundary_cardinality_breach'
+                                message = '%s - %s - too many metrics covered by rule for alert id: %s, algorithm: %s - %s metrics' % (
+                                    level, metric[0], str(alerter_id), algorithm,
+                                    str(len(rule_remove_cardinality_limited_metrics)))
+                                status = 'cardinality_breached'
+                                try:
+                                    # @modified 20240301 - Feature #5298: boundary - excludes
+                                    # alerter_id = metric[8]
+                                    set_alerter = False
+                                    if isinstance(metric[8], str):
+                                        set_alerter = True
+                                    if not set_alerter:
+                                        if isinstance(metric[8], int):
+                                            set_alerter = True
+                                    if set_alerter:
+                                        alerter_id = int(metric[8])
+                                    else:
+                                        alerter_id = 'None'
+                                except:
+                                    alerter_id = 'None'
+                                if boundary_metric_type == 'external':
+                                    try:
+                                        alerter_id = metric[8]
+                                    except:
+                                        alerter_id = None
+
+                                namespace = metric[0]
+                                algorithm = metric[1]
+                                try:
+                                    namespace_prefix = metric[12]
+                                except:
+                                    namespace_prefix = None
+
+                                # @added 20240301 - Feature #5298: boundary - excludes
+                                excludes = []
+                                try:
+                                    if isinstance(metric[8], list):
+                                        excludes = list(metric[8])
+                                except:
+                                    excludes = []
+
+                                alert_list_dict = {
+                                    'namespace': metric[0], 'algorithm': metric[1],
+                                    'expiry': metric[2],
+                                    'minimum_avg': metric[3],
+                                    'minimum_avg_seconds': metric[4],
+                                    'trigger_value': metric[5],
+                                    'alert_threshold': metric[6],
+                                    'alerter': metric[7],
+                                    'excludes': excludes,
+                                    'id': alerter_id,
+                                    'function': metric[9],
+                                    'function_seconds': metric[10],
+                                    'function_value': metric[11],
+                                    'namespace_prefix': namespace_prefix,
+                                }
+                                thunder_event = {
+                                    'level': level,
+                                    'event_type': event_type,
+                                    'message': message,
+                                    'app': skyline_app,
+                                    'metric': None,
+                                    'source': skyline_app,
+                                    'timestamp': time(),
+                                    'expiry': 3600,
+                                    'data': {
+                                        'alert': event_type,
+                                        'namespace': metric[0],
+                                        'namespace_prefix': namespace_prefix,
+                                        'rejected_metrics': rule_remove_cardinality_limited_metrics,
+                                        'rejected_metrics_count': len(rule_remove_cardinality_limited_metrics),
+                                        'algorithm': metric[1],
+                                        'id': alerter_id,
+                                        'alert_dict': alert_list_dict,
+                                        'status': status,
+                                    },
+                                }
+                                submitted = False
+                                try:
+                                    submitted = thunder_send_event(skyline_app, thunder_event, log=True)
+                                except Exception as err:
+                                    logger.error('error :: metrics_manager :: error encountered with thunder_send_event - %s' % (
+                                        err))
+                                if submitted:
+                                    logger.info('metrics_manager :: send thunder event for %s dicarded metrics due to boundary rule cardinality breach on %s' % (
+                                        str(len(rule_remove_cardinality_limited_metrics)),
+                                        str(metric)))
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to process alert_rule: %s, err: %s' % (alert_rule, err))
+                        removed_empty_boundary_metrics = []
+                        if limited_boundary_metrics:
+                            for metric in list(boundary_metrics.keys()):
+                                if len(boundary_metrics[metric]) == 0:
+                                    removed_empty_boundary_metrics.append(metric)
+                                    try:
+                                        del boundary_metrics[metric]
+                                    except:
+                                        pass
+                        if removed_empty_boundary_metrics:
+                            logger.info('metrics_manager :: removed %s empty metrics from boundary_metrics due cardinality breach removals' % (
+                                str(len(list(set(removed_empty_boundary_metrics))))))
+                            del removed_empty_boundary_metrics
+
                     boundary_metrics_redis_dict = {}
                     boundary_metrics_base_names = []
                     logger.info('metrics_manager :: %s boundary_metrics identified from the %s unique_base_names and %s active labelled_metrics' % (
@@ -3750,6 +4573,9 @@ class Metrics_Manager(Thread):
                         logger.info('metrics_manager :: updated: %s, removed: %s entries in the Redis hash key %s' % (
                             str(boundary_metrics_keys_updated),
                             str(boundary_metrics_keys_removed), boundary_metrics_hash_key))
+
+                logger.info('metrics_manager :: managed metrics_manager.boundary_metrics, took %.2f seconds' % (
+                    time() - start_create_boundary_metrics))
 
                 logger.info('metrics_manager :: metric_management_process :: memory usage after boundary management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
@@ -3937,8 +4763,22 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: metric_management_process :: memory usage after resolution management - %s' % (
                     str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
 
+                # @added 20240214 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                # When load shedding checking data sparsity is not urgent as
+                # under high load or I/O wait check data sparsity took 44.36 seconds
+                try:
+                    check_data_sparsity = settings.CHECK_DATA_SPARSITY
+                except:
+                    check_data_sparsity = True
+                if check_data_sparsity:
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: load_shedding_active not checking data sparsity')
+                        check_data_sparsity = False
+
                 # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
-                if CHECK_DATA_SPARSITY:
+                # if CHECK_DATA_SPARSITY:
+                if check_data_sparsity:
                     check_data_sparsity_start = time()
                     logger.info('metrics_manager :: checking data sparsity')
 
@@ -4014,7 +4854,7 @@ class Metrics_Manager(Thread):
                                     check_metrics.remove(metric_name)
                                     removed_new_metrics_from_check_metrics += 1
                             except Exception as err:
-                                logger.warning('metrics_manager :: could not remove %s from check_metrics - %s' % (str(metric_name), err))
+                                logger.info('warning :: metrics_manager :: could not remove %s from check_metrics - %s' % (str(metric_name), err))
                         logger.info('metrics_manager :: removed %s new metrics from check_metrics for check_data_sparsity' % str(removed_new_metrics_from_check_metrics))
 
                     # Multi get series
@@ -4028,7 +4868,7 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: failed to get check_metrics from Redis')
                         raw_assigned = []
                     if not raw_assigned:
-                        logger.warning('warning :: metrics_manager :: No raw_assigned for check sparisty')
+                        logger.info('warning :: metrics_manager :: No raw_assigned for check sparisty')
                     else:
                         logger.info('metrics_manager :: checking data sparsity on %s metric timeseries from Redis' % str(len(raw_assigned)))
                     last_metrics_data_sparsity = {}
@@ -4278,8 +5118,17 @@ class Metrics_Manager(Thread):
                     if metrics_fully_populated:
                         metrics_fully_populated_count = len(metrics_fully_populated)
                         try:
-                            self.redis_conn.rename('analyzer.metrics_manager.metrics_fully_populated', 'aet.analyzer.metrics_manager.metrics_fully_populated')
-                            logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_fully_populated Redis set')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.metrics_manager.metrics_fully_populated', 'aet.analyzer.metrics_manager.metrics_fully_populated')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.metrics_manager.metrics_fully_populated', 'aet.analyzer.metrics_manager.metrics_fully_populated', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.metrics_manager.metrics_fully_populated to aet.analyzer.metrics_manager.metrics_fully_populated, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_fully_populated Redis set')
                         except:
                             logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_fully_populated Redis set')
                         try:
@@ -4304,8 +5153,17 @@ class Metrics_Manager(Thread):
                     if metrics_sparsity_decreasing:
                         metrics_sparsity_decreasing_count = len(metrics_sparsity_decreasing)
                         try:
-                            self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_decreasing', 'aet.analyzer.metrics_manager.metrics_sparsity_decreasing')
-                            logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_decreasing', 'aet.analyzer.metrics_manager.metrics_sparsity_decreasing')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.metrics_manager.metrics_sparsity_decreasing', 'aet.analyzer.metrics_manager.metrics_sparsity_decreasing', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.metrics_manager.metrics_sparsity_decreasing to aet.analyzer.metrics_manager.metrics_sparsity_decreasing, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
                         except:
                             logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
                         try:
@@ -4329,8 +5187,17 @@ class Metrics_Manager(Thread):
                     if metrics_sparsity_increasing:
                         metrics_sparsity_increasing_count = len(metrics_sparsity_increasing)
                         try:
-                            self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_increasing', 'aet.analyzer.metrics_manager.metrics_sparsity_increasing')
-                            logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_increasing', 'aet.analyzer.metrics_manager.metrics_sparsity_increasing')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.metrics_manager.metrics_sparsity_increasing', 'aet.analyzer.metrics_manager.metrics_sparsity_increasing', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.metrics_manager.metrics_sparsity_increasing to aet.analyzer.metrics_manager.metrics_sparsity_increasing, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
                         except:
                             logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
                         try:
@@ -4354,8 +5221,17 @@ class Metrics_Manager(Thread):
 
                     if metrics_sparsity:
                         try:
-                            self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity', 'aet.analyzer.metrics_manager.metrics_sparsity')
-                            logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity Redis set')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity', 'aet.analyzer.metrics_manager.metrics_sparsity')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.metrics_manager.metrics_sparsity', 'aet.analyzer.metrics_manager.metrics_sparsity', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.metrics_manager.metrics_sparsity to aet.analyzer.metrics_manager.metrics_sparsity, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity Redis set')
                         except:
                             logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity Redis set')
                         try:
@@ -4560,7 +5436,7 @@ class Metrics_Manager(Thread):
                                 str(len(metrics_last_timestamp_dict)),
                                 metrics_last_timestamp_hash_key))
                         else:
-                            logger.warning('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                            logger.info('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
                                 metrics_last_timestamp_hash_key))
                     except:
                         logger.error(traceback.format_exc())
@@ -4829,8 +5705,17 @@ class Metrics_Manager(Thread):
                         err))
                 if metric_names:
                     try:
-                        self.redis_conn.rename('analyzer.metrics_manager.db.metric_names', 'aet.analyzer.metrics_manager.db.metric_names')
-                        logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.db.metric_names Redis set')
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('analyzer.metrics_manager.db.metric_names', 'aet.analyzer.metrics_manager.db.metric_names')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'analyzer.metrics_manager.db.metric_names', 'aet.analyzer.metrics_manager.db.metric_names', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming analyzer.metrics_manager.db.metric_names to aet.analyzer.metrics_manager.db.metric_names, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.db.metric_names Redis set')
                     except Exception as e:
                         logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
                     try:
@@ -4893,6 +5778,37 @@ class Metrics_Manager(Thread):
                         except:
                             unique_parent_namespaces[parent_namespace] = 1
                     unique_parent_namespaces_timings.append(time() - start_unique_parent_namespaces_timing)
+
+                # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+                #                   Task #5248: Optimise ionosphere_functions.get_related
+                # Added a hash of all_db_metric_ids_with_names so that all
+                # metric names and ids are available to apps, specifically in
+                # this instance for webapp ionosphere_backend.get_fp_matches
+                # to enable the use of webapp.ionosphere_backend.ionosphere_summary_dict
+                # to cache the ionosphere_summary_list to ensure that /api&anomaly
+                # is fast.
+                if len(all_db_metric_ids_with_names) > 0:
+                    try:
+                        self.redis_conn_decoded.hset('metrics_manager.all_db_metric_ids_with_names', mapping=all_db_metric_ids_with_names)
+                        self.redis_conn_decoded.expire('metrics_manager.all_db_metric_ids_with_names', 899)
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: hset failed on metrics_manager.all_db_metric_ids_with_names Redis hash, err: %s' % err)
+
+                # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+                # Added a hash of all echo fp ids specifically for webapp
+                # ionosphere_backend.get_fp_matches so that the /api&anomaly
+                # request does not need to make a SQL query it get all the echo
+                # fp ids and it is fast.
+                logger.info('metrics_manager :: running manage_echo_fp_ids')
+                start_manage_echo_fp_ids = time()
+                new_echo_fps = {}
+                try:
+                    new_echo_fps = manage_echo_fp_ids(self)
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: manage_echo_fp_ids failed, err: %s' % err)
+                logger.info('metrics_manager :: manage_echo_fp_ids, %s new echo fp ids added, took %s seconds' % (
+                    str(len(new_echo_fps)), str(time() - start_manage_echo_fp_ids)))
+                del new_echo_fps
 
                 # @added 20230411 - Task #4872: Optimise luminosity for labelled_metrics
                 # Create a unique list of namespaces to create a hash to be used in
@@ -5062,9 +5978,24 @@ class Metrics_Manager(Thread):
 
                 if metric_names_with_ids:
                     try:
+                        self.redis_conn.hset('metrics_manager.metric_names_with_ids', mapping=metric_names_with_ids)
+                        logger.info('metrics_manager :: created and added %s metrics to the metrics_manager.metric_names_with_ids Redis hash' % str(len(metric_names_with_ids)))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to create metrics_manager.metric_names_with_ids Redis hash - %s' % err)
+                    try:
                         logger.info('metrics_manager :: creating the aet.metrics_manager.metric_names_with_ids Redis set')
-                        self.redis_conn.rename('metrics_manager.metric_names_with_ids', 'aet.metrics_manager.metric_names_with_ids')
-                        logger.info('metrics_manager :: created the aet.metrics_manager.metric_names_with_ids Redis set')
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('metrics_manager.metric_names_with_ids', 'aet.metrics_manager.metric_names_with_ids')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.metric_names_with_ids', 'aet.metrics_manager.metric_names_with_ids', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming metrics_manager.metric_names_with_ids to aet.metrics_manager.metric_names_with_ids, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created the aet.metrics_manager.metric_names_with_ids Redis set')
                     except Exception as err:
                         logger.error('metrics_manager :: failed to created the aet.metrics_manager.metric_names_with_ids Redis set - %s' % err)
                     try:
@@ -5157,19 +6088,30 @@ class Metrics_Manager(Thread):
                                 try:
                                     metric_name = all_db_metric_ids_with_names[metric_id]
                                 except Exception as err:
-                                    readding_labelled_metrics_errors.append(['readding_labelled_metrics error - failed to determine metric_name from id:', metric_id])
+                                    readding_labelled_metrics_errors.append(['readding_labelled_metrics error - failed to determine metric_name from id:', metric_id, err])
                                 if metric_name:
                                     active_labelled_metrics_with_id[metric_name] = metric_id
                                     active_labelled_ids_with_metrics[metric_id] = metric_name
                                     readded_active_again_labelled_metrics += 1
                             if readding_labelled_metrics_errors:
-                                logger.error('metrics_manager :: %s readding_labelled_metrics errors occurred, last 3: %s' % str(readding_labelled_metrics_errors[-3:]))
+                                logger.error('metrics_manager :: %s readding_labelled_metrics errors occurred, last 3: %s' % (
+                                    str(len(readding_labelled_metrics_errors)),
+                                    str(readding_labelled_metrics_errors[-3:])))
                             logger.info('metrics_manager :: readded %s labelled_metrics that are active again in Redis' % str(readded_active_again_labelled_metrics))
                     del all_db_metric_ids_with_names
 
                     try:
-                        self.redis_conn.rename('metrics_manager.ids_with_metric_names', 'aet.metrics_manager.ids_with_metric_names')
-                        logger.info('metrics_manager :: created the aet.metrics_manager.ids_with_metric_names Redis set')
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('metrics_manager.ids_with_metric_names', 'aet.metrics_manager.ids_with_metric_names')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.ids_with_metric_names', 'aet.metrics_manager.ids_with_metric_names', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming metrics_manager.ids_with_metric_names to aet.metrics_manager.ids_with_metric_names, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created the aet.metrics_manager.ids_with_metric_names Redis set')
                     except Exception as err:
                         logger.error('metrics_manager :: failed to created the aet.metrics_manager.ids_with_metric_names Redis set - %s' % err)
                     try:
@@ -5184,8 +6126,17 @@ class Metrics_Manager(Thread):
                     if active_labelled_metrics_with_id:
                         try:
                             self.redis_conn.hset('metrics_manager.active_labelled_metrics_with_id', mapping=active_labelled_metrics_with_id)
-                            self.redis_conn.rename('metrics_manager.active_labelled_metrics_with_id', 'aet.metrics_manager.active_labelled_metrics_with_id')
-                            logger.info('metrics_manager :: created the aet.metrics_manager.active_labelled_metrics_with_id Redis hash with %s metrics' % str(len(active_labelled_metrics_with_id)))
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('metrics_manager.active_labelled_metrics_with_id', 'aet.metrics_manager.active_labelled_metrics_with_id')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.active_labelled_metrics_with_id', 'aet.metrics_manager.active_labelled_metrics_with_id', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming metrics_manager.active_labelled_metrics_with_id to aet.metrics_manager.active_labelled_metrics_with_ids, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.metrics_manager.active_labelled_metrics_with_id Redis hash with %s metrics' % str(len(active_labelled_metrics_with_id)))
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to create aet.metrics_manager.active_labelled_metrics_with_id Redis hash - %s' % err)
@@ -5195,8 +6146,17 @@ class Metrics_Manager(Thread):
                         # del active_labelled_metrics_with_id
                         try:
                             self.redis_conn.hset('metrics_manager.active_labelled_ids_with_metric', mapping=active_labelled_ids_with_metrics)
-                            self.redis_conn.rename('metrics_manager.active_labelled_ids_with_metric', 'aet.metrics_manager.active_labelled_ids_with_metric')
-                            logger.info('metrics_manager :: created the aet.metrics_manager.active_labelled_ids_with_metric Redis hash with %s metrics' % str(len(active_labelled_ids_with_metrics)))
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn.rename('metrics_manager.active_labelled_ids_with_metric', 'aet.metrics_manager.active_labelled_ids_with_metric')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.active_labelled_ids_with_metric', 'aet.metrics_manager.active_labelled_ids_with_metric', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming metrics_manager.active_labelled_ids_with_metric to aet.metrics_manager.active_labelled_ids_with_metric, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('metrics_manager :: created the aet.metrics_manager.active_labelled_ids_with_metric Redis hash with %s metrics' % str(len(active_labelled_ids_with_metrics)))
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to create metrics_manager.active_labelled_ids_with_metric Redis hash - %s' % err)
@@ -5258,13 +6218,35 @@ class Metrics_Manager(Thread):
 
                 # @added 20230105 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
                 reactivate_metric_ids = []
+
+                # @added 20240218 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                if load_shedding_active:
+                    logger.info('metrics_manager :: load_shedding_active - not running manage_inactive_metrics')
+
                 try:
-                    reactivate_metric_ids = manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_with_id)
+                    # @added 20240111 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                    # @modified 20240218 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                      Feature #4888: analyzer - load_shedding
+                    # if MANAGE_INACTIVE_METRICS:
+                    if MANAGE_INACTIVE_METRICS:
+                        reactivate_metric_ids = manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_with_id)
+                    else:
+                        logger.info('metrics_manager :: not running manage_inactive_metrics, MANAGE_INACTIVE_METRICS: %s' % str(MANAGE_INACTIVE_METRICS))
                 except Exception as err:
                     logger.error('error :: metrics_manager :: manage_inactive_metrics failed - %s' % err)
+
                 # @added 20230201 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
                 # Reactivate metrics if manage_inactive_metrics returns metric ids to reactive
                 if reactivate_metric_ids:
+
+                    # @added 20240218 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    logger.info('metrics_manager :: %s metric ids to reactivate' % str(len(reactivate_metric_ids)))
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: load_shedding_active - limiting reactivate_metric_ids to 10')
+                        reactivate_metric_ids = reactivate_metric_ids[0:9]
+
                     try:
                         set_metrics_as_active_count = set_metric_ids_as_active(skyline_app, reactivate_metric_ids)
                     except Exception as err:
@@ -5274,10 +6256,17 @@ class Metrics_Manager(Thread):
 
                 # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
                 # Create feedback_labelled_metrics from active_labelled_metrics_with_id
-                start_feedback_labelled_metric_ids= time()
+                start_feedback_labelled_metric_ids = time()
                 feedback_labelled_metric_ids = []
                 feedback_labelled_metric_errors = []
                 for labelled_metric_base_name in list(active_labelled_metrics_with_id.keys()):
+
+                    # @added 20240218 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    if load_shedding_active:
+                        logger.info('metrics_manager :: load_shedding_active - not managing feedback_labelled_metric_ids')
+                        break
+
                     try:
                         pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, labelled_metric_base_name, settings.SKYLINE_FEEDBACK_NAMESPACES, False)
                         feedback_metric = False
@@ -5294,7 +6283,7 @@ class Metrics_Manager(Thread):
                         feedback_labelled_metric_errors.append([labelled_metric_base_name, err])
                 if feedback_labelled_metric_errors:
                     logger.error('error :: metrics_manager :: %s errors reported during determining feedback_labelled_metric_ids, last 3 errors - %s' % (
-                        str(len(feedback_labelled_metric_errors)), str(feedback_labelled_metric_errors[-3:]), err))
+                        str(len(feedback_labelled_metric_errors)), str(feedback_labelled_metric_errors[-3:])))
 
                 # @added 20230605 - Feature #4932: mute_alerts_on
                 if mute_alerts_on_dict:
@@ -5306,13 +6295,83 @@ class Metrics_Manager(Thread):
                 if feedback_labelled_metric_ids:
                     try:
                         self.redis_conn.sadd('metrics_manager.feedback.labelled_metric_ids', *set(feedback_labelled_metric_ids))
+                        logger.info('metrics_manager :: added %s feedback metrics ids to metrics_manager.feedback.labelled_metric_ids, sample: %s' % (
+                            str(len(feedback_labelled_metric_ids)), str(feedback_labelled_metric_ids[0:3])))
                     except Exception as err:
                         logger.error('error :: metrics_manager :: failed to created metrics_manager.feedback.labelled_metric_ids Redis set - %s' % err)
+
+                    # @added 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    # Remove metrics as well
+                    feedback_labelled_metric_ids_to_remove = []
+                    feedback_labelled_metric_ids_redis_set = []
                     try:
-                        self.redis_conn.rename('metrics_manager.feedback.labelled_metric_ids', 'aet.metrics_manager.feedback.labelled_metric_ids')
-                        logger.info('metrics_manager :: created the aet.metrics_manager.feedback.labelled_metric_ids Redis set')
+                        feedback_labelled_metric_ids_redis_set = self.redis_conn_decoded.smembers('metrics_manager.feedback.labelled_metric_ids')
+                        logger.info('metrics_manager :: got %s feedback metrics ids from metrics_manager.feedback.labelled_metric_ids, sample: %s' % (
+                            str(len(feedback_labelled_metric_ids_redis_set)),
+                            str(list(feedback_labelled_metric_ids_redis_set)[0:3])))
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: failed to smembers metrics_manager.feedback.labelled_metric_ids, err: %s' % (
+                            err))
+                    # feedback_labelled_metric_ids_list = [int(metric_id_str) for metric_id_str in feedback_labelled_metric_ids]
+                    logger.info('metrics_manager :: sample feedback_labelled_metric_ids[0:3]: %s' % (
+                        str(feedback_labelled_metric_ids[0:3])))
+                    feedback_labelled_metric_ids_set = set(feedback_labelled_metric_ids)
+                    logger.info('metrics_manager :: sample feedback_labelled_metric_ids_set[0:3]: %s' % (
+                        str(list(feedback_labelled_metric_ids_set)[0:3])))
+                    feedback_labelled_metric_ids_str_list = [str(metric_id) for metric_id in list(feedback_labelled_metric_ids_set)]
+                    logger.info('metrics_manager :: sample feedback_labelled_metric_ids_list[0:3]: %s' % (
+                        str(feedback_labelled_metric_ids_str_list[0:3])))
+                    feedback_labelled_metric_ids_set = set(feedback_labelled_metric_ids_str_list)
+                    logger.info('metrics_manager :: sample feedback_labelled_metric_ids_set[0:3]: %s' % (
+                        str(list(feedback_labelled_metric_ids_set)[0:3])))
+                    if isinstance(feedback_labelled_metric_ids_redis_set, set):
+                        logger.info('metrics_manager :: comparing feedback_labelled_metric_ids_set with %s items and feedback_labelled_metric_ids_redis_set with %s items' % (
+                            str(len(feedback_labelled_metric_ids_set)),
+                            str(len(feedback_labelled_metric_ids_redis_set))))
+                        logger.info('metrics_manager :: sample feedback_labelled_metric_ids_redis_set[0:3]: %s' % (
+                            str(list(feedback_labelled_metric_ids_redis_set)[0:3])))
+                        try:
+                            feedback_labelled_metric_ids_set_difference = feedback_labelled_metric_ids_redis_set.difference(feedback_labelled_metric_ids_set)
+                            feedback_labelled_metric_ids_to_remove = list(feedback_labelled_metric_ids_set_difference)
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: failed to difference between feedback_labelled_metric_ids_set and feedback_labelled_metric_ids_redis_set, err: %s' % (
+                                err))
+                    logger.info('metrics_manager :: there are %s feedback labelled_metrics ids to remove from metrics_manager.feedback.labelled_metric_ids' % (
+                        str(len(feedback_labelled_metric_ids_to_remove))))
+                    if feedback_labelled_metric_ids_to_remove:
+                        logger.info('metrics_manager :: sample feedback_labelled_metric_ids_to_remove[0:3]: %s' % (
+                            str(feedback_labelled_metric_ids_to_remove[0:3])))
+                        try:
+                            feedback_labelled_metric_ids_removed_count = self.redis_conn_decoded.srem('metrics_manager.feedback.labelled_metric_ids', *set(feedback_labelled_metric_ids_to_remove))
+                            logger.info('metrics_manager :: removed %s feedback labelled_metrics from metrics_manager.feedback.labelled_metric_ids' % (
+                                str(feedback_labelled_metric_ids_removed_count)))
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: failed to srem metrics_manager.feedback.labelled_metric_ids, err: %s' % (
+                                err))
+                        try:
+                            self.redis_conn_decoded.sadd('metrics_manager.feedback.labelled_metric_ids.removed', *set(feedback_labelled_metric_ids_to_remove))
+                            self.redis_conn_decoded.expire('metrics_manager.feedback.labelled_metric_ids.removed', 300)
+                            logger.info('metrics_manager :: added %s feedback metrics to metrics_manager.feedback.labelled_metric_ids.removed and set expire to 300' % (
+                                str(len(feedback_labelled_metric_ids_to_remove))))
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: failed to sadd to metrics_manager.feedback.labelled_metric_ids.removed, err: %s' % (
+                                err))
+
+                    try:
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn.rename('metrics_manager.feedback.labelled_metric_ids', 'aet.metrics_manager.feedback.labelled_metric_ids')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.feedback.labelled_metric_ids', 'aet.metrics_manager.feedback.labelled_metric_ids', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming metrics_manager.feedback.labelled_metric_ids to aet.metrics_manager.feedback.labelled_metric_ids, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created the aet.metrics_manager.feedback.labelled_metric_ids Redis set')
                     except Exception as err:
                         logger.error('error :: metrics_manager :: failed to rename metrics_manager.feedback.labelled_metric_ids Redis set - %s' % err)
+
                 logger.info('metrics_manager :: determined %s feedback labelled_metrics in %s seconds' % (
                     str(len(feedback_labelled_metric_ids)), str(time() - start_feedback_labelled_metric_ids)))
 
@@ -5399,7 +6458,7 @@ class Metrics_Manager(Thread):
                             if c_time > (v_ts + vortex_purge_times[vortex_hash_key]):
                                 remove_v_keys.append(v_key)
                         if remove_v_keys:
-                            logger.warning('warning :: metrics_manager :: purging %s keys from %s older than % seconds' % (
+                            logger.info('warning :: metrics_manager :: purging %s keys from %s older than % seconds' % (
                                 str(len(remove_v_keys)), vortex_hash_key,
                                 str(vortex_purge_times[vortex_hash_key])))
                             try:
@@ -5577,9 +6636,18 @@ class Metrics_Manager(Thread):
                 if derivative_labelled_metrics:
                     try:
                         self.redis_conn_decoded.sadd('metrics_manager.derivative_labelled_metrics', *set(derivative_labelled_metrics))
-                        self.redis_conn_decoded.rename('metrics_manager.derivative_labelled_metrics', 'aet.metrics_manager.derivative_labelled_metrics')
-                        logger.info('metrics_manager :: created aet.metrics_manager.derivative_labelled_metrics with %s metrics' % (
-                            str(len(derivative_labelled_metrics))))
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn_decoded.rename('metrics_manager.derivative_labelled_metrics', 'aet.metrics_manager.derivative_labelled_metrics')
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.derivative_labelled_metrics', 'aet.metrics_manager.derivative_labelled_metrics', log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming metrics_manager.derivative_labelled_metrics to aet.metrics_manager.derivative_labelled_metrics, err: %s' % err)
+                        if redis_key_renamed:
+                            logger.info('metrics_manager :: created aet.metrics_manager.derivative_labelled_metrics with %s metrics' % (
+                                str(len(derivative_labelled_metrics))))
                     except Exception as err:
                         logger.error('metrics_manager :: failed to create and then rename metrics_manager.derivative_labelled_metrics Redis set to aet.metrics_manager.derivative_labelled_metrics - %s' % str(err))
 
@@ -5632,6 +6700,16 @@ class Metrics_Manager(Thread):
                             logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to get raw_assigned from Redis - %s' % e)
                     roomba_removed = []
                     if raw_assigned:
+
+                        # @added 20240522 - Feature #5352: vista - bigquery
+                        # Handle custom full durations
+                        namespace_custom_full_durations = {}
+                        try:
+                            namespace_custom_full_durations = self.redis_conn_decoded.hgetall('metrics_manager.batch_processing_namespaces_full_durations')
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: hgetall failed on metrics_manager.batch_processing_namespaces_full_durations, err: %s' % err)
+                        namespaces_with_custom_full_durations = list(namespace_custom_full_durations.keys())
+
                         # Distill timeseries strings into lists
                         for i, metric_name in enumerate(batch_processing_metrics):
                             timeseries = []
@@ -5641,8 +6719,13 @@ class Metrics_Manager(Thread):
                                 unpacker.feed(raw_series)
                                 timeseries = list(unpacker)
                             except Exception as err:
-                                logger.warning('warning :: metrics_manager :: roomba batch_processing_metrics failed to unpack %s timeseries - %s' % (
+                                logger.info('warning :: metrics_manager :: roomba batch_processing_metrics failed to unpack %s timeseries - %s' % (
                                     str(metric_name), err))
+                                try:
+                                    self.redis_conn_decoded.srem('aet.analyzer.batch_processing_metrics', metric_name)
+                                except Exception as err:
+                                    logger.error('error :: metrics_manager :: failed to remove %s from aet.analyzer.batch_processing_metrics - %s' % (
+                                        str(metric_name), err))
                                 timeseries = []
                             # To ensure that there are no unordered timestamps in the time
                             # series which are artefacts of the collector or carbon-relay, sort
@@ -5658,9 +6741,25 @@ class Metrics_Manager(Thread):
                                         metric_name, e))
                             remove_timeseries = False
                             if timeseries:
+
+                                # @added 20240522 - Feature #5352: vista - bigquery
+                                # Handle custom full durations
+                                use_inactive_batch_metrics_timestamp = int(inactive_batch_metrics_timestamp)
+                                if namespaces_with_custom_full_durations:
+                                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                                    else:
+                                        base_name = str(metric_name)
+                                    for namespace in namespaces_with_custom_full_durations:
+                                        if namespace in base_name:
+                                            use_inactive_batch_metrics_timestamp = int(namespace_custom_full_durations[namespace])
+
                                 try:
                                     last_timeseries_timestamp = int(timeseries[-1][0])
-                                    if last_timeseries_timestamp < inactive_batch_metrics_timestamp:
+                                    # @modified 20240522 - Feature #5352: vista - bigquery
+                                    # Handle custom full durations
+                                    # if last_timeseries_timestamp < inactive_batch_metrics_timestamp:
+                                    if last_timeseries_timestamp < use_inactive_batch_metrics_timestamp:
                                         remove_timeseries = True
                                 except Exception as e:
                                     logger.error(traceback.format_exc())
@@ -5713,6 +6812,60 @@ class Metrics_Manager(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager ::: failed to delete skyline.external_settings.update.flux from Redis, err: %s' % err)
 
+                # @added 20230925 - Task #5000: Replace alert key scans with sets
+                # Instead of using expiring keys with have a compute cost with
+                # using scan_iter(match='[PATTERN]') switch to using entries in a
+                # hash key, the management of which has a must lower compute cost.
+                # This new method requires the management of the hash
+                # entries as they do not have an expire like the keys
+                hash_flux_filled = {}
+                flux_filled_hash_key = 'flux.filled_metrics'
+                try:
+                    hash_flux_filled = self.redis_conn_decoded.hgetall(flux_filled_hash_key)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: hgetall failed %s Redis hash - %s' % (
+                        flux_filled_hash_key, err))
+                    hash_flux_filled = {}
+                if hash_flux_filled:
+                    logger.info('metrics_manager ::: removing any expired keys from Redis hash flux.filled_metrics')
+                    current_timestamp = int(time())
+                    for metric, raw_data in hash_flux_filled.items():
+                        fill_data = literal_eval(raw_data)
+                        last_fill_timestamp = fill_data['filled_at']
+                        expiry = fill_data['expiry']
+                        if (last_fill_timestamp + expiry) < current_timestamp:
+                            try:
+                                self.redis_conn_decoded.hdel(flux_filled_hash_key, metric)
+                                logger.info('deleted expired key - %s from %s Redis hash' % (
+                                    metric, flux_filled_hash_key))
+                            except Exception as err:
+                                logger.error('error :: failed to delete key from %s Redis hash - %s' % (
+                                    flux_filled_hash_key, err))
+                mirage_periodic_checks = {}
+                mirage_periodic_checks_hash_key = 'analyzer.mirage_periodic_checks'
+                try:
+                    mirage_periodic_checks = self.redis_conn_decoded.hgetall(mirage_periodic_checks_hash_key)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: hgetall failed %s Redis hash - %s' % (
+                        mirage_periodic_checks_hash_key, err))
+                    mirage_periodic_checks = {}
+                if mirage_periodic_checks:
+                    logger.info('metrics_manager ::: removing any expired keys from Redis hash analyzer.mirage_periodic_checks')
+                    current_timestamp = int(time())
+                    for metric, added_ts_str in mirage_periodic_checks.items():
+                        # @modified 20240112 - Task #5178: Build and test skyline v4.1.0
+                        # if (int(added_ts) + MIRAGE_PERIODIC_CHECK_INTERVAL) < current_timestamp:
+                        if (int(added_ts_str) + MIRAGE_PERIODIC_CHECK_INTERVAL) < current_timestamp:
+                            try:
+                                self.redis_conn_decoded.hdel(mirage_periodic_checks_hash_key, metric)
+                                logger.info('deleted expired key - %s from %s Redis hash' % (
+                                    metric, mirage_periodic_checks_hash_key))
+                            except Exception as err:
+                                logger.error('error :: failed to delete key from %s Redis hash - %s' % (
+                                    mirage_periodic_checks_hash_key, err))
+
                 spin_end = time() - spin_start
 
                 # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
@@ -5735,6 +6888,11 @@ class Metrics_Manager(Thread):
 
         logger.info('metrics_manager :: metric_management_process :: memory usage final - %s' % (
             str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))
+
+        # @added 20240112 - Task #5178: Build and test skyline v4.1.0
+        # Define spin_end in case the process is terminated while in the main
+        # block above
+        spin_end = time() - spin_start
 
         logger.info('metrics_manager :: metric_management_process took %.2f seconds' % spin_end)
         return
@@ -5776,7 +6934,7 @@ class Metrics_Manager(Thread):
                 SERVER_METRIC_PATH = ''
         except Exception as e:
             SERVER_METRIC_PATH = ''
-            logger.warning('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
+            logger.info('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
         try:
             ANALYZER_ENABLED = settings.ANALYZER_ENABLED
             logger.info('metrics_manager :: ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
@@ -5868,10 +7026,15 @@ class Metrics_Manager(Thread):
                 # We only enter this if we didn't 'break' above.
                 logger.info('metrics_manager :: timed out, killing metric_management_process process')
                 for p in pids:
-                    logger.info('metrics_manager :: killing metric_management_process process')
+                    kill_pid = str(p.pid)
+                    logger.info('metrics_manager :: killing metric_management_process process pid: %s' % kill_pid)
                     p.terminate()
                     # p.join()
                     logger.info('metrics_manager :: killed metric_management_process process')
+                    # @added 20240111 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                    if p.is_alive():
+                        sleep(1)
+                        logger.info('metrics_manager :: killed metric_management_process process but still alive.')
 
             for p in pids:
                 if p.is_alive():

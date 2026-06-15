@@ -26,9 +26,16 @@ from functions.thunder.alert_on_no_data import alert_on_no_data
 # @added 20220202 - Feature #4412: flux - quota - thunder alert
 from functions.thunder.alert_on_quota_exceeded import alert_on_quota_exceeded
 
+# @added 20231121 - Feature #5104: boundary - external_settings
+# Limit cardinality
+from functions.thunder.alert_on_boundary_cardinality_breach import alert_on_boundary_cardinality_breach
+
 # @added 20220726 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
 from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20240319 - Feature #5312: thunder - 207 alert
+from functions.thunder.alert_on_invalid_metrics import alert_on_invalid_metrics
 
 skyline_app = 'thunder'
 skyline_app_logger = '%sLog' % skyline_app
@@ -91,7 +98,7 @@ class Thunder(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             exit(0)
 
     def spin_thunder_process(self, i, validated_event_details, redis_item, event_file):
@@ -110,9 +117,9 @@ class Thunder(Thread):
                 if set_alert_cache_key:
                     logger.info('set Redis key %s with %s TTL' % (
                         cache_key, str(expiry)))
-            except Exception as e:
+            except Exception as err:
                 logger.error('error :: set_alert_cache_key failed setting key - %s - %s' % (
-                    cache_key, e))
+                    cache_key, err))
                 # Add a key file
                 thunder_keys_file = '%s/%s' % (THUNDER_KEYS_DIR, cache_key)
                 thunder_keys_file_data = {'timestamp': timestamp, 'expiry': expiry}
@@ -121,16 +128,16 @@ class Thunder(Thread):
                         skyline_app, thunder_keys_file, 'w',
                         str(thunder_keys_file_data))
                     logger.info('added Redis failover thunder_keys_file  %s' % (thunder_keys_file))
-                except Exception as e:
-                    logger.error('error :: failed to add Redis failover thunder_keys_file - %s - %s' % (thunder_keys_file, e))
+                except Exception as err:
+                    logger.error('error :: failed to add Redis failover thunder_keys_file - %s - %s' % (thunder_keys_file, err))
 
-        def remove_event(redis_item, event_file):
+        def remove_event(redis_item, event_file, do_log=True):
             if redis_item:
                 # Delete the item from the Redis set
                 try:
                     # removed_item = update_redis_set(
                     # @added 20220303 - Feature #4412: flux - quota - thunder alert
-                    do_log = True
+                    # do_log = True
                     try:
                         redis_item_dict = literal_eval(redis_item)
                         if isinstance(redis_item_dict, dict):
@@ -142,6 +149,17 @@ class Thunder(Thread):
                                 except Exception as err:
                                     logger.error('error :: failed to removed data key from dict - %s' % err)
                                 logger.info('sample: %s' % str(redis_item_dict))
+                            # @added 20231121 - Feature #5104: boundary - external_settings
+                            # Limit cardinality
+                            if redis_item_dict['event_type'] == 'boundary_cardinality_breach':
+                                do_log = False
+                                logger.info('not logging total event string as boundary_cardinality_breach, sampling with data removed')
+                                try:
+                                    del redis_item_dict['data']['rejected_metrics']
+                                except Exception as err:
+                                    logger.error('error :: failed to removed data key from dict - %s' % err)
+                                logger.info('sample: %s' % str(redis_item_dict))
+
                     except Exception as err:
                         logger.error('error :: failed literal_eval the redis_item - %s' % err)
 
@@ -153,17 +171,17 @@ class Thunder(Thread):
                     # if removed_item:
                     #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
                     #         thunder_redis_set, str(redis_item)))
-                except Exception as e:
+                except Exception as err:
                     logger.error('error :: could not remove item from Redis set %s - %s' % (
-                        thunder_redis_set, e))
+                        thunder_redis_set, err))
             if event_file:
                 # Delete the bad event_file
                 removed_file = False
                 try:
                     removed_file = remove_file(skyline_app, event_file)
-                except Exception as e:
+                except Exception as err:
                     logger.error('error :: could not remove event_file %s - %s' % (
-                        event_file, e))
+                        event_file, err))
                 if removed_file:
                     logger.info('event_file removed - %s' % (
                         str(event_file)))
@@ -179,6 +197,16 @@ class Thunder(Thread):
             event_type = str(validated_event_details['event_type'])
             if event_type == 'metric_quota_exceeded':
                 log_validated_event_details = False
+
+            # @added 20231121 - Feature #5104: boundary - external_settings
+            # Limit cardinality
+            if event_type == 'boundary_cardinality_breach':
+                log_validated_event_details = False
+
+            # @added 20240319 - Feature #5312: thunder - 207 alert
+            if event_type == 'invalid_data':
+                log_validated_event_details = False
+
         except Exception as err:
             logger.error('error :: failed literal_eval the redis_item - %s' % err)
 
@@ -201,9 +229,9 @@ class Thunder(Thread):
             alert_vias = validated_event_details['alert_vias']
             data = validated_event_details['data']
             event_file = validated_event_details['event_file']
-        except Exception as e:
+        except Exception as err:
             logger.error('error :: spin_thunder_process :: failed to determine variables from event_details - %s' % (
-                e))
+                err))
             # return
 
         # Handle thunder/rolling alerts first, these are defined by source being
@@ -221,9 +249,9 @@ class Thunder(Thread):
                     logger.info('spin_thunder_process - alert_via_smtp: %s' % str(alert_via_smtp))
             except KeyError:
                 alert_via_smtp = True
-            except Exception as e:
+            except Exception as err:
                 logger.error('error :: failed to determine alert_via_smtp for %s.%s check - %s' % (
-                    app, event_type, e))
+                    app, event_type, err))
             if alert_via_smtp:
                 alert_vias.append('alert_via_smtp')
                 logger.info('spin_thunder_process - alert_via_smtp appended to alert_vias')
@@ -234,9 +262,9 @@ class Thunder(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('spin_thunder_process - alert_via_slack KeyError')
                 alert_via_slack = False
-            except Exception as e:
+            except Exception as err:
                 logger.error('error :: failed to determine alert_via_slack for %s.%s check - %s' % (
-                    app, event_type, e))
+                    app, event_type, err))
             if alert_via_slack:
                 alert_vias.append('alert_via_slack')
                 logger.info('spin_thunder_process - alert_via_slack appended to alert_vias')
@@ -246,9 +274,9 @@ class Thunder(Thread):
                     logger.info('spin_thunder_process - alert_via_pagerduty: %s' % str(alert_via_pagerduty))
             except KeyError:
                 alert_via_pagerduty = False
-            except Exception as e:
+            except Exception as err:
                 logger.error('error :: failed to determine alert_via_smtp for %s.%s check - %s' % (
-                    app, event_type, e))
+                    app, event_type, err))
             if alert_via_pagerduty:
                 alert_vias.append('alert_via_pagerduty')
                 logger.info('spin_thunder_process - alert_via_pagerduty appended to alert_vias')
@@ -276,9 +304,9 @@ class Thunder(Thread):
                         logger.info('sent thunder_alert(%s, %s' % (
                             str(alert_via), str(subject)))
                         alerts_sent += 1
-                except Exception as e:
+                except Exception as err:
                     logger.error('error :: failed to alert_via %s for %s.%s check - %s' % (
-                        alert_via, app, event_type, e))
+                        alert_via, app, event_type, err))
                 cache_key = 'thunder.alert.%s.%s' % (app, event_type)
             if alerts_sent:
                 if level == 'alert':
@@ -294,10 +322,10 @@ class Thunder(Thread):
                 parent_namespace = data['namespace']
                 stale_metrics = data['stale_metrics']
                 alerts_sent_dict = alert_on_stale_metrics(self, level, message, parent_namespace, stale_metrics, data)
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: alert_on_stale_metrics failed for %s - %s' % (
-                    parent_namespace, e))
+                    parent_namespace, err))
             all_sent = False
             if alerts_sent_dict:
                 all_sent = alerts_sent_dict['all_sent']
@@ -305,7 +333,7 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 if level == 'alert':
@@ -320,10 +348,10 @@ class Thunder(Thread):
             parent_namespace = None
             try:
                 parent_namespace = data['namespace']
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not determine parent_namespace from data %s - %s' % (
-                    str(data), e))
+                    str(data), err))
                 remove_event(redis_item, event_file)
             send_no_data_alert = True
             if parent_namespace:
@@ -337,16 +365,16 @@ class Thunder(Thread):
                             logger.info('Redis key %s exists, not send no_data alert for %s' % (
                                 thunder_no_data_alert_key, parent_namespace))
                             remove_event(redis_item, event_file)
-                    except Exception as e:
+                    except Exception as err:
                         logger.error('error :: failed Redis key %s - %s' % (
-                            thunder_no_data_alert_key, e))
+                            thunder_no_data_alert_key, err))
             if parent_namespace and send_no_data_alert:
                 try:
                     alerts_sent_dict = alert_on_no_data(self, level, message, parent_namespace, data)
-                except Exception as e:
+                except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not remove event_file %s - %s' % (
-                        event_file, e))
+                        event_file, err))
 
                 all_sent = False
                 if alerts_sent_dict:
@@ -355,10 +383,38 @@ class Thunder(Thread):
                         str(alerts_sent_dict['to_send']),
                         str(alerts_sent_dict['sent']), parent_namespace))
                 if not all_sent:
-                    logger.warning('warning :: all alerts were not sent - %s' % (
+                    logger.info('warning :: all alerts were not sent - %s' % (
                         str(alerts_sent_dict)))
                 if all_sent:
                     remove_event(redis_item, event_file)
+
+        # @added 20231121 - Feature #5104: boundary - external_settings
+        # Limit cardinality
+        if source == 'analyzer' and event_type == 'boundary_cardinality_breach':
+            logger.info('handling alert for boundary_cardinality_breach')
+            alerts_sent_dict = {}
+            try:
+                parent_namespace = data['namespace_prefix']
+                rejected_metrics = data['rejected_metrics']
+                alerts_sent_dict = alert_on_boundary_cardinality_breach(self, level, message, parent_namespace, expiry, rejected_metrics, data)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_on_boundary_cardinality_breach failed for %s - %s' % (
+                    message, err))
+            all_sent = False
+            if alerts_sent_dict:
+                all_sent = alerts_sent_dict['all_sent']
+                logger.info('%s alerts of %s sent for metric_quota_exceeded on %s' % (
+                    str(alerts_sent_dict['to_send']),
+                    str(alerts_sent_dict['sent']), parent_namespace))
+            if not all_sent:
+                logger.info('warning :: all alerts were not sent - %s' % (
+                    str(alerts_sent_dict)))
+            if all_sent:
+                cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
+                    app, event_type, level, parent_namespace, str(timestamp))
+                create_alert_cache_key(cache_key, expiry, str(validated_event_details))
+                remove_event(redis_item, event_file, do_log=False)
 
         # @added 20220202 - Feature #4412: flux - quota - thunder alert
         # metrics over quota alerts
@@ -379,13 +435,74 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
                     app, event_type, level, parent_namespace, str(timestamp))
                 create_alert_cache_key(cache_key, expiry, str(validated_event_details))
                 remove_event(redis_item, event_file)
+
+        # @added 20240319 - Feature #5312: thunder - 207 alert
+        if source == 'flux' and event_type == 'invalid_data':
+            alerts_sent_dict = {}
+            try:
+                parent_namespace = data['namespace']
+                alerts_sent_dict = alert_on_invalid_metrics(self, level, message, parent_namespace, timestamp, data)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_on_invalid_metrics failed for %s - %s' % (
+                    parent_namespace, err))
+            all_sent = False
+            in_expiry = False
+            if alerts_sent_dict:
+                all_sent = alerts_sent_dict['all_sent']
+                in_expiry = alerts_sent_dict['in_expiry']
+                if not in_expiry:
+                    logger.info('%s alerts of %s sent for invalid_metrics on %s' % (
+                        str(alerts_sent_dict['to_send']),
+                        str(alerts_sent_dict['sent']), parent_namespace))
+                else:
+                    ttl = alerts_sent_dict['ttl']
+                    logger.info('no alerts for invalid_metrics on %s were sent, in_expiry, ttl: %s seconds' % (
+                        parent_namespace, str(ttl)))
+            if not all_sent:
+                logger.info('warning :: all alerts were not sent - %s' % (
+                    str(alerts_sent_dict)))
+            if all_sent and not in_expiry:
+                cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
+                    app, event_type, level, parent_namespace, str(timestamp))
+                create_alert_cache_key(cache_key, 3600, str(validated_event_details))
+                remove_event(redis_item, event_file)
+
+        # @added 20240521 - Feature #5352: vista - bigquery
+        if event_type == 'bq_backfill_failed':
+            if not settings.SLACK_ENABLED:
+                logger.info('%s thunder alert would be sent to slack for %s with %s' % (
+                    event_type, message, str(data)))
+                remove_event(redis_item, event_file)
+            else:
+                subject = message
+                body = str(data)
+                alerts_sent = 0
+                alert_via = 'alert_via_slack'
+                logger.info('spin_thunder_process - thunder rolling event alert_via: %s' % str(alert_via))
+                alert_sent = False
+                try:
+                    title = 'Skyline Thunder - %s' % level.upper()
+                    with_subject = subject.replace(level, '')
+                    title = title + with_subject
+                    alert_sent = thunder_alert(alert_via, title, body)
+                except Exception as err:
+                    logger.error('error :: failed to alert_via %s for %s.%s, err: %s' % (
+                        alert_via, app, event_type, err))
+                cache_key = 'thunder.alert.%s.%s' % (app, event_type)
+                if alerts_sent:
+                    alerts_sent = 1
+                    if level == 'alert':
+                        create_alert_cache_key(cache_key, expiry, timestamp)
+                    remove_event(redis_item, event_file)
+                logger.info('%s alerts sent for %s' % (str(alerts_sent), event_type))
 
         spin_end = time() - spin_start
         logger.info('spin_thunder_process took %.2f seconds' % spin_end)
@@ -449,24 +566,24 @@ class Thunder(Thread):
         if not os.path.exists(settings.SKYLINE_TMP_DIR):
             try:
                 mkdir_p(settings.SKYLINE_TMP_DIR)
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to create %s - %s' % (settings.SKYLINE_TMP_DIR, e))
+                logger.error('error :: failed to create %s - %s' % (settings.SKYLINE_TMP_DIR, err))
 
         # Create the required THUNDER directories which are failed over to and
         # used in the event that Redis is down
         if not os.path.exists(THUNDER_EVENTS_DIR):
             try:
                 mkdir_p(THUNDER_EVENTS_DIR)
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to create %s - %s' % (THUNDER_EVENTS_DIR, e))
+                logger.error('error :: failed to create %s - %s' % (THUNDER_EVENTS_DIR, err))
         if not os.path.exists(THUNDER_KEYS_DIR):
             try:
                 mkdir_p(THUNDER_KEYS_DIR)
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to create %s - %s' % (THUNDER_KEYS_DIR, e))
+                logger.error('error :: failed to create %s - %s' % (THUNDER_KEYS_DIR, err))
 
         last_sent_to_graphite = int(time())
         thunder_alerts_sent = 0
@@ -478,30 +595,30 @@ class Thunder(Thread):
             try:
                 self.redis_conn.ping()
                 logger.info('Redis ping OK')
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cannot connect to redis at socket path %s - %s' % (
-                    settings.REDIS_SOCKET_PATH, e))
+                    settings.REDIS_SOCKET_PATH, err))
                 sleep(10)
                 try:
                     self.redis_conn = get_redis_conn(skyline_app)
                     logger.info('connected via get_redis_conn')
-                except Exception as e:
+                except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: not connected via get_redis_conn - %s' % e)
+                    logger.error('error :: not connected via get_redis_conn - %s' % err)
                 # continue
             try:
                 self.redis_conn_decoded.ping()
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: not connected via get_redis_conn_decoded - %s' % e)
+                logger.error('error :: not connected via get_redis_conn_decoded - %s' % err)
                 sleep(10)
                 try:
                     self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
                     logger.info('connected via get_redis_conn_decoded')
-                except Exception as e:
+                except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: cannot connect via get_redis_conn_decoded - %s' % e)
+                    logger.error('error :: cannot connect via get_redis_conn_decoded - %s' % err)
                 # continue
 
             # Determine if any metric has been added to process
@@ -526,14 +643,14 @@ class Thunder(Thread):
                         try:
                             logger.info('set thunder Redis key')
                             self.redis_conn.setex('redis', 120, current_timestamp)
-                        except Exception as e:
+                        except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: could not update the Redis redis key - %s' % (
-                                e))
-                except Exception as e:
+                                err))
+                except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not update the Redis %s key - %s' % (
-                        skyline_app, e))
+                        skyline_app, err))
 
                 if not settings.THUNDER_ENABLED:
                     logger.info('sleeping 59 seconds settings.THUNDER_ENABLED not set')
@@ -554,8 +671,8 @@ class Thunder(Thread):
                         #                      Branch #1444: thunder
                         # thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
                         thunder_events = list(self.redis_conn_decoded.smembers(thunder_redis_set))
-                    except Exception as e:
-                        logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+                    except Exception as err:
+                        logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, err))
 
                 # If no data was returned from Redis ensure thunder_events is
                 # a set so that any event_files can be added to the set
@@ -565,7 +682,10 @@ class Thunder(Thread):
                         thunder_events = set(thunder_events)
                 else:
                     logger.info('no entries in thunder.events Redis set')
-                    thunder_events = []
+                    # @modified 20240206 - Task #4962: Build and test skyline v4.0.0
+                    # Ensure this is a set so it can be added to not appended
+                    # thunder_events = []
+                    thunder_events = set([])
 
                 # Check the filesystem for failover event files
                 filesystem_check_timestamp = int(time())
@@ -582,20 +702,37 @@ class Thunder(Thread):
                                     try:
                                         with open(event_file, 'r') as f:
                                             data_dict_str = f.read()
-                                    except Exception as e:
-                                        logger.error('error :: failed to open event_file: %s - %s' % (event_file, e))
+                                    except Exception as err:
+                                        logger.error('error :: failed to open event_file: %s - %s' % (event_file, err))
 
                                     try:
                                         data_dict = literal_eval(data_dict_str)
-                                        if data_dict:
+
+                                        # @modified 20240206 - Task #4962: Build and test skyline v4.0.0
+                                        # Do not do multiple actions here do
+                                        # them individually.  Moved to below
+                                        # so that only literal_eval is being
+                                        # done here
+                                        # if data_dict:
+                                        #     data_dict['event_file'] = event_file
+                                        #     # thunder_events.add(str(data_dict))
+                                        #     thunder_events.append(str(data_dict))
+                                    except Exception as err:
+                                        logger.error('error :: failed to literal_eval event_file: %s - %s' % (event_file, err))
+                                    # @added 20240206 - Task #4962: Build and test skyline v4.0.0
+                                    # Moved from above to run individually and
+                                    # not in the literal_eval state
+                                    if data_dict:
+                                        try:
                                             data_dict['event_file'] = event_file
-                                            # thunder_events.add(str(data_dict))
-                                            thunder_events.append(str(data_dict))
-                                    except Exception as e:
-                                        logger.error('error :: failed to literal_eval event_file: %s - %s' % (event_file, e))
-                                except Exception as e:
+                                            # Add to the set, set has no append
+                                            thunder_events.add(str(data_dict))
+                                        except Exception as err:
+                                            logger.error('error :: failed to add data to thunder_events set from event_file: %s to data_dict: %s, err: %s' % (
+                                                str(event_file), str(data_dict), err))
+                                except Exception as err:
                                     logger.error('failed evaluate event_file %s - %s' % (
-                                        event_file, e))
+                                        event_file, err))
                     logger.info('%s thunder failover event files found' % str(thunder_event_files_count))
 
                     # Check the filesystem for failover key files
@@ -612,17 +749,17 @@ class Thunder(Thread):
                                             key_dict_str = f.read()
                                         key_dict = literal_eval(key_dict_str)
                                         thunder_key_files_count += 1
-                                    except Exception as e:
+                                    except Exception as err:
                                         logger.error('error :: failed to open thunder_key_file: %s - %s' % (
-                                            thunder_key_file, e))
+                                            thunder_key_file, err))
                                     timestamp = 0
                                     if key_dict:
                                         try:
                                             timestamp = key_dict['timestamp']
                                             expiry = int(key_dict['expiry'])
-                                        except Exception as e:
+                                        except Exception as err:
                                             logger.error('error :: failed to determine timestamp and expiry from key_dict created from thunder_key_file: %s - %s' % (
-                                                thunder_key_file, e))
+                                                thunder_key_file, err))
                                     if timestamp:
                                         now = int(time())
                                         if (timestamp + expiry) >= now:
@@ -632,14 +769,14 @@ class Thunder(Thread):
                                                 if removed_file:
                                                     logger.info('removed expired thunder_key_file: %s' % (
                                                         thunder_key_file))
-                                            except Exception as e:
+                                            except Exception as err:
                                                 logger.error('error :: failed to remove %s, continuing - %s' % (
-                                                    thunder_key_file, e))
+                                                    thunder_key_file, err))
                                         if (timestamp + expiry) <= now:
                                             expiry = now - (timestamp + expiry)
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('failed evaluate thunder_key_file: %s - %s' % (
-                                        thunder_key_file, e))
+                                        thunder_key_file, err))
                     logger.info('%s thunder failover key files found' % str(thunder_key_files_count))
 
                 # @added 20220222 -Branch #1444: thunder
@@ -658,22 +795,25 @@ class Thunder(Thread):
                             redis_item = event_item
                             try:
                                 event_details = literal_eval(event_item)
-                            except Exception as e:
+                            except Exception as err:
                                 remove_item = True
                                 event_details = None
                                 logger.error('error :: could not determine event_details from %s Redis set entry - %s' % (
-                                    thunder_redis_set, e))
+                                    thunder_redis_set, err))
                             missing_required_keys = False
                             if event_details:
                                 try:
                                     event_type = str(event_details['event_type'])
                                 except KeyError:
                                     event_type = str(event_details['type'])
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine type from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     event_type = False
-                                if event_type != 'metric_quota_exceeded':
+                                # @modified 20231121 - Feature #5104: boundary - external_settings
+                                # Limit cardinality
+                                # if event_type != 'metric_quota_exceeded':
+                                if event_type not in ['metric_quota_exceeded', 'boundary_cardinality_breach']:
                                     logger.info('validating thunder event_details: %s' % str(event_details))
                                 else:
                                     logger.info('validating thunder event_details for %s' % str(event_type))
@@ -681,90 +821,90 @@ class Thunder(Thread):
                                     level = str(event_details['level'])
                                 except KeyError:
                                     level = 'alert'
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine level from event_details dict set to alert - %s' % (
-                                        e))
+                                        err))
                                     level = 'alert'
                                 validated_event_details['level'] = level
                                 try:
                                     event_type = str(event_details['event_type'])
                                 except KeyError:
                                     event_type = str(event_details['type'])
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine type from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     event_type = False
                                 validated_event_details['event_type'] = event_type
                                 try:
                                     message = str(event_details['message'])
                                 except KeyError:
                                     message = False
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine message from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     message = False
                                 validated_event_details['message'] = message
                                 try:
                                     app = str(event_details['app'])
                                 except KeyError:
                                     app = False
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine app from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     app = False
                                 validated_event_details['app'] = app
                                 try:
                                     metric = str(event_details['metric'])
                                 except KeyError:
                                     metric = False
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine metric from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     metric = False
                                 validated_event_details['metric'] = metric
                                 try:
                                     source = str(event_details['source'])
                                 except KeyError:
                                     source = False
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine source from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     source = False
                                 validated_event_details['source'] = source
                                 try:
                                     expiry = int(event_details['expiry'])
                                 except KeyError:
                                     expiry = 900
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine expiry from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     expiry = 900
                                 validated_event_details['expiry'] = expiry
                                 try:
                                     timestamp = event_details['timestamp']
                                 except KeyError:
                                     timestamp = int(time())
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine timestamp from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     timestamp = int(time())
                                 validated_event_details['timestamp'] = timestamp
                                 try:
                                     alert_vias = event_details['alert_vias']
                                 except KeyError:
                                     alert_vias = []
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine alert_vias from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     alert_vias = []
                                 validated_event_details['alert_vias'] = alert_vias
                                 if source == 'thunder':
                                     validated_event_details['alert_vias'] = ['default']
                                 try:
                                     data = event_details['data']
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine data from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     data = {'status': None}
                                 validated_event_details['data'] = data
                                 # Add the event_file, this is related to files used
@@ -774,9 +914,9 @@ class Thunder(Thread):
                                     event_file = event_details['event_file']
                                 except KeyError:
                                     event_file = None
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: failed to determine event_file from event_details dict - %s' % (
-                                        e))
+                                        err))
                                     event_file = None
                                 validated_event_details['event_file'] = event_file
 
@@ -801,25 +941,25 @@ class Thunder(Thread):
                                         # if removed_item:
                                         #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
                                         #         thunder_redis_set, str(event_item)))
-                                    except Exception as e:
+                                    except Exception as err:
                                         logger.error('error :: could not remove bad item from Redis set %s - %s' % (
-                                            thunder_redis_set, e))
+                                            thunder_redis_set, err))
                                 else:
                                     # Delete the bad event_file
                                     removed_file = False
                                     try:
                                         removed_file = remove_file(skyline_app, event_file)
-                                    except Exception as e:
+                                    except Exception as err:
                                         logger.error('error :: could not remove bad event_file %s - %s' % (
-                                            event_file, e))
+                                            event_file, err))
                                     if removed_file:
                                         logger.error('error :: could not determine event_details from the event_file (removed) - %s' % (
                                             str(event_file)))
                                 continue
-                        except Exception as e:
+                        except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: validating and checking event - %s' % (
-                                e))
+                                err))
 
                         if validated_event_details:
                             logger.info('thunder event_details validated')
@@ -838,10 +978,10 @@ class Thunder(Thread):
                             alerted = None
                             try:
                                 alerted = self.redis_conn_decoded.get(alert_cache_key)
-                            except Exception as e:
+                            except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: failed to get %s Redis key - %s' % (
-                                    alert_cache_key, e))
+                                    alert_cache_key, err))
                             if not alerted:
                                 alerted = check_thunder_failover_key(self, alert_cache_key)
                             if alerted:
@@ -863,6 +1003,18 @@ class Thunder(Thread):
                                                     except Exception as err:
                                                         logger.error('error :: failed to removed data key from dict - %s' % err)
                                                     logger.info('sample: %s' % str(redis_item_dict))
+                                                    
+                                                # @added 20231121 - Feature #5104: boundary - external_settings
+                                                # Limit cardinality
+                                                if redis_item_dict['event_type'] == 'boundary_cardinality_breach':
+                                                    do_log = False
+                                                    logger.info('not logging total event string as boundary_cardinality_breach, sampling with data removed')
+                                                    try:
+                                                        del redis_item_dict['data']['rejected_metrics']
+                                                    except Exception as err:
+                                                        logger.error('error :: failed to removed data key from dict - %s' % err)
+                                                    logger.info('sample: %s' % str(redis_item_dict))
+
                                         except Exception as err:
                                             logger.error('error :: failed literal_eval the redis_item - %s' % err)
 
@@ -876,17 +1028,17 @@ class Thunder(Thread):
                                         # if removed_item:
                                         #     logger.info('alert key exists, removed event_details from %s Redis set entry - %s' % (
                                         #         thunder_redis_set, str(redis_item)))
-                                    except Exception as e:
+                                    except Exception as err:
                                         logger.error('error :: could not remove item from Redis set %s - %s' % (
-                                            thunder_redis_set, e))
+                                            thunder_redis_set, err))
                                 if event_file:
                                     # Delete the bad event_file
                                     removed_file = False
                                     try:
                                         removed_file = remove_file(skyline_app, event_file)
-                                    except Exception as e:
+                                    except Exception as err:
                                         logger.error('error :: could not remove event_file %s - %s' % (
-                                            event_file, e))
+                                            event_file, err))
                                     if removed_file:
                                         logger.info('alert key exists, event_file removed - %s' % (
                                             str(event_file)))
@@ -903,10 +1055,10 @@ class Thunder(Thread):
                                 current_event = self.redis_conn_decoded.get(current_event_cache_key)
                                 if current_event:
                                     logger.info('current_event_cache_key exist in Redis %s for this event, skipping' % current_event_cache_key)
-                            except Exception as e:
+                            except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: failed to get %s Redis key - %s' % (
-                                    current_event_cache_key, e))
+                                    current_event_cache_key, err))
                             if not current_event:
                                 current_event = check_thunder_failover_key(self, current_event_cache_key)
                                 if current_event:
@@ -918,10 +1070,10 @@ class Thunder(Thread):
                         if validated_event_details:
                             try:
                                 self.redis_conn_decoded.setex(current_event_cache_key, 59, int(time()))
-                            except Exception as e:
+                            except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: failed to setex %s Redis key - %s' % (
-                                    current_event_cache_key, e))
+                                    current_event_cache_key, err))
                                 try:
                                     failover_key_file = '%s/%s' % (THUNDER_KEYS_DIR, current_event_cache_key)
                                     failover_key_data = {'timestamp': int(time()), 'expiry': 59}
@@ -929,8 +1081,8 @@ class Thunder(Thread):
                                         skyline_app, failover_key_file, 'w',
                                         str(failover_key_data))
                                     logger.info('added Redis failover - failover_key_file - %s' % (failover_key_file))
-                                except Exception as e:
-                                    logger.error('error :: failed to add Redis failover failover_key_file - %s - %s' % (failover_key_file, e))
+                                except Exception as err:
+                                    logger.error('error :: failed to add Redis failover failover_key_file - %s - %s' % (failover_key_file, err))
                             # @modified 20220110 - Bug #4364: Prune old thunder.events
                             #                      Branch #1444: thunder
                             # redis_item = event_item
@@ -993,7 +1145,12 @@ class Thunder(Thread):
                     for p in pids:
                         if p.is_alive():
                             logger.info('stopping spin_thunder_process - %s' % (str(p.is_alive())))
-                            p.join()
+                            # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                            # p.join()
+                            killing_pid = p.pid
+                            logger.info('kill spin_thunder_process with pid: %s' % (str(killing_pid)))
+                            p.terminate()
+                            logger.info('killed spin_thunder_process process with pid: %s' % (str(killing_pid)))
 
                     # @added 20210907 - Bug #4258: cleanup thunder.events
                     # Remove event
@@ -1022,9 +1179,9 @@ class Thunder(Thread):
                             update_redis_set(
                                 skyline_app, thunder_redis_set, redis_item,
                                 'remove', do_log)
-                        except Exception as e:
+                        except Exception as err:
                             logger.error('error :: could not remove item from Redis set %s - %s' % (
-                                thunder_redis_set, e))
+                                thunder_redis_set, err))
 
             if int(time()) >= (last_sent_to_graphite + 60):
                 logger.info('sending Graphite metrics')
@@ -1040,8 +1197,8 @@ class Thunder(Thread):
                 # Not required here
                 # try:
                 #     thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
-                # except Exception as e:
-                #     logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+                # except Exception as err:
+                #     logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, err))
 
                 # @added 20210907 - Bug #4258: cleanup thunder.events
                 # The original version of thunder never removed the
@@ -1056,8 +1213,8 @@ class Thunder(Thread):
                 logger.info('managing thunder.events Redis set and removing any items older than 86400')
                 try:
                     thunder_events_list = list(self.redis_conn_decoded.smembers(thunder_redis_set))
-                except Exception as e:
-                    logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+                except Exception as err:
+                    logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, err))
                 if not thunder_events_list:
                     logger.info('managed thunder.events Redis set, no items in set')
                 if thunder_events_list:
@@ -1113,9 +1270,9 @@ class Thunder(Thread):
                                         # skyline_app, thunder_redis_set, redis_item,
                                         skyline_app, thunder_redis_set,
                                         thunder_event_str, 'remove', do_log)
-                                except Exception as e:
+                                except Exception as err:
                                     logger.error('error :: could not remove item from Redis set %s - %s' % (
-                                        thunder_redis_set, e))
+                                        thunder_redis_set, err))
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to manage a thunder_event in the thunder_events_list - %s' % err)

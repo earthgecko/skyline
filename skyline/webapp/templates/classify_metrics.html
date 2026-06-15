@@ -9,6 +9,25 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?cloudbursts=true" data-bs-toggle="tooltip" title="Explore significant but not anomalous changes"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?related_to_metrics=true" data-bs-toggle="tooltip" title="Explore what metrics are related"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?pearson_closest=true" data-bs-toggle="tooltip" title="Determine what metrics correlate with a specific metric"><span class="logo"><span class="sky">Pearson</span><span class="re"> closest</span></span></a>
+    </li>
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -21,7 +40,8 @@
 		  <li><a href="?classification=true"><span class="logo"><span class="sky">Classifications</span> - <span class="re">metric</span></span></span></a></li>
 -->
 		  <li><a href="?cloudbursts=true"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a></li>
-		  <li><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		  <li><a href="?related_to_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		  <li><a href="?pearson_closest=true"><span class="logo"><span class="sky">Pearson</span><span class="re"> closest</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -40,13 +60,19 @@
 		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
 		  <li class="active"><a href="?classify_metrics=true">Search</a></li>
 		</ul>
+{% endif %}
+
 		<div class="tab-content">
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
   		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">classified metrics</span></span></h4>
   {% if classified_metrics %}
+    {% if version == dev_ver %}
+        <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#search_options">Show search options</button>
+    {% else %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+    {% endif %}
         <div id="search_options" class="collapse">
   {% endif %}
         <form action="luminosity">

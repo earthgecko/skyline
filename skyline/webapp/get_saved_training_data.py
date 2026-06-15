@@ -85,6 +85,8 @@ def get_saved_training_data(
                 saved_training_data_dict[metric][timestamp]['url'] = url
 
                 saved_training_data_dict[metric][timestamp]['labelled_metric_base_name'] = labelled_metric_base_name
+                saved_training_data_dict[metric][timestamp]['metric'] = use_base_name
+
                 metric_id = 0
                 try:
                     metric_id = get_metric_id_from_base_name(current_skyline_app, use_base_name)

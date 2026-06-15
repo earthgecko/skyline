@@ -39,12 +39,12 @@ def get_metric_redistimeseries(current_skyline_app, metric, from_timestamp, unti
     timeseries = []
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
-    except Exception as e:
+    except Exception as err:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error('error :: %s :: failed to connect to Redis to fetch time series for %s - %s' % (
-            function_str, metric, e))
+            function_str, metric, err))
 
     use_metric = str(metric)
     metric_id = 0
@@ -76,6 +76,10 @@ def get_metric_redistimeseries(current_skyline_app, metric, from_timestamp, unti
 
     try:
         timeseries = redis_conn_decoded.ts().range(use_metric, (from_timestamp * 1000), (until_timestamp * 1000))
+        if log:
+            current_logger.info('%s :: fetched Redis time series for %s with  length: %s, sample: %s' % (
+                function_str, metric, str(len(timeseries)),
+                str(timeseries[-3:])))
     except Exception as err:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'
@@ -86,8 +90,14 @@ def get_metric_redistimeseries(current_skyline_app, metric, from_timestamp, unti
     if timeseries:
         # Convert Redis millisecond timestamps to second timestamps
         timeseries = [[int(mts / 1000), value] for mts, value in timeseries]
+        if log:
+            current_logger.info('%s :: converted timestamps in time series for %s with  length: %s, sample: %s' % (
+                function_str, metric, str(len(timeseries)),
+                str(timeseries[-3:])))
     metric_type = None
-    if timeseries:
+    # @modified 20240424 - Feature #5332: redistimeseries - dotted namespaces
+    # if timeseries:
+    if timeseries and metric_id:
         try:
             metric_type = get_labelled_metric_type(current_skyline_app, use_metric)
         except Exception as err:
@@ -106,5 +116,9 @@ def get_metric_redistimeseries(current_skyline_app, metric, from_timestamp, unti
                 current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error('error :: %s :: nonNegativeDerivative failed - %s' % (
                 function_str, err))
+        if log:
+            current_logger.info('%s :: converted to derivative_timeseries for %s with  length: %s, sample: %s' % (
+                function_str, metric, str(len(timeseries)),
+                str(timeseries[-3:])))
 
     return timeseries

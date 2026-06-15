@@ -1065,6 +1065,11 @@ def panorama_anomaly_details(anomaly_id):
 
     logger.info('panorama_anomaly_details - getting details for anomaly id %s' % str(anomaly_id))
 
+    # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                   Task #5248: Optimise ionosphere_functions.get_related
+    # Ensure that anomaly_data is a list and not a boolean
+    anomaly_data = []
+
     metric_id = 0
 
     # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -1131,7 +1136,11 @@ def panorama_anomaly_details(anomaly_id):
             # logger.error('error :: panorama_anomaly_details - failed to get metric from db')
             logger.error('error :: panorama_anomaly_details :: get_base_name_from_metric_id falied for metric_id: %s - %s' % (
                 str(metric_id), err))
-            return False
+            # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+            #                      Task #5248: Optimise ionosphere_functions.get_related
+            # Ensure that anomaly_data is a list and not a boolean
+            # return False
+            return anomaly_data
 
     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
     #                      Task #4778: v4.0.0 - update dependencies
@@ -1144,7 +1153,12 @@ def panorama_anomaly_details(anomaly_id):
     #     logger.error(traceback.format_exc())
     #     logger.error('error :: panorama_anomaly_details - failed to get anomaly details from db')
     #     return False
-    anomaly_data = None
+
+    # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                      Task #5248: Optimise ionosphere_functions.get_related
+    # Ensure that anomaly_data is a list and not a boolean
+    # anomaly_data = None
+
     rows = []
     try:
         stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_timestamp, anomalies_table.c.full_duration, anomalies_table.c.created_timestamp, anomalies_table.c.anomaly_end_timestamp]).\
@@ -1165,7 +1179,11 @@ def panorama_anomaly_details(anomaly_id):
         connection.close()
     except Exception as err:
         logger.error('error :: panorama_anomaly_details :: failed to get anomaly from the db - %s' % err)
-        return False
+        # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+        #                      Task #5248: Optimise ionosphere_functions.get_related
+        # Ensure that anomaly_data is a list and not a boolean
+        # return False
+        return anomaly_data
 
     # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
     #                   Task #4778: v4.0.0 - update dependencies
@@ -1175,7 +1193,12 @@ def panorama_anomaly_details(anomaly_id):
     if anomaly_data:
         return anomaly_data
 
-    anomaly_data = None
+    # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                      Task #5248: Optimise ionosphere_functions.get_related
+    # Ensure that anomaly_data is a list and not a boolean
+    # anomaly_data = None
+    anomaly_data = []
+
     for row in rows:
         anomalous_datapoint = float(row[2])
         anomaly_timestamp = int(row[3])
@@ -1241,7 +1264,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
     except Exception as err:
         logger.error('error :: get_cluster_data - %s' % err)
     if cluster_call:
-        logger.warning('warning :: get_cluster_data was call with a request that pased cluster_call=true, prevent loop returning empty data')
+        logger.info('warning :: get_cluster_data was call with a request that pased cluster_call=true, prevent loop returning empty data')
         return data
 
     if only_host != 'all':
@@ -1342,7 +1365,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             # Added 400 to handle bad request on cluster node
             # if r.status_code == 404:
             if r.status_code in [404, 400]:
-                logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
+                logger.info('warning :: get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
                 # @modified 20220504 - Feature #4530: namespace.analysed_events
                 # return data
@@ -1397,7 +1420,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             # if r.status_code == 404:
             # If there is no r ....
             # if r.status_code in [404, 400]:
-            logger.warning('get_cluster_data :: %s no response from %s ' % (
+            logger.info('warning :: get_cluster_data :: %s no response from %s ' % (
                 api_endpoint, str(item[0])))
             # @modified 20220504 - Feature #4530: namespace.analysed_events
             # return data
@@ -1856,6 +1879,7 @@ def get_yhat_values(
                 #     except:
                 #         a_end_timestamp = 0
                 #     anomalies_at.append([a_timestamp, a_value, a_end_timestamp])
+
                 stmt = select([anomalies_table.c.anomaly_timestamp, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_end_timestamp]).\
                     where(anomalies_table.c.metric_id == int(metric_id)).\
                     where(anomalies_table.c.anomaly_timestamp >= from_timestamp).\
@@ -1881,11 +1905,16 @@ def get_yhat_values(
             if engine:
                 engine_disposal(skyline_app, engine)
 
+            logger.info('get_yhat_values :: got %s anomalies' % str(len(anomalies_at)))
+
         timeseries_ranges = []
         last_timestamp = None
         for index, item in enumerate(timeseries):
             if last_timestamp:
-                t_range = list(range(last_timestamp, int(item[0])))
+                # @modified 20240605 - Feature #3850: webapp - yhat_values API endoint
+                # Optimise this operation from taking 19 seconds to less than 1
+                # t_range = list(range(last_timestamp, int(item[0])))
+                t_range = [last_timestamp, int(item[0])]
                 timeseries_ranges.append([index, t_range, item])
             last_timestamp = int(item[0])
 
@@ -1897,12 +1926,19 @@ def get_yhat_values(
             last_index = int(index)
             last_item = list(item)
 
-        t_range = list(range(last_timestamp, (int(last_item[0]) + 1)))
+        # @modified 20240605 - Feature #3850: webapp - yhat_values API endoint
+        # Optimise this operation from taking 19 seconds to less than 1
+        # t_range = list(range(last_timestamp, (int(last_item[0]) + 1)))
+        t_range = [last_timestamp, (int(last_item[0]) + 1)]
+
         timeseries_ranges.append([last_index, t_range, last_item])
         anomalies_index = []
         for index, time_range, item in timeseries_ranges:
             for a_timestamp, a_value, a_end_timestamp in anomalies_at:
-                if a_timestamp in time_range:
+                # @modified 20240605 - Feature #3850: webapp - yhat_values API endoint
+                # Optimise this operation from taking 19 seconds to less than 1
+                # if a_timestamp in time_range:
+                if a_timestamp >= time_range[0] and a_timestamp < time_range[1]:
                     anomalies_index.append([index, item])
         anomalous_period_indices = []
         anomalies_indices = [item[0] for item in anomalies_index]
@@ -1917,6 +1953,8 @@ def get_yhat_values(
         for item in anomalies_index:
             anomaly_timestamps_indices.append(item[0])
             anomalies.append(item[1])
+
+        logger.info('get_yhat_values :: calculated anomaly_timestamps_indices')
 
     top = []
     bottom = []
@@ -1943,7 +1981,7 @@ def get_yhat_values(
             sigma3_array = True
 
     if use_numba and not sigma3_array:
-        logger.warning('get_yhat_values - numba_sigma3_array did not populate sigma3_array')
+        logger.info('warning :: get_yhat_values - numba_sigma3_array did not populate sigma3_array')
 
     yhat_dict = {}
     if use_numba and sigma3_array:
@@ -1958,7 +1996,7 @@ def get_yhat_values(
             logger.error('error :: numba_yhat_dict failed - %s' % err)
         logger.info('get_yhat_values - numba_yhat_dict took %.6f seconds' % (timer() - start_numba_yhat_dict))
         if not yhat_array_dict:
-            logger.warning('warning get_yhat_values - numba_yhat_dict did not return dictionary')
+            logger.info('warning :: get_yhat_values - numba_yhat_dict did not return dictionary')
 
         if yhat_array_dict:
             start_yhat_array_dict = timer()
@@ -2138,17 +2176,24 @@ def get_yhat_values(
                 # Change dict key to int not float
                 int_ts = int(ts)
                 yhat_dict[int_ts] = {}
+
+                # @modified 20241111 - Bug #5541: np.float64 - yhat and sigma3
+                #                      Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Coerce all values below to float to be literal_eval and json
+                # safe so there are no np.float64 types
+
                 if include_value:
-                    yhat_dict[int_ts]['value'] = value
+                    yhat_dict[int_ts]['value'] = float(value)
                 if include_mean:
-                    yhat_dict[int_ts]['mean'] = va_mean
+                    yhat_dict[int_ts]['mean'] = float(va_mean)
                 if include_mean:
-                    yhat_dict[int_ts]['mean'] = va_mean
+                    yhat_dict[int_ts]['mean'] = float(va_mean)
 
                 # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 # yhat_lower = va_mean - va_std_3
-                yhat_lower = lower
-                yhat_upper = upper
+                yhat_lower = float(lower)
+                yhat_upper = float(upper)
 
                 if include_yhat_real_lower:
                     # @modified 20201202 - Feature #3850: webapp - yhat_values API endoint
@@ -2158,17 +2203,17 @@ def get_yhat_values(
                     if yhat_lower < 0 and array_amin > -0.0000000001:
                         yhat_dict[int_ts]['yhat_real_lower'] = 0
                     else:
-                        yhat_dict[int_ts]['yhat_real_lower'] = yhat_lower
-                yhat_dict[int_ts]['yhat_lower'] = yhat_lower
+                        yhat_dict[int_ts]['yhat_real_lower'] = float(yhat_lower)
+                yhat_dict[int_ts]['yhat_lower'] = float(yhat_lower)
                 # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 # yhat_dict[int_ts]['yhat_upper'] = va_mean + va_std_3
-                yhat_dict[int_ts]['yhat_upper'] = upper
+                yhat_dict[int_ts]['yhat_upper'] = float(upper)
                 # @added 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 if use_extended:
                     if yhat_lower != three_sigma_lower:
-                        yhat_dict[int_ts]['3sigma_lower'] = three_sigma_lower
+                        yhat_dict[int_ts]['3sigma_lower'] = float(three_sigma_lower)
                     if yhat_upper != three_sigma_upper:
-                        yhat_dict[int_ts]['3sigma_upper'] = three_sigma_upper
+                        yhat_dict[int_ts]['3sigma_upper'] = float(three_sigma_upper)
                 if include_anomalous_periods:
                     yhat_dict[int_ts]['anomalous_period'] = anomalous_period
         except:
@@ -2850,7 +2895,7 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
     except KeyError:
         plot_timestamps = list(data_dict[metric][metric]['timestamps'].keys())
 
-    logger.info('plot_not_anomalous_metric :: building not %s timeseries' % plot_type)
+    logger.info('plot_not_anomalous_metric :: building %s timeseries' % plot_type)
     plot_timeseries = []
     last_timestamp = None
     a_timestamps_done = []
@@ -2871,7 +2916,7 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
                 anomaly = 1
                 a_timestamps_done.append(a_timestamp)
         plot_timeseries.append([int(timestamp), anomaly])
-    logger.info('plot_not_anomalous_metric :: created %s timeseries' % plot_type)
+    logger.info('plot_not_anomalous_metric :: created %s timeseries of length: %s' % (plot_type, str(len(plot_timeseries))))
 
     logger.info('plot_not_anomalous_metric :: creating timeseries dataframe')
     try:

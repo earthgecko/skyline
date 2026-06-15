@@ -67,7 +67,7 @@ See `Optimizations results`_ at the end of this page.
 Analyzer work rate
 ------------------
 
-The original Analyzer analyzed all timeseries against all algorithms
+The original Analyzer analyzed all time series against all algorithms
 which is the maximum possible work. In terms of the :mod:`settings.CONSENSUS`
 based model, this is not the most efficient work rate.
 
@@ -86,7 +86,7 @@ Using anomaly\_breakdown metrics graphs to tune the Analyzer workflow
 anomaly\_breakdown metrics were added to Skyline on 10 Jun 2014, yet
 never merged into the main Etsy fork. However, in terms of performance
 tuning and profiling Skyline they are quite useful. They provide us with
-the ability to optimize the analysis of timeseries data based on 2
+the ability to optimize the analysis of time series data based on 2
 simple criteria:
 
 1. Determine the algorithms that are triggered most frequently
@@ -99,7 +99,7 @@ We can use these data to determine the *efficiency* of the algorithms
 and when this is applied to the Analyzer :mod:`settings.CONSENSUS` model we can
 optimize ``algorithms.py`` to run in the most efficient manner possible.
 
-Originally algorithms.py simply analyzed every timeseries against every
+Originally algorithms.py simply analyzed every time series against every
 ``algorithm in ALGORITHMS`` and only checked the :mod:`settings.CONSENSUS`
 threshold at the end. However a very small but effective optimization is to use
 the above data to run the following optimizations.
@@ -110,7 +110,7 @@ the above data to run the following optimizations.
   optimization is valid if more algorithms were added.
 - If our :mod:`settings.CONSENSUS` was 6 and Analyzer has not been able to
   trigger any of the most frequently and least expensive 5 algorithms, then
-  there is no need to analyze the timeseries against the remaining
+  there is no need to analyze the time series against the remaining
   algorithms. This surprisingly reduces the work of Analyzer by ~xx% on average
   (a lot).
 - The cost of this optimization is that we lose the original
@@ -118,7 +118,7 @@ the above data to run the following optimizations.
   against. However two additional factors somewhat mitigate this but it is
   definitely still skewed. The mitigations being that:
 
-  - When a timeseries is anomalous more than one algorithm triggers
+  - When a time series is anomalous more than one algorithm triggers
     anyway.
   - When an algorithm is triggered, more algorithms are run. Seeing as we
     have optimized to have the least frequently triggered algorithms be
@@ -191,7 +191,7 @@ Using the ``algorithm_breakdown`` metrics data we can determine the most
 Performance weighting
 ~~~~~~~~~~~~~~~~~~~~~
 
-If we change the order in which the timeseries are run through the
+If we change the order in which the time series are run through the
 algorithms in Analyzer, we can improve the overall performance by
 running the most expensive computational algorithms later in the
 analysis.
@@ -223,7 +223,7 @@ analysis.
 :mod:`settings.RUN_OPTIMIZED_WORKFLOW`
 --------------------------------------
 
-The original version of Analyzer ran all timeseries through all
+The original version of Analyzer ran all time series through all
 ``ALGORITHMS`` like so:
 
 .. code-block:: python
@@ -231,7 +231,7 @@ The original version of Analyzer ran all timeseries through all
     ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
 
 After running all the algorithms, it then determined whether the last
-datapoint for timeseries was anomalous.
+datapoint for time series was anomalous.
 
 The optimized workflow uses the above triggered / execution time ranking
 matrix to run as efficiently as possible and achieve the same results

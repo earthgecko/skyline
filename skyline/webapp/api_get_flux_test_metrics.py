@@ -48,7 +48,7 @@ def api_get_flux_test_metrics(current_skyline_app, cluster_data):
             current_logger.info('api_get_flux_test_metrics :: returning flux_test_data')
             # return flux_test_data
     else:
-        current_logger.warning('warning :: api_get_flux_test_metrics :: failed to determine test metrics')
+        current_logger.info('warning :: api_get_flux_test_metrics :: failed to determine test metrics')
 
     remote_flux_test_data = []
     if REMOTE_SKYLINE_INSTANCES and cluster_data:

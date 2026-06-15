@@ -99,7 +99,7 @@ except:
 try:
     LUMINOSITY_PROCESSES = settings.LUMINOSITY_PROCESSES
 except:
-    logger.warning('warning :: cannot determine LUMINOSITY_PROCESSES from settings')
+    logger.info('warning :: cannot determine LUMINOSITY_PROCESSES from settings')
     # @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch
     # It is fast and lightweight
     # luminosity_processes = 2
@@ -244,7 +244,7 @@ class Luminosity(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -1122,7 +1122,13 @@ class Luminosity(Thread):
                                 if p.is_alive():
                                     logger.info('stopping classify_anomalies - %s' % (str(p.is_alive())))
                                     try:
-                                        p.join()
+                                        # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                                        # p.join()
+                                        killing_pid = p.pid
+                                        logger.info('%s :: kill classify_anomalies with pid: %s' % (skyline_app, str(killing_pid)))
+                                        p.terminate()
+                                        logger.info('%s :: killed classify_anomalies process with pid: %s' % (skyline_app, str(killing_pid)))
+
                                     except:
                                         pass
                             logger.info('classify_anomalies - complete')
@@ -1185,7 +1191,13 @@ class Luminosity(Thread):
                         for p in pids:
                             if p.is_alive():
                                 logger.info('stopping classify_metrics - %s' % (str(p.is_alive())))
-                                p.join()
+                                # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                                # p.join()
+                                killing_pid = p.pid
+                                logger.info('kill classify_metrics with pid: %s' % (str(killing_pid)))
+                                p.terminate()
+                                logger.info('%s :: killed classify_metrics process with pid: %s' % (str(killing_pid)))
+
                         logger.info('classify_metrics - complete')
                         up_now = time()
                         # Report app up
@@ -1430,7 +1442,12 @@ class Luminosity(Thread):
             for p in pids:
                 if p.is_alive():
                     logger.info('stopping spin_process - %s' % (str(p.is_alive())))
-                    p.join()
+                    # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                    # p.join()
+                    killing_pid = p.pid
+                    logger.info('kill spin_process with pid: %s' % (str(killing_pid)))
+                    p.terminate()
+                    logger.info('killed spin_process process with pid: %s' % (str(killing_pid)))
 
             current_now = time()
             process_runtime = current_now - now

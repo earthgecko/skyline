@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>features_profile &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>features_profile &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -137,11 +137,12 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="c1"># import json</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">nullcontext</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">tsfresh.feature_extraction</span> <span class="kn">import</span> <span class="p">(</span>
-
     <span class="c1"># @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method</span>
     <span class="c1"># extract_features, ReasonableFeatureExtractionSettings)</span>
     <span class="n">extract_features</span><span class="p">,</span> <span class="n">EfficientFCParameters</span><span class="p">)</span>
@@ -162,6 +163,10 @@
 <span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_labelled_metrics_name</span> <span class="kn">import</span> <span class="n">get_base_name_from_labelled_metrics_name</span>
 <span class="kn">from</span> <span class="nn">functions.metrics.get_metric_id_from_base_name</span> <span class="kn">import</span> <span class="n">get_metric_id_from_base_name</span>
 
+<span class="c1"># @added 20240102 - Feature #4672: ionosphere_downsampled</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries.determine_data_frequency</span> <span class="kn">import</span> <span class="n">determine_data_frequency</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries.downsample</span> <span class="kn">import</span> <span class="n">downsample_timeseries</span>
+
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 
 <span class="c1"># @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</span>
@@ -180,8 +185,20 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE</span> <span class="o">=</span> <span class="mf">100.0</span>
 
+<span class="c1"># @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_PREPROCESS_VALIDATE_TRAINING</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PREPROCESS_VALIDATE_TRAINING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_PREPROCESS_VALIDATE_TRAINING</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">IONOSPHERE_PREPROCESS_VALIDATE_TRAINING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">get_redis_conn_decoded</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
 
-<div class="viewcode-block" id="feature_name_id"><a class="viewcode-back" href="../skyline.html#features_profile.feature_name_id">[docs]</a><span class="k">def</span> <span class="nf">feature_name_id</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+
+<div class="viewcode-block" id="feature_name_id">
+<a class="viewcode-back" href="../skyline.html#features_profile.feature_name_id">[docs]</a>
+<span class="k">def</span> <span class="nf">feature_name_id</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the Skyline id of a tsfresh feature name</span>
 
@@ -206,20 +223,29 @@
     <span class="k">return</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="calculate_features_profile"><a class="viewcode-back" href="../skyline.html#features_profile.calculate_features_profile">[docs]</a><span class="k">def</span> <span class="nf">calculate_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<span class="c1"># @modified 20240703 - Feature #5384: ionosphere - preprocess_validate_training</span>
+<span class="c1"># Added the preprocess_validate_training functionality</span>
+<div class="viewcode-block" id="calculate_features_profile">
+<a class="viewcode-back" href="../skyline.html#features_profile.calculate_features_profile">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">preprocess_validate_training</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates a tsfresh features profile from a training data set</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
+<span class="sd">        knows which log to write too.</span>
+<span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :param timestamp: the timestamp of metric anomaly with training data</span>
 <span class="sd">    :type timestamp: str</span>
 <span class="sd">    :param metric: the base_name of the metric</span>
 <span class="sd">    :type metric: str</span>
 <span class="sd">    :param context: the context</span>
-<span class="sd">    :type metric: str</span>
-
+<span class="sd">    :type context: str</span>
+<span class="sd">    :param preprocess_validate_training: whether this is a preprocess_validate_training request</span>
+<span class="sd">    :type preprocess_validate_training: bool</span>
 <span class="sd">    :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)</span>
 <span class="sd">    :rtype: int</span>
 <span class="sd">    :rtype: (str, boolean, str, str, str)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
@@ -233,14 +259,14 @@
     <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
 
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;training data&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: training data&#39;</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features profile data&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: features profile data&#39;</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
         <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
     <span class="c1"># @added 20170114 - Feature #1854: Ionosphere learn</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: learn&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: learn&#39;</span>
 
     <span class="c1"># TODO</span>
     <span class="c1"># @added 20190314 - Feature #2484: FULL_DURATION feature profiles</span>
@@ -253,18 +279,18 @@
     <span class="c1"># skyline/ionosphere/ionosphere.py</span>
     <span class="c1"># skyline/webapp/webapp.py</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: echo&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: echo&#39;</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: echo check&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: echo check&#39;</span>
 
     <span class="c1"># @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;adhoc&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: adhoc&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: adhoc&#39;</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;learn_repetitive_patterns&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: learn_repetitive_patterns&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: learn_repetitive_patterns&#39;</span>
     <span class="c1"># @added 20220915 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;find_repetitive_patterns&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: find_repetitive_patterns&#39;</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features_profile :: ionosphere :: find_repetitive_patterns&#39;</span>
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> feature profile creation requested for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">log_context</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">))</span>
@@ -497,6 +523,75 @@
 
     <span class="k">del</span> <span class="n">datapoints</span>
 
+    <span class="c1"># @added 20240102 - Feature #4672: ionosphere_downsampled</span>
+    <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+    <span class="c1"># To ensure the good performance of features profiles we ensure that the</span>
+    <span class="c1"># data is downsampled to a suitable size.  The features profiles perform</span>
+    <span class="c1"># best on data sets between 1000 and 2000 data points in length, any data</span>
+    <span class="c1"># set larger than this will incur increased computation time and complexity</span>
+    <span class="c1"># and the larger the data set the more unlikely the features profiles will</span>
+    <span class="c1"># be similar.  Seeing as there is no way to force the input to sustainable</span>
+    <span class="c1"># sizes, whether that be due to retention resolutions or scrape_interval,</span>
+    <span class="c1"># the data must be preprocessed to be fit for purpose.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">converted</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: no data to create profile&#39;</span> <span class="o">%</span> <span class="n">log_context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+    <span class="n">metric_resolution</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">expected_datapoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_resolution</span><span class="p">))</span>
+    <span class="n">downsample_to</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>
+        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="mi">600</span>
+        <span class="n">expected_datapoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">/</span> <span class="n">metric_resolution</span><span class="p">)</span>
+        <span class="n">downsample_to</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="c1"># Handle greater than 30 days of data and downsample at a lower resolution</span>
+    <span class="c1"># a 30 day data set at 600 seconds has 4320 data points this is the limit</span>
+    <span class="c1"># on fps and this is the standard that has been used in learning.</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2592000</span><span class="p">:</span>
+        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="mi">1800</span>
+        <span class="n">expected_datapoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">/</span> <span class="n">metric_resolution</span><span class="p">)</span>
+        <span class="n">downsample_to</span> <span class="o">=</span> <span class="mi">1800</span>
+    <span class="n">converted_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">converted</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: len(converted): </span><span class="si">%s</span><span class="s1">, expected_datapoints: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">converted_length</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected_datapoints</span><span class="p">)))</span>
+    <span class="n">do_downsample</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">converted_length</span> <span class="o">&gt;</span> <span class="n">expected_datapoints</span><span class="p">:</span>
+        <span class="n">do_downsample</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">converted_length</span> <span class="o">&gt;</span> <span class="mi">4320</span><span class="p">:</span>
+        <span class="n">do_downsample</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1">####</span>
+<span class="c1"># DISABLED for now</span>
+    <span class="n">do_downsample</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">do_downsample</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">converted</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: determine_data_frequency failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">log_context</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+        <span class="n">downsample_from</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_resolution</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: downsampling data from </span><span class="si">%s</span><span class="s1"> second resoultion to </span><span class="si">%s</span><span class="s1"> second resolution&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">downsample_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">downsample_to</span><span class="p">)))</span>
+        <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="n">downsample_timeseries</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">converted</span><span class="p">,</span> <span class="n">downsample_from</span><span class="p">,</span> <span class="n">downsample_to</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: downsample_timeseries failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">log_context</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+        <span class="k">if</span> <span class="n">downsampled_timeseries</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: len(downsampled_timeseries): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">downsampled_timeseries</span><span class="p">))))</span>
+            <span class="n">converted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">downsampled_timeseries</span><span class="p">)</span>
+
     <span class="c1"># @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
     <span class="c1"># if context in [&#39;adhoc&#39;, &#39;learn_repetitive_patterns&#39;, &#39;find_repetitive_patterns&#39;]:</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;adhoc&#39;</span><span class="p">:</span>
@@ -516,6 +611,21 @@
                 <span class="n">converted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">minmax_timeseries</span><span class="p">)</span>
                 <span class="k">del</span> <span class="n">minmax_timeseries</span>
 
+    <span class="c1"># @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training</span>
+    <span class="c1"># Added the preprocess_validate_training functionality</span>
+    <span class="k">if</span> <span class="n">preprocess_validate_training</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_redis_conn_decoded failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+    <span class="n">valid_training_data</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">converted</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">800</span><span class="p">:</span>
+        <span class="n">valid_training_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: insufficient data to create profile, len(timeseries): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">converted</span><span class="p">)))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
     <span class="c1"># @added 20220822 - Task #2732: Prometheus to Skyline</span>
     <span class="c1">#                   Branch #4300: prometheus</span>
     <span class="c1"># Only allow for fp creation if there is sufficient data</span>
@@ -527,9 +637,44 @@
     <span class="n">timestamp_limit</span> <span class="o">=</span> <span class="n">last_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">first_timestamp</span> <span class="o">&gt;</span> <span class="n">timestamp_limit</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+
+        <span class="c1"># @added 20240703 - Feature #5384: ionosphere - preprocess_validate_training</span>
+        <span class="k">if</span> <span class="n">preprocess_validate_training</span><span class="p">:</span>
+            <span class="c1"># Record the training in the ionosphere.training_data_too_short</span>
+            <span class="c1"># Redis hash</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_base_name</span><span class="p">))</span>
+                <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+                <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_data_too_short&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: hset on ionosphere.training_data_too_short failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">log_context</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: insufficient data to create profile, last_timestamp: </span><span class="si">%s</span><span class="s1">, ts_full_duration: </span><span class="si">%s</span><span class="s1">, first_timestamp: </span><span class="si">%s</span><span class="s1">, timestamp_limit: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">first_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_limit</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="c1"># @added 20241011 - Feature #5384: ionosphere - preprocess_validate_training</span>
+    <span class="c1"># Finishing off this unfinished piece</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_training_data</span> <span class="ow">and</span> <span class="n">preprocess_validate_training</span><span class="p">:</span>
+        <span class="c1"># set the trainable parameter in the ionosphere.training_data_too_short Redis set</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_base_name</span><span class="p">))</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+            <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_data_too_short&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: hset on ionosphere.training_data_too_short failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">log_context</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: insufficient data to create profile&#39;</span> <span class="o">%</span> <span class="n">log_context</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
@@ -791,6 +936,7 @@
     <span class="c1"># ionosphere_backend.py and learn.py not done here</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_time</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -800,7 +946,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luminosity &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Luminosity &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -90,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -98,7 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -135,14 +135,14 @@
            <div itemprop="articleBody">
              
   <section id="luminosity">
-<h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this heading"></a></h1>
+<h1>Luminosity<a class="headerlink" href="#luminosity" title="Link to this heading"></a></h1>
 <p>Requires - Panorama to be enabled and running.  It is enabled and configured
 via the <code class="docutils literal notranslate"><span class="pre">LUMINOSITY_</span></code> variables in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
 <p>Luminosity handles correlation and classification of anomalies and metrics.
 Luminosity also learns what metrics are related to each other using all the
 previous discovered correlations data for metrics.</p>
 <section id="luminosity-correlation">
-<h2>Luminosity correlation<a class="headerlink" href="#luminosity-correlation" title="Permalink to this heading"></a></h2>
+<h2>Luminosity correlation<a class="headerlink" href="#luminosity-correlation" title="Link to this heading"></a></h2>
 <p>Luminosity takes the time series of an anomalous metric and then cross
 correlates the time series against all the other metrics (or correlation mapped
 namespaces metrics, see <a class="reference internal" href="skyline.html#settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY" title="settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY</span></code></a> and
@@ -176,8 +176,8 @@ This is just the start, to be able to try and make it better and useful, the
 data is needed first.</p>
 </section>
 <section id="luminosity-classifications">
-<h2>Luminosity classifications<a class="headerlink" href="#luminosity-classifications" title="Permalink to this heading"></a></h2>
-<p>Luminosity can also be enabled to classify metrics and timeseries.
+<h2>Luminosity classifications<a class="headerlink" href="#luminosity-classifications" title="Link to this heading"></a></h2>
+<p>Luminosity can also be enabled to classify metrics and time series.
 There are a number of classifications the luminosity/classify_metrics can be
 enabled to do.  These different types of classifications are required to enable
 certain functionalities.</p>
@@ -208,7 +208,7 @@ shifts is useful to identify and automatically add them to the metrics on which
 to run custom_algorithms/adtk_level_shift on.</p>
 </section>
 <section id="luminosity-as-a-replacement-for-kale-oculus">
-<h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Permalink to this heading"></a></h2>
+<h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Link to this heading"></a></h2>
 <p>Luminosity is the beginning of an attempt to implement a pure Python replacement
 for the Oculus anomaly correlation component of the Etsy Kale stack.</p>
 <p>Oculus was not moved forward with Skyline in this version of Skyline for a
@@ -222,7 +222,7 @@ into Skyline.</p>
 similar information.</p>
 </section>
 <section id="differences-between-oculus-and-luminosity">
-<h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Permalink to this heading"></a></h2>
+<h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Link to this heading"></a></h2>
 <p>Oculus had a very large architectural footprint.
 Luminosity runs in parallel to all the other Skyline apps on the same Skyline
 commodity machine, with very little overhead.</p>
@@ -240,7 +240,7 @@ and their results are then recorded in the Skyline MySQL database and related to
 the anomaly.  Viewable via the Ionosphere and Luminosity UI pages.</p>
 </section>
 <section id="luminosity-adds">
-<h2>Luminosity adds<a class="headerlink" href="#luminosity-adds" title="Permalink to this heading"></a></h2>
+<h2>Luminosity adds<a class="headerlink" href="#luminosity-adds" title="Link to this heading"></a></h2>
 <p>Luminosity has the advantage over Oculus of storing the history of metrics,
 anomalies and their correlations.  This gives Skyline a near real time root
 cause analysis component and over time enables Skyline to determine and report
@@ -251,7 +251,7 @@ implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.</p>
 </section>
 <section id="luminosity-related-metrics">
-<h2>Luminosity related_metrics<a class="headerlink" href="#luminosity-related-metrics" title="Permalink to this heading"></a></h2>
+<h2>Luminosity related_metrics<a class="headerlink" href="#luminosity-related-metrics" title="Link to this heading"></a></h2>
 <p>Luminosity can also be enabled to analyse what metrics relate to what other
 metrics.  The resulting metric_group data can then be used to for further
 analysis and information/categorisation for the user.</p>
@@ -289,7 +289,7 @@ an unordered list (not sorted by any feature) of metrics in each metric_group
 stored in Redis.</p>
 </section>
 <section id="running-luminosity-on-multiple-distributed-skyline-instances">
-<h2>Running Luminosity on multiple, distributed Skyline instances<a class="headerlink" href="#running-luminosity-on-multiple-distributed-skyline-instances" title="Permalink to this heading"></a></h2>
+<h2>Running Luminosity on multiple, distributed Skyline instances<a class="headerlink" href="#running-luminosity-on-multiple-distributed-skyline-instances" title="Link to this heading"></a></h2>
 <p>Please see <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></p>
 </section>
 </section>
@@ -305,7 +305,7 @@ stored in Redis.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

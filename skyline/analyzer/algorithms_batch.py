@@ -1,5 +1,6 @@
 from __future__ import division
 import logging
+import traceback
 from time import time
 from os import getpid
 from timeit import default_timer as timer
@@ -9,7 +10,6 @@ import pandas
 import numpy as np
 import scipy
 import statsmodels.api as sm
-import traceback
 
 from settings import (
     ALGORITHMS,
@@ -53,13 +53,10 @@ if CUSTOM_ALGORITHMS:
     # @added 20230616 - Feature #3566: custom_algorithms
     # Filter out only the ones in which analyzer is
     # declared in use_with
-    # @added 20230616 - Feature #3566: custom_algorithms
-    # Filter out only the ones in which analyzer is
-    # declared in use_with
     ASSIGNED_CUSTOM_ALGORITHMS = {}
     for custom_algorithm in CUSTOM_ALGORITHMS:
         try:
-            if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+            if 'analyzer_batch' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
                 ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
         except:
             pass
@@ -624,7 +621,55 @@ def negatives_present(timeseries, use_full_duration):
     return False
 
 
-def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present):
+def is_anomalously_anomalous(metric_name, ensemble, datapoint):
+    """
+    This method runs a meta-analysis on the metric to determine whether the
+    metric has a past history of triggering. TODO: weight intervals based on datapoint
+    """
+    # We want the datapoint to avoid triggering twice on the same data
+    new_trigger = [time(), datapoint]
+
+    # Get the old history
+    # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+    # Use get_redis_conn
+    from skyline_functions import get_redis_conn
+    redis_conn = get_redis_conn(skyline_app)
+
+    raw_trigger_history = redis_conn.get('trigger_history.' + metric_name)
+    if not raw_trigger_history:
+        redis_conn.set('trigger_history.' + metric_name, packb([(time(), datapoint)]))
+        return True
+
+    trigger_history = unpackb(raw_trigger_history)
+
+    # Are we (probably) triggering on the same data?
+    if (new_trigger[1] == trigger_history[-1][1] and new_trigger[0] - trigger_history[-1][0] <= 300):
+        return False
+
+    # Update the history
+    trigger_history.append(new_trigger)
+    redis_conn.set('trigger_history.' + metric_name, packb(trigger_history))
+
+    # Should we surface the anomaly?
+    trigger_times = [x[0] for x in trigger_history]
+    intervals = [
+        trigger_times[i + 1] - trigger_times[i]
+        for i, v in enumerate(trigger_times)
+        if (i + 1) < len(trigger_times)
+    ]
+
+    series = pandas.Series(intervals)
+    mean = series.mean()
+    stdDev = series.std()
+
+    return abs(intervals[-1] - mean) > 3 * stdDev
+
+
+def run_selected_batch_algorithm(
+        timeseries, metric_name, run_negatives_present,
+        # @added 20240607 - Feature #5368: analyzer_batch - reprocess
+        # Allow oneshot analysis for reprocessing added custom_algorithm_overrides
+        custom_algorithm_overrides={}):
     """
     Filter timeseries and run selected algorithm.
     """
@@ -657,8 +702,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     # if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
     if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
         if LOCAL_DEBUG:
-            logger.debug('debug :: algorithms_batch :: %s - timeseries stale' % (
-                metric_name))
+            tn = int(time())
+            logger.debug('debug :: algorithms_batch :: %s - timeseries stale, time: %s, timestamp: %s, age: %s, BATCH_PROCESSING_STALE_PERIOD: %s' % (
+                metric_name, str(tn), str(timeseries[-1][0]),
+                str(tn - timeseries[-1][0]), str(BATCH_PROCESSING_STALE_PERIOD)))
         raise Stale()
 
     # Get rid of boring series
@@ -683,6 +730,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
 
     algorithm_tmp_file_prefix = '%s/%s.' % (SKYLINE_TMP_DIR, skyline_app)
 
+    # @added 20240719 - Feature #5390: custom_algorithms - condition
+    #                   Feature #3566: custom_algorithms
+    # Update Analyzer algorithms CUSTOM_ALGORITHMS method to the Mirage method
+    final_custom_ensemble = []
+
     # @added 20200607 - Feature #3566: custom_algorithms
     algorithms_run = []
     custom_consensus_override = False
@@ -695,22 +747,85 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     custom_algorithms_run = []
     custom_algorithms_run_results = []
 
+    # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+    single_consensus = False
+
+    # @added 20240523 - Feature #5352: vista - bigquery
+    #                   Feature #5190: Add custom_algorithm results to Mirage and plots
+    #                   Feature #3566: custom_algorithms
+    custom_algorithm_results = {}
+
+    # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+    run_custom_algorithm_after_3sigma = False
+    final_after_custom_ensemble = []
+    custom_algorithm_not_anomalous = False
+    custom_algorithms_to_run = {}
+
     # @modified 20200817 - Bug #3652: Handle multiple metrics in base_name conversion
     # base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
     if metric_name.startswith(FULL_NAMESPACE):
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
     else:
         base_name = metric_name
+
+    # @added 20220822 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if metric_name.startswith('labelled_metrics.'):
+        base_name = str(metric_name)
+
+    custom_algorithms_to_run = {}
+
     if CUSTOM_ALGORITHMS:
-        custom_algorithms_to_run = {}
         try:
-            custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
+            # @modified 20240717 - Feature #5390: custom_algorithms - condition
+            # Added timeseries
+            custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS, timeseries=timeseries)
             if DEBUG_CUSTOM_ALGORITHMS or LOCAL_DEBUG:
                 if custom_algorithms_to_run:
                     logger.debug('algorithms_batch :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
         except:
             logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
+
+        # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+        for custom_algorithm in custom_algorithms_to_run:
+            custom_run_3sigma_algorithms = None
+            try:
+                custom_run_3sigma_algorithms = custom_algorithms_to_run[custom_algorithm]['run_3sigma_algorithms']
+            except:
+                custom_run_3sigma_algorithms = None
+            if custom_run_3sigma_algorithms is False:
+                run_3sigma_algorithms = False
+                break
+        for custom_algorithm in custom_algorithms_to_run:
+            custom_consensus = None
+            try:
+                custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
+            except:
+                custom_consensus = None
+            if custom_consensus == 1:
+                if not run_3sigma_algorithms:
+                    single_consensus = True
+                    maximum_false_count = 1
+                    break
+
+        # @added 20240607 - Feature #5368: analyzer_batch - reprocess
+        # Allow oneshot analysis for reprocessing added custom_algorithm_overrides
+        custom_algorithms_to_run_list = list(custom_algorithms_to_run.keys())
+        for custom_algorithm in custom_algorithms_to_run_list:
+            override_keys = list(custom_algorithm_overrides.keys())
+            for key in list(custom_algorithms_to_run[custom_algorithm].keys()):
+                if key in override_keys:
+                    custom_algorithms_to_run[custom_algorithm][key] = custom_algorithm_overrides[key]
+                    logger.debug('debug :: algorithms_batch :: overrode %s for %s with %s' % (
+                        key, str(custom_algorithm), str(custom_algorithm_overrides[key])))
+                if key == 'algorithm_parameters':
+                    for pkey in list(custom_algorithms_to_run[custom_algorithm][key].keys()):
+                        if pkey in override_keys:
+                            custom_algorithms_to_run[custom_algorithm][key][pkey] = custom_algorithm_overrides[pkey]
+                            logger.debug('debug :: algorithms_batch :: overrode %s in %s on %s with %s' % (
+                                pkey, key, str(custom_algorithm), str(custom_algorithm_overrides[pkey])))
+
         for custom_algorithm in custom_algorithms_to_run:
             if consensus_possible:
                 algorithm = custom_algorithm
@@ -765,8 +880,30 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     # @added 20211125 - Feature #3566: custom_algorithms
                     custom_algorithms_run.append(custom_algorithm)
 
+                    # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
                     try:
-                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                        return_results = custom_algorithms_to_run[custom_algorithm]['return_results']
+                    except:
+                        return_results = False
+                    try:
+                        return_anomalies = custom_algorithms_to_run[custom_algorithm]['return_anomalies']
+                    except:
+                        return_anomalies = False
+                    if return_anomalies:
+                        return_results = True
+
+                    try:
+                        # @modified 20240523 - Feature #5360: custom_algorithms - sigma_macd
+                        if not return_results:
+                            result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                        else:
+                            result, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                            # @added 20240523 - Feature #5352: vista - bigquery
+                            #                   Feature #5190: Add custom_algorithm results to Mirage and plots
+                            #                   Feature #3566: custom_algorithms
+                            if results:
+                                custom_algorithm_results = copy.deepcopy(results)
+
                         algorithm_result = [result]
                         if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                             logger.debug('debug :: algorithms_batch :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
@@ -787,8 +924,9 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                         logger.error('error :: debug :: algorithms_batch :: run_custom_algorithm_on_timeseries was not loaded so was not run')
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     end_debug_timer = timer()
-                    logger.debug('debug :: algorithms_batch :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
+                    logger.debug('debug :: algorithms_batch :: ran custom algorithm %s on %s for timestamp: %s, value: %s, with result of (%s, %s) in %.6f seconds' % (
                         str(algorithm), str(base_name),
+                        str(timeseries[-1][0]), str(timeseries[-1][1]),
                         str(result), str(anomalyScore),
                         (end_debug_timer - start_debug_timer)))
                 algorithms_run.append(algorithm)
@@ -812,6 +950,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             else:
                 result = False
             final_ensemble.append(result)
+            # @added 20240719 - Feature #5390: custom_algorithms - condition
+            #                   Feature #3566: custom_algorithms
+            final_custom_ensemble.append(result)
+
             custom_consensus = None
             algorithms_allowed_in_consensus = []
             # @added 20200605 - Feature #3566: custom_algorithms
@@ -820,6 +962,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             custom_run_3sigma_algorithms = True
             try:
                 custom_run_3sigma_algorithms = custom_algorithms_to_run[custom_algorithm]['run_3sigma_algorithms']
+
+                # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+                if not custom_run_3sigma_algorithms:
+                    run_3sigma_algorithms = False
+
             except:
                 custom_run_3sigma_algorithms = True
             if not custom_run_3sigma_algorithms and result:
@@ -854,6 +1001,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         if len(run_3sigma_algorithms_overridden_by) > 0:
             logger.debug('algorithms :: run_3sigma_algorithms overridden by %s' % (
                 str(run_3sigma_algorithms_overridden_by)))
+
+    # @added 20240719 - Feature #5390: custom_algorithms - condition
+    #                   Feature #3566: custom_algorithms
+    ensemble = list(final_custom_ensemble)
 
     # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
     # Added negatives_found
@@ -939,7 +1090,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     f.write('%.6f\n' % (end - start))
         else:
             algorithm_result = [None]
-            algorithms_run.append(algorithm)
+            # @modified 20240523 - Feature #5360: custom_algorithms - sigma_macd
+            # Only append if not single_consensus
+            # algorithms_run.append(algorithm)
+            if not single_consensus:
+                algorithms_run.append(algorithm)
 
         if algorithm_result.count(True) == 1:
             result = True
@@ -952,7 +1107,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         else:
             result = False
 
-        final_ensemble.append(result)
+        # @modified 20240523 - Feature #5360: custom_algorithms - sigma_macd
+        # Only append if not single_consensus
+        # final_ensemble.append(result)
+        if not single_consensus:
+            final_ensemble.append(result)
 
         if not RUN_OPTIMIZED_WORKFLOW:
             continue
@@ -978,9 +1137,23 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
 
+    # @added 20241112 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    #                   Feature #4482: Test alerts
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+    final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in final_ensemble]
+
     try:
         # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
         ensemble = list(final_ensemble)
+
+        # @added 20240719 - Feature #5390: custom_algorithms - condition
+        if not run_3sigma_algorithms:
+            if len(ensemble) == 0 and len(final_custom_ensemble) > 0:
+                ensemble = list(final_custom_ensemble)
 
         # @modified 20200607 - Feature #3566: custom_algorithms
         # threshold = len(ensemble) - CONSENSUS
@@ -1003,7 +1176,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             if LOCAL_DEBUG:
                 logger.debug('debug :: algorithms_batch :: %s - ensemble.count(None) == len(ensemble), returning False' % (
                     metric_name))
-            return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
+            return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms, custom_algorithm_results
 
         # @modified 20220113 - Feature #3566: custom_algorithms
         #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
@@ -1043,7 +1216,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             # @modified 20200815 - Feature #3678: SNAB - anomalyScore
             # Added the number_of_algorithms to calculate anomalyScore from
             # return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
-            return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
+            return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms, custom_algorithm_results
 
         if LOCAL_DEBUG:
             logger.debug('debug :: algorithms_batch :: %s - NOT ensemble.count(False) <= threshold and ensemble.count(False) > 0, returning False' % (
@@ -1055,7 +1228,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         # @modified 20200815 - Feature #3678: SNAB - anomalyScore
         # Added the number_of_algorithms to calculate anomalyScore from
         # return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
-        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
+        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms, custom_algorithm_results
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
         if LOCAL_DEBUG:
@@ -1070,4 +1243,4 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         # @modified 20200815 - Feature #3678: SNAB - anomalyScore
         # Added the number_of_algorithms to calculate anomalyScore from
         # return False, [], 1, negatives_found, algorithms_run
-        return False, [], 1, negatives_found, algorithms_run, 0
+        return False, [], 1, negatives_found, algorithms_run, 0, {}

@@ -305,6 +305,13 @@ def ionosphere_echo(base_name, mirage_full_duration):
         if row['validated'] == 0:
             continue
 
+        # @added 20240315 - Feature #5304: ionosphere.find_repetitive_patterns
+        # Exclude LEARNT - repetitive pattern fps from echo because they are
+        # based on Mirage data only and do not have Redis data with which to
+        # create an echo_fp
+        if row['label'] == 'LEARNT - repetitive pattern':
+            continue
+
         if row['full_duration'] == int(mirage_full_duration):
             fp_id = row['id']
             # @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
@@ -480,12 +487,20 @@ def ionosphere_echo(base_name, mirage_full_duration):
         calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, use_base_name)
         calculated_feature_file_found = False
         fp_csv = None
+        log_msg = None
         if os.path.isfile(calculated_feature_file):
             calculated_feature_file_found = True
             fp_csv = calculated_feature_file
             logger.info('ionosphere_echo :: calculated features file is available - %s' % (calculated_feature_file))
 
-        echo_json_file = '%s.mirage.redis.%sh.json' % (use_base_name, str(full_duration_in_hours))
+        echo_json_file = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, use_base_name, str(full_duration_in_hours))
+
+        # @added 20240315 - Feature #5304: ionosphere.find_repetitive_patterns
+        # If no mirage.redis.%sh.json file exists continue
+        if not os.path.isfile(echo_json_file):
+            logger.info('ionosphere_echo :: redis data file does not exists to work with, nothing to do, %s' % (echo_json_file))
+            continue
+
         if not calculated_feature_file_found:
             logger.info('ionosphere_echo :: calculating features from mirage.redis data ts json - %s' % (echo_json_file))
             str_created_ts = str(created_ts)
@@ -501,11 +516,19 @@ def ionosphere_echo(base_name, mirage_full_duration):
         if os.path.isfile(calculated_feature_file):
             logger.info('ionosphere_echo :: calculated features - %s' % (calculated_feature_file))
         else:
-            logger.error('error :: ionosphere_echo :: failed to calculate features no file found - %s' % calculated_feature_file)
+            if 'insufficient data' in log_msg:
+                logger.info('warning :: ionosphere_echo :: %s' % log_msg)
+            else:
+                logger.error('error :: ionosphere_echo :: failed to calculate features no file found - %s' % calculated_feature_file)
             continue
 
         # Create the new settings.FULL_DURATION features profile
         ionosphere_job = 'learn_fp_human'
+
+        # @added 20240424 - Feature #5318: motif_annihilation
+        # Add echo fp creation
+        if row['label'] == 'LEARNT - motif_annihilation':
+            ionosphere_job = 'echo_motif_annihilation'
 
         # @added 20190503 - Branch #2646: slack
         # Added slack_ionosphere_job

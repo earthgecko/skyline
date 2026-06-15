@@ -1,4 +1,8 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 	<ol class="breadcrumb">

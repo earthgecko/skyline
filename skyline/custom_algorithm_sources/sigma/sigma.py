@@ -625,8 +625,8 @@ def run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus
     :type timeseries: list
     :type metric_name: str
     :type sigma_value: int
-    :return: anomalous, ensemble, datapoint, algorithms_run
-    :rtype: (boolean, list, float, list)
+    :return: anomalous, anomalies
+    :rtype: (boolean, dict)
 
     """
 
@@ -635,14 +635,14 @@ def run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus
     anomalies = {}
 
     if len(timeseries) == 0:
-        return anomalous, anomalyScore, anomalies
+        return False, anomalies
 
     if len(timeseries) < MIN_TOLERABLE_LENGTH:
-        return anomalous, anomalies
+        return False, anomalies
 
     # Get rid of boring series
     if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
-        return anomalous, anomalies
+        return False, anomalies
 
     ensemble = []
     number_of_algorithms_triggered = 0
@@ -804,7 +804,7 @@ def run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus
     except:
         traceback_format_exc_string = traceback.format_exc()
         record_algorithm_error(current_skyline_app, 'sigma', traceback_format_exc_string)
-        return None, anomalies
+        return False, anomalies
 
     if len(anomalies) == 0:
         return False, anomalies

@@ -7,6 +7,10 @@ import traceback
 import datetime as dt
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 load_libraries = True
 if load_libraries:
@@ -54,6 +58,10 @@ def plot_fp_match(
         current_logger.info('plot_fp_match - creating graph image - %s' % output_file)
         matched_timeseries_length = len(not_anomalous_timeseries)
 
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
         # Ensure timesereis are same length
         if len(fp_values) > matched_timeseries_length:
             fp_values = fp_values[-matched_timeseries_length:]
@@ -64,6 +72,17 @@ def plot_fp_match(
 
         # Plot match
         rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        plt.style.use('fast')
+        rcParams['path.simplify_threshold'] = 1.0
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
         not_anomalous_timestamp = int(not_anomalous_timeseries[-1][0])

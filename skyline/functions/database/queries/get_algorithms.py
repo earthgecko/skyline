@@ -12,7 +12,9 @@ from database import get_engine, engine_disposal
 
 
 # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
-def get_algorithms(current_skyline_app):
+# @modified 20230722 - Feature #5008: webapp - snab report page
+# Added return_all_algorithms_by_id
+def get_algorithms(current_skyline_app, return_all_algorithms_by_id=False):
     """
     Returns a dict of algorithms and their ids.
     """
@@ -20,6 +22,11 @@ def get_algorithms(current_skyline_app):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     algorithms = {}
+
+    # @added 20230722 - Feature #5008: webapp - snab report page
+    # Added all_algorithms_by_id
+    all_algorithms_by_id = {}
+
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
         if fail_msg != 'got MySQL engine':
@@ -70,9 +77,22 @@ def get_algorithms(current_skyline_app):
                 stmt = select(use_table.c.id).where(use_table.c.algorithm == algorithm)
 
                 result = connection.execute(stmt)
+
+                # @added 20230722 - Feature #5008: webapp - snab report page
+                # Added return_all_algorithms_by_id
+                first_id = None
+
                 for row in result:
-                    algorithms[algorithm] = row['id']
-                    break
+                    # @modified 20230722 - Feature #5008: webapp - snab report page
+                    # Added return_all_algorithms_by_id
+                    # algorithms[algorithm] = row['id']
+                    # break
+                    c_id = row['id']
+                    if not first_id:
+                        algorithms[algorithm] = int(c_id)
+                        first_id = int(c_id)
+                    all_algorithms_by_id[c_id] = algorithm
+
             connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
@@ -80,5 +100,10 @@ def get_algorithms(current_skyline_app):
 
     if engine:
         engine_disposal(current_skyline_app, engine)
+
+    # @added 20230722 - Feature #5008: webapp - snab report page
+    # Added return_all_algorithms_by_id
+    if return_all_algorithms_by_id:
+        return algorithms, all_algorithms_by_id
 
     return algorithms

@@ -1,4 +1,8 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 <!-- BEGIN /ionosphere block -->
@@ -9,6 +13,48 @@
   {% set use_for_metric = for_metric %}
 {% endif %}
 
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/ionosphere">Ionosphere</a></li>
+  {% if fp_view %}
+    {% if metric_files %}
+        <li class="breadcrumb-item"><a href="/ionosphere?fp_view=true&metric_td={{ use_for_metric }}">Features profiles</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ use_for_metric }}</span></span></li>
+    {% else %}
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></li>
+    {% endif %}
+    {% elif fp_search %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+    {% elif fp_matches %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+<!-- # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page -->
+    {% elif fp_validate %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features profiles</span> <span class="re">to validate</span></span></li>
+<!-- # @added 20210107 - Feature #3934: ionosphere_performance -->
+    {% elif performance %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features profiles</span> <span class="re">performance</span></span></li>
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+    {% elif motif_matches %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+    {% else %}
+      {% if metric_files %}
+		    <li class="breadcrumb-item"><a href="/ionosphere?metric_td={{ use_for_metric }}">training data</a></li>
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ use_for_metric }}</span></span></li>
+<!-- # @added 20210727 - Feature #4206: webapp - saved_training_data page -->
+      {% elif saved_training_data_page %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Saved</span> <span class="re">training_data</span></span></li>
+      {% else %}
+		    <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></li>
+      {% endif %}
+  {% endif %}
+      </div>
+    </ol>
+  </nav>
+{% else %}
 <ol class="breadcrumb">
 	<div class="breadcrumb">
 		<li><a href="/">Home</a></li>
@@ -33,8 +79,10 @@
 {% elif performance %}
 		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">performance</span></span></li>
 <!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
-{% elif matched_motifs %}
+{% elif motif_matches %}
 		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+{% elif unvalidated_motif_annihilation_fps %}
+		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">to validate</span></span></li>
 {% else %}
   {% if metric_files %}
 		<li><a href="/ionosphere?metric_td={{ use_for_metric }}">training data</a></li>
@@ -48,6 +96,7 @@
 {% endif %}
   </div>
 </ol>
+{% endif %}
 
 {% if fp_view %}
     {% include "features_profiles.html" %}
@@ -64,7 +113,7 @@
 {% elif performance %}
     {% include "ionosphere_performance.html" %}
 <!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
-{% elif matched_motifs %}
+{% elif motif_matches %}
     {% include "motif_matches.html" %}
 <!-- # @added 20210727 - Feature #4206: webapp - saved_training_data page -->
 {% elif saved_training_data_page %}
@@ -72,6 +121,8 @@
 <!-- # @added 20221018 - Feature #4650: ionosphere.bulk.training -->
 {% elif bulk_training %}
     {% include "bulk_training.html" %}
+{% elif validate_motif_annihilation_fps %}
+    {% include "validate_motif_annihilations.html" %}
 {% else %}
     {% include "training_data.html" %}
 {% endif %}

@@ -6,8 +6,15 @@ import os
 import traceback
 import datetime as dt
 import textwrap
+
+from numpy import nan
+
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 load_libraries = True
 if load_libraries:
@@ -65,7 +72,14 @@ def plot_timeseries(
             os.makedirs(output_dir, mode=0o755)
 
         timeseries_duration = timeseries[-1][0] - timeseries[0][0]
-        title = plot_parameters['title']
+
+        # @modified 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
+        # title = plot_parameters['title']
+        try:
+            title = plot_parameters['title']
+        except KeyError:
+            pass
+
         if not title:
             if timeseries_duration <= 86400:
                 period = timeseries_duration / 60 / 60
@@ -98,9 +112,22 @@ def plot_timeseries(
                 current_logger.error('%s :: %s :: an error occurred checking days duration in title - %s' % (
                     str(current_skyline_app), function_str, err))
 
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
         # Plot match
         # rcParams['figure.figsize'] = 8, 4
         rcParams['figure.figsize'] = plot_parameters['figsize']
+
+        # Plot match
+        rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
 
@@ -131,7 +158,17 @@ def plot_timeseries(
         plt.gca().xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_formatter(xfmt)
 
-        values = [float(item[1]) for item in timeseries]
+        # @modified 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+        # Coerce None to NaN
+        #values = [float(item[1]) for item in timeseries]
+        values = []
+        for t, v in timeseries:
+            try:
+                value = float(v)
+            except:
+                value = nan
+            values.append(value)
+
         ax.plot(
             datetimes, values, label=use_label,
             color=plot_parameters['line_color'], lw=1,
@@ -140,11 +177,11 @@ def plot_timeseries(
         try:
             ax.get_yaxis().get_major_formatter().set_useOffset(False)
         except Exception as err:
-            current_logger.warning('warning :: %s :: get_major_formatter - %s' % (function_str, err))
+            current_logger.info('warning :: %s :: get_major_formatter - %s' % (function_str, err))
         try:
             ax.get_yaxis().get_major_formatter().set_scientific(False)
         except Exception as err:
-            current_logger.warning('warning :: %s :: get_major_formatter - %s' % (function_str, err))
+            current_logger.info('warning :: %s :: get_major_formatter - %s' % (function_str, err))
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0 + box.height * 0.1,

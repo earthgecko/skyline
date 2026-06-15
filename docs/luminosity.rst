@@ -54,7 +54,7 @@ data is needed first.
 Luminosity classifications
 --------------------------
 
-Luminosity can also be enabled to classify metrics and timeseries.
+Luminosity can also be enabled to classify metrics and time series.
 There are a number of classifications the luminosity/classify_metrics can be
 enabled to do.  These different types of classifications are required to enable
 certain functionalities.

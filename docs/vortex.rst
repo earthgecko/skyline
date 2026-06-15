@@ -2,15 +2,15 @@
 Vortex
 ######
 
-Skyline Vortex is a service responsible for adhoc analysis of timeseries data
-submitted via HTTP POSTs.  This allows for adhoc analysis of any timeseries
+Skyline Vortex is a service responsible for adhoc analysis of time series data
+submitted via HTTP POSTs.  This allows for adhoc analysis of any time series
 data, these metrics can be stored anywhere, Skyline does not require access to
 them, but metrics already in Skyline can be run through Vortex as well.  The
-timeseries data is posted to Flux with json data that provides details about the
-metric, the timeseries data itself and what algorithms to analyse the data with.
+time series data is posted to Flux with json data that provides details about the
+metric, the time series data itself and what algorithms to analyse the data with.
 
 Although Vortex is accessible via API, there is a webapp UI page to submit local
-metric timeseries and csv data as well.
+metric time series and csv data as well.
 
 Vortex is handled by two services, Flux and Mirage.  Requests are submitted to
 Flux, which are added to a queue for mirage_vortex to process.  mirage_vortex
@@ -24,13 +24,13 @@ A few things to be aware of are:
 - Timestamps and values that cannot be coerced will be removed.
 - The requesting client should use a timeout of 60 seconds.
 - The requesting client must follow HTTP status 303 and 302 redirects.
-- Only one timeseries can be submitted per request.  This is for the sake of
-  simplicity, if multiple metrics/timeseries were accepted the client would
+- Only one time series can be submitted per request.  This is for the sake of
+  simplicity, if multiple metrics/time series were accepted the client would
   possibly have to parse and process HTTP 207 responses **and** follow any 303
   or 302 items returned in the 207 response, which could hold a number of 200,
   303 and 302 items.  This would make it impossible to use simple HTTP methods
   such as cURL or python requests, without having to wrap their usage in
-  complicated conditions. Therefore to keep it simple - one timeseries per
+  complicated conditions. Therefore to keep it simple - one time series per
   request.
 
 Preprocessing
@@ -102,7 +102,7 @@ Strictly increasing monotonic data transformation
 -------------------------------------------------
 
 Any data submitted that is strictly increasing monotonic data (counters, counts)
-will be transformed to a non-negative derivative timeseries (resets discarded).
+will be transformed to a non-negative derivative time series (resets discarded).
 
 Similar to downsampling, **always try to apply an appropriate rate** to any
 count based metrics before sending the data rather than sending the raw
@@ -122,8 +122,8 @@ it will issue a HTTP 303 (See other) response with a GET URL location for the
 client to request to get the result from, the original timeout is automatically
 added as a URL parameter.  The client should follow the 303 and will once again
 wait for the timeout period for the results response.  If the results are not
-ready after this timeout period, then a HTTP 302 response is issues with the
-same URL and the retry parameter incurred by 1.  This process is repeated 3
+ready after this timeout period, then a HTTP 302 response is issued with the
+same URL and the retry parameter incremented by 1.  This process is repeated 3
 times after which if no results are available, a HTTP 200 response will be
 issued with json response of:
 
@@ -145,7 +145,7 @@ Vortex POST data
 Due to the number of options available the POST data object can be quite complex.
 Each algorithm has it's own parameters, which if not passed will be set to a
 sensible default.  Sometimes these sensible defaults are calculated from the
-timeseries data itself.
+time series data itself.
 
 The basic json POST data has the following structure, the keys in the below
 example are required.
@@ -162,7 +162,8 @@ example are required.
           "spectral_residual": {},
       },
       "consensus": [["sigma", "spectral_residual"]],
-      "reference": "a reference id for you|str|optional"
+      "reference": "a reference id for you|str|optional",
+      "adhoc": true/false|bool|optional
   }
 
 Required key value pairs that must be sent in the POST json data are:
@@ -179,7 +180,7 @@ Optional key value pairs are:
   maximum of 3 algorithms that can be passed (unless the
   mod:`settings.FLUX_SELF_API_KEY` key is used, see below).
 - ``reference``: This can be a string of a reference you wish to assign to the
-  analysis task.  This could be a trace id, a metric name or a timeseries, it
+  analysis task.  This could be a trace id, a metric name or a time series, it
   can be anything, but it **must** be cast as a string.  Therefore if it is an
   int or float it must be passed as ``"1987"`` or ``"1669399450.337939"``.
 - ``no_downsample``: Allows analysis to be run without downsampling the data,
@@ -188,6 +189,10 @@ Optional key value pairs are:
 - ``override_7_day_limit``:  Allows to override the requirement for 24h or 7d
   data, **be advised training_data is not suitable for training with on these
   requests**
+- ``adhoc``:  A boolean that can be set if this is not a known Skyline metric or
+  it is and you do not want training data saved on it or piped through the alert
+  pipeline if the metric name used matches or happens to match an alert
+  namespace pass adhoc as ``true``.
 
 Using the mod:`settings.FLUX_SELF_API_KEY` key allows for additional parameters
 to be passed and can be used to remove the maximum algorithm limit of 3.
@@ -269,20 +274,20 @@ Basically this allows you to configure the algorithm to check if any value in
 the last x values are anomalous, rather than just checking the last value.
 
 If present in an algorithm, by default the ``anomaly_window`` is 1.  Skyline
-generally only determines if the final value in a timeseries is anomalous
-related to the rest of the timeseries, however, due to the nature of Vortex, it
+generally only determines if the final value in a time series is anomalous
+related to the rest of the time series, however, due to the nature of Vortex, it
 may help the set the ``anomaly_window`` to a number of data points.
 
 Because Vortex is adhoc analysis, the methods you use to decide whether to
-analyse a timeseries may be lagged, meaning by the time your analysis/alerter
+analyse a time series may be lagged, meaning by the time your analysis/alerter
 has decided something should be further assessed and surfaces the data, the
-timeseries may already have changed.  Perhaps you see a value of 800 and your
+time series may already have changed.  Perhaps you see a value of 800 and your
 normal values are between 10 and 30, by the time you surface the data to send
 to Vortex the last value may have updated to say 22, using the default
-``anomaly_window`` the timeseries may be classified as not anomalous, because
+``anomaly_window`` the time series may be classified as not anomalous, because
 the value of 22 is being used as the decider.  Having an ``anomaly_window`` of
 say 5 and say the following values would be evaluated ``17, 14, 24, 800, 22``
-and the timeseries would be classified as anomalous.
+and the time series would be classified as anomalous.
 
 **It is important to consider this window in the context of any downsampling
 that may be applied to the data.**
@@ -306,22 +311,30 @@ removal at some point in the future:
 - ``lof`` - Local Outlier Factor
 - ``one_class_svm`` - One Class SVM
 - ``pca`` - Principal Component Analysis
-- ``prophet`` - the fbprophet algorithm (long running and not suited to realtime 
-    analysis)
+- ``prophet``
+  The fbprophet algorithm (long running and not suited to realtime analysis)
 - ``spectral_residual`` - Spectral Residual
 - ``isolation_forest`` - Isolation Forest
-- ``m66`` - A skyline changepoint detection algorithm, similar to
-    PELT, ruptures and Bayesian Online Changepoint Detection, however it is
-    more robust to instaneous outliers and more conditionally selective of
-    changepoints.
+- ``m66``
+  A skyline changepoint detection algorithm, similar to PELT, ruptures and
+  Bayesian Online Changepoint Detection, however it is more robust to instaneous
+  outliers and more conditionally selective of changepoints.
 - ``adtk_level_shift`` - ADTK LevelShiftAD algorithm
 - ``adtk_persist`` - ADTK PersistAD algorithm
 - ``adtk_seasonal`` - ADTK SeasonalAD algorithm
 - ``adtk_volatility_shift`` - ADTK VolatilityShiftAD algorithm
 - ``macd`` - Moving Average Convergence/Divergence
 - ``spectral_entropy`` - Spectral Entropy
-- ``mstl`` - statsforecast MSTL algorithm (the mstl algorithm is very long running
-    and not suited for realtime analysis)
+- ``mstl``
+  statsforecast MSTL algorithm (the mstl algorithm is very long running and not
+  suited for realtime analysis)
+- ``lad`` - Large Deviations Anomaly Detection
+- ``probabilistic_forecasts_generalized_pareto_distribution_ets``
+  Probabilistic forecasts for anomaly detection using Generalized Pareto
+  Distribution (long running and not suited for realtime analysis)
+- ``laoccfdlpnc``
+  Locally Adaptive One-Class Classifier Fusion with Dynamic ℓp-Norm Constraints
+  for Robust Anomaly Detection
 
 The algorithms are run in the order in which they are declared and the analysis
 will stop before running all algorithms, if a consensus is reached before all

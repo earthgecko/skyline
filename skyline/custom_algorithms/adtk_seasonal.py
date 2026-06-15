@@ -73,8 +73,8 @@ def adtk_seasonal(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     computational complexity, along with execution time and CPU usage. The
     adtk SeasonalAD algortihm is not O(n) and it is not fast either, not when
     compared to the normal three-sigma triggered algorithms.  However it is
-    useful if you care about detecting all level shifts.  The normal three-sigma
-    triggered algorithms do not always detect a level shift, especially if the
+    useful if you care about detecting all seasonal.  The normal three-sigma
+    triggered algorithms do not always detect a seasonal, especially if the
     level shift does not breach the three-sigma limits.  Therefore you may find
     over time that you encounter alerts that contain level shifts that you
     thought should have been detected.  On these types of metrics and events,
@@ -82,6 +82,10 @@ def adtk_seasonal(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     these.  It is not recommended to run on all your metrics as it would
     immediately triple the analyzer runtime every if only run every 5 windows/
     minutes.
+
+    UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
+    is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
+    is!
 
     Due to the computational complexity and long run time of the adtk
     SeasonalAD algorithm on the size of timeseries data used by Skyline.

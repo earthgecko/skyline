@@ -15,6 +15,9 @@ from functions.prometheus.skyline_prometheus_metrics import skyline_prometheus_m
 # @added 20230511 - Feature #4904: Handle send_graphite_metric failure
 # from skyline_functions import get_redis_conn_decoded
 
+# @added 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+from functions.graphite.process_graphite_queue import process_graphite_queue
+
 try:
     # @modified 20190518 - Branch #3002: docker
     # from settings import GRAPHITE_HOST
@@ -73,6 +76,132 @@ def send_graphite_metric(self, current_skyline_app, metric, value, timestamp=Non
     """
 
     # @added 20230511 - Feature #4904: Handle send_graphite_metric failure
+    # If Skyline has been partitioned from Graphite use the failure queue that
+    # is processed by the horizon canary worker
+    def graphite_fail(metric, value, ts):
+        added = 0
+        try:
+            data = [metric, value, ts]
+            self.redis_conn_decoded.set('skyline.graphite_fail', str(data))
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: failed to sadd to Redis set skyline.graphite_failure_queue - %s' % err)
+        try:
+            data = [metric, value, ts]
+            added = self.redis_conn_decoded.sadd('skyline.graphite_fail_queue', str(data))
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: failed to sadd to Redis set skyline.graphite_failure_queue - %s' % err)
+        return added
+
+    # @added 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+    def queue_graphite_metric(metric, value, ts):
+        added = 0
+        try:
+            key = '%s.%s' % (str(ts), str(metric))
+            # @modified 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+            #                      Task #5244: Add CentOS Stream 9 to dawn build
+            #                      Task #5178: Build and test skyline v4.1.0
+            # Type the elements
+            # data = {'metric': metric, 'value': value, 'timestamp': ts}
+            try:
+                value = float(value)
+            except Exception as err:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.info('warning :: send_graphite_metric :: failed to determine float value for %s, value: %s, err: %s' % (
+                    str(metric), str(value), err))
+                return added
+            data = {'metric': metric, 'value': float(value), 'timestamp': int(ts)}
+            added = self.redis_conn_decoded.hset('skyline.graphite_metrics_single_submit', key, str(data))
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: failed to hset to Redis set skyline.graphite_metrics_single_submit for %s, err: %s' % (
+                str(metric), err))
+        return added
+
+    current_logger = None
+    timestamp = int(time())
+    skyline_graphite_metrics_single_submit = False
+    last_skyline_graphite_metrics_single_submit = 0
+    try:
+        last_skyline_graphite_metrics_single_submit = self.redis_conn_decoded.get('skyline.last.skyline_graphite_metrics_single_submit')
+        if last_skyline_graphite_metrics_single_submit:
+            last_skyline_graphite_metrics_single_submit = int(last_skyline_graphite_metrics_single_submit)
+        else:
+            last_skyline_graphite_metrics_single_submit = int(timestamp) - 61
+    except Exception as err:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: send_graphite_metric :: failed to get Redis key skyline.last.skyline_graphite_metrics_single_submit - %s' % err)
+
+    if timestamp >= (last_skyline_graphite_metrics_single_submit + 60):
+        skyline_graphite_metrics_single_submit = True
+        try:
+            self.redis_conn_decoded.set('skyline.last.skyline_graphite_metrics_single_submit', timestamp)
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: failed to get Redis key skyline.last.skyline_graphite_metrics_single_submit - %s' % err)
+        if not current_logger:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.info('send_graphite_metric :: handling skyline_graphite_metrics_single_submit')
+    added_to_queue = 0
+    try:
+        added_to_queue = queue_graphite_metric(metric, value, timestamp)
+    except Exception as err:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: send_graphite_metric :: queue_graphite_metric failed, err: %s' % err)
+    if not skyline_graphite_metrics_single_submit:
+        if added_to_queue:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.debug('debug :: send_graphite_metric :: added to queue - %s, %s, %s' % (
+                metric, str(value), str(timestamp)))
+            return True
+    skyline_graphite_metrics_single_submit_success = False
+    if skyline_graphite_metrics_single_submit:
+        skyline_graphite_metrics_single_submit_data = {}
+        sent_count = 0
+        try:
+            skyline_graphite_metrics_single_submit_data = self.redis_conn_decoded.hgetall('skyline.graphite_metrics_single_submit')
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: failed to hset to Redis set skyline.graphite_metrics_single_submit for %s, err: %s' % (
+                str(metric), err))
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.debug('debug :: send_graphite_metric :: %s items in skyline_graphite_metrics_single_submit_data to process' % (
+            str(len(skyline_graphite_metrics_single_submit_data))))
+        try:
+            sent_count = process_graphite_queue(self, current_skyline_app, skyline_graphite_metrics_single_submit_data)
+        except Exception as err:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: send_graphite_metric :: process_graphite_queue failed, err: %s' % (
+                err))
+        if sent_count == len(skyline_graphite_metrics_single_submit_data):
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.info('send_graphite_metric :: sent %s skyline.graphite_metrics_single_submit items' % (
+                str(sent_count)))
+            skyline_graphite_metrics_single_submit_success = True
+            # return True
+        else:
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.info('warning :: send_graphite_metric :: sent %s skyline.graphite_metrics_single_submit items of %s metrics in skyline.graphite_metrics_single_submit' % (
+                str(sent_count), str(len(skyline_graphite_metrics_single_submit_data))))
+            skyline_graphite_metrics_single_submit_success = True
+            # return True
+
+    # @added 20230511 - Feature #4904: Handle send_graphite_metric failure
     # Check if the skyline.graphite_failure exist
 #    redis_conn_decoded = None
 #    try:
@@ -89,6 +218,10 @@ def send_graphite_metric(self, current_skyline_app, metric, value, timestamp=Non
         current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error('error :: send_graphite_metric :: failed to get Redis key skyline.graphite_failure - %s' % err)
+
+    # @added 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+    if not graphite_failure and skyline_graphite_metrics_single_submit_success:
+        return True
 
     if graphite_failure:
         processing = 0
@@ -122,27 +255,6 @@ def send_graphite_metric(self, current_skyline_app, metric, value, timestamp=Non
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
                 current_logger.error('error :: send_graphite_metric :: failed to get Redis key skyline.graphite_ok - %s' % err)
-
-    # @added 20230511 - Feature #4904: Handle send_graphite_metric failure
-    # If Skyline has been partitioned from Graphite use the failure queue that
-    # is processed by the horizon canary worker
-    def graphite_fail(metric, value, ts):
-        added = 0
-        try:
-            data = [metric, value, ts]
-            self.redis_conn_decoded.set('skyline.graphite_fail', str(data))
-        except Exception as err:
-            current_skyline_app_logger = str(current_skyline_app) + 'Log'
-            current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.error('error :: send_graphite_metric :: failed to sadd to Redis set skyline.graphite_failure_queue - %s' % err)
-        try:
-            data = [metric, value, ts]
-            added = self.redis_conn_decoded.sadd('skyline.graphite_fail_queue', str(data))
-        except Exception as err:
-            current_skyline_app_logger = str(current_skyline_app) + 'Log'
-            current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.error('error :: send_graphite_metric :: failed to sadd to Redis set skyline.graphite_failure_queue - %s' % err)
-        return added
 
     if not timestamp:
         timestamp = int(time())

@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3.0.0 &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>3.0.0 &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -190,11 +190,11 @@
            <div itemprop="articleBody">
              
   <section id="id1">
-<h1>3.0.0<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<h1>3.0.0<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
 <p>v3.0.0 - May 1, 2022</p>
 <p>This is a major release with additional apps, features and functionality.</p>
 <section id="important-notice-for-current-users">
-<h2>IMPORTANT NOTICE FOR CURRENT USERS<a class="headerlink" href="#important-notice-for-current-users" title="Permalink to this heading"></a></h2>
+<h2>IMPORTANT NOTICE FOR CURRENT USERS<a class="headerlink" href="#important-notice-for-current-users" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Skyline requires a modification to the runner.py of the python-daemon 2.3.0
 package to allow it to run on Python 3 properly in the manner in which
@@ -206,7 +206,7 @@ properly.</p></li>
 </ul>
 </section>
 <section id="summary-of-some-key-changes-in-v3-0-0">
-<h2>Summary of some key changes in v3.0.0<a class="headerlink" href="#summary-of-some-key-changes-in-v3-0-0" title="Permalink to this heading"></a></h2>
+<h2>Summary of some key changes in v3.0.0<a class="headerlink" href="#summary-of-some-key-changes-in-v3-0-0" title="Link to this heading"></a></h2>
 <p>Lots of changes and new functionality have been introduced in v3.0.0 the key
 new features are listed below.  This is a <strong>major</strong> update to all Skyline apps
 with the addition of some new apps too.</p>
@@ -246,7 +246,7 @@ those interested.</p></li>
 </ul>
 </section>
 <section id="breaking-changes">
-<h2>Breaking changes<a class="headerlink" href="#breaking-changes" title="Permalink to this heading"></a></h2>
+<h2>Breaking changes<a class="headerlink" href="#breaking-changes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Skyline is no longer supported on docker.</p></li>
 <li><p>Skyline is now only supported on CentOS Stream 8, Ubuntu 18.04 and 20.04.</p></li>
@@ -260,7 +260,7 @@ of Apache configurations for new features.</p></li>
 </ul>
 </section>
 <section id="notable-changes-for-users-that-were-moving-with-master">
-<h2>Notable changes for users that were moving with master<a class="headerlink" href="#notable-changes-for-users-that-were-moving-with-master" title="Permalink to this heading"></a></h2>
+<h2>Notable changes for users that were moving with master<a class="headerlink" href="#notable-changes-for-users-that-were-moving-with-master" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Only for users that have been running versions of master &gt; v2.0.0. The
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">SKYLINE_FEEDBACK_NAMESPACES</span></code> was introduced and it defaulted to the
@@ -272,7 +272,7 @@ Skyline is very busy.</p></li>
 </ul>
 </section>
 <section id="update-notes">
-<h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this heading"></a></h2>
+<h2>Update notes<a class="headerlink" href="#update-notes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>These update instruction apply to upgrading from v2.0.0 to v3.0.0 (through
 to v3.0.4) only. However as with all Skyline updates it is possible to go
@@ -289,7 +289,7 @@ The additions and changes described below.</p></li>
 <li><p>Ensure you <strong>TEST</strong> your new settings.py before continuing with the upgrade.</p></li>
 </ul>
 <section id="settings-py-changes">
-<h3>settings.py Changes<a class="headerlink" href="#settings-py-changes" title="Permalink to this heading"></a></h3>
+<h3>settings.py Changes<a class="headerlink" href="#settings-py-changes" title="Link to this heading"></a></h3>
 <p><strong>IMPORTANT</strong> in the new version of Skyline <strong>ALL</strong> settings must be defined in
 your settings.py because they are now tested when the services start.  If any
 settings are missing or ill-defined in your settings.py the Skyline services
@@ -403,7 +403,7 @@ described in their docstrings in settings.py</p>
 </section>
 </section>
 <section id="how-to-update-from-v2-0-0">
-<h2>How to update from v2.0.0<a class="headerlink" href="#how-to-update-from-v2-0-0" title="Permalink to this heading"></a></h2>
+<h2>How to update from v2.0.0<a class="headerlink" href="#how-to-update-from-v2-0-0" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Download the new release tag or clone/update to get it to a temp location,
 ready to be deployed.</p></li>
@@ -671,7 +671,7 @@ find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span c
 stack in the world (probably).  Have a look at the new functionality in the UI
 and enjoy.</p>
 <section id="considerations">
-<h3>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading"></a></h3>
+<h3>Considerations<a class="headerlink" href="#considerations" title="Link to this heading"></a></h3>
 <p>By default in v3.0.0 matrixprofile is not enabled as an additional algorithm to
 run.  This is because it is a user decision as to whether they wish to implement
 matrixprofile as an algorithm to be added to the analysis pipeline.  The
@@ -724,7 +724,7 @@ good and the unknown.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

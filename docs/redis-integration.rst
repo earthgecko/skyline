@@ -1,6 +1,8 @@
 .. role:: skyblue
 .. role:: red
 .. role:: brow
+.. _Installation: ../html/installation.html
+
 
 Redis integration
 =================
@@ -43,7 +45,7 @@ There are two different types of Skyline implementations:
 - Multiple Skyline instances running in a distributed fashion Redis still
   only need to bind to 127.0.0.1 and each Skyline node in the cluster accesses
   the required shared Redis data via specific API calls through webapp.  See
-  `Running multiple Skyline instances<running-multiple-skylines.html>`__
+  `Running multiple Skyline instances <running-multiple-skylines.html>`__
 
 How are time series stored in Redis?
 ------------------------------------
@@ -71,6 +73,14 @@ Ionosphere, Skyline fetches that data from Graphite or VictoriaMetrics directly
 when required.  This overcomes any Redis performance issues and the use of Graphite
 data removes the limitation of Skyline only being able to analyse data and be useful
 in the 24 hour time window.
+
+RedisTimeseries considerations
+------------------------------
+
+- Redis timeseries does not accept commas in label values and therefore on ingestion
+  of any metrics with label values that include commas, Skyline replaces commas with
+  underscores, e.g. ``'tags': 'netgo,builtinassets,stringlabels'`` will become
+  ``'tags': 'netgo_builtinassets_stringlabels'``
 
 What other data are stored in Redis?
 ------------------------------------

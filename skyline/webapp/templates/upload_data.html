@@ -9,6 +9,16 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/flux_frontend"><span class="logo"><span class="sky">Upload</span> <span class="re">data</span></span></a>
+    </li>
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -29,6 +39,7 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+{% endif %}
 
 	<div class="col-md-12">
     {% if not upload_data_enabled %}

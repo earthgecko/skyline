@@ -19,6 +19,9 @@ from sys import version_info
 import gzip
 
 import traceback
+# @added 20230707 - Feature #4988: Allow snab to return and save results
+import json
+
 from flask import request
 import requests
 # from redis import StrictRedis
@@ -120,6 +123,14 @@ from functions.plots.vortex_training_data_graphs import get_vortex_training_data
 # @added 20220731 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
 from create_matplotlib_graph import create_matplotlib_graph
+
+# @added 20240425 - Feature #5318: motif_annihilation
+from functions.database.queries.get_fps_for_metric import get_fps_for_metric
+from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
+
+# @added 20241023 - Feature #5512: labelled_anomalies - info message
+#                   Ideas #2476: Label and relate anomalies
+from thunder.thunder_alerters import thunder_alert
 
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
@@ -339,16 +350,24 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
     return (metric_paths, unique_metrics, unique_timestamps, human_dates, labelled_metric_base_names)
 
 
-def ionosphere_data(requested_timestamp, data_for_metric, context):
+def ionosphere_data(
+        requested_timestamp, data_for_metric, context,
+        # @added 20230925 - Add pagination to training data
+        offset=None, perpage=None):
     """
     Get a list of all training data or profiles folders and metrics
 
     :param requested_timestamp: the training data or profile timestamp
     :param data_for_metric: the metric base_name
     :param context: the request context, training_data or features_profiles
+    :param offset: the offset if pagination parameters are passed
+    :param perpage: the number of items to return from offset if pagination
+        parameters are passed
     :type requested_timestamp: str
     :type data_for_metric: str
     :type context: str
+    :type offset: int
+    :type perpage: int
     :return: tuple of lists
     :rtype:  (list, list, list, list)
 
@@ -391,7 +410,27 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
         data_dir = '%s' % settings.IONOSPHERE_DATA_FOLDER
     if context == 'features_profiles':
         data_dir = '%s' % settings.IONOSPHERE_PROFILES_FOLDER
+
+    # @added 20230925 - Add pagination to training data
+#    count = 0
+
     for root, dirs, files in walk(data_dir):
+
+        # @modified 20231117 - Add pagination to training data
+        # Commented out as this broke training data list page
+        # @added 20230925 - Add pagination to training data
+#        if root != data_dir:
+#            if isinstance(offset, int) and isinstance(perpage, int) and files:
+#                if offset > 0:
+#                    if count < (offset - 1):
+#                        count += 1
+#                        continue
+#                if count == (offset + perpage):
+#                    break
+#                count += 1
+#        if root != data_dir:
+#            continue
+
         for file in files:
             if file.endswith('.json'):
                 data_file = True
@@ -399,8 +438,26 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
                     data_file = False
                 if re.search('mirage.redis.json', file):
                     data_file = False
+                # @added 20230707 - Feature #4988: Allow snab to return and save results
+                if re.search('^snab\..*\.results\.json', file):
+                    data_file = False
+                if re.search('^snab\..*\.results\.timeseries\.json', file):
+                    data_file = False
+                # @added 20230728 - Feature #4988: Allow snab to return and save results
+                if file.endswith('.downsampled.json'):
+                    data_file = False
+
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                if file.endswith('.custom_algorithms_results.json'):
+                    data_file = False
+
                 if re.search('\\d{10}', root) and data_file:
                     metric_name = file.replace('.json', '')
+
+                    if '.analyzer.redis.' in metric_name and metric_name.endswith('h'):
+                        continue
+
                     if data_for_metric != 'all':
                         add_metric = False
                         if metric_name == base_name:
@@ -414,17 +471,17 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
                             metric_paths.append([metric_name, root])
                             metrics.append(metric_name)
                             if context == 'training_data':
-                                timestamp = int(root.split('/')[5])
+                                timestamp = int(float(root.split('/')[5]))
                             if context == 'features_profiles':
-                                timestamp = int(path.split(root)[1])
+                                timestamp = int(float(path.split(root)[1]))
                             timestamps.append(timestamp)
                     else:
                         metric_paths.append([metric_name, root])
                         metrics.append(metric_name)
                         if context == 'training_data':
-                            timestamp = int(root.split('/')[5])
+                            timestamp = int(float(root.split('/')[5]))
                         if context == 'features_profiles':
-                            timestamp = int(path.split(root)[1])
+                            timestamp = int(float(path.split(root)[1]))
                         timestamps.append(timestamp)
 
     # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -454,6 +511,11 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
                         if re.search(exclude_redis_json, file):
                             data_file = False
                         if re.search('mirage.redis.json', file):
+                            data_file = False
+                        # @added 20230707 - Feature #4988: Allow snab to return and save results
+                        if re.search('^snab\..*\.results\.json', file):
+                            data_file = False
+                        if re.search('^snab\..*\.results\.timeseries\.json', file):
                             data_file = False
                         if re.search('\\d{10}', root) and data_file:
                             metric_name = file.replace('.json', '')
@@ -542,7 +604,13 @@ def engine_disposal(engine):
     return
 
 
-def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id):
+# @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+# Added response_format so that if this is not a web UI but an "api" request
+# graphs are not created
+# def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id):
+def ionosphere_metric_data(
+            requested_timestamp, data_for_metric, context, fp_id,
+            response_format='html'):
     """
     Get a list of all training data folders and metrics
     """
@@ -581,7 +649,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
-        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = [
+            'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+            'anomaly_id',
+        ]
         array_keys = ['algorithms', 'triggered_algorithms', 'algorithms_run']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -780,6 +853,22 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
     undownsampled_archive = None
 
+    # @added 20230707 - Feature #4988: Allow snab to return and save results
+    snab_results = {}
+    snab_results_file = None
+
+    # @added 20231013 - Feature #5100: snab - allow for multiple checks
+    snab_results_files = []
+
+    # @added 20230718 - Feature #5006: Add graph of Mirage analysed downsampled data to training_data page
+    #                   Feature #4988: Allow snab to return and save result
+    #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Feature #4994: custom_algorithm - mirages
+    #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+    mirage_analysed_downsampled_data_json_file = False
+    mirage_analysed_downsampled_graph = False
+
     td_files = listdir(metric_data_dir)
     for i_file in td_files:
         metric_file = path.join(metric_data_dir, i_file)
@@ -796,6 +885,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         if i_file.startswith('undownsampled.'):
             if i_file.endswith('.json.gz'):
                 undownsampled_archive = metric_file
+
+        # @added 20230718 - Feature #5006: Add graph of Mirage analysed downsampled data to training_data page
+        #                   Feature #4988: Allow snab to return and save result
+        #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Feature #4994: custom_algorithm - mirages
+        #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        if i_file.endswith('.downsampled.json'):
+            mirage_analysed_downsampled_data_json_file = str(metric_file)
+            mirage_analysed_downsampled_graph = metric_file.replace('downsampled.json','mirage.analysed.downsampled.png')
 
         if i_file.endswith('.png'):
             # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
@@ -817,6 +916,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             # Plot the macthed motif
             if '.matched_motif.' in i_file:
                 append_image = False
+
+            # @added 20230718 - Feature #5006: Add graph of Mirage analysed downsampled data to training_data page
+            if i_file.endswith('.mirage.analysed.downsampled.png'):
+                append_image = False
+
+            # @added 20240405 - Feature #5318: motif_annihilation
+            if i_file.endswith('.png'):
+                if 'motif_annihilation' in i_file:
+                    append_image = True
 
             if append_image:
                 images.append(str(metric_file))
@@ -844,6 +952,26 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         # @added 20170309 - Feature #1960: ionosphere_layers
         if i_file == ionosphere_json_filename:
             ionosphere_json_file = str(metric_file)
+
+        # @added 20230707 - Feature #4988: Allow snab to return and save results
+        if re.search('^snab\..*\.results\.json', i_file):
+            snab_results_file = str(metric_file)
+
+            # @added 20231013 - Feature #5100: snab - allow for multiple checks
+            snab_results_files.append(snab_results_file)
+
+    # @added 20230707 - Feature #4988: Allow snab to return and save results
+    if snab_results_file:
+        if path.isfile(snab_results_file):
+            try:
+                with open(snab_results_file, 'r') as f:
+                    json_str = f.read()
+                snab_results = json.loads(json_str)
+            except Exception as err:
+                logger.error('error :: data from snab_results_file %s could not be loaded - %s' % (
+                    str(snab_results_file), err))
+            snab_results['snab_results_file'] = snab_results_file
+            snab_results['snab_results_path'] = path.dirname(snab_results_file)
 
     metric_vars_ok = False
     # @modified 20230207
@@ -1098,6 +1226,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         logger.error(traceback.format_exc())
         logger.error('error :: failed to get anomaly id from panorama: %s' % str(url))
 
+    # @added 20230703 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    # Handle csv metrics which will not have an anomaly id
+    if vortex_metric_data_file:
+        panorama_resp = False
+
     if panorama_resp:
         try:
             data = literal_eval(r.text)
@@ -1138,7 +1272,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # @added 20221130 - Feature #4732: flux vortex
     #                   Feature #4734: mirage_vortex
     vortex_graphs = []
-    if vortex_training:
+
+    # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+    # Added response_format condition so that if this is not a
+    # web UI but an "api" request graphs are not created
+    # if vortex_training:
+    if vortex_training and response_format != 'json':
         try:
             vortex_graphs = get_vortex_training_data_graphs(skyline_app, vortex_metric_data_file, undownsampled_archive)
         except Exception as err:
@@ -1178,10 +1317,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 #                     Branch #4300: prometheus
                 # Handle getting data from Graphite and victoriametrics
                 if data_source == 'graphite':
-                    logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
-                    graph_image = get_graphite_metric(
-                        skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                        graph_image_file)
+
+                    # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                    # Added response_format condition so that if this is not a
+                    # web UI but an "api" request graphs are not created
+                    if response_format != 'json':
+                        logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+                        graph_image = get_graphite_metric(
+                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                            graph_image_file)
                 if data_source == 'victoriametrics':
                     logger.info('getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
                     metric_data = None
@@ -1207,9 +1351,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                         # get_victoriametrics_metric automatically applies the rate and
                         # step required no downsampling or nonNegativeDerivative is
                         # required.
-                        graph_image = get_victoriametrics_metric(
-                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                            graph_image_file, metric_data, plot_parameters)
+                        # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                        # Added response_format condition so that if this is not a
+                        # web UI but an "api" request graphs are not created
+                        if response_format != 'json':
+                            graph_image = get_victoriametrics_metric(
+                                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                graph_image_file, metric_data, plot_parameters)
                     except Exception as err:
                         logger.error('error :: get_victoriametrics_metric failed - %s' % (
                             err))
@@ -1387,10 +1535,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                         str(motifs_matched_id), str(matched_timestamp))
                 if not path.isfile(graph_image_file):
                     if data_source == 'graphite':
-                        logger.info('getting Graphite graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
-                        graph_image = get_graphite_metric(
-                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                            graph_image_file)
+
+                        # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                        # Added response_format condition so that if this is not a
+                        # web UI but an "api" request graphs are not created
+                        if response_format != 'json':
+                            logger.info('getting Graphite graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
+                            graph_image = get_graphite_metric(
+                                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                graph_image_file)
                     if data_source == 'victoriametrics':
                         logger.info('getting victoriametrics graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
                         metric_data = None
@@ -1403,9 +1556,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                             # get_victoriametrics_metric automatically applies the rate and
                             # step required no downsampling or nonNegativeDerivative is
                             # required.
-                            graph_image = get_victoriametrics_metric(
-                                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                                graph_image_file, metric_data, plot_parameters)
+                            # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                            # Added response_format condition so that if this is not a
+                            # web UI but an "api" request graphs are not created
+                            if response_format != 'json':
+                                graph_image = get_victoriametrics_metric(
+                                    skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                    graph_image_file, metric_data, plot_parameters)
                         except Exception as err:
                             logger.error('error :: get_victoriametrics_metric failed - %s' % (
                                 err))
@@ -1496,34 +1653,43 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                     str(fp_id), str(matched_layer[0]))
                 if not path.isfile(graph_image_file):
                     if data_source == 'graphite':
-                        logger.info(
-                            'getting Graphite graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
-                                str(fp_id), str(matched_layer_id), str(from_timestamp),
-                                str(until_timestamp)))
-                        graph_image = get_graphite_metric(
-                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                            graph_image_file)
-                    if data_source == 'victoriametrics':
-                        logger.info(
-                            'getting victoriametrics graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
-                                str(fp_id), str(matched_layer_id), str(from_timestamp),
-                                str(until_timestamp)))
-                        metric_data = None
-                        title = 'Matched timeseries\n%s' % str(use_base_name)
-                        plot_parameters = {
-                            'title': title, 'line_color': 'green', 'bg_color': 'black',
-                            'figsize': (8, 4)
-                        }
-                        try:
-                            # get_victoriametrics_metric automatically applies the rate and
-                            # step required no downsampling or nonNegativeDerivative is
-                            # required.
-                            graph_image = get_victoriametrics_metric(
+
+                        # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                        # Added response_format condition so that if this is not a
+                        # web UI but an "api" request graphs are not created
+                        if response_format != 'json':
+                            logger.info(
+                                'getting Graphite graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
+                                    str(fp_id), str(matched_layer_id), str(from_timestamp),
+                                    str(until_timestamp)))
+                            graph_image = get_graphite_metric(
                                 skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                                graph_image_file, metric_data, plot_parameters)
-                        except Exception as err:
-                            logger.error('error :: get_victoriametrics_metric failed - %s' % (
-                                err))
+                                graph_image_file)
+                    if data_source == 'victoriametrics':
+                        # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+                        # Added response_format condition so that if this is not a
+                        # web UI but an "api" request graphs are not created
+                        if response_format != 'json':
+                            logger.info(
+                                'getting victoriametrics graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
+                                    str(fp_id), str(matched_layer_id), str(from_timestamp),
+                                    str(until_timestamp)))
+                            metric_data = None
+                            title = 'Matched timeseries\n%s' % str(use_base_name)
+                            plot_parameters = {
+                                'title': title, 'line_color': 'green', 'bg_color': 'black',
+                                'figsize': (8, 4)
+                            }
+                            try:
+                                # get_victoriametrics_metric automatically applies the rate and
+                                # step required no downsampling or nonNegativeDerivative is
+                                # required.
+                                graph_image = get_victoriametrics_metric(
+                                    skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                    graph_image_file, metric_data, plot_parameters)
+                            except Exception as err:
+                                logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                                    err))
                 else:
                     graph_image = True
                     logger.info('not getting Graphite graph as exists - %s' % (graph_image_file))
@@ -1549,6 +1715,11 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         if path.isfile(analyzer_redis_json_file):
             if analyzer_redis_image_file not in images:
                 create_plot = True
+
+        # @added 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+        if response_format == 'json':
+            create_plot = False
+
         if create_plot:
             logger.info('ionosphere_metric_data :: plotting %s' % analyzer_redis_image_file)
             raw_timeseries = None
@@ -1601,6 +1772,48 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 images.append(analyzer_redis_image_file)
                 logger.info('ionosphere_metric_data :: adding %s to images' % analyzer_redis_image_file)
 
+    # @added 20230718 - Feature #5006: Add graph of Mirage analysed downsampled data to training_data page
+    #                   Feature #4988: Allow snab to return and save result
+    #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Feature #4994: custom_algorithm - mirages
+    #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+    # Added mirage_analysed_downsampled_data_json_file
+    # @modified 20230901 - Task #5056: webapp ionosphere - minimise work on api calls
+    # Added response_format condition so that if this is not a
+    # web UI but an "api" request graphs are not created
+    # if mirage_analysed_downsampled_graph:
+    if mirage_analysed_downsampled_graph and response_format != 'json':
+        if not path.exists(mirage_analysed_downsampled_graph):
+            logger.info('ionosphere_metric_data :: plotting Mirage analysed downsampled data graph - %s' % mirage_analysed_downsampled_graph)
+            raw_timeseries = None
+            timeseries = []
+            try:
+                with open(mirage_analysed_downsampled_data_json_file, 'r') as f:
+                    raw_timeseries = f.read()
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: ionosphere_metric_data :: failed to read timeseries data from %s - %s' % (
+                    mirage_analysed_downsampled_data_json_file, err))
+            if raw_timeseries:
+                timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                del raw_timeseries
+                timeseries = literal_eval(timeseries_array_str)
+            if timeseries:
+                monotonic_timeseries = []
+                try:
+                    graph_title = 'Mirage downsampled Redis and merged Graphite data analysed (%s)\n%s' % (
+                        human_date, use_base_name)
+                    anomalies = []
+                    created_graph = create_matplotlib_graph(skyline_app, mirage_analysed_downsampled_graph, graph_title, timeseries, anomalies, monotonic_timeseries)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: ionosphere_metric_data :: failed to plot %s - %s' % (
+                        mirage_analysed_downsampled_graph, err))
+            if created_graph:
+                # images.append(mirage_analysed_downsampled_graph)
+                logger.info('ionosphere_metric_data :: adding %s to images' % mirage_analysed_downsampled_graph)
+
     return (
         metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
         panorama_anomaly_id, graphite_now_images, graphite_matched_images,
@@ -1622,7 +1835,17 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         fp_details_list,
         # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
         # For ionosphere_echo features profiles
-        fp_anomaly_timestamp)
+        fp_anomaly_timestamp,
+        # @added 20230707 - Feature #4988: Allow snab to return and save results
+        snab_results,
+        # @added 20230718 - Feature #5006: Add graph of Mirage analysed downsampled data to training_data page
+        #                   Feature #4988: Allow snab to return and save result
+        #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Feature #4994: custom_algorithm - mirages
+        #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        mirage_analysed_downsampled_graph,
+    )
 
 
 # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -1748,6 +1971,13 @@ def features_profile_details(fp_id):
         else:
             motif_matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(motif_last_matched)))
 
+        # @added 20241018 - Feature #5481: ionosphere.copy_features_profile
+        #                   Feature #5479: ionosphere.alias_features_profile
+        try:
+            alias_id = row['alias_id']
+        except:
+            alias_id = 0
+
         fp_details = '''
 tsfresh_version     :: %s | calc_time :: %s
 features_count      :: %s
@@ -1764,7 +1994,7 @@ motif_last_checked  :: %s | human_date :: %s
 created_timestamp   :: %s
 full_duration       :: %s
 parent_id           :: %s | generation :: %s | validated :: %s
-layers_id           :: %s
+layers_id           :: %s | alias_id   :: %s
 label               :: %s
 ''' % (str(tsfresh_version), str(calc_time), str(features_count),
             str(features_sum), str(deleted), str(matched_count),
@@ -1778,7 +2008,7 @@ label               :: %s
             str(created_timestamp),
             str(full_duration),
             str(parent_id), str(generation),
-            str(validated), str(layers_id), str(label))
+            str(validated), str(layers_id), str(alias_id), str(label))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -1857,6 +2087,10 @@ def ionosphere_search(default_query, search_query):
     matched_count = None
     checked_count = None
     generation_count = None
+    # @added 20241021 - Feature #5479: ionosphere.alias_features_profile
+    #                   Feature #5481: ionosphere.copy_features_profile
+    # Allow to select alias features profiles only
+    alias_query = False
 
     count_by_metric = None
     if 'count_by_metric' in request.args:
@@ -2161,7 +2395,10 @@ def ionosphere_search(default_query, search_query):
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
                 # Use validated variable
                 # new_query_string = '%s AND matched_count > %s' % (query_string, matched_greater_than)
-                new_query_string = '%s AND matched_count > %s' % (query_string, validated_matched_greater_than)
+                # @modified 20240321 - Feature #5304: ionosphere.find_repetitive_patterns
+                # Changed to >=
+                # new_query_string = '%s AND matched_count > %s' % (query_string, validated_matched_greater_than)
+                new_query_string = '%s AND matched_count >= %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
@@ -2171,7 +2408,10 @@ def ionosphere_search(default_query, search_query):
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
                 # Use validated variable
                 # new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
-                new_query_string = '%s WHERE matched_count > %s' % (query_string, validated_matched_greater_than)
+                # @modified 20240321 - Feature #5304: ionosphere.find_repetitive_patterns
+                # Changed to >=
+                # new_query_string = '%s WHERE matched_count > %s' % (query_string, validated_matched_greater_than)
+                new_query_string = '%s WHERE matched_count >= %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
@@ -2204,6 +2444,24 @@ def ionosphere_search(default_query, search_query):
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('query_string now "%s"' % query_string)
             needs_and = True
+
+    # @added 20241021 - Feature #5479: ionosphere.alias_features_profile
+    #                   Feature #5481: ionosphere.copy_features_profile
+    # Allow to select alias features profiles only
+    if 'alias' in request.args:
+        alias = request.args.get('alias', None)
+        if alias:
+            if str(alias) == 'true':
+                alias_query = True
+        if alias_query:
+            if needs_and:
+                new_query_string = '%s AND alias_id > 0' % query_string
+                query_string = new_query_string
+            else:
+                new_query_string = '%s WHERE alias_id > 0' % query_string
+                query_string = new_query_string
+                needs_and = True
+            logger.info('query_string now "%s"' % query_string)
 
     # @modified 20180414 - Feature #1862: Ionosphere features profiles search page
     #                      Branch #2270: luminosity
@@ -2354,6 +2612,8 @@ def ionosphere_search(default_query, search_query):
         default_ionosphere_search = True
 
     metrics = []
+    # @added 20241120 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics = {}
 
     try:
         connection = engine.connect()
@@ -2362,13 +2622,20 @@ def ionosphere_search(default_query, search_query):
         logger.info('selecting all metrics with id > 0')
         if default_ionosphere_search:
             stmt = select([metrics_table]).where(metrics_table.c.id == 0)
-            logger.info('defult Ionosphere search some not selecting all metrics')
+            logger.info('defult Ionosphere search so not selecting all metrics')
 
         result = connection.execute(stmt)
         for row in result:
             metric_id = int(row['id'])
             metric_name = str(row['metric'])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            if metric_name in duplicate_metrics.keys():
+                duplicate_metrics[metric_name].append(metric_id)
+                continue
             metrics.append([metric_id, metric_name])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            duplicate_metrics[metric_name] = [metric_id]
+
         connection.close()
     except:
         trace = traceback.format_exc()
@@ -2454,6 +2721,13 @@ def ionosphere_search(default_query, search_query):
         if find_unvalidated:
             logger.info('optimised - selecting all features profiles with validated == 0')
             stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+
+        # @added 20241021 - Feature #5479: ionosphere.alias_features_profile
+        #                   Feature #5481: ionosphere.copy_features_profile
+        # Allow to select alias features profiles only
+        if alias_query:
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.alias_id >= 1)
+            logger.info('selecting only features profiles with alias_id')
 
         result = connection.execute(stmt)
         for row in result:
@@ -2710,14 +2984,22 @@ def ionosphere_search(default_query, search_query):
                     # [SQL: SELECT * FROM metrics WHERE id in ()]
                     if select_metric_ids == '':
                         select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id=0'
-                        logger.warning('warn :: determined 0 metrics with features profiles for the default Ionosphere search')
+                        logger.info('warning :: determined 0 metrics with features profiles for the default Ionosphere search')
 
                     try:
                         metrics_result = connection.execute(select_metric_ids_stmt)
                         for row in metrics_result:
                             metric_id = int(row['id'])
                             metric_name = str(row['metric'])
+
+                            # @added 20241120 - Bug #5522: Handle duplicate metric names
+                            if metric_name in duplicate_metrics.keys():
+                                duplicate_metrics[metric_name].append(metric_id)
+                                continue
                             metrics.append([metric_id, metric_name])
+                            # @added 20241120 - Bug #5522: Handle duplicate metric names
+                            duplicate_metrics[metric] = [metric_id]
+
                         logger.info('engine_needed and engine and search_query - determined %s metric objects for the default Ionosphere search' % str(len(metrics)))
                     except:
                         trace = traceback.format_exc()
@@ -3892,6 +4174,9 @@ def metric_layers_alogrithms(base_name):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # @added 20241120 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics = {}
+
     metric_id = 0
     try:
         connection = engine.connect()
@@ -3899,6 +4184,9 @@ def metric_layers_alogrithms(base_name):
         result = connection.execute(stmt)
         for row in result:
             metric_id = int(row['id'])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            break
+
         connection.close()
     except:
         trace = traceback.format_exc()
@@ -4420,6 +4708,37 @@ def validate_fp(update_id, id_column_name, user_id):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # @added 20240425 - Feature #5318: motif_annihilation
+    # Add echo fp creation
+    metric_id = int(update_id)
+    motif_annihilation_validation = {}
+    if id_column_name == 'id':
+        # Determine the metric_id
+        fp_id_row = {}
+        try:
+            fp_id_row = get_ionosphere_fp_db_row(skyline_app, fp_id)
+        except Exception as err:
+            logger.err('error :: ionosphere_backend ::  %s :: get_ionosphere_fp_db_row failed, err: %s' % (function_str, err))
+        if fp_id_row:
+            try:
+                metric_id = fp_id_row['metric_id']
+                logger.info('ionosphere_backend ::  %s :: determined metric_id as %s' % (function_str, str(metric_id)))
+            except Exception as err:
+                logger.err('error :: ionosphere_backend ::  %s :: failed to determine metric_id from fp_id_row, err: %s' % (function_str, err))
+            if fp_id_row['label'] == 'LEARNT - motif_annihilation':
+                motif_annihilation_validation = {fp_id: fp_id_row}
+    if id_column_name == 'metric_id':
+        fps_dict = {}
+        try:
+            fps_dict = get_fps_for_metric(skyline_app, metric_id)
+        except Exception as err:
+            logger.error('error :: %s :: get_fps_for_metric failed, err: %s' % (
+                function_str, str(err)))
+        if fps_dict:
+            for key, item in fps_dict.items():
+                if item['enabled'] and item['validated'] == 0 and item['label'] == 'LEARNT - motif_annihilation':
+                    motif_annihilation_validation[key] = item
+
     try:
         connection = engine.connect()
         # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -4462,6 +4781,31 @@ def validate_fp(update_id, id_column_name, user_id):
     # Added missing disposal
     if engine:
         engine_disposal(engine)
+
+    # @added 20240425 - Feature #5318: motif_annihilation
+    # Add echo fp creation
+    if motif_annihilation_validation:
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        except Exception as err:
+            logger.error('error :: %s :: get_redis_conn_decoded failed for adding ionosphere.echo.work motif_annihilation work, err: %s' % (
+                function_str, err))
+        ionosphere_job = 'echo_motif_annihilation'
+        for key, item in motif_annihilation_validation.items():
+            try:
+                new_fp_id = int(key)
+                metric_id = item['metric_id']
+                requested_timestamp = item['anomaly_timestamp']
+                fp_generation = item['generation']
+                ts_full_duration = item['full_duration']
+                use_base_name = get_base_name_from_metric_id(skyline_app, metric_id)
+                redis_conn_decoded.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), use_base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
+                logger.info('%s :: added item to ionosphere.echo.work motif_annihilation for %s' % (
+                    function_str, str(item)))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: %s :: failed to add item to ionosphere.echo.work motif_annihilation for %s, err: %s' % (
+                    function_str, str(item), err))
 
     if id_column_name == 'id':
         return True, fail_msg, trace
@@ -4610,10 +4954,11 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
             # @modified 20210419 - Feature #4014: Ionosphere - inference
             # shutil.copy(i_file, saved_metric_training_data_dir)
             shutil.copy(i_file, use_saved_metric_training_data_dir)
+            i_filename = path.basename(i_file)
             logger.info(
                 '%s :: training data copied to %s/%s' % (
                     # function_str, saved_metric_training_data_dir, i_file))
-                    function_str, use_saved_metric_training_data_dir, i_file))
+                    function_str, use_saved_metric_training_data_dir, i_filename))
         except shutil.Error as e:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -5067,8 +5412,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_fp_matches'
-
+    start_get_fp_matches = time.time()
     logger.info('%s getting matches' % (function_str))
+
+
     logger.info('arguments :: %s, %s, %s, %s, %s, %s, %s, %s' % (
         str(metric), str(metric_like), str(get_fp_id), str(get_layer_id),
         str(from_timestamp), str(until_timestamp), str(limit),
@@ -5684,7 +6031,18 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     # determined
     memcache_result = None
     ionosphere_summary_list = None
-    if settings.MEMCACHE_ENABLED:
+
+    # @added 20230713 - Feature #4988: Allow snab to return and save results
+    #                   Feature #4994: custom_algorithm - mirages
+    # Using the memcache object had been disabled because the DB query is faster
+    # than literal_eval on the memcache_result
+    use_memcache_data = False
+
+    # @modified 20230713 - Feature #4988: Allow snab to return and save results
+    #                      Feature #4994: custom_algorithm - mirages
+    # Not using the memcache object
+    # if settings.MEMCACHE_ENABLED:
+    if settings.MEMCACHE_ENABLED and use_memcache_data:
         try:
 
             # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
@@ -5713,7 +6071,56 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             logger.error('error :: failed to process data from memcache key - ionosphere_summary_list')
             ionosphere_summary_list = False
 
+    # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                   Task #5248: Optimise ionosphere_functions.get_related
+    # It is clear that at times get_fp_matches can be slow. Debugging shows that
+    # this is often in the generation of the ionosphere_summary_list from DB
+    # query, which can take up to 5 seconds. This was being cached in memcache
+    # but was found that the literal_eval of the object was taking longer than
+    # the DB query so it was disabled.
+    # With the new resources now available in terms of
+    # get_metric_ids_and_base_names, testing has shown that if the
+    # ionosphere_summary_list is saved as a dict with just ionosphere_id and
+    # metric_id and saved to Redis that the lookup from Redis and then
+    # metric names, this is fast again.
+    # took: 0.4346587657928467 seconds to get 7342
+    # took: 0.2590491771697998 seconds to get 7342
+    # took: 0.24914813041687012 seconds to get 7342
+    # took: 0.4208261966705322 seconds to get 7342
+    start_ionosphere_summary_dict = time.time()
+    ionosphere_summary_list = []
+    ionosphere_summary_dict = {}
+    redis_conn_decoded = None
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: get_redis_conn_decoded failed, err: %s' % err)
+    ionosphere_summary_str_dict = {}
+    try:
+        ionosphere_summary_str_dict = redis_conn_decoded.hgetall('webapp.ionosphere_backend.ionosphere_summary_dict')
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: failed to hgetall webapp.ionosphere_backend.ionosphere_summary_dict, err: %s' % err)
+    if ionosphere_summary_str_dict:
+        all_db_metric_id_str_with_names = {}
+        try:
+            all_db_metric_id_str_with_names = redis_conn_decoded.hgetall('metrics_manager.all_db_metric_ids_with_names')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_fp_matches :: failed to hgetall metrics_manager.all_db_metric_ids_with_names, err: %s' % err)
+        for iid, mid in ionosphere_summary_str_dict.items():
+            base_name = None
+            try:
+                base_name = all_db_metric_id_str_with_names[str(mid)]
+            except:
+                base_name = None
+            ionosphere_summary_list.append([int(iid), int(mid), str(base_name)])
+    logger.info('get_fp_matches :: ionosphere_summary_list has %s items from webapp.ionosphere_backend.ionosphere_summary_dict in %s seconds' % (
+        str(len(ionosphere_summary_list)), (time.time() - start_ionosphere_summary_dict)))
+
     if not ionosphere_summary_list:
+        logger.info('get_fp_matches :: creating ionosphere_summary_list from DB query')
         stmt = "SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id"
         try:
             connection = engine.connect()
@@ -5734,7 +6141,16 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             ionosphere_summary_list = []
             for row in results:
                 ionosphere_summary_list.append([int(row['id']), int(row['metric_id']), str(row['metric'])])
-            if settings.MEMCACHE_ENABLED:
+                # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+                #                   Task #5248: Optimise ionosphere_functions.get_related
+                # Use fast caching in Redis
+                ionosphere_summary_dict[str(row['id'])] = str(row['metric_id'])
+
+            # @modified 20230713 - Feature #4988: Allow snab to return and save results
+            #                      Feature #4994: custom_algorithm - mirages
+            # Not using the memcache object
+            # if settings.MEMCACHE_ENABLED:
+            if settings.MEMCACHE_ENABLED and use_memcache_data:
                 try:
                     memcache_client.set('ionosphere_summary_list', ionosphere_summary_list, expire=600)
                     logger.info('set memcache ionosphere_summary_list key with DB results')
@@ -5745,11 +6161,48 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 # Added nosec to exclude from bandit tests
                 except:  # nosec
                     pass
+        logger.info('get_fp_matches :: created ionosphere_summary_list from DB query')
+
+        # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+        #                   Task #5248: Optimise ionosphere_functions.get_related
+        # Use fast caching in Redis
+        if ionosphere_summary_dict:
+            try:
+                redis_conn_decoded.hset('webapp.ionosphere_backend.ionosphere_summary_dict', mapping=ionosphere_summary_dict)
+                redis_conn_decoded.expire('webapp.ionosphere_backend.ionosphere_summary_dict', 900)
+                logger.info('get_fp_matches :: created Redis hash webapp.ionosphere_backend.ionosphere_summary_dict')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_fp_matches :: failed to hsetl webapp.ionosphere_backend.ionosphere_summary_dict, err: %s' % err)
+
+    # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    # Added a hash of all echo fp ids specifically for webapp
+    # ionosphere_backend.get_fp_matches so that the /api&anomaly
+    # request does not need to make a SQL query it get all the echo
+    # fp ids and it is fast.
+    echo_fp_ids = []
+    if settings.IONOSPHERE_ECHO_ENABLED:
+        echo_fp_id_strs = None
+        try:
+            echo_fp_id_strs = redis_conn_decoded.hkeys('metrics_manager.echo_fp_ids')
+        except Exception as err:
+            logger.error('error :: get_fp_matches :: hkeys failed on metrics_manager.echo_fp_ids, err: %s' % err)
+        if echo_fp_id_strs:
+            try:
+                echo_fp_ids = set([int(fp_id_str) for fp_id_str in echo_fp_id_strs])
+            except Exception as err:
+                logger.error('error :: get_fp_matches :: failed to create set of echo_fp_ids, err: %s' % err)
+                echo_fp_ids = []
+        logger.info('Determined %s echo_fp_ids from metrics_manager.echo_fp_ids' % str(len(echo_fp_ids)))
 
     # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo, get the ids of all echo_fp features profiles
-    echo_fp_ids = []
-    if settings.IONOSPHERE_ECHO_ENABLED:
+    # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    # Only query DB if the data was not retrieved from Redis
+    # echo_fp_ids = []
+    # if settings.IONOSPHERE_ECHO_ENABLED:
+    if settings.IONOSPHERE_ECHO_ENABLED and len(echo_fp_ids) == 0:
+        logger.info('get_fp_matches :: gettting echo_fp_ids from DB')
         echo_fp_ids_stmt = 'SELECT id FROM ionosphere WHERE echo_fp=1'
         try:
             connection = engine.connect()
@@ -5797,6 +6250,26 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     metric_list = []
 
     if get_features_profiles_matched:
+        start_get_fp_m = time.time()
+        logger.info('get_fp_matches :: determining matched features profiles')
+
+        # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+        # Just added this comment. If this is a webapp get_related_matches, all
+        # request made via /api?anomaly then the query_stmt is fine and does not
+        # require optimising as it is conditional on ionosphere_matches.metric_timestamp
+        # which is indexed in the table. From the /api?anomaly the query_stmt is:
+        # SELECT ionosphere_matched.id, ionosphere_matched.fp_id, \
+        # ionosphere_matched.metric_timestamp, ionosphere_matched.all_calc_features_sum, \
+        # ionosphere_matched.all_calc_features_count, ionosphere_matched.sum_common_values, \
+        # ionosphere_matched.common_features_count, ionosphere_matched.tsfresh_version, \
+        # ionosphere_matched.minmax, ionosphere_matched.minmax_fp_features_sum, \
+        # ionosphere_matched.minmax_fp_features_count, ionosphere_matched.minmax_anomalous_features_sum, \
+        # ionosphere_matched.minmax_anomalous_features_count, ionosphere_matched.fp_count, \
+        # ionosphere_matched.fp_checked, ionosphere_matched.motifs_matched_id, \
+        # ionosphere_matched.validated, ionosphere_matched.user_id
+        # FROM ionosphere_matched
+        # WHERE ionosphere_matched.metric_timestamp > :metric_timestamp_1 AND ionosphere_matched.metric_timestamp <= :metric_timestamp_2
+
         try:
             connection = engine.connect()
             stmt = query_string
@@ -5806,6 +6279,49 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # logger.info('executing %s' % stmt)
             # results = connection.execute(stmt)
             # logger.info('executing %s' % stmt)
+
+            # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+            # First use a query to only get the ids where metric_timestamp is >
+            # AND <=. Then query for the rows with ids.  Even though metric_timestamp
+            # is indexed, when selecting all no index is used.  However the
+            # features_profile_matched index is used in both when the id is used
+            # EXPLAIN SELECT * FROM ionosphere_matched WHERE metric_timestamp > 1706792400 AND metric_timestamp <= 1706792640
+            #+------+-------------+--------------------+------+---------------+------+---------+------+--------+-------------+
+            #| id   | select_type | table              | type | possible_keys | key  | key_len | ref  | rows   | Extra       |
+            #+------+-------------+--------------------+------+---------------+------+---------+------+--------+-------------+
+            #|    1 | SIMPLE      | ionosphere_matched | ALL  | NULL          | NULL | NULL    | NULL | 238306 | Using where |
+            #+------+-------------+--------------------+------+---------------+------+---------+------+--------+-------------+
+            # EXPLAIN SELECT id FROM ionosphere_matched WHERE metric_timestamp > 1706792400 AND metric_timestamp <= 1706792400
+            #+------+-------------+--------------------+-------+---------------+--------------------------+---------+------+--------+--------------------------+
+            #| id   | select_type | table              | type  | possible_keys | key                      | key_len | ref  | rows   | Extra                    |
+            #+------+-------------+--------------------+-------+---------------+--------------------------+---------+------+--------+--------------------------+
+            #|    1 | SIMPLE      | ionosphere_matched | index | NULL          | features_profile_matched | 13      | NULL | 238306 | Using where; Using index |
+            #+------+-------------+--------------------+-------+---------------+--------------------------+---------+------+--------+--------------------------+
+            #EXPLAIN SELECT * FROM ionosphere_matched WHERE id in (298014, 298015)"
+            #+------+-------------+--------------------+-------+----------------------------------+---------+---------+------+------+-------------+
+            #| id   | select_type | table              | type  | possible_keys                    | key     | key_len | ref  | rows | Extra       |
+            #+------+-------------+--------------------+-------+----------------------------------+---------+---------+------+------+-------------+
+            #|    1 | SIMPLE      | ionosphere_matched | range | PRIMARY,features_profile_matched | PRIMARY | 4       | NULL | 2    | Using where |
+            #+------+-------------+--------------------+-------+----------------------------------+---------+---------+------+------+-------------+
+            # Testing querying the 238306 rows were timed as:
+            # WITHOUT index: 0.5297927856445312 seconds
+            # WITH index: 0.1811220645904541 seconds
+            # Breakdown for the two queries as:
+            # ids: 0.17673611640930176 seconds
+            # rows: 0.004385948181152344 seconds
+            if get_related_matches:
+                query_stmt = select([ionosphere_matched_table.c.id]).\
+                    where(ionosphere_matched_table.c.metric_timestamp > int(related_from_timestamp)).\
+                    where(ionosphere_matched_table.c.metric_timestamp <= int(related_until_timestamp))
+                results = connection.execute(query_stmt)
+                # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+                # @modified 20240203 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+                #                      Task #5178: Build and test skyline v4.1.0
+                # use_fp_ids_list = [row['fp_id'] for row in results]
+                use_fp_ids_list = [row['id'] for row in results]
+                logger.info('get_fp_matches :: determining %s matched features profiles in defined period' % str(len(use_fp_ids_list)))
+                query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(use_fp_ids_list))
+
             results = connection.execute(query_stmt)
             connection.close()
         except:
@@ -5888,7 +6404,12 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # Added motifs_matched_id
             matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, metric_timestamp, motifs_matched_id])
 
+        logger.info('get_fp_matches :: determined %s matched features profiles in %s seconds' % (
+            str(len(matches)), str((time.time() - start_get_fp_m))))
+
     if get_layers_matched:
+        start_get_l_m = time.time()
+        logger.info('get_fp_matches :: determining matched layers')
         # layers matches
         new_query_string = query_string.replace('ionosphere_matched', 'ionosphere_layers_matched')
         query_string = new_query_string
@@ -5906,10 +6427,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # logger.info('executing layers_matched_query_stmt: %s' % str(layers_matched_query_stmt))
             results = connection.execute(layers_matched_query_stmt)
             connection.close()
-        except:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(traceback.format_exc())
-            logger.error('error :: could not determine metrics from metrics table')
+            fail_msg = 'error :: get_fp_matches :: could not determine metrics from metrics table. err: %s' % err
+            logger.error(fail_msg)
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal and raise
             if engine:
@@ -5937,8 +6459,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     anomaly_timestamp = int(row['anomaly_timestamp'])
             except Exception as err:
                 trace = traceback.format_exc()
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not determine timestamp - %s' % err)
+                logger.error(trace)
+                fail_msg = 'error :: get_fp_matches :: could not determine timestamp - %s' % err
+                logger.error(fail_msg)
                 if engine:
                     engine_disposal(engine)
                 return False, fail_msg, trace
@@ -5985,6 +6508,8 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # Added motifs_matched_id
             motifs_matched_id = 0
             matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, anomaly_timestamp, motifs_matched_id])
+        logger.info('get_fp_matches :: determined %s matched features profiles and layers in %s seconds' % (
+            str(len(matches)), str((time.time() - start_get_l_m))))
 
     sorted_matches = sorted(matches, key=lambda x: x[0])
     matches = sorted_matches
@@ -5994,12 +6519,13 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     try:
         del metric_list
     except:
-        logger.error('error :: failed to del metrics_list')
+        logger.error('error :: get_fp_matches :: failed to del metrics_list')
 
     # @added 20180809 - Bug #2496: error reported on no matches found
     #                   https://github.com/earthgecko/skyline/issues/64
     # If there are no matches return this information in matches to prevent
     # webapp from reporting an error
+    matches_padded = False
     if not matches:
         # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
         # @modified 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
@@ -6014,6 +6540,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         #                   Branch #4300: prometheus
         # Handle labelled_metric name added metric id
         matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None', 'None', 'None', 'None']]
+        matches_padded = True
 
     # @added 20220801 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -6025,6 +6552,8 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         if matches[0][0] != 'None':
             match_data = True
     if match_data:
+        logger.info('get_fp_matches :: getting metric ids for matches')
+        start_get_mid_for_matches = time.time()
         try:
             matched_fp_ids = [int(item[3]) for item in matches]
         except Exception as err:
@@ -6055,8 +6584,18 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     function_str, str(fp_id), err))
                 item.append(0)
             matches_with_metric_id.append(item)
+        logger.info('get_fp_matches :: determined metric ids for matches in %s seconds' % (
+            str((time.time() - start_get_mid_for_matches))))
+
     if matches_with_metric_id:
         matches = list(matches_with_metric_id)
+
+    if not matches_padded:
+        logger.info('get_fp_matches :: determined %s matches in %s seconds' % (
+            str(len(matches)), str((time.time() - start_get_fp_matches))))
+    else:
+        logger.info('get_fp_matches :: determined 0 matches in %s seconds' % (
+            str((time.time() - start_get_fp_matches))))
 
     return matches, fail_msg, trace
 
@@ -6690,12 +7229,16 @@ human_date          :: %s
         if not path.isfile(graph_image_file):
             on_demand_motif_analysis = True
             # logger.info('fp_motif length: %s' % (str(len(fp_motif))))
+            logger.info('plotting motif match to %s' % graph_image_file)
+            try:
 
-            plotted_image, plotted_image_file = plot_motif_match(
-                skyline_app, use_base_name, metric_timestamp, fp_id, full_duration,
-                generation_str, motif_id, index, size, distance, type_id,
-                fp_motif, not_anomalous_motif_sequence, graph_image_file,
-                on_demand_motif_analysis)
+                plotted_image, plotted_image_file = plot_motif_match(
+                    skyline_app, use_base_name, metric_timestamp, fp_id, full_duration,
+                    generation_str, motif_id, index, size, distance, type_id,
+                    fp_motif, not_anomalous_motif_sequence, graph_image_file,
+                    on_demand_motif_analysis)
+            except Exception as err:
+                logger.error('error :: get_matched_id_resources :: plot_motif_match failed, err: %s' % err)
         else:
             plotted_image = True
         if not plotted_image:
@@ -6865,7 +7408,18 @@ def get_features_profiles_to_validate(base_name):
     all_full_durations = []
     metric_fp_ids = get_ionosphere_fp_ids_for_full_duration(skyline_app, metric_id, full_duration=0, enabled=True)
     for i_fp_id in list(metric_fp_ids.keys()):
-        all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        # @modified 20241203 - Feature #5479: ionosphere.alias_features_profile
+        # Check dict item
+        #all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        try:
+            all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        except Exception as err:
+            try:
+                all_full_durations.append(metric_fp_ids[i_fp_id]['full_duration'])
+            except Exception as err2:
+                logger.error('error :: failed to determine full_duration for fp id %s from %s, err: %s, err2: %s' % (
+                    str(i_fp_id), str(metric_fp_ids[i_fp_id]), err, err2))
+
     all_full_durations = sorted(list(set(all_full_durations)))
     logger.info('%s :: all_full_durations: %s' % (
         function_str, str(all_full_durations)))
@@ -7233,7 +7787,12 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
 
 
 # @added 20190502 - Branch #2646: slack
-def webapp_update_slack_thread(base_name, metric_timestamp, value, message_context):
+# @modified 20230802 - Feature #5038: snab_results_algorithms
+#                      Feature #5042: Add save_training_data link options to SNAB slack results message
+#                      Feature #4988: Allow snab to return and save results
+# Added snab_dict which contains algorithms_results 
+# def webapp_update_slack_thread(base_name, metric_timestamp, value, message_context):
+def webapp_update_slack_thread(base_name, metric_timestamp, value, message_context, snab_dict={}):
     """
     Update slack threads with enabled events.
 
@@ -7241,10 +7800,12 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     :param metric_timestamp: the anomaly_timestamp
     :param value: the features profile id, the validated_count or None
     :param message_context: training_data_viewed or layers_created
+    :param snab_dict: the snab_dict with algorithms_results and consensus_achieved
     :type base_name: str
     :type metric_timestamp: str or int
     :type value: int or None
     :type message_context: str
+    :type snab_dict: dict
     :return: True or False
     :rtype:  boolean
 
@@ -7269,6 +7830,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         log_message = 'updating slack that snab result has been submitted'
         message_context_known = True
         snab_result = value
+
 
     # @added 20201004 - Task #3748: POC SNAB
     #                   Branch #3068: SNAB
@@ -7408,6 +7970,10 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
+
+        # @added 20241120 - Bug #5522: Handle duplicate metric names
+        duplicate_metrics = {}
+
         metric_id = None
         try:
             connection = engine.connect()
@@ -7415,6 +7981,9 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             result = connection.execute(stmt)
             for row in result:
                 metric_id = int(row['id'])
+                # @added 20241120 - Bug #5522: Handle duplicate metric names
+                break
+
             connection.close()
         except:
             logger.error(traceback.format_exc())
@@ -7551,6 +8120,31 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     if message_context == 'snab_result':
         message = '*SNAB* - user *EVALUATED* as - %s' % (
             str(snab_result))
+        # @added 20230802 - Feature #5042: Add save_training_data link options to SNAB slack results message
+        # Along with any link to the saved_training_data and add
+        # the algorithms_results and consensus_achieved (if there is one) to the
+        # snab slack evaluated message.
+        if snab_dict and 'saved_training_data' in list(snab_dict.keys()):
+            if snab_dict['saved_training_data']:
+                message = '%s\ntraining_data_saved: %s' % (
+                    message, str(snab_dict['saved_training_data']))
+        if snab_dict and 'algorithms_results' in list(snab_dict.keys()):
+            try:
+                consensus_achieved = snab_dict['algorithms_results']['consensus_achieved']
+            except:
+                consensus_achieved = False          
+            summary_dict = {}
+            if 'algorithms_results' in list(snab_dict['algorithms_results'].keys()):
+                for s_id in list(snab_dict['algorithms_results']['algorithms_results']):
+                    algo = snab_dict['algorithms_results']['algorithms_results'][s_id]['algorithm']
+                    summary_dict[algo] = {
+                        'anomalous': snab_dict['algorithms_results']['algorithms_results'][s_id]['anomalyScore'],
+                        'runtime': snab_dict['algorithms_results']['algorithms_results'][s_id]['runtime']
+                    }
+            if len(summary_dict) > 0:
+                message = '%s\nconsensus_achieved: `%s`' % (message, str(consensus_achieved))
+                message = '%s\nalgorithms_results: `%s`' % (
+                    message, str(summary_dict))
 
     # @added 20201004 - Task #3748: POC SNAB
     #                   Branch #3068: SNAB
@@ -8001,6 +8595,39 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     if engine:
         engine_disposal(engine)
 
+    # @added 20241023 - Feature #5512: labelled_anomalies - info message
+    #                   Ideas #2476: Label and relate anomalies
+    if len(anomaly_ids_to_label) > 0:
+        # Send email
+        subject = 'Skyline Panorama - NOTICE - %s anomalies labelled' % str(len(anomaly_ids_to_label))
+        data = {
+            'label': label,
+            'namespaces': namespaces,
+            'labelled': len(anomaly_ids_to_label),
+            'start_timestamp': start_timestamp, 
+            'end_timestamp': end_timestamp,
+            'metrics': metrics,
+        }
+        alert_via = 'alert_via_smtp'
+        try:
+            alert_sent = thunder_alert(alert_via, subject, str(data))
+            if alert_sent:
+                logger.info('label_anomalies :: sent email notice')
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: thunder_alert via smtp failed, err: %s' % err)
+        if settings.SLACK_ENABLED:
+            alert_via = 'alert_via_slack'
+            try:
+                alert_sent = thunder_alert(alert_via, subject, str(data))
+                if alert_sent:
+                    logger.info('label_anomalies :: sent slack notice')
+            except Exception as err:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: thunder_alert via slack failed, err: %s' % err)
+ 
     return True, len(anomaly_ids_to_label)
 
 
@@ -8296,9 +8923,9 @@ def get_matched_motifs(
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            logger.error('error :: %s :: could not determine fp ids from ionosphere table - %s' % (
-                function_str, err))
-            dev_null = e
+            fail_msg = 'error :: %s :: could not determine fp ids from ionosphere table - %s' % (
+                function_str, err)
+            logger.error(fail_msg)
             if engine:
                 engine_disposal(engine)
             return False, fail_msg, trace
@@ -8380,12 +9007,12 @@ def get_matched_motifs(
                     fp_ids_list.append(row['id'])
 
                 connection.close()
-            except Exception as e:
+            except Exception as err:
                 trace = traceback.format_exc()
                 logger.error(trace)
-                logger.error('error :: %s :: could not determine id from metrics table' % function_str)
+                fail_msg = 'error :: %s :: could not determine id from metrics table, err: %s' % (function_str, err)
+                logger.error(fail_msg)
                 # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
-                dev_null = e
                 if engine:
                     engine_disposal(engine)
                 return False, fail_msg, trace
@@ -8609,11 +9236,20 @@ def get_matched_motifs(
             logger.error('error :: %s :: limit is not an integer - %s - %s' % (function_str, str(limit), e))
             new_query_string = '%s LIMIT 100' % (query_string)
 
+    # @added 20240202 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                   Task #5248: Optimise ionosphere_functions.get_related
+    # Using the memcache object had been disabled because the DB query was faster
+    # than literal_eval on the memcache_result, but now using a Redis hash
+    use_memcache_data = False
+
     # Get ionosphere_summary memcache object from which metric names will be
     # determined
     memcache_result = None
     ionosphere_summary_list = None
-    if settings.MEMCACHE_ENABLED:
+    # @modified 20240202 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                      Task #5248: Optimise ionosphere_functions.get_related
+    # if settings.MEMCACHE_ENABLED:
+    if settings.MEMCACHE_ENABLED and use_memcache_data:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
     else:
         memcache_client = None
@@ -8642,6 +9278,44 @@ def get_matched_motifs(
             del memcache_result
         except Exception as e:
             dev_null = e
+
+    # @added 20240202 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+    #                   Task #5248: Optimise ionosphere_functions.get_related
+    # As per modification made in get_fp_mataches above
+    start_ionosphere_summary_dict = time.time()
+    ionosphere_summary_list = []
+    ionosphere_summary_dict = {}
+    redis_conn_decoded = None
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: get_redis_conn_decoded failed, err: %s' % (function_str, err))
+    ionosphere_summary_str_dict = {}
+    try:
+        ionosphere_summary_str_dict = redis_conn_decoded.hgetall('webapp.ionosphere_backend.ionosphere_summary_dict')
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to hgetall webapp.ionosphere_backend.ionosphere_summary_dict, err: %s' % (
+            function_str, err))
+    if ionosphere_summary_str_dict:
+        all_db_metric_id_str_with_names = {}
+        try:
+            all_db_metric_id_str_with_names = redis_conn_decoded.hgetall('metrics_manager.all_db_metric_ids_with_names')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to hgetall metrics_manager.all_db_metric_ids_with_names, err: %s' % (
+                function_str, err))
+        for iid, mid in ionosphere_summary_str_dict.items():
+            base_name = None
+            try:
+                base_name = all_db_metric_id_str_with_names[str(mid)]
+            except:
+                base_name = None
+            ionosphere_summary_list.append([int(iid), int(mid), str(base_name)])
+    logger.info('%s :: ionosphere_summary_list has %s items from webapp.ionosphere_backend.ionosphere_summary_dict in %s seconds' % (
+        function_str, str(len(ionosphere_summary_list)), (time.time() - start_ionosphere_summary_dict)))
+
     if not ionosphere_summary_list:
         stmt = "SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id"
         try:
@@ -8664,7 +9338,10 @@ def get_matched_motifs(
             ionosphere_summary_list = []
             for row in results:
                 ionosphere_summary_list.append([int(row['id']), int(row['metric_id']), str(row['metric'])])
-            if settings.MEMCACHE_ENABLED:
+            # @modified 20240202 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+            #                      Task #5248: Optimise ionosphere_functions.get_related
+            #if settings.MEMCACHE_ENABLED:
+            if settings.MEMCACHE_ENABLED and use_memcache_data:
                 try:
                     memcache_client.set('ionosphere_summary_list', ionosphere_summary_list, expire=600)
                     logger.info('%s :: set memcache ionosphere_summary_list key with DB results' % function_str)
@@ -8674,6 +9351,17 @@ def get_matched_motifs(
                     memcache_client.close()
                 except Exception as e:
                     dev_null = e
+        # @added 20240131 - Task #5250: Optimise ionosphere_backend.get_fp_matches
+        #                   Task #5248: Optimise ionosphere_functions.get_related
+        # Use fast caching in Redis
+        if ionosphere_summary_dict:
+            try:
+                redis_conn_decoded.hset('webapp.ionosphere_backend.ionosphere_summary_dict', mapping=ionosphere_summary_dict)
+                redis_conn_decoded.expire('webapp.ionosphere_backend.ionosphere_summary_dict', 900)
+                logger.info('get_fp_matches :: created Redis hash webapp.ionosphere_backend.ionosphere_summary_dict')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_fp_matches :: failed to hsetl webapp.ionosphere_backend.ionosphere_summary_dict, err: %s' % err)
 
     matched_motifs = {}
     metric_list = []
@@ -8841,7 +9529,7 @@ def get_matched_motif_id(fp_id, timestamp, index, size):
 
     except Exception as err:
         logger.error('error :: %s :: failed to get motifs_matched id and validated from the database for fp_id %s - %s' % (
-            function_str, (fp_id), err))
+            function_str, str(fp_id), err))
     if matched_motif_id:
         try:
             # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy

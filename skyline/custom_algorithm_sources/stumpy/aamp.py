@@ -6,8 +6,15 @@ import numpy as np
 from numba import njit, prange
 import numba
 
-from . import core, config
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+# modifications and additions from stumpy v1.13.0
+#from . import core, config
+from . import config, core
 
+# @added 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                   Task #5526: Build v5.0.0 and upgrade deps
+from .mparray import mparray
 
 @njit(
     # "(f8[:], f8[:], i8, b1[:], b1[:], f8, i8[:], i8, i8, i8, f8[:, :, :],"
@@ -60,7 +67,9 @@ def _compute_diagonal(
         `np.nan`/`np.inf` value (False)
 
     p : float
-        The p-norm to apply for computing the Minkowski distance.
+        The p-norm to apply for computing the Minkowski distance. Minkowski distance is
+        typically used with `p` being 1 or 2, which correspond to the Manhattan distance
+        and the Euclidean distance, respectively.
 
     diags : numpy.ndarray
         The diag of diagonals to process and compute
@@ -223,7 +232,9 @@ def _aamp(
         `np.nan`/`np.inf` value (False)
 
     p : float
-        The p-norm to apply for computing the Minkowski distance.
+        The p-norm to apply for computing the Minkowski distance. Minkowski distance is
+        typically used with `p` being 1 or 2, which correspond to the Manhattan distance
+        and the Euclidean distance, respectively.
 
     diags : numpy.ndarray
         The diag of diagonals to process and compute
@@ -354,7 +365,9 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
         to `False`. Default is `True`.
 
     p : float, default 2.0
-        The p-norm to apply for computing the Minkowski distance.
+        The p-norm to apply for computing the Minkowski distance. Minkowski distance is
+        typically used with `p` being 1 or 2, which correspond to the Manhattan distance
+        and the Euclidean distance, respectively.
 
     k : int, default 1
         The number of top `k` smallest distances used to construct the matrix profile.
@@ -375,6 +388,12 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
         equivalently, out[:, -2] and out[:, -1]) correspond to the top-1 left
         matrix profile indices and the top-1 right matrix profile indices, respectively.
 
+        For convenience, the matrix profile (distances) and matrix profile indices can
+        also be accessed via their corresponding named array attributes, `.P_` and
+        `.I_`,respectively. Similarly, the corresponding left matrix profile indices
+        and right matrix profile indices may also be accessed via the `.left_I_` and
+        `.right_I_` array attributes.
+
     Notes
     -----
     `arXiv:1901.05708 \
@@ -388,12 +407,17 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
         T_B = T_A.copy()
         ignore_trivial = True
 
-    T_A, T_A_subseq_isfinite, T_subseq_isconstant = core.preprocess_non_normalized(
-        T_A, m
-    )
-    T_B, T_B_subseq_isfinite, T_subseq_isconstant = core.preprocess_non_normalized(
-        T_B, m
-    )
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+#    T_A, T_A_subseq_isfinite, T_subseq_isconstant = core.preprocess_non_normalized(
+#        T_A, m
+#    )
+#    T_B, T_B_subseq_isfinite, T_subseq_isconstant = core.preprocess_non_normalized(
+#        T_B, m
+#    )
+
+    T_A, T_A_subseq_isfinite = core.preprocess_non_normalized(T_A, m)
+    T_B, T_B_subseq_isfinite = core.preprocess_non_normalized(T_B, m)
 
     if T_A.ndim != 1:  # pragma: no cover
         raise ValueError(f"T_A is {T_A.ndim}-dimensional and must be 1-dimensional. ")
@@ -431,5 +455,7 @@ def aamp(T_A, m, T_B=None, ignore_trivial=True, p=2.0, k=1):
     out[:, k:] = np.column_stack((I, IL, IR))
 
     core._check_P(out[:, 0])
-
-    return out
+# @modified 20241107 - Task #5535: Update custom_algorithm_sources.stumpy
+#                      Task #5526: Build v5.0.0 and upgrade deps
+#    return out
+    return mparray(out, m, k, config.STUMPY_EXCL_ZONE_DENOM)

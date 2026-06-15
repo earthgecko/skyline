@@ -13,6 +13,16 @@ import operator
 import copy
 
 import numpy as np
+
+# @added 20231210 - Task #5168: v4.1.0 - update dependencies
+# As of numpy 1.2.4 there is no attribute warnings in np.  Before that
+# np.warnings was the same as the stdlib warnings.  This breaks mass_ts.
+# https://github.com/scikit-learn/scikit-learn/pull/23654
+# 2023-12-10 16:26:11 :: 3926034 :: error :: inference :: 5320 mts.mass2_batch error: module 'numpy' has no attribute 'warnings'
+if np.__version__ >= '1.24':
+    import warnings
+    np.warnings = warnings
+
 import mass_ts as mts
 
 # import matplotlib.image as mpimg
@@ -67,42 +77,42 @@ try:
     if SERVER_METRIC_PATH == '.':
         SERVER_METRIC_PATH = ''
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % outer_err)
     SERVER_METRIC_PATH = ''
 try:
     SINGLE_MATCH = settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % outer_err)
     SINGLE_MATCH = True
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = 10
 
 context = 'ionosphere_inference'
@@ -195,7 +205,7 @@ def ionosphere_motif_inference(metric, timestamp):
             metric_timeseries_dir, labelled_metric_name, str(full_duration_in_hours))
 
     try:
-        metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, True)
+        metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, return_dict=True)
     except Exception as err:
         logger.error('error :: inference :: failed to load metric variables from check file - %s - %s' % (
             metric_vars_file, err))
@@ -506,6 +516,12 @@ def ionosphere_motif_inference(metric, timestamp):
                 # subsequence
                 max_y = max(batch_size_dataset)
                 min_y = min(batch_size_dataset)
+
+                # @added 20240326 - Ideas #5316: motif_annihilation learning
+                #                   Feature #4014: Ionosphere - inference
+                # In testing found that on lower value ranges more padding can
+                # be added
+
                 range_padding = ((max_y - min_y) / 100) * range_padding_percent
                 if min_y > 0 and (min_y - range_padding) > 0:
                     min_y_padded = min_y - range_padding
@@ -564,6 +580,11 @@ def ionosphere_motif_inference(metric, timestamp):
                                 str(use_top_matches), str(top_matches)))
 
                         start_mass2_batch = timer()
+                        # @modified 20240324 - Ideas #5316: motif_annihilation learning
+                        #                      Feature #4014: Ionosphere - inference
+                        # Added this comment because I can never remember what
+                        # index is returned the starting index or the end index.
+                        # Returns the starting index of the top matches
                         best_indices, best_dists = mts.mass2_batch(relate_dataset, batch_size_dataset, batch_size=batch_size, top_matches=use_top_matches)
                         end_mass2_batch = timer()
                         mass2_batch_times.append((end_mass2_batch - start_mass2_batch))
@@ -692,7 +713,18 @@ def ionosphere_motif_inference(metric, timestamp):
 
                 if not use_mass3:
                     if not current_best_indices[0]:
-                        continue
+
+                        # @modified 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                        #                      Feature #4014: Ionosphere - inference
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Allow for current_best_indices[0] == 0, which is probably an exact_match
+                        # as it was discovered that an exact match current_best_indices
+                        # could be like [0, 180, 360, 540]
+                        # 2024-01-05 10:08:35 :: 1106567 :: on_demand_motif_analysis :: current_best_indices for fp id 7277, current_best_indices: [0, 180, 360, 540]
+                        # continue
+                        if len(current_best_indices) == 0:
+                            continue
+    
                 if use_mass3 and not current_best_indices:
                     continue
 
@@ -1054,11 +1086,13 @@ def ionosphere_motif_inference(metric, timestamp):
                 matched_motifs[motif_id]['fp_motif_sequence'] = relate_timeseries
                 # @added 20210423 - Feature #4014: Ionosphere - inference
                 # Compute the area using the composite trapezoidal rule.
-                matched_motifs[motif_id]['motif_area'] = motif_area
-                matched_motifs[motif_id]['fp_motif_area'] = fp_motif_area
+                # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                # Coerce new strict np.float64 with numpy 2.2.3 to float
+                matched_motifs[motif_id]['motif_area'] = float(motif_area)
+                matched_motifs[motif_id]['fp_motif_area'] = float(fp_motif_area)
                 # @added 20210424 - Feature #4014: Ionosphere - inference
-                matched_motifs[motif_id]['area_percent_diff'] = percent_different
-                matched_motifs[motif_id]['max_area_percent_diff'] = motif_max_area_percent_diff
+                matched_motifs[motif_id]['area_percent_diff'] = float(percent_different)
+                matched_motifs[motif_id]['max_area_percent_diff'] = float(motif_max_area_percent_diff)
                 # @added 20210428 - Feature #4014: Ionosphere - inference
                 # Add time taken and fps checked
                 matched_motifs[motif_id]['fps_checked'] = len(list(set(fps_checked_for_motifs)))

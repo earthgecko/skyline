@@ -47,12 +47,48 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        "algorithm_parameters": {
-            "n_neighbors": 2,
-            "anomaly_window": 5,
-            "return_results": True,
-        }
+        custom_algorithm and algorithm itself.  For the pca custom algorithm
+        no specific algorithm_parameters are required apart from an empty dict
+        but the algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'threshold'`` (float): The threshold value.
+            The value for the threshold to use, >= to this value is anomalous.
+            Default is ``0.7``.
+        - ``'n_test'`` (int): Size of test sample.
+            The number of samples in the test data. Default is ``10``.
+        - ``'diffs'`` (int): Number of differences to calculate.
+            The number of differences to calculate. Default is ``1``.
+        - ``'lags'`` (int): Number of lags to calculate.
+            The number of lags to calculate. Default is ``3``.
+        - ``'smooth'`` (int): Number of data points used in rolling average for smoothing.
+            Default is ``3``.
+        - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'threshold': 0.7,
+                'n_test': 10,
+                'diffs': 1,
+                'lags': 3,
+                'smooth': 3,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -120,6 +156,19 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         if abs_features:
             df = abs(df)
         return df
+
+    def deduplicate_timeseries(timeseries):
+        """
+        Use a set to track unique (timestamp, value) pairs and deduplicate
+        items that are the same
+        """
+        seen = set()
+        deduplicated_timeseries = []
+        for ts, v in timeseries:
+            if (ts, v) not in seen:
+                seen.add((ts, v))
+                deduplicated_timeseries.append([ts, v])
+        return deduplicated_timeseries
 
     start = time()
 
@@ -210,6 +259,66 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     if debug_logging:
         current_logger.debug('debug :: running PCA on timeseries with %s datapoints' % str(len(timeseries)))
 
+    original_timeseries_len = len(timeseries)
+    timestamps = [t for t, _ in timeseries]
+    timestamps_set = set(timestamps)
+    if len(timestamps) > len(timestamps_set):
+        try:
+            timeseries = deduplicate_timeseries(timeseries)
+            if debug_logging:
+                current_logger.debug('debug :: pca deduplicated timeseries from on %s data points to %s data points' % (
+                    str(original_timeseries_len), str(len(timeseries))))
+        except Exception as err:
+            record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            if debug_print:
+                print('error:', traceback.format_exc())
+            if debug_logging:
+                current_logger.debug('debug :: error on pca deduplicate_timeseries, err: %s' % err)
+                current_logger.debug(traceback.format_exc())
+
+    # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Check that the data suits the PCA algorithm and if not do not run and
+    # fail/error with 
+    # /opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/sklearn/decomposition/_pca.py:653: RuntimeWarning: invalid value encountered in divide
+    #    explained_variance_ratio_ = explained_variance_ / total_var
+    def check_pca_suitability(data, dataset='train'):
+        reason = 'ok'
+        suitable = True
+        try:
+            variances = np.var(data, axis=0)
+            if np.any(variances == 0):
+                suitable = False
+                reason = '%s has features with zero variance, which are unsuitable for PCA' % dataset
+                if debug_logging:
+                    current_logger.info('warning :: %s' % reason)
+            if suitable:
+                # Low variability threshold
+                if np.all(variances < 1e-5):
+                    suitable = False
+                    reason = '%s has very low variance overall, which may make PCA ineffective' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+            if suitable:
+                if data.shape[0] < data.shape[1]:
+                    suitable = False
+                    reason = '%s has more features than samples, which may not be ideal for PCA' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+            if suitable:
+                # Low correlation threshold
+                corr_matrix = pd.DataFrame(data).corr()
+                if corr_matrix.abs().values.max() < 0.1:
+                    suitable = False
+                    reason = '%s has low correlation between features, which may reduce PCA effectiveness' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability failed on %s, err: %s' % (
+                    dataset, err))
+        return suitable, reason
+
     try:
         # Use the last n_test data points to train on
         n_train = len(timeseries) - n_test
@@ -225,10 +334,63 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         df = df.set_index(datetime_index)
         df.drop('date', axis=1, inplace=True)
         df_train = df.head(n_train)
+
+        # @added 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+#        reduction = diffs_n + max(smooth_n - 1, 0) + lags_n
+#        df_train = df_train.iloc[reduction:]
+
         # preprocess or 'featurize' the training data
         train_data = pca_preprocess_df(df_train, lags_n, diffs_n, smooth_n)
+
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        # Check that the data suits the PCA algorithm and if not do not run and
+        check_dataset = 'train_data'
+        suitable_for_pca = True
+        reason = 'OK'
+        try:
+            suitable_for_pca, reason = check_pca_suitability(train_data, dataset=check_dataset)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability on %s, err: %s' % (
+                    check_dataset, err))
+        if not suitable_for_pca:
+            if debug_logging:
+                current_logger.debug('debug :: not suitable for pca returning, took %.6f seconds' % (time() - start))
+            results['anomalies'] = {}
+            results['error'] = reason
+            if return_results:
+                return (None, None, results)
+            return (None, None)
+
+        # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
         df_anomalous = df.tail((len(timeseries) - len(train_data)))
+#        df_anomalous_start = len(df) - len(train_data) - reduction  # Starting point for df_anomalous
+#        df_anomalous = df.iloc[df_anomalous_start:]  # Tail slice after train_data
+
         anomalous_data = pca_preprocess_df(df_anomalous, lags_n, diffs_n, smooth_n)
+
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        # Check that the data suits the PCA algorithm and if not do not run and
+        check_dataset = 'anomalous_data'
+        suitable_for_pca = True
+        reason = 'OK'
+        try:
+            suitable_for_pca, reason = check_pca_suitability(anomalous_data, dataset=check_dataset)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability on %s, err: %s' % (
+                    check_dataset, err))
+        if not suitable_for_pca:
+            if debug_logging:
+                current_logger.debug('debug :: not suitable for pca returning, took %.6f seconds' % (time() - start))
+            results['anomalies'] = {}
+            results['error'] = reason
+            if return_results:
+                return (None, None, results)
+            return (None, None)
+
         # build PCA model
         n_pca = PCA(n_components=2)
         # scale based on training data
@@ -249,7 +411,93 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         # normalize based on train data scores
         df_scores = (df_scores - df_train_scores_min) / (df_train_scores_max - df_train_scores_min)
         df_anomalies = df.copy()
-        df_anomalies['anomaly_score'] = pd.concat([df_train_scores, df_scores])
+
+        if debug_logging:
+            # Find duplicated indices in each DataFrame
+            duplicated_train_indices = df_train_scores.index[df_train_scores.index.duplicated()]
+            duplicated_score_indices = df_scores.index[df_scores.index.duplicated()]
+            duplicated_anomalies_indices = df_anomalies.index[df_anomalies.index.duplicated()]
+
+            duplicated_df_train_scores = df_train_scores[df_train_scores.index.duplicated(keep=False)]
+            duplicated_df_scores = df_scores[df_scores.index.duplicated(keep=False)]
+            duplicated_df_anomalies = df_anomalies[df_anomalies.index.duplicated(keep=False)]
+
+            log_data = {
+                'version': 20,
+                'n_train': n_train, 'len(df)': len(df), 'len(df_train)': len(df_train),
+                'len(train_data)': len(train_data), 'len(df_anomalous)': len(df_anomalous),
+                'len(anomalous_data)': len(anomalous_data), 'len(train_scores)': len(train_scores),
+                'len(df_train_scores)': len(df_train_scores),
+                'len(df_scores)': len(df_scores),
+                'Duplicates in df_anomalies index': df_anomalies.index.duplicated().any(),
+                'Duplicates in df_train_scores index': df_train_scores.index.duplicated().any(),
+                'Duplicates in df_scores index': df_scores.index.duplicated().any(),
+#                'duplicated_train_indices': duplicated_train_indices,
+#                'duplicated_score_indices': duplicated_score_indices,
+#                'duplicated_anomalies_indices': duplicated_anomalies_indices,
+#                'duplicated_df_train_scores': df_train_scores[df_train_scores.index.duplicated(keep=False)],
+#                'duplicated_df_scores': df_scores[df_scores.index.duplicated(keep=False)],
+#                'duplicated_df_anomalies': df_anomalies[df_anomalies.index.duplicated(keep=False)],
+#                'duplicated_df_train_scores': duplicated_df_train_scores.to_dict(orient="records"),
+#                'duplicated_df_scores': duplicated_df_scores.to_dict(orient="records"),
+#                'duplicated_df_anomalies': duplicated_df_anomalies.to_dict(orient="records"),
+                'duplicated_df_train_scores': str(duplicated_df_train_scores),
+                'duplicated_df_scores': str(duplicated_df_scores),
+                'duplicated_df_anomalies': str(duplicated_df_anomalies),
+            }
+            current_logger.debug('debug :: pca - data attributes: %s' % str(log_data))
+
+        # @added 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+#        df_anomalies = df_anomalies[~df_anomalies.index.duplicated()]
+#        df_train_scores = df_train_scores[~df_train_scores.index.duplicated()]
+#        df_scores = df_scores[~df_scores.index.duplicated()]
+
+        # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+        # Testing possible difference between pandas 2.0.3 and 2.2.3 in terms
+        # over stricter handling of things with concat, in which the following
+        # errors are being reported occassionally
+        # File "/opt/python_virtualenv/projects/skyline/lib/python3.10/site-packages/pandas/core/indexes/base.py", line 4429, in reindex
+        #   raise ValueError("cannot reindex on an axis with duplicate labels")
+        # ValueError: cannot reindex on an axis with duplicate labels
+        reindex_data = False
+        try:
+            # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+            df_anomalies['anomaly_score'] = pd.concat([df_train_scores, df_scores])
+            #df_anomalies['anomaly_score'] = pd.concat([df_train_scores, df_scores]).reindex(df_anomalies.index).values
+        except ValueError:
+            reindex_data = True
+            if debug_logging:
+                current_logger.error(traceback.format_exc())
+                current_logger.info('warning - ValueError encountered on pca from pd.concat([df_train_scores, df_scores])')
+        if reindex_data:
+            if debug_logging:
+                current_logger.debug('debug :: pca - resetting indexes to avoid duplicates')
+            try:
+                use_first_method = False
+                if use_first_method:
+                    # Reset indexes to avoid duplicates
+                    df_train_scores_reset = df_train_scores.reset_index(drop=True)
+                    df_scores_reset = df_scores.reset_index(drop=True)
+                    # Concatenate the scores with a continuous index
+                    concatenated_scores = pd.concat([df_train_scores_reset, df_scores_reset], ignore_index=True)
+                    # Reset index of df_anomalies to align with concatenated_scores
+                    df_anomalies = df_anomalies.reset_index(drop=True)
+                else:
+                    # concatenated_scores = pd.concat([df_train_scores, df_scores]).reset_index(drop=True)
+                    df_train_scores = df_train_scores[~df_train_scores.index.duplicated()]
+                    df_scores = df_scores[~df_scores.index.duplicated()]
+                    concatenated_scores = pd.concat([df_train_scores, df_scores], ignore_index=True)
+
+                # Assign the anomaly scores
+                df_anomalies['anomaly_score'] = concatenated_scores['anomaly_score'].values
+            except Exception as err:
+                record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+                if debug_print:
+                    print('error:', traceback.format_exc())
+                if debug_logging:
+                    current_logger.debug('debug :: error - on pca reindexing data, err: %s' % err)
+                    current_logger.debug(traceback.format_exc())
+
         pca_scores = df_anomalies['anomaly_score'].tolist()
 
         # Coerce scores to floats, removing nans and replace with 0 so they are
@@ -286,6 +534,7 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             'anomalyScore_list': anomalyScore_list,
             'scores': pca_scores,
             'threshold': threshold,
+            'algorithm_parameters': algorithm_parameters,
         }
         if debug_print:
             print('ran pca OK in %.6f seconds' % (time() - start))

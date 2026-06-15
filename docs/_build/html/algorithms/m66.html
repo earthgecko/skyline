@@ -1,28 +1,28 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>m66 &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>m66 &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Mirage" href="../mirage.html" />
-    <link rel="prev" title="macd" href="macd.html" /> 
+    <link rel="next" title="sigma" href="sigma.html" />
+    <link rel="prev" title="matrixprofile" href="matrixprofile.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -64,8 +63,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Algorithms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="core-algorithms.html">Core algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matrixprofile.html">matrixprofile</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">m66</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#m66-tcpdbench-results">m66 TCPDBench results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-m66-with-tcpdbench">Testing m66 with TCPDBench</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-datasets-on-centos-8">Build datasets on CentOS 8</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#results">results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sigma.html">sigma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
@@ -76,7 +86,9 @@
 <li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lad.html">LAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="probabilistic_forecasts_generalized_pareto_distribution_ets.html">probabilistic_forecasts_generalized_pareto_distribution_ets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grafana_promql_anomaly_detection.html">grafana_promql_anomaly_detection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -96,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -104,7 +117,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -142,23 +155,782 @@
            <div itemprop="articleBody">
              
   <section id="m66">
-<h1>m66<a class="headerlink" href="#m66" title="Permalink to this heading"></a></h1>
-<p>THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT</p>
+<h1>m66<a class="headerlink" href="#m66" title="Link to this heading"></a></h1>
+<p>A time series data points are anomalous if the 6th median is 6 standard
+deviations (six-sigma) from the time series 6th median standard deviation and
+persists for x_windows, where <cite>x_windows = int(window / 2)</cite>.</p>
+<p>This algorithm finds <strong>SIGNIFICANT</strong> changepoints in a time series, similar to
+PELT and Bayesian Online Changepoint Detection, however it is more robust to
+instantaneous outliers and more conditionally selective of changepoints.</p>
+<p>See the docstrings - <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.m66">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.m66</a></p>
 <p>See the custom_algorithm source - <a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/m66.py">https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/m66.py</a></p>
+<section id="m66-tcpdbench-results">
+<h2>m66 TCPDBench results<a class="headerlink" href="#m66-tcpdbench-results" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://github.com/alan-turing-institute/TCPDBench">https://github.com/alan-turing-institute/TCPDBench</a></p>
+<p>Seeing as there is a changepoint algorithm benchmarking app might as well test
+it.  It would probably score low seeing as it is not detecting <strong>all</strong>
+changepoints by design, only significant changepoints.  But it scores but than
+expected, it is places 6th overall.</p>
+<p><strong>Heatmap</strong></p>
+<img alt="../_images/m66.with.TCPDBench.results.heatmap.greens.png" src="../_images/m66.with.TCPDBench.results.heatmap.greens.png" />
+<p><strong>Best highlighted</strong></p>
+<img alt="../_images/m66.with.TCPDBench.results.highlight.blue.png" src="../_images/m66.with.TCPDBench.results.highlight.blue.png" />
+<p><strong>Top and bottom 3</strong></p>
+<img alt="../_images/m66.with.TCPDBench.results.top.bottom.3.png" src="../_images/m66.with.TCPDBench.results.top.bottom.3.png" />
+<p><strong>Results and rank</strong></p>
+<img alt="../_images/m66.with.TCPDBench.results.heatmap.rank.rank.png" src="../_images/m66.with.TCPDBench.results.heatmap.rank.rank.png" />
+</section>
+<section id="testing-m66-with-tcpdbench">
+<h2>Testing m66 with TCPDBench<a class="headerlink" href="#testing-m66-with-tcpdbench" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>“If you want to climb the mountain, you most do all the hard things and climb it.”</p>
+<p class="attribution">—Kukuczka</p>
+</div></blockquote>
+<p>Apart from some lacking docs and deps bugs with TCPDBench, got there in the end.</p>
+<section id="build-datasets-on-centos-8">
+<h3>Build datasets on CentOS 8<a class="headerlink" href="#build-datasets-on-centos-8" title="Link to this heading"></a></h3>
+<p>Set up TCPD and TCPDBench on a CentOS 8 server</p>
+<p><a class="reference external" href="https://github.com/alan-turing-institute/TCPD">https://github.com/alan-turing-institute/TCPD</a></p>
+<p><a class="reference external" href="https://github.com/alan-turing-institute/TCPDBench">https://github.com/alan-turing-institute/TCPDBench</a></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum<span class="w"> </span>install<span class="w"> </span>texlive
+yum<span class="w"> </span>install<span class="w"> </span>latekmk
+
+<span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.11&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;TCPDBench-py3811&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
+
+<span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># dataset</span>
+<span class="c1"># As per https://github.com/alan-turing-institute/TCPD#using-the-command-line</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alan-turing-institute/TCPD
+<span class="nb">cd</span><span class="w"> </span>TCPD
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+Installing<span class="w"> </span>collected<span class="w"> </span>packages:<span class="w"> </span>six,<span class="w"> </span>urllib3,<span class="w"> </span>pytz,<span class="w"> </span>python-dateutil,<span class="w"> </span>numpy,<span class="w"> </span>idna,<span class="w"> </span>charset-normalizer,<span class="w"> </span>certifi,<span class="w"> </span>soupsieve,<span class="w"> </span>requests,<span class="w"> </span>regex,<span class="w"> </span>pyrsistent,<span class="w"> </span>pandas,<span class="w"> </span>multitasking,<span class="w"> </span>lxml,<span class="w"> </span>et-xmlfile,<span class="w"> </span>chardet,<span class="w"> </span>attrs,<span class="w"> </span>yfinance,<span class="w"> </span>Pillow,<span class="w"> </span>openpyxl,<span class="w"> </span>jsonschema,<span class="w"> </span>diff-match-patch,<span class="w"> </span>clevercsv,<span class="w"> </span>beautifulsoup4
+Successfully<span class="w"> </span>installed<span class="w"> </span>Pillow-8.3.1<span class="w"> </span>attrs-21.2.0<span class="w"> </span>beautifulsoup4-4.9.3<span class="w"> </span>certifi-2021.5.30<span class="w"> </span>chardet-4.0.0<span class="w"> </span>charset-normalizer-2.0.4<span class="w"> </span>clevercsv-0.7.0<span class="w"> </span>diff-match-patch-20200713<span class="w"> </span>et-xmlfile-1.1.0<span class="w"> </span>idna-3.2<span class="w"> </span>jsonschema-3.2.0<span class="w"> </span>lxml-4.6.3<span class="w"> </span>multitasking-0.0.9<span class="w"> </span>numpy-1.21.1<span class="w"> </span>openpyxl-3.0.7<span class="w"> </span>pandas-1.3.1<span class="w"> </span>pyrsistent-0.18.0<span class="w"> </span>python-dateutil-2.8.2<span class="w"> </span>pytz-2021.1<span class="w"> </span>regex-2021.8.3<span class="w"> </span>requests-2.26.0<span class="w"> </span>six-1.16.0<span class="w"> </span>soupsieve-2.2.1<span class="w"> </span>urllib3-1.26.6<span class="w"> </span>yfinance-0.1.63
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span>
+
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>list
+
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>list
+Package<span class="w">            </span>Version
+------------------<span class="w"> </span>---------
+attrs<span class="w">              </span><span class="m">21</span>.2.0
+beautifulsoup4<span class="w">     </span><span class="m">4</span>.9.3
+certifi<span class="w">            </span><span class="m">2021</span>.5.30
+chardet<span class="w">            </span><span class="m">4</span>.0.0
+charset-normalizer<span class="w"> </span><span class="m">2</span>.0.4
+clevercsv<span class="w">          </span><span class="m">0</span>.7.0
+diff-match-patch<span class="w">   </span><span class="m">20200713</span>
+et-xmlfile<span class="w">         </span><span class="m">1</span>.1.0
+idna<span class="w">               </span><span class="m">3</span>.2
+jsonschema<span class="w">         </span><span class="m">3</span>.2.0
+lxml<span class="w">               </span><span class="m">4</span>.6.3
+multitasking<span class="w">       </span><span class="m">0</span>.0.9
+numpy<span class="w">              </span><span class="m">1</span>.21.1
+openpyxl<span class="w">           </span><span class="m">3</span>.0.7
+pandas<span class="w">             </span><span class="m">1</span>.3.1
+Pillow<span class="w">             </span><span class="m">8</span>.3.1
+pip<span class="w">                </span><span class="m">21</span>.2.4
+pyrsistent<span class="w">         </span><span class="m">0</span>.18.0
+python-dateutil<span class="w">    </span><span class="m">2</span>.8.2
+pytz<span class="w">               </span><span class="m">2021</span>.1
+regex<span class="w">              </span><span class="m">2021</span>.8.3
+requests<span class="w">           </span><span class="m">2</span>.26.0
+setuptools<span class="w">         </span><span class="m">57</span>.4.0
+six<span class="w">                </span><span class="m">1</span>.16.0
+soupsieve<span class="w">          </span><span class="m">2</span>.2.1
+urllib3<span class="w">            </span><span class="m">1</span>.26.6
+wheel<span class="w">              </span><span class="m">0</span>.37.0
+yfinance<span class="w">           </span><span class="m">0</span>.1.63
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span>
+</pre></div>
+</div>
+<p>Build datasets</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>build_tcpd.py<span class="w"> </span>-v<span class="w"> </span>collect
+
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>build_tcpd.py<span class="w"> </span>-v<span class="w"> </span>collect
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>apple<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>bee_waggle_6<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>bitcoin<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>iceland_tourism<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>measles<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>occupancy<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>ratner_stock<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>robocalls<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>scanline_126007<span class="w"> </span>...<span class="w"> </span>ok
+Running<span class="w"> </span>collect<span class="w"> </span>action<span class="w"> </span><span class="k">for</span><span class="w"> </span>dataset:<span class="w"> </span>scanline_42049<span class="w"> </span>...<span class="w"> </span>ok
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span>
+</pre></div>
+</div>
+<p>Check datasets</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>./utils/check_checksums.py<span class="w"> </span>-v<span class="w"> </span>-c<span class="w"> </span>./checksums.json<span class="w"> </span>-d<span class="w"> </span>./datasets
+
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>./utils/check_checksums.py<span class="w"> </span>-v<span class="w"> </span>-c<span class="w"> </span>./checksums.json<span class="w"> </span>-d<span class="w"> </span>./datasets
+Checking<span class="w"> </span>apple.json
+Checking<span class="w"> </span>bank.json
+Checking<span class="w"> </span>bee_waggle_6.json
+Checking<span class="w"> </span>bitcoin.json
+Checking<span class="w"> </span>brent_spot.json
+Checking<span class="w"> </span>businv.json
+Checking<span class="w"> </span>centralia.json
+Checking<span class="w"> </span>children_per_woman.json
+Checking<span class="w"> </span>co2_canada.json
+Checking<span class="w"> </span>construction.json
+Checking<span class="w"> </span>debt_ireland.json
+Checking<span class="w"> </span>gdp_argentina.json
+Checking<span class="w"> </span>gdp_croatia.json
+Checking<span class="w"> </span>gdp_iran.json
+Checking<span class="w"> </span>gdp_japan.json
+Checking<span class="w"> </span>global_co2.json
+Checking<span class="w"> </span>homeruns.json
+Checking<span class="w"> </span>iceland_tourism.json
+Checking<span class="w"> </span>jfk_passengers.json
+Checking<span class="w"> </span>lga_passengers.json
+Checking<span class="w"> </span>measles.json
+Checking<span class="w"> </span>nile.json
+Checking<span class="w"> </span>occupancy.json
+Checking<span class="w"> </span>ozone.json
+Checking<span class="w"> </span>quality_control_1.json
+Checking<span class="w"> </span>quality_control_2.json
+Checking<span class="w"> </span>quality_control_3.json
+Checking<span class="w"> </span>quality_control_4.json
+Checking<span class="w"> </span>quality_control_5.json
+Checking<span class="w"> </span>rail_lines.json
+Checking<span class="w"> </span>ratner_stock.json
+Checking<span class="w"> </span>robocalls.json
+Checking<span class="w"> </span>run_log.json
+Checking<span class="w"> </span>scanline_126007.json
+Checking<span class="w"> </span>scanline_42049.json
+Checking<span class="w"> </span>seatbelts.json
+Checking<span class="w"> </span>shanghai_license.json
+Checking<span class="w"> </span>uk_coal_employ.json
+Checking<span class="w"> </span>unemployment_nl.json
+Checking<span class="w"> </span>us_population.json
+Checking<span class="w"> </span>usd_isk.json
+Checking<span class="w"> </span>well_log.json
+All<span class="w"> </span>ok.
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPD<span class="o">]</span>
+</pre></div>
+</div>
+<p>Set up TCPDBench</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/
+<span class="nb">source</span><span class="w"> </span>bin/activate
+<span class="c1"># As per https://github.com/alan-turing-institute/TCPDBench#getting-started</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/alan-turing-institute/TCPDBench
+<span class="nb">cd</span><span class="w"> </span>TCPDBench
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>./analysis/requirements.txt
+
+Installing<span class="w"> </span>collected<span class="w"> </span>packages:<span class="w"> </span>sortedcontainers,<span class="w"> </span>intervaltree,<span class="w"> </span>termcolor,<span class="w"> </span>tabulate,<span class="w"> </span>scipy,<span class="w"> </span>labella,<span class="w"> </span>colorama
+Successfully<span class="w"> </span>installed<span class="w"> </span>colorama-0.4.4<span class="w"> </span>intervaltree-3.1.0<span class="w"> </span>labella-0.9.8<span class="w"> </span>scipy-1.7.1<span class="w"> </span>sortedcontainers-2.4.0<span class="w"> </span>tabulate-0.8.9<span class="w"> </span>termcolor-1.1.0
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPDBench<span class="o">]</span>
+</pre></div>
+</div>
+<p>Install m66 requirement</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>bottleneck
+
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPDBench-py3811<span class="o">]</span><span class="w"> </span>bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>bottleneck
+Collecting<span class="w"> </span>bottleneck
+Using<span class="w"> </span>cached<span class="w"> </span>Bottleneck-1.3.2-cp38-cp38-linux_x86_64.whl
+Requirement<span class="w"> </span>already<span class="w"> </span>satisfied:<span class="w"> </span>numpy<span class="w"> </span><span class="k">in</span><span class="w"> </span>./lib/python3.8/site-packages<span class="w"> </span><span class="o">(</span>from<span class="w"> </span>bottleneck<span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="m">1</span>.21.1<span class="o">)</span>
+Installing<span class="w"> </span>collected<span class="w"> </span>packages:<span class="w"> </span>bottleneck
+Successfully<span class="w"> </span>installed<span class="w"> </span>bottleneck-1.3.2
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPDBench-py3811<span class="o">]</span>
+</pre></div>
+</div>
+<p>Errors on CentOS 8</p>
+<p>Latex / texlive error. And seemingly no texlive-standalone package on CentOS 8 :(</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/TCPDBench
+make<span class="w"> </span>results
+...
+...
+python<span class="w"> </span>./analysis/scripts/rank_plots.py<span class="w"> </span>-i<span class="w"> </span>analysis/output/tables/best_cover_uni_full.json<span class="w"> </span>-o<span class="w"> </span>analysis/output/rankplots/rankplot_best_cover_uni.tex<span class="w"> </span>-b<span class="w"> </span>max<span class="w"> </span>--type<span class="w"> </span>best
+
+Warning:<span class="w"> </span>Filtering<span class="w"> </span>out<span class="w"> </span>RBOCPDMS<span class="w"> </span>due<span class="w"> </span>to<span class="w"> </span>insufficient<span class="w"> </span>results.
+
+Latexmk:<span class="w"> </span>This<span class="w"> </span>is<span class="w"> </span>Latexmk,<span class="w"> </span>John<span class="w"> </span>Collins,<span class="w"> </span><span class="m">18</span><span class="w"> </span>June<span class="w"> </span><span class="m">2019</span>,<span class="w"> </span>version:<span class="w"> </span><span class="m">4</span>.65.
+Rule<span class="w"> </span><span class="s1">&#39;pdflatex&#39;</span>:<span class="w"> </span>The<span class="w"> </span>following<span class="w"> </span>rules<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>subrules<span class="w"> </span>became<span class="w"> </span>out-of-date:
+<span class="w">    </span><span class="s1">&#39;pdflatex&#39;</span>
+------------
+Run<span class="w"> </span>number<span class="w"> </span><span class="m">1</span><span class="w"> </span>of<span class="w"> </span>rule<span class="w"> </span><span class="s1">&#39;pdflatex&#39;</span>
+------------
+------------
+Running<span class="w"> </span><span class="s1">&#39;pdflatex  --interaction=nonstopmode -recorder -output-directory=&quot;/tmp/tmp16cu66k5&quot;  &quot;/tmp/tmp16cu66k5/labella_text.tex&quot;&#39;</span>
+------------
+Latexmk:<span class="w"> </span>applying<span class="w"> </span>rule<span class="w"> </span><span class="s1">&#39;pdflatex&#39;</span>...
+This<span class="w"> </span>is<span class="w"> </span>pdfTeX,<span class="w"> </span>Version<span class="w"> </span><span class="m">3</span>.14159265-2.6-1.40.19<span class="w"> </span><span class="o">(</span>TeX<span class="w"> </span>Live<span class="w"> </span><span class="m">2018</span><span class="o">)</span><span class="w"> </span><span class="o">(</span>preloaded<span class="w"> </span><span class="nv">format</span><span class="o">=</span>pdflatex<span class="o">)</span>
+restricted<span class="w"> </span><span class="se">\w</span>rite18<span class="w"> </span>enabled.
+entering<span class="w"> </span>extended<span class="w"> </span>mode
+<span class="o">(</span>/tmp/tmp16cu66k5/labella_text.tex
+LaTeX2e<span class="w"> </span>&lt;<span class="m">2017</span>-04-15&gt;
+Babel<span class="w"> </span>&lt;<span class="m">3</span>.17&gt;<span class="w"> </span>and<span class="w"> </span>hyphenation<span class="w"> </span>patterns<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="m">3</span><span class="w"> </span>language<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>loaded.
+
+!<span class="w"> </span>LaTeX<span class="w"> </span>Error:<span class="w"> </span>File<span class="w"> </span><span class="sb">`</span>standalone.cls<span class="s1">&#39; not found.</span>
+
+<span class="s1">Type X to quit or &lt;RETURN&gt; to proceed,</span>
+<span class="s1">or enter new name. (Default extension: cls)</span>
+
+<span class="s1">Enter file name:</span>
+<span class="s1">! Emergency stop.</span>
+<span class="s1">&lt;read *&gt;</span>
+
+<span class="s1">l.3 \begin</span>
+<span class="s1">        {document}^^M</span>
+<span class="s1">!  ==&gt; Fatal error occurred, no output PDF file produced!</span>
+<span class="s1">Transcript written on /tmp/tmp16cu66k5/labella_text.log.</span>
+<span class="s1">Latexmk: Missing input file: &#39;</span>standalone.cls<span class="s1">&#39; from line</span>
+<span class="s1">&#39;</span>!<span class="w"> </span>LaTeX<span class="w"> </span>Error:<span class="w"> </span>File<span class="w"> </span><span class="sb">`</span>standalone.cls<span class="s1">&#39; not found.&#39;</span>
+Collected<span class="w"> </span>error<span class="w"> </span>summary<span class="w"> </span><span class="o">(</span>may<span class="w"> </span>duplicate<span class="w"> </span>other<span class="w"> </span>messages<span class="o">)</span>:
+pdflatex:<span class="w"> </span>Command<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;pdflatex&#39;</span><span class="w"> </span>gave<span class="w"> </span><span class="k">return</span><span class="w"> </span>code<span class="w"> </span><span class="m">1</span>
+<span class="w">    </span>Refer<span class="w"> </span>to<span class="w"> </span><span class="s1">&#39;/tmp/tmp16cu66k5/labella_text.log&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>details
+Latexmk:<span class="w"> </span>Use<span class="w"> </span>the<span class="w"> </span>-f<span class="w"> </span>option<span class="w"> </span>to<span class="w"> </span>force<span class="w"> </span><span class="nb">complete</span><span class="w"> </span>processing,
+unless<span class="w"> </span>error<span class="w"> </span>was<span class="w"> </span>exceeding<span class="w"> </span>maximum<span class="w"> </span>runs,<span class="w"> </span>or<span class="w"> </span>warnings<span class="w"> </span>treated<span class="w"> </span>as<span class="w"> </span>errors.
+<span class="o">===</span><span class="w"> </span>TeX<span class="w"> </span>engine<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;pdfTeX&#39;</span>
+Latexmk:<span class="w"> </span>Errors,<span class="w"> </span>so<span class="w"> </span>I<span class="w"> </span>did<span class="w"> </span>not<span class="w"> </span><span class="nb">complete</span><span class="w"> </span>making<span class="w"> </span>targets
+
+Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </span>recent<span class="w"> </span>call<span class="w"> </span>last<span class="o">)</span>:
+File<span class="w"> </span><span class="s2">&quot;./analysis/scripts/rank_plots.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">151</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>&lt;module&gt;
+<span class="w">    </span>main<span class="o">()</span>
+File<span class="w"> </span><span class="s2">&quot;./analysis/scripts/rank_plots.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">145</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>main
+<span class="w">    </span>make_rank_plot<span class="o">(</span>
+File<span class="w"> </span><span class="s2">&quot;./analysis/scripts/rank_plots.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">90</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>make_rank_plot
+<span class="w">    </span><span class="nv">tl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>TimelineTex<span class="o">(</span>plot_data,<span class="w"> </span><span class="nv">options</span><span class="o">=</span>options<span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/timeline.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">509</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>__init__
+<span class="w">    </span>super<span class="o">()</span>.__init__<span class="o">(</span>items,<span class="w"> </span><span class="nv">options</span><span class="o">=</span>options,<span class="w"> </span><span class="nv">output_mode</span><span class="o">=</span><span class="s2">&quot;tex&quot;</span><span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/timeline.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">145</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>__init__
+<span class="w">    </span>self.items<span class="w"> </span><span class="o">=</span><span class="w"> </span>self.parse_items<span class="o">(</span>dicts,<span class="w"> </span><span class="nv">output_mode</span><span class="o">=</span>output_mode<span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/timeline.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">179</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>parse_items
+<span class="w">    </span><span class="nv">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>Item<span class="o">(</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/timeline.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">97</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>__init__
+<span class="w">    </span>self.width,<span class="w"> </span>self.height<span class="w"> </span><span class="o">=</span><span class="w"> </span>self.get_text_dimensions<span class="o">()</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/timeline.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">107</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>get_text_dimensions
+<span class="w">    </span>width,<span class="w"> </span><span class="nv">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>text_dimensions<span class="o">(</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/tex.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">139</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>text_dimensions
+<span class="w">    </span>width,<span class="w"> </span><span class="nv">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>get_latex_dims<span class="o">(</span>tex,<span class="w"> </span><span class="nv">silent</span><span class="o">=</span>silent,
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/tex.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">106</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>get_latex_dims
+<span class="w">    </span>compile_latex<span class="o">(</span>fname,<span class="w"> </span>tmpdirname,<span class="w"> </span>latexmk_options,<span class="w"> </span><span class="nv">silent</span><span class="o">=</span>silent<span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/tex.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">94</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>compile_latex
+<span class="w">    </span>raise<span class="w"> </span><span class="o">(</span>e<span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/TCPDBench-py3811/lib/python3.8/site-packages/labella/tex.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">89</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>compile_latex
+<span class="w">    </span><span class="nv">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>subprocess.check_output<span class="o">(</span>command,<span class="w"> </span><span class="nv">stderr</span><span class="o">=</span>subprocess.STDOUT<span class="o">)</span>
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/versions/3.8.11/lib/python3.8/subprocess.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">415</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>check_output
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>run<span class="o">(</span>*popenargs,<span class="w"> </span><span class="nv">stdout</span><span class="o">=</span>PIPE,<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>timeout,<span class="w"> </span><span class="nv">check</span><span class="o">=</span>True,
+File<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/versions/3.8.11/lib/python3.8/subprocess.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">516</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>run
+<span class="w">    </span>raise<span class="w"> </span>CalledProcessError<span class="o">(</span>retcode,<span class="w"> </span>process.args,
+subprocess.CalledProcessError:<span class="w"> </span>Command<span class="w"> </span><span class="s1">&#39;[&#39;</span>latexmk<span class="s1">&#39;, &#39;</span>--pdf<span class="s1">&#39;, &#39;</span>--outdir<span class="o">=</span>/tmp/tmp16cu66k5<span class="s1">&#39;, &#39;</span>--interaction<span class="o">=</span>nonstopmode<span class="s1">&#39;, &#39;</span>/tmp/tmp16cu66k5/labella_text.tex<span class="s1">&#39;]&#39;</span><span class="w"> </span>returned<span class="w"> </span>non-zero<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>status<span class="w"> </span><span class="m">12</span>.
+make:<span class="w"> </span>***<span class="w"> </span><span class="o">[</span>Makefile:226:<span class="w"> </span>analysis/output/rankplots/rankplot_best_cover_uni.tex<span class="o">]</span><span class="w"> </span>Error<span class="w"> </span><span class="m">1</span>
+<span class="o">(</span>TCPDBench-py3811<span class="o">)</span><span class="w"> </span><span class="o">[</span>root@server<span class="w"> </span>TCPDBench<span class="o">]</span>
+</pre></div>
+</div>
+<p>Needs latex so needs to be done local.</p>
+<p>Trying POCing on Ubuntu 14.04 laptop as CentOS 8 has no texlive-standalone</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.6&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;TCPDBench-py386&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
+
+<span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># dataset</span>
+<span class="c1"># As per https://github.com/alan-turing-institute/TCPD#using-the-command-line</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alan-turing-institute/TCPD
+<span class="nb">cd</span><span class="w"> </span>TCPD
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+<span class="c1"># Self signed ssl cert errors</span>
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>build_tcpd.py<span class="w"> </span>-v<span class="w"> </span>collect
+
+<span class="c1"># (TCPDBench-py386) gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPD$ /opt/python_virtualenv/projects/$PROJECT/bin/&quot;python${PYTHON_MAJOR_VERSION}&quot; build_tcpd.py                                                           -v collect</span>
+<span class="c1"># Running collect action for dataset: apple ... ok</span>
+<span class="c1"># Running collect action for dataset: bee_waggle_6 ... Error occurred (URLError(SSLCertVerificationError(1, &#39;[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self                                                           signed certificate in certificate chain (_ssl.c:1124)&#39;))) when trying to download zip. Retrying in 5 seconds &lt;_io.TextIOWrapper name=&#39;&lt;stderr&gt;&#39; mode=&#39;w&#39; encoding=&#39;utf-8&#39;&gt;</span>
+<span class="c1"># Error occurred (URLError(SSLCertVerificationError(1, &#39;[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate in certificate chain (_ssl.c:1124)                                                          &#39;))) when trying to download zip. Retrying in 5 seconds &lt;_io.TextIOWrapper name=&#39;&lt;stderr&gt;&#39; mode=&#39;w&#39; encoding=&#39;utf-8&#39;&gt;</span>
+<span class="c1"># Error occurred (URLError(SSLCertVerificationError(1, &#39;[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate in certificate chain (_ssl.c:1124)                                                          &#39;))) when trying to download zip. Retrying in 5 seconds &lt;_io.TextIOWrapper name=&#39;&lt;stderr&gt;&#39; mode=&#39;w&#39; encoding=&#39;utf-8&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Due to openssl version on Ubuntu 14.04</p>
+<p>Use dataset that where built on CentOS 8</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># rsync datasets from server</span>
+rsync<span class="w"> </span>-avz<span class="w"> </span>--exclude<span class="w"> </span>__pycache__/<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;ssh -o &quot;StrictHostKeyChecking=no&quot; -i  -l root -ax -o ClearAllForwardings=yes&#39;</span><span class="w"> </span>server:/opt/python_virtualenv/projects/TCPDBench-py3811/TCPD/datasets/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPD/datasets/
+
+<span class="c1"># verify OK</span>
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPD$<span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>./utils/check_checksums.py<span class="w"> </span>-v<span class="w"> </span>-c<span class="w"> </span>./checksums.json<span class="w"> </span>-d<span class="w"> </span>./datasets
+Checking<span class="w"> </span>apple.json
+Checking<span class="w"> </span>bank.json
+Checking<span class="w"> </span>bee_waggle_6.json
+Checking<span class="w"> </span>bitcoin.json
+Checking<span class="w"> </span>brent_spot.json
+Checking<span class="w"> </span>businv.json
+Checking<span class="w"> </span>centralia.json
+Checking<span class="w"> </span>children_per_woman.json
+Checking<span class="w"> </span>co2_canada.json
+Checking<span class="w"> </span>construction.json
+Checking<span class="w"> </span>debt_ireland.json
+Checking<span class="w"> </span>gdp_argentina.json
+Checking<span class="w"> </span>gdp_croatia.json
+Checking<span class="w"> </span>gdp_iran.json
+Checking<span class="w"> </span>gdp_japan.json
+Checking<span class="w"> </span>global_co2.json
+Checking<span class="w"> </span>homeruns.json
+Checking<span class="w"> </span>iceland_tourism.json
+Checking<span class="w"> </span>jfk_passengers.json
+Checking<span class="w"> </span>lga_passengers.json
+Checking<span class="w"> </span>measles.json
+Checking<span class="w"> </span>nile.json
+Checking<span class="w"> </span>occupancy.json
+Checking<span class="w"> </span>ozone.json
+Checking<span class="w"> </span>quality_control_1.json
+Checking<span class="w"> </span>quality_control_2.json
+Checking<span class="w"> </span>quality_control_3.json
+Checking<span class="w"> </span>quality_control_4.json
+Checking<span class="w"> </span>quality_control_5.json
+Checking<span class="w"> </span>rail_lines.json
+Checking<span class="w"> </span>ratner_stock.json
+Checking<span class="w"> </span>robocalls.json
+Checking<span class="w"> </span>run_log.json
+Checking<span class="w"> </span>scanline_126007.json
+Checking<span class="w"> </span>scanline_42049.json
+Checking<span class="w"> </span>seatbelts.json
+Checking<span class="w"> </span>shanghai_license.json
+Checking<span class="w"> </span>uk_coal_employ.json
+Checking<span class="w"> </span>unemployment_nl.json
+Checking<span class="w"> </span>us_population.json
+Checking<span class="w"> </span>usd_isk.json
+Checking<span class="w"> </span>well_log.json
+All<span class="w"> </span>ok.
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPD$
+</pre></div>
+</div>
+<p>Run on Ubuntu machine</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/
+<span class="c1"># As per https://github.com/alan-turing-institute/TCPDBench#getting-started</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/alan-turing-institute/TCPDBench
+<span class="nb">cd</span><span class="w"> </span>TCPDBench
+/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>./analysis/requirements.txt
+
+<span class="c1"># Install m66 requirement</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>bottleneck
+
+<span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/<span class="nv">$PROJECT</span>/TCPDBench
+make<span class="w"> </span>results
+<span class="c1"># OK apart from one</span>
+</pre></div>
+</div>
+<p>Copy datasets on Ubuntu machine</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># First, obtain the Turing Change Point Dataset and follow the instructions</span>
+<span class="c1"># provided there. Copy the dataset files to a datasets directory in this</span>
+<span class="c1"># repository</span>
+mkdir<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets
+rsync<span class="w"> </span>-avz<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPD/datasets/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/
+</pre></div>
+</div>
+<p>Move exisitng abed_results</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench
+mv<span class="w"> </span>abed_results<span class="w"> </span>old_abed_results
+
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench$<span class="w"> </span>mv<span class="w"> </span>abed_results<span class="w"> </span>old_abed_results
+</pre></div>
+</div>
+<p>Install abed with error</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386
+bin/pip3.8<span class="w"> </span>install<span class="w"> </span>abed
+
+<span class="c1"># ERROR</span>
+...
+gcc<span class="w"> </span>-pthread<span class="w"> </span>_configtest.o<span class="w"> </span>-lvt.mpi<span class="w"> </span>-o<span class="w"> </span>_configtest
+/usr/bin/ld:<span class="w"> </span>cannot<span class="w"> </span>find<span class="w"> </span>-lvt.mpi
+collect2:<span class="w"> </span>error:<span class="w"> </span>ld<span class="w"> </span>returned<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span>status
+failure.
+...
+_configtest.c:2:17:<span class="w"> </span>fatal<span class="w"> </span>error:<span class="w"> </span>mpi.h:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
+<span class="c1">#include &lt;mpi.h&gt;</span>
+<span class="w">                </span>^
+compilation<span class="w"> </span>terminated.
+failure.
+removing:<span class="w"> </span>_configtest.c<span class="w"> </span>_configtest.o
+error:<span class="w"> </span>Cannot<span class="w"> </span>compile<span class="w"> </span>MPI<span class="w"> </span>programs.<span class="w"> </span>Check<span class="w"> </span>your<span class="w"> </span>configuration!!!
+----------------------------------------
+ERROR:<span class="w"> </span>Failed<span class="w"> </span>building<span class="w"> </span>wheel<span class="w"> </span><span class="k">for</span><span class="w"> </span>mpi4py
+Failed<span class="w"> </span>to<span class="w"> </span>build<span class="w"> </span>mpi4py
+ERROR:<span class="w"> </span>Could<span class="w"> </span>not<span class="w"> </span>build<span class="w"> </span>wheels<span class="w"> </span><span class="k">for</span><span class="w"> </span>mpi4py<span class="w"> </span>which<span class="w"> </span>use<span class="w"> </span>PEP<span class="w"> </span><span class="m">517</span><span class="w"> </span>and<span class="w"> </span>cannot<span class="w"> </span>be<span class="w"> </span>installed<span class="w"> </span>directly
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span>
+</pre></div>
+</div>
+<p>Much googling, considered docker route, no easier unless you forked and cloned your repo with Dockerfile …</p>
+<p>Reading mpi4py docs</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>openmpi-bin<span class="w"> </span>openmpi-doc<span class="w"> </span>libopenmpi-dev
+</pre></div>
+</div>
+<p>Success</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386
+bin/pip3.8<span class="w"> </span>install<span class="w"> </span>abed
+...
+Successfully<span class="w"> </span>installed<span class="w"> </span>Fabric3-1.14.post1<span class="w"> </span>abed-0.1.2<span class="w"> </span>backports.lzma-0.0.14<span class="w"> </span>bcrypt-3.2.0<span class="w"> </span>bz2file-0.98<span class="w"> </span>cryptography-3.4.7<span class="w"> </span>dominate-2.6.0<span class="w"> </span>gitdb-4.0.7<span class="w"> </span>gitpython-3.1.18<span class="w"> </span>mpi4py-3.1.0<span class="w"> </span>paramiko-2.7.2<span class="w"> </span>progressbar-2.5<span class="w"> </span>pynacl-1.4.0<span class="w"> </span>smmap-4.0.0<span class="w"> </span>tqdm-4.62.0
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386$
+</pre></div>
+</div>
+<p>jupyter. Let us see this data to fit m66 to work with it.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386
+<span class="nb">source</span><span class="w"> </span>bin/activate
+bin/pip3.8<span class="w"> </span>install<span class="w"> </span>jupyter
+jupyter<span class="w"> </span>notebook<span class="w"> </span><span class="p">&amp;</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://github.com/earthgecko/skyline/blob/v5.0.0-alpha/tests/20210814.POC.task4236.test.m66.with.TCPDBench.ipynb.py">https://github.com/earthgecko/skyline/blob/v5.0.0-alpha/tests/20210814.POC.task4236.test.m66.with.TCPDBench.ipynb.py</a></p>
+<p>Got it to run eventually and analysed just m66 and zero and got results but cannot plot them with make results.</p>
+<p>Latex breaks</p>
+<p>Perhaps to update you need to run all</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench$<span class="w"> </span>abed<span class="w"> </span>status
+There<span class="w"> </span>are<span class="w"> </span><span class="m">41664</span><span class="w"> </span>tasks<span class="w"> </span>left<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span><span class="m">41664</span><span class="w"> </span>tasks<span class="w"> </span>defined.
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench$
+</pre></div>
+</div>
+<p>And …</p>
+<blockquote>
+<div><p>&gt; You may want to run these experiments in parallel on a large number of cores,
+&gt; as the expected runtime is on the order of 21 days on a single core. Once this
+&gt; command starts running the experiments you will see result files appear in the
+&gt; staging directory.</p>
+</div></blockquote>
+<p><a class="reference external" href="https://github.com/alan-turing-institute/AnnotateChange">https://github.com/alan-turing-institute/AnnotateChange</a></p>
+<p>See if we can plot what the others scored at least.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386
+<span class="nb">source</span><span class="w"> </span>bin/activate
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/alan-turing-institute/AnnotateChange
+<span class="nb">cd</span><span class="w"> </span>AnnotateChange
+
+/opt/python_virtualenv/projects/TCPDBench-py386/bin/pip3.8<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env.development
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/DB_TYPE=mysql/DB_TYPE=sqlite3/g&#39;</span><span class="w"> </span>.env.development
+
+./flask.sh<span class="w"> </span>db<span class="w"> </span>upgrade
+
+./flask.sh<span class="w"> </span>admin<span class="w"> </span>add<span class="w"> </span>--auto-confirm-email
+</pre></div>
+</div>
+<p>A bit flaky, looks like it emails the annotations to the user.</p>
+<p>So from annotations it looks like they had users [‘6’, ‘7’, ‘8’, ‘9’, ‘10’, ‘12’, ‘13’, ‘14’]</p>
+<p>Did the annotations and not all of them did all the timeseries.  I can see you they used AnnotateChange to do that as well.</p>
+<p>m66 is a LEGIT changepoint detection algorithm!</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">1516</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output/
+<span class="m">1517</span><span class="w">  </span><span class="c1"># I think this is the first time it has run properly with best</span>
+<span class="m">1518</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1519</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output
+<span class="m">1520</span><span class="w">  </span>rsync<span class="w"> </span>-az<span class="w"> </span>--exclude<span class="w"> </span>best_m66/<span class="w"> </span>--exclude<span class="w"> </span>default_m66/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results.original/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results/
+<span class="m">1521</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1522</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output/
+<span class="m">1523</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1524</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output/
+<span class="m">1525</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1526</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>stagedir/0
+<span class="m">1527</span><span class="w">  </span>abed<span class="w"> </span>reload_tasks
+<span class="m">1528</span><span class="w">  </span>mpiexec<span class="w"> </span>-np<span class="w"> </span><span class="m">2</span><span class="w"> </span>abed<span class="w"> </span><span class="nb">local</span>
+<span class="m">1529</span><span class="w">  </span>rsync<span class="w"> </span>-az<span class="w"> </span>--exclude<span class="w"> </span>best_m66/<span class="w"> </span>--exclude<span class="w"> </span>default_m66/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results.original/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results/
+<span class="m">1530</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1531</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>abed_results/
+<span class="m">1532</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output/
+<span class="m">1533</span><span class="w">  </span>abed<span class="w"> </span>reload_tasks
+<span class="m">1534</span><span class="w">  </span>mpiexec<span class="w"> </span>-np<span class="w"> </span><span class="m">2</span><span class="w"> </span>abed<span class="w"> </span><span class="nb">local</span>
+<span class="m">1535</span><span class="w">  </span>rsync<span class="w"> </span>-az<span class="w"> </span>--exclude<span class="w"> </span>best_m66/<span class="w"> </span>--exclude<span class="w"> </span>default_m66/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results.original/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results/
+<span class="m">1536</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1537</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>abed_results/
+<span class="m">1538</span><span class="w">  </span>rm<span class="w"> </span>-rf<span class="w"> </span>analysis/output/
+<span class="m">1539</span><span class="w">  </span>abed<span class="w"> </span>reload_tasks
+<span class="m">1540</span><span class="w">  </span>mpiexec<span class="w"> </span>-np<span class="w"> </span><span class="m">2</span><span class="w"> </span>abed<span class="w"> </span><span class="nb">local</span>
+<span class="m">1541</span><span class="w">  </span>rsync<span class="w"> </span>-az<span class="w"> </span>--exclude<span class="w"> </span>best_m66/<span class="w"> </span>--exclude<span class="w"> </span>default_m66/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results.original/<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/abed_results/
+<span class="m">1542</span><span class="w">  </span>make<span class="w"> </span>-k<span class="w"> </span>results
+<span class="m">1543</span><span class="w">  </span>../bin/pip3.8<span class="w"> </span>install<span class="w"> </span>pdflatex
+<span class="m">1544</span><span class="w">  </span>../bin/pip3.8<span class="w"> </span>install<span class="w"> </span>xhtml2pdf
+<span class="m">1545</span><span class="w">  </span><span class="nb">history</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench$<span class="w"> </span>date
+Sun<span class="w"> </span>Aug<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="m">21</span>:28:11<span class="w"> </span>BST<span class="w"> </span><span class="m">2021</span>
+<span class="o">(</span>TCPDBench-py386<span class="o">)</span><span class="w"> </span>gary@mc11:/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench$
+</pre></div>
+</div>
+</section>
+<section id="results">
+<h3>results<a class="headerlink" href="#results" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">best_cover_avg</span>
+<span class="sd">m66 0.795455</span>
+<span class="sd">bocpd       0.789368</span>
+<span class="sd">segneigh    0.783592</span>
+<span class="sd">binseg      0.780245</span>
+<span class="sd">amoc        0.745989</span>
+<span class="sd">bocpdms     0.743791</span>
+<span class="sd">pelt        0.725448</span>
+<span class="sd">ecp 0.720113</span>
+<span class="sd">kcpa        0.625981</span>
+<span class="sd">zero        0.578767</span>
+<span class="sd">prophet     0.576222</span>
+<span class="sd">cpnp        0.552106</span>
+<span class="sd">wbs 0.428036</span>
+<span class="sd">rfpop       0.414154</span>
+
+
+<span class="sd">best_f1_avg</span>
+<span class="sd">bocpd       0.879675</span>
+<span class="sd">binseg      0.855901</span>
+<span class="sd">segneigh    0.854902</span>
+<span class="sd">m66 0.841738</span>
+<span class="sd">amoc        0.798912</span>
+<span class="sd">ecp 0.796599</span>
+<span class="sd">pelt        0.787211</span>
+<span class="sd">kcpa        0.683167</span>
+<span class="sd">cpnp        0.665980</span>
+<span class="sd">zero        0.662375</span>
+<span class="sd">bocpdms     0.620328</span>
+<span class="sd">prophet     0.534355</span>
+<span class="sd">wbs 0.532729</span>
+<span class="sd">rfpop       0.530942</span>
+
+<span class="sd">default_cover_avg</span>
+<span class="sd">binseg      0.705799</span>
+<span class="sd">amoc        0.701605</span>
+<span class="sd">pelt        0.688798</span>
+<span class="sd">segneigh    0.676410</span>
+<span class="sd">bocpd       0.636019</span>
+<span class="sd">bocpdms     0.633351</span>
+<span class="sd">rbocpdms    0.628623</span>
+<span class="sd">zero        0.582727</span>
+<span class="sd">m66 0.582623</span>
+<span class="sd">prophet     0.539869</span>
+<span class="sd">cpnp        0.535341</span>
+<span class="sd">ecp 0.522748</span>
+<span class="sd">rfpop       0.392427</span>
+<span class="sd">wbs 0.330206</span>
+<span class="sd">kcpa        0.061955</span>
+
+<span class="sd">default_f1_avg</span>
+<span class="sd">binseg      0.744400</span>
+<span class="sd">pelt        0.709992</span>
+<span class="sd">amoc        0.703711</span>
+<span class="sd">bocpd       0.689622</span>
+<span class="sd">segneigh    0.675545</span>
+<span class="sd">zero        0.668967</span>
+<span class="sd">m66 0.648660</span>
+<span class="sd">cpnp        0.606694</span>
+<span class="sd">ecp 0.597710</span>
+<span class="sd">bocpdms     0.507137</span>
+<span class="sd">rfpop       0.499453</span>
+<span class="sd">prophet     0.487742</span>
+<span class="sd">rbocpdms    0.446714</span>
+<span class="sd">wbs 0.411706</span>
+<span class="sd">kcpa        0.111007</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Test params in their algorithms</p>
+<p>make venv numpy before scipy</p>
+<p>But make venv throw error and numpy needs to be installed before scipy.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Building<span class="w"> </span>wheels<span class="w"> </span><span class="k">for</span><span class="w"> </span>collected<span class="w"> </span>packages:<span class="w"> </span>scipy
+Building<span class="w"> </span>wheel<span class="w"> </span><span class="k">for</span><span class="w"> </span>scipy<span class="w"> </span><span class="o">(</span>setup.py<span class="o">)</span><span class="w"> </span>...<span class="w"> </span>error
+ERROR:<span class="w"> </span>Command<span class="w"> </span>errored<span class="w"> </span>out<span class="w"> </span>with<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>status<span class="w"> </span><span class="m">1</span>:
+command:<span class="w"> </span>/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/rbocpdms/venv/bin/python<span class="w"> </span>-u<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;import io, os, sys, setuptools, tokenize; sys.argv[0] = &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;; __file__=&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;;f = getattr(tokenize, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;open&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;, open)(__file__) if os.path.exists(__file__) else io.StringIO(&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;from setuptools import setup; setup()&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;);code = f.read().replace(&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;\r\n&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;\n&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;);f.close();exec(compile(code, __file__, &#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;exec&#39;</span><span class="s2">&quot;&#39;&quot;</span><span class="s1">&#39;))&#39;</span><span class="w"> </span>bdist_wheel<span class="w"> </span>-d<span class="w"> </span>/tmp/pip-wheel-xdsqoeuc
+<span class="w">    </span>cwd:<span class="w"> </span>/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/
+Complete<span class="w"> </span>output<span class="w"> </span><span class="o">(</span><span class="m">9</span><span class="w"> </span>lines<span class="o">)</span>:
+/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py:114:<span class="w"> </span>DeprecationWarning:<span class="w"> </span>the<span class="w"> </span>imp<span class="w"> </span>module<span class="w"> </span>is<span class="w"> </span>deprecated<span class="w"> </span><span class="k">in</span><span class="w"> </span>favour<span class="w"> </span>of<span class="w"> </span>importlib<span class="p">;</span><span class="w"> </span>see<span class="w"> </span>the<span class="w"> </span>module<span class="s1">&#39;s documentation for alternative uses</span>
+<span class="s1">    import imp</span>
+<span class="s1">Traceback (most recent call last):</span>
+<span class="s1">    File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;</span>
+<span class="s1">    File &quot;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&quot;, line 474, in &lt;module&gt;</span>
+<span class="s1">    setup_package()</span>
+<span class="s1">    File &quot;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&quot;, line 450, in setup_package</span>
+<span class="s1">    from numpy.distutils.core import setup</span>
+<span class="s1">ModuleNotFoundError: No module named &#39;</span>numpy<span class="s1">&#39;</span>
+<span class="s1">----------------------------------------</span>
+<span class="s1">ERROR: Failed building wheel for scipy</span>
+<span class="s1">Running setup.py clean for scipy</span>
+<span class="s1">ERROR: Command errored out with exit status 1:</span>
+<span class="s1">command: /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/rbocpdms/venv/bin/python -u -c &#39;</span>import<span class="w"> </span>io,<span class="w"> </span>os,<span class="w"> </span>sys,<span class="w"> </span>setuptools,<span class="w"> </span>tokenize<span class="p">;</span><span class="w"> </span>sys.argv<span class="o">[</span><span class="m">0</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span><span class="p">;</span><span class="w"> </span><span class="nv">__file__</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span><span class="p">;</span><span class="nv">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>getattr<span class="o">(</span>tokenize,<span class="w"> </span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;open&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span>,<span class="w"> </span>open<span class="o">)(</span>__file__<span class="o">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span>os.path.exists<span class="o">(</span>__file__<span class="o">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span>io.StringIO<span class="o">(</span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;from setuptools import setup; setup()&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span><span class="o">)</span><span class="p">;</span><span class="nv">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>f.read<span class="o">()</span>.replace<span class="o">(</span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;\r\n&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span>,<span class="w"> </span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;\n&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span><span class="o">)</span><span class="p">;</span>f.close<span class="o">()</span><span class="p">;</span>exec<span class="o">(</span>compile<span class="o">(</span>code,<span class="w"> </span>__file__,<span class="w"> </span><span class="s1">&#39;&quot;&#39;</span><span class="s2">&quot;&#39;exec&#39;&quot;</span><span class="s1">&#39;&quot;&#39;</span><span class="o">))</span><span class="s1">&#39; clean --all</span>
+<span class="s1">    cwd: /tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b</span>
+<span class="s1">Complete output (11 lines):</span>
+<span class="s1">/tmp/pip-install-qro7kaiy/scipy_d9e7a8590f554c5c851b4993f896117b/setup.py:114: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module&#39;</span>s<span class="w"> </span>documentation<span class="w"> </span><span class="k">for</span><span class="w"> </span>alternative<span class="w"> </span>uses
+<span class="w">    </span>import<span class="w"> </span>imp
+
+<span class="sb">`</span>setup.py<span class="w"> </span>clean<span class="sb">`</span><span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>supported,<span class="w"> </span>use<span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>instead:
+
+<span class="w">    </span>-<span class="w"> </span><span class="sb">`</span>git<span class="w"> </span>clean<span class="w"> </span>-xdf<span class="sb">`</span><span class="w"> </span><span class="o">(</span>cleans<span class="w"> </span>all<span class="w"> </span>files<span class="o">)</span>
+<span class="w">    </span>-<span class="w"> </span><span class="sb">`</span>git<span class="w"> </span>clean<span class="w"> </span>-Xdf<span class="sb">`</span><span class="w"> </span><span class="o">(</span>cleans<span class="w"> </span>all<span class="w"> </span>versioned<span class="w"> </span>files,<span class="w"> </span>doesn<span class="s1">&#39;t touch</span>
+<span class="s1">                        files that aren&#39;</span>t<span class="w"> </span>checked<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>git<span class="w"> </span>repo<span class="o">)</span>
+
+Add<span class="w"> </span><span class="sb">`</span>--force<span class="sb">`</span><span class="w"> </span>to<span class="w"> </span>your<span class="w"> </span><span class="nb">command</span><span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>it<span class="w"> </span>anyway<span class="w"> </span><span class="k">if</span><span class="w"> </span>you<span class="w"> </span>must<span class="w"> </span><span class="o">(</span>unsupported<span class="o">)</span>.
+
+----------------------------------------
+ERROR:<span class="w"> </span>Failed<span class="w"> </span>cleaning<span class="w"> </span>build<span class="w"> </span>dir<span class="w"> </span><span class="k">for</span><span class="w"> </span>scipy
+Failed<span class="w"> </span>to<span class="w"> </span>build<span class="w"> </span>scipy
+Installing<span class="w"> </span>collected<span class="w"> </span>packages:<span class="w"> </span>six,<span class="w"> </span>pytz,<span class="w"> </span>python-dateutil,<span class="w"> </span>pyparsing,<span class="w"> </span>py,<span class="w"> </span>pluggy,<span class="w"> </span>numpy,<span class="w"> </span>more-itertools,<span class="w"> </span>kiwisolver,<span class="w"> </span>cycler,<span class="w"> </span>attrs,<span class="w"> </span>atomicwrites,<span class="w"> </span>scipy,<span class="w"> </span>pytest,<span class="w"> </span>matplotlib
+<span class="w">    </span>Running<span class="w"> </span>setup.py<span class="w"> </span>install<span class="w"> </span><span class="k">for</span><span class="w"> </span>scipy<span class="w"> </span>...<span class="w"> </span><span class="se">\^</span>canceled
+ERROR:<span class="w"> </span>Operation<span class="w"> </span>cancelled<span class="w"> </span>by<span class="w"> </span>user
+WARNING:<span class="w"> </span>You<span class="w"> </span>are<span class="w"> </span>using<span class="w"> </span>pip<span class="w"> </span>version<span class="w"> </span><span class="m">21</span>.2.3<span class="p">;</span><span class="w"> </span>however,<span class="w"> </span>version<span class="w"> </span><span class="m">21</span>.2.4<span class="w"> </span>is<span class="w"> </span>available.
+You<span class="w"> </span>should<span class="w"> </span>consider<span class="w"> </span>upgrading<span class="w"> </span>via<span class="w"> </span>the<span class="w"> </span><span class="s1">&#39;/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/rbocpdms/venv/bin/python -m pip install --upgrade pip&#39;</span><span class="w"> </span>command.
+make:<span class="w"> </span>***<span class="w"> </span><span class="o">[</span>execs/python/rbocpdms/venv<span class="o">]</span><span class="w"> </span>Error<span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Test params bug</p>
+<p>No bugs.</p>
+<p>They type the arguments and the make_param_dict functions works as desired in their algorithm.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gary@mc11:~$<span class="w"> </span>tail<span class="w"> </span>/tmp/TCPDBench.bocpdms.debug.parameters.txt
+parameters:<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">1</span>.0,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">}</span>
+<span class="nv">detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>run_bocpdms<span class="o">(</span>mat,<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">1</span>.0,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">})</span>
+agrs:<span class="w"> </span>Namespace<span class="o">(</span><span class="nv">input</span><span class="o">=</span><span class="s1">&#39;/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/well_log.json&#39;</span>,<span class="w"> </span><span class="nv">intensity</span><span class="o">=</span><span class="m">200</span>.0,<span class="w"> </span><span class="nv">output</span><span class="o">=</span>None,<span class="w"> </span><span class="nv">prior_a</span><span class="o">=</span><span class="m">0</span>.01,<span class="w"> </span><span class="nv">prior_b</span><span class="o">=</span><span class="m">100</span>.0,<span class="w"> </span><span class="nv">threshold</span><span class="o">=</span><span class="m">100</span>,<span class="w"> </span><span class="nv">use_timeout</span><span class="o">=</span>True<span class="o">)</span>
+defaults:<span class="w"> </span><span class="o">{</span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">}</span>
+parameters:<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">200</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">}</span>
+<span class="nv">detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>run_bocpdms<span class="o">(</span>mat,<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">200</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">100</span>.0,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">})</span>
+agrs:<span class="w"> </span>Namespace<span class="o">(</span><span class="nv">input</span><span class="o">=</span><span class="s1">&#39;/opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/well_log.json&#39;</span>,<span class="w"> </span><span class="nv">intensity</span><span class="o">=</span><span class="m">50</span>.0,<span class="w"> </span><span class="nv">output</span><span class="o">=</span>None,<span class="w"> </span><span class="nv">prior_a</span><span class="o">=</span><span class="m">0</span>.01,<span class="w"> </span><span class="nv">prior_b</span><span class="o">=</span><span class="m">0</span>.01,<span class="w"> </span><span class="nv">threshold</span><span class="o">=</span><span class="m">100</span>,<span class="w"> </span><span class="nv">use_timeout</span><span class="o">=</span>True<span class="o">)</span>
+defaults:<span class="w"> </span><span class="o">{</span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">}</span>
+parameters:<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">50</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">}</span>
+<span class="nv">detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>run_bocpdms<span class="o">(</span>mat,<span class="w"> </span><span class="o">{</span><span class="s1">&#39;intensity&#39;</span>:<span class="w"> </span><span class="m">50</span>.0,<span class="w"> </span><span class="s1">&#39;prior_a&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;prior_b&#39;</span>:<span class="w"> </span><span class="m">0</span>.01,<span class="w"> </span><span class="s1">&#39;threshold&#39;</span>:<span class="w"> </span><span class="m">100</span>,<span class="w"> </span><span class="s1">&#39;use_timeout&#39;</span>:<span class="w"> </span>True,<span class="w"> </span><span class="s1">&#39;S1&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;S2&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;intercept_grouping&#39;</span>:<span class="w"> </span>None,<span class="w"> </span><span class="s1">&#39;prior_mean_scale&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;prior_var_scale&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;lower_AR&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;upper_AR&#39;</span>:<span class="w"> </span><span class="m">4</span><span class="o">})</span>
+gary@mc11:~$
+</pre></div>
+</div>
+<p>abed no source in shell</p>
+<p>I had to pass . instead of source otherwise abed taks failed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span><span class="m">2021</span>-08-17<span class="w"> </span><span class="m">08</span>:21:33<span class="o">]</span><span class="w"> </span>Executing:<span class="w"> </span><span class="s1">&#39;source ./opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/activate &amp;&amp; /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/python /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/cpdbench_bocpdms.py -i /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/well_log.json --intensity 50 --prior-a 1.0 --prior-b 1.0 --threshold 100 --use-timeout&#39;</span>
+Error:<span class="w"> </span>There<span class="w"> </span>was<span class="w"> </span>an<span class="w"> </span>error<span class="w"> </span>executing:<span class="w"> </span><span class="s1">&#39;source ./opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/activate &amp;&amp; /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/python /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/cpdbench_bocpdms.py -i /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/well_log.json --intensity 100 --prior-a 0.01 --prior-b 0.01 --threshold 100 --use-timeout&#39;</span>.<span class="w"> </span>Here<span class="w"> </span>is<span class="w"> </span>the<span class="w"> </span>error:
+/bin/sh:<span class="w"> </span><span class="m">1</span>:<span class="w"> </span>source:<span class="w"> </span>not<span class="w"> </span>found
+Error:<span class="w"> </span>There<span class="w"> </span>was<span class="w"> </span>an<span class="w"> </span>error<span class="w"> </span>executing:<span class="w"> </span><span class="s1">&#39;source ./opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/activate &amp;&amp; /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/bocpdms/venv/bin/python /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/execs/python/cpdbench_bocpdms.py -i /opt/python_virtualenv/projects/TCPDBench-py386/TCPDBench/datasets/well_log.json --intensity 50 --prior-a 1.0 --prior-b 1.0 --threshold 100 --use-timeout&#39;</span>.<span class="w"> </span>Here<span class="w"> </span>is<span class="w"> </span>the<span class="w"> </span>error:
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#    &quot;best_bocpdms&quot;: (</span>
+<span class="c1">#        &quot;source {execdir}/python/bocpdms/venv/bin/activate &amp;&amp; python {execdir}/python/cpdbench_bocpdms.py -i {datadir}/{dataset}/{dataset}.json --intensity {intensity} --prior-a {prior_a} --prior-b {prior_b} --threshold 100 --use-timeout&quot;</span>
+<span class="c1">#    ),</span>
+    <span class="s2">&quot;best_bocpdms&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;. </span><span class="si">{execdir}</span><span class="s2">/python/bocpdms/venv/bin/activate &amp;&amp; python </span><span class="si">{execdir}</span><span class="s2">/python/cpdbench_bocpdms.py -i </span><span class="si">{datadir}</span><span class="s2">/</span><span class="si">{dataset}</span><span class="s2">/</span><span class="si">{dataset}</span><span class="s2">.json --intensity </span><span class="si">{intensity}</span><span class="s2"> --prior-a </span><span class="si">{prior_a}</span><span class="s2"> --prior-b </span><span class="si">{prior_b}</span><span class="s2"> --threshold 100 --use-timeout&quot;</span>
+    <span class="p">),</span>
+</pre></div>
+</div>
+<p>Heatmaps of results</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">algorithms_results</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;best_cover_avg&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;m66&#39;</span><span class="p">:</span> <span class="mf">0.795455</span><span class="p">,</span>
+        <span class="s1">&#39;bocpd&#39;</span><span class="p">:</span> <span class="mf">0.789368</span><span class="p">,</span>
+        <span class="s1">&#39;segneigh&#39;</span><span class="p">:</span> <span class="mf">0.783592</span><span class="p">,</span>
+        <span class="s1">&#39;binseg&#39;</span><span class="p">:</span> <span class="mf">0.780245</span><span class="p">,</span>
+        <span class="s1">&#39;amoc&#39;</span><span class="p">:</span> <span class="mf">0.745989</span><span class="p">,</span>
+        <span class="s1">&#39;bocpdms&#39;</span><span class="p">:</span> <span class="mf">0.743791</span><span class="p">,</span>
+        <span class="s1">&#39;pelt&#39;</span><span class="p">:</span> <span class="mf">0.725448</span><span class="p">,</span>
+        <span class="s1">&#39;ecp&#39;</span><span class="p">:</span> <span class="mf">0.720113</span><span class="p">,</span>
+        <span class="s1">&#39;kcpa&#39;</span><span class="p">:</span> <span class="mf">0.625981</span><span class="p">,</span>
+        <span class="s1">&#39;zero&#39;</span><span class="p">:</span> <span class="mf">0.578767</span><span class="p">,</span>
+        <span class="s1">&#39;prophet&#39;</span><span class="p">:</span> <span class="mf">0.576222</span><span class="p">,</span>
+        <span class="s1">&#39;cpnp&#39;</span><span class="p">:</span> <span class="mf">0.552106</span><span class="p">,</span>
+        <span class="s1">&#39;wbs&#39;</span><span class="p">:</span> <span class="mf">0.428036</span><span class="p">,</span>
+        <span class="s1">&#39;rfpop&#39;</span><span class="p">:</span> <span class="mf">0.414154</span><span class="p">},</span>
+    <span class="s1">&#39;best_f1_avg&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;bocpd&#39;</span><span class="p">:</span> <span class="mf">0.879675</span><span class="p">,</span>
+        <span class="s1">&#39;binseg&#39;</span><span class="p">:</span> <span class="mf">0.855901</span><span class="p">,</span>
+        <span class="s1">&#39;segneigh&#39;</span><span class="p">:</span> <span class="mf">0.854902</span><span class="p">,</span>
+        <span class="s1">&#39;m66&#39;</span><span class="p">:</span> <span class="mf">0.841738</span><span class="p">,</span>
+        <span class="s1">&#39;amoc&#39;</span><span class="p">:</span> <span class="mf">0.798912</span><span class="p">,</span>
+        <span class="s1">&#39;ecp&#39;</span><span class="p">:</span> <span class="mf">0.796599</span><span class="p">,</span>
+        <span class="s1">&#39;pelt&#39;</span><span class="p">:</span> <span class="mf">0.787211</span><span class="p">,</span>
+        <span class="s1">&#39;kcpa&#39;</span><span class="p">:</span> <span class="mf">0.683167</span><span class="p">,</span>
+        <span class="s1">&#39;cpnp&#39;</span><span class="p">:</span> <span class="mf">0.665980</span><span class="p">,</span>
+        <span class="s1">&#39;zero&#39;</span><span class="p">:</span> <span class="mf">0.662375</span><span class="p">,</span>
+        <span class="s1">&#39;bocpdms&#39;</span><span class="p">:</span> <span class="mf">0.620328</span><span class="p">,</span>
+        <span class="s1">&#39;prophet&#39;</span><span class="p">:</span> <span class="mf">0.534355</span><span class="p">,</span>
+        <span class="s1">&#39;wbs&#39;</span><span class="p">:</span> <span class="mf">0.532729</span><span class="p">,</span>
+        <span class="s1">&#39;rfpop&#39;</span><span class="p">:</span> <span class="mf">0.530942</span><span class="p">},</span>
+    <span class="s1">&#39;default_cover_avg&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;binseg&#39;</span><span class="p">:</span> <span class="mf">0.705799</span><span class="p">,</span>
+        <span class="s1">&#39;amoc&#39;</span><span class="p">:</span> <span class="mf">0.701605</span><span class="p">,</span>
+        <span class="s1">&#39;pelt&#39;</span><span class="p">:</span> <span class="mf">0.688798</span><span class="p">,</span>
+        <span class="s1">&#39;segneigh&#39;</span><span class="p">:</span> <span class="mf">0.676410</span><span class="p">,</span>
+        <span class="s1">&#39;bocpd&#39;</span><span class="p">:</span> <span class="mf">0.636019</span><span class="p">,</span>
+        <span class="s1">&#39;bocpdms&#39;</span><span class="p">:</span> <span class="mf">0.633351</span><span class="p">,</span>
+        <span class="s1">&#39;rbocpdms&#39;</span><span class="p">:</span> <span class="mf">0.628623</span><span class="p">,</span>
+        <span class="s1">&#39;zero&#39;</span><span class="p">:</span> <span class="mf">0.582727</span><span class="p">,</span>
+        <span class="s1">&#39;m66&#39;</span><span class="p">:</span> <span class="mf">0.582623</span><span class="p">,</span>
+        <span class="s1">&#39;prophet&#39;</span><span class="p">:</span> <span class="mf">0.539869</span><span class="p">,</span>
+        <span class="s1">&#39;cpnp&#39;</span><span class="p">:</span> <span class="mf">0.535341</span><span class="p">,</span>
+        <span class="s1">&#39;ecp&#39;</span><span class="p">:</span> <span class="mf">0.522748</span><span class="p">,</span>
+        <span class="s1">&#39;rfpop&#39;</span><span class="p">:</span> <span class="mf">0.392427</span><span class="p">,</span>
+        <span class="s1">&#39;wbs&#39;</span><span class="p">:</span> <span class="mf">0.330206</span><span class="p">,</span>
+        <span class="s1">&#39;kcpa&#39;</span><span class="p">:</span> <span class="mf">0.061955</span><span class="p">},</span>
+    <span class="s1">&#39;default_f1_avg&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;binseg&#39;</span><span class="p">:</span> <span class="mf">0.744400</span><span class="p">,</span>
+        <span class="s1">&#39;pelt&#39;</span><span class="p">:</span> <span class="mf">0.709992</span><span class="p">,</span>
+        <span class="s1">&#39;amoc&#39;</span><span class="p">:</span> <span class="mf">0.703711</span><span class="p">,</span>
+        <span class="s1">&#39;bocpd&#39;</span><span class="p">:</span> <span class="mf">0.689622</span><span class="p">,</span>
+        <span class="s1">&#39;segneigh&#39;</span><span class="p">:</span> <span class="mf">0.675545</span><span class="p">,</span>
+        <span class="s1">&#39;zero&#39;</span><span class="p">:</span> <span class="mf">0.668967</span><span class="p">,</span>
+        <span class="s1">&#39;m66&#39;</span><span class="p">:</span> <span class="mf">0.648660</span><span class="p">,</span>
+        <span class="s1">&#39;cpnp&#39;</span><span class="p">:</span> <span class="mf">0.606694</span><span class="p">,</span>
+        <span class="s1">&#39;ecp&#39;</span><span class="p">:</span> <span class="mf">0.597710</span><span class="p">,</span>
+        <span class="s1">&#39;bocpdms&#39;</span><span class="p">:</span> <span class="mf">0.507137</span><span class="p">,</span>
+        <span class="s1">&#39;rfpop&#39;</span><span class="p">:</span> <span class="mf">0.499453</span><span class="p">,</span>
+        <span class="s1">&#39;prophet&#39;</span><span class="p">:</span> <span class="mf">0.487742</span><span class="p">,</span>
+        <span class="s1">&#39;rbocpdms&#39;</span><span class="p">:</span> <span class="mf">0.446714</span><span class="p">,</span>
+        <span class="s1">&#39;wbs&#39;</span><span class="p">:</span> <span class="mf">0.411706</span><span class="p">,</span>
+        <span class="s1">&#39;kcpa&#39;</span><span class="p">:</span> <span class="mf">0.111007</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">algorithms_results</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greens&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greens&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;font-size&#39;</span><span class="p">:</span> <span class="s1">&#39;12px&#39;</span><span class="p">})</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">highlight_max</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightblue&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">highlight_top3</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">is_large</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">is_small</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">is_large</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;background-color: lightgreen&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">is_small</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;background-color: #FFCCCB&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+<span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">highlight_top3</span><span class="p">)</span>
+
+<span class="c1"># results and rank</span>
+<span class="n">algorithms_results_and_rank</span> <span class="o">=</span> <span class="n">algorithms_results</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">algorithms_results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">algorithms_results</span><span class="p">[</span><span class="n">score</span><span class="p">]:</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">algo</span><span class="p">,</span> <span class="n">algorithms_results</span><span class="p">[</span><span class="n">score</span><span class="p">][</span><span class="n">algo</span><span class="p">]])</span>
+    <span class="n">sorted_l</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rank_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">algorithms_results</span><span class="p">[</span><span class="n">score</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_l</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">algo</span><span class="p">:</span>
+                <span class="n">rank_dict</span><span class="p">[</span><span class="n">algo</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> rank&#39;</span> <span class="o">%</span> <span class="n">score</span>
+    <span class="n">algorithms_results_and_rank</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">rank_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">algorithms_results_and_rank</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Greens&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">background_gradient</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues_r&#39;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;best_cover_avg rank&#39;</span><span class="p">,</span><span class="s1">&#39;best_f1_avg rank&#39;</span><span class="p">,</span><span class="s1">&#39;default_cover_avg rank&#39;</span><span class="p">,</span><span class="s1">&#39;default_f1_avg rank&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;font-size&#39;</span><span class="p">:</span> <span class="s1">&#39;12px&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="macd.html" class="btn btn-neutral float-left" title="macd" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../mirage.html" class="btn btn-neutral float-right" title="Mirage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="matrixprofile.html" class="btn btn-neutral float-left" title="matrixprofile" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sigma.html" class="btn btn-neutral float-right" title="sigma" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

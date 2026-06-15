@@ -478,6 +478,16 @@ def anomalous_daily_peak(current_skyline_app, parent_pid, timeseries, algorithm_
         # The algorithm
         anomalous = abs(peak_difference) > threesigma3_peak_values_stdDev
 
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # Coerce all numpy.bool_ typed elements introduced with
+        # numpy >= 2 to Python bool so they are literal_eval and
+        # json safe.  ideally if isinstance np.bool_ but without incurring
+        # the overhead of importing numpy here just to load the type
+        if type(anomalous) is not None and type(anomalous).__name__ == 'bool_':
+            anomalous = bool(anomalous)
+
         percent_different = 0
         if within_percent_of_normal_peaks and anomalous:
             percent_different = get_percent_different(abs(peak_difference), threesigma3_peak_values_stdDev, False)

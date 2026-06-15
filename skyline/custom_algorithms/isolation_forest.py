@@ -44,14 +44,53 @@ def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_para
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        ``algorithm_parameters={'contamination'='0.01', 'anomaly_window'=5, 'return_results'=True}``
+        custom_algorithm and algorithm itself.  For the isolation_forest custom
+        algorithm no specific algorithm_parameters are required apart from an
+        empty dict but the algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'contamination'`` (float):
+        - ``'contamination'`` (float or "auto"):
+            The proportion of the dataset that is expected to be anomalies or
+            outliers. This can be either:
+
+            - A ``float`` value between ``0.0`` and ``0.5`` representing the
+                expected proportion of anomalies in the data. For example,
+                ``0.01`` would mean that 1% of the data is anticipated to be
+                anomalous.
+            - The string ``"auto"``: This option allows the algorithm to 
+                automatically determine an appropriate contamination level based
+                on the characteristics of the data. Useful when the proportion
+                of outliers is unknown.
+            Default is ``"auto"``.
+         - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'contamination': 0.01,,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore, isolation_forest_scores
-    :rtype: tuple(boolean, float, isolation_forest_scores)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 

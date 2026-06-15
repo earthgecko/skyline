@@ -104,7 +104,7 @@ def get_cloudburst_plot(cloudburst_id, base_name, shift, all_in_period=False):
             metrics_timeseries[base_name] = {}
             metrics_timeseries[base_name]['timeseries'] = timeseries
         else:
-            logger.warning('warning :: %s :: failed to retrieve timeseries from VictoriaMetrics for %s' % (
+            logger.info('warning :: %s :: failed to retrieve timeseries from VictoriaMetrics for %s' % (
                 function_str, base_name))
 
     if not labelled_metric:

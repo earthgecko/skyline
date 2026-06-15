@@ -6,6 +6,8 @@ sigma.py
 # errors regardless of debug_logging setting for the custom_algorithm
 import logging
 import traceback
+import copy
+from time import time
 from custom_algorithms import record_algorithm_error
 
 # Import ALL modules that the custom algorithm requires.  Remember that if a
@@ -42,15 +44,45 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the anomalous_daily_peak
-        custom algorithm no specific algorithm_parameters are required apart
-        from an empty dict, example: ``algorithm_parameters={}``
+        custom_algorithm and algorithm itself.  For the sigma custom algorithm
+        no specific algorithm_parameters are required apart from an empty dict
+        but the sigma algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'sigma_value'`` (int): The sigma value.
+            The sigma value to use.  Default is ``3``.
+        - ``'consensus'`` (int): The consensus count.
+            The consensus count to use, e.g. how many algorithms need to trigger
+            to be considered anomalous.  Default is ``6``.
+        - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'sigma': 3,
+                'consensus': 6,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore
-    :rtype: tuple(boolean, float)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 
@@ -64,7 +96,9 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     anomalous = None
     anomalyScore = None
     anomalies = {}
+    results = {}
 
+    start = time()
     current_logger = None
 
     # If you wanted to log, you can but this should only be done during
@@ -123,13 +157,62 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         return_anomalies = algorithm_parameters['return_anomalies']
     except:
         return_anomalies = False
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+    except:
+        return_results = False
+    if return_results:
+        return_anomalies = True
 
     try:
         anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # Coerce all numpy.bool_ typed elements introduced with
+        # numpy >= 2 to Python bool so they are literal_eval and
+        # json safe.  ideally if isinstance np.bool_ but without incurring
+        # the overhead of importing numpy here just to load the type
+        if type(anomalous) is not None and type(anomalous).__name__ == 'bool_':
+            anomalous = bool(anomalous)
+
         if anomalous:
             anomalyScore = 1.0
         else:
             anomalyScore = 0.0
+
+        if return_results:
+            anomalyScore_list = []
+            sigma_scores = [] 
+            anomaly_timestamps = set(list(anomalies.keys()))
+            for ts, v in timeseries:
+                score = 0
+                sigma_score = 0
+                if ts in anomaly_timestamps:
+                    score = 1
+                    sigma_score = anomalies[ts]['anomalyScore']
+                anomalyScore_list.append(score)
+                sigma_scores.append(sigma_score)
+
+            results = {
+                'anomalous': anomalous,
+                'anomalies': copy.deepcopy(anomalies),
+                'anomalyScore_list': anomalyScore_list,
+                'scores': sigma_scores,
+                'algorithm_parameters': algorithm_parameters,
+            }
+        if debug_print:
+            print('ran sigma OK in %.6f seconds' % (time() - start))
+        if debug_logging:
+            current_logger.debug('debug :: sigma :: ran in %.6f seconds' % (time() - start))
+        if return_results:
+            anomalies = copy.deepcopy(results)
+        if debug_print:
+            print('sigma :: anomalous: %s' % str(anomalous))
+        if debug_logging:
+            current_logger.debug('debug :: sigma :: anomalous: %s' % str(anomalous))
+
     except StopIteration:
         # This except pattern MUST be used in ALL custom algortihms to
         # facilitate the traceback from any errors.  The algorithm we want to
@@ -144,6 +227,10 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
+        if not return_anomalies:
+            return (anomalous, anomalyScore)
         return (anomalous, anomalyScore, anomalies)
 
+    if not return_anomalies:
+        return (anomalous, anomalyScore)
     return (anomalous, anomalyScore, anomalies)

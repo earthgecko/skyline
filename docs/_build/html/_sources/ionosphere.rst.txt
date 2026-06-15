@@ -43,6 +43,51 @@ With Ionosphere we are training Skyline on what is NOT ANOMALOUS, rather than
 focusing on what is anomalous.  Ionosphere allows us to train Skyline as to what
 is normal, even if normal includes spikes and dips and seasonality.
 
+To achieve this Skyline implements a novel time series similarities comparison
+algorithm and a boundary layers methodology that generates fingerprints of time
+series data using the sum of the values of features of the time series which
+have been extracted using the tsfresh features extraction package -
+https://github.com/blue-yonder/tsfresh and evaluation against boundary layer
+algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
+known pattern in the data.
+
+The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm -
+SITTSSCA first coined here :) compares the generated fingerprints of the two
+time series and can determine if they closely resemble each other in terms of:
+
+- of the amount of "power/energy", range and "movement" there is within the time
+  series data set somewhat like RMS - Erol Kalkan from United States Geological Survey,
+  “Another approach to compute the differences between two time series is moving
+  window root-mean-square. RMS can be run for both series separately. This way,
+  you can compare the similarities in energy (gain) level of time series. You
+  may vary the window length for best resolution.”
+  (https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value)
+  http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy
+
+The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
+compares how close the fingerprint values are as a percentage and
+varying this percentage variable will either focus the algorithm with greater
+precision, the closer to 0% the parameter gets, the perfect match (or possibly
+a mirror match too - unkonwn/untested) or it will incrementally increase the
+tolerance as the percentage variable increases and the matching will become
+less and less reliable.
+
+However there is a sweet spot and here SITTSSCA works extremely well :)
+
+Added to SITTSSCA is an optional layer of simple boundary algorithms that are
+user defined during the operator training interaction with Skyline, where the
+operator augments the SITTSSCA results with boundaries that describe the
+expected norm within the time series.  Very similar to being able to describe
+the Active Brownian Motion of a time series -
+https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801
+
+In addition to these two methods of similarity search Skline also uses `mass_ts`
+to find similar motifs in trained patterns.
+
+This results in an anomaly detection/deflection system which enables the user to
+very simply label time series and train Skyline on the peaks and troughs and the
+expected Active Brownian Motion or best effort thereof.
+
 Overview
 --------
 

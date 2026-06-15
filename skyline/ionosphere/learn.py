@@ -149,9 +149,11 @@ def learn_load_metric_vars(metric_vars_file):
     float_keys = ['value']
     # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
     # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+    # @modified 20241120 - Feature #5064: mirage.inflection
+    # Added anomaly_id
     int_keys = [
         'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
-        'ionosphere_parent_id']
+        'ionosphere_parent_id', 'anomaly_id']
     array_keys = ['algorithms', 'triggered_algorithms']
     boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -768,7 +770,7 @@ def ionosphere_learn(timestamp):
             # (".*", 0, 3661, 16, 100),
             # patch.1
             if learn_full_duration_days == 0:
-                logger.warning('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                logger.info('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
                 learn_full_duration_days = 30
                 # @added 20200717 - Bug #3382: Prevent ionosphere.learn loop edge cases
                 learn_full_duration_seconds = int(learn_full_duration_days * 86400)
@@ -836,7 +838,7 @@ def ionosphere_learn(timestamp):
                 logger.info('info :: learn :: completed work check - a features profile at learn_full_duration_days of %s has already been created for fp id %s' % (
                     str(learn_full_duration_days), str(learn_parent_id)))
                 logger.info('info :: learn :: features profiles exists %s' % (str(exisitng_recent_fps)))
-                logger.warning('warning :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
+                logger.info('warning :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
                 remove_work_list_from_redis_set(learn_metric_list)
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
@@ -1178,7 +1180,7 @@ def ionosphere_learn(timestamp):
             # (".*", 0, 3661, 16, 100),
             # patch.2
             if learn_full_duration_days == 0:
-                logger.warning('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                logger.info('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
                 learn_full_duration_days = 30
                 # patch.2
                 learn_full_duration_seconds = int(learn_full_duration_days) * 86400

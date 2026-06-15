@@ -5,7 +5,12 @@ import logging
 
 from settings import SKYLINE_TMP_DIR
 from skyline_functions import get_redis_conn
-
+# @added 20240206 - Task #5254: Upgrade Skyline to Python 3.10
+#                   Task #5178: Build and test skyline v4.1.0
+try:
+    from settings import ENABLE_DEBUG_ERROR_LOGS
+except:
+    ENABLE_DEBUG_ERROR_LOGS = False
 
 # @added 20220328 - Feature #4018: thunder - skyline.errors
 class RedisErrorLogHandler(logging.StreamHandler):
@@ -25,6 +30,15 @@ class RedisErrorLogHandler(logging.StreamHandler):
             self.redis_conn = None
 
     def emit(self, record):
+
+        # @added 20240202 - Task #5254: Upgrade Skyline to Python 3.10
+        #                   Task #5178: Build and test skyline v4.1.0
+        # This is for DEVELOPMENT ONLY
+        if ENABLE_DEBUG_ERROR_LOGS:
+            debug_file = '%s/%s.debug.errors.txt' % (SKYLINE_TMP_DIR, self.skyline_app)
+            with open(debug_file, 'a') as fh:
+                fh.write(str(record))
+
         # Skip traceback entries because most errors report the traceback and a
         # error log entry
         if 'Traceback (most recent call last)' in str(record):

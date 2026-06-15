@@ -1,5 +1,36 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
+
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }}</span></span></li>
+      </div>
+    </ol>
+  </nav>
+  <br>
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a>
+      </li>
+    </ul>
+
+<!--
+  </div>
+  <div class="mx-auto" style="width: fit-content;">
+-->
+{% else %}
 
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
@@ -39,13 +70,14 @@
           	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a></li>
         </ul>
       </div><!-- /.nav-collapse -->
+{% endif %}
 
 {% if pattern != "*" %}
   {% if exclude != "" %}
     {% if key_type != "" %}
-	<h1>Keys matching <code>{{ pattern }}</code> of types <code>{{ key_types }}</code></h1>
+	<h4>Keys matching <code>{{ pattern }}</code> of types <code>{{ key_types }}</code></h4>
     {% else %}
-	<h1>Keys matching <code>{{ pattern }}</code></h1>
+	<h4>Keys matching <code>{{ pattern }}</code></h4>
     {% endif %}
     {% if key_type != "" %}
 	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, excluding <strong>{{ filtered_out}}</strong> keys matching <code>{{ exclude_list }}</code> and including only <code>{{ key_types }}</code> key types</p>
@@ -53,7 +85,7 @@
 	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, excluding <strong>{{ filtered_out}}</strong> keys matching <code>{{ exclude_list }}</code></p>
     {% endif %}
   {% else %}
-	<h1>Keys matching <code>{{ pattern }}</code></h1>
+	<h4>Keys matching <code>{{ pattern }}</code></h4>
     {% if key_type != "" %}
 	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, including only <code>{{ key_types }}</code> key types</p>
     {% else %}
@@ -62,19 +94,46 @@
   {% endif %}
 {% else %}
   {% if key_type != "" %}
-	<h1>All Keys of types <code>{{ key_types }}</code></h1>
+	<h4>All Keys of types <code>{{ key_types }}</code></h4>
 	<p><strong>{{ num_keys }} Keys available</strong></p>
   {% else %}
-	<h1>All Keys</h1>
+	<h4>All Keys</h4>
 	<p><strong>{{ num_keys }} Keys available</strong></p>
   {% endif %}
 {% endif %}
 
-	<nav class="navbar navbar-default" role="navigation">
+{% if version == dev_ver %}
+	<form action="./">
+		<table class="table table-hover">
+			<thead>
+			<tr>
+				<th>Option</th>
+				<th>value</th>
+			</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Pattern</td>
+					<td><input type="text" name="pattern" size="100" value="{{ pattern }}"> match pattern</td>
+				</tr>
+				<tr>
+					<td>Exclude</td>
+					<td><input type="text" name="exclude" size="60" value="{{ exclude }}"> exclude pattern/s [optional] - multiple exclude patterns can be passed with comma separation</td>
+				</tr>
+				<tr>
+					<td>Key type</td>
+					<td><input type="text" name="key_type" value="{{ key_type }}"> filter by Redis key type [hash|set|string] [optional] - multiple types can be passed with comma separation e.g. <code>hash,set</code></td>
+				</tr>
+			</tbody>
+		</table>
+		<input name="token" type="hidden" value="{{ token }}">
+		<input type="submit" value="Search">
+		<a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
+	</form>
 
+{% else %}
+	<nav class="navbar navbar-default" role="navigation">
 		<form class="navbar-form navbar-left" role="search" method="GET" action="./">
-		  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
-		  <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
 		  <div class="form-group">
 		    <input name="pattern" type="text" class="form-control" placeholder="{{ pattern }}" value="{{ pattern }}"> match pattern<br>
 		    <input name="exclude" type="text" class="form-control" placeholder="{{ exclude }}" value="{{ exclude }}"> exclude pattern/s [optional] - multiple exclude patterns can be passed with comma separation<br>
@@ -84,10 +143,13 @@
 		  <div class="form-group">
 		    <input name="token" type="hidden" class="form-control" placeholder="{{ token }}" value="{{ token }}">
 		  </div>
-		</form>
-
+		  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
+		  <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
+    </form>
 	</nav>
+{% endif %}
 
+	<h4><span class="logo"><span class="sky">Search ::</span> <span class="re">results :: </span></span></h4>
   <div class="tableFixHead">
 	<table class="table table-hover">
 		<thead>
@@ -110,8 +172,12 @@
           				{% elif key_sizes[key] > 1024 %}
           				({{ "%.1f"|format(key_sizes[key] / 1024.0) }} KB)
           				{% endif %}</td>
+        {% if version == dev_ver %}
+          <td><form method="POST"><input type="hidden" name="action" value="delkey" /><input type="hidden" name="key" value="{{ key }}" /><button class="btn btn-danger" type="button" onclick="if(confirm('Are you sure you want to delete this key? {{ key }}')) this.form.submit();"><img src="/static/bootstrap-icons-1.11.3/trash.svg" alt="Trash Icon" width="16" height="16"></button></form></td>
+        {% else %}
 	    		<td><form method="POST"><input type="hidden" name="action" value="delkey" /><input type="hidden" name="key" value="{{ key }}" /><button class="btn btn-default" type="submit" onclick="return confirm('Are you sure you want to delete this key? {{ key }}');"><span class="glyphicon glyphicon-trash"></span></button></form></td>
-	    	</tr>
+        {% endif %}
+        </tr>
 			{% endfor %}
 		</tbody>
 	</table>
@@ -132,5 +198,10 @@
 	  {% endif %}
 	</ul>
 	{% endif %}
+
+{% if version == dev_ver %}
+<!-- Close mx-auto div -->
+	</div>
+{% endif %}
 
 {% endblock %}

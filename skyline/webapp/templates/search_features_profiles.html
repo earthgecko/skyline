@@ -9,6 +9,53 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a>
+    </li>
+  </ul>
+</div>
+<br>
+
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Search</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC"><span class="logo"><span class="sky">Matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC"><span class="logo"><span class="sky">Motif</span> <span class="re">matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_validate=true&metric=all"><span class="logo"><span class="re">Validate</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?validate_motif_annihilations=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re"></span>motif_annihilations</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">List</span> <span class="re">by metrics</span></span></a>
+    </li>
+-->
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?performance=true"><span class="logo"><span class="sky">Performance</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?fp_view=true&a_dated_list=true"><span class="logo"><span class="sky">List</span> <span class="re">by date</span></span></a>
+    </li>
+-->
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -42,17 +89,26 @@
 		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
 	    <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 		  <li><a href="?fp_validate=true&metric=all">Validate</a></li>
+		  <li><a href="?validate_motif_annihilations=true&limit=10">Validate motif_annihilations</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?performance=true">Performance</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
+{% endif %}
+
+{% if version != dev_ver %}
 		<div class="tab-content">
+{% endif %}
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
   		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></h4>
   {% if fp_search_results %}
+    {% if version == dev_ver %}
+        <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#search_options">Show search options</button>
+    {% else %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+    {% endif %}
         <div id="search_options" class="collapse">
   {% endif %}
         <form action="ionosphere">
@@ -107,7 +163,7 @@
 <!-- # @added 20170518 - Feature #1996: Ionosphere - matches page
 Added matched_greater_than query to the search features profile page -->
   		      <tr>
-  		        <td>matched_greater_than</td>
+  		        <td>matched_greater_than (or equal)</td>
   		        <td><input type="number" name="matched_greater_than" value="0"></td>
   		      </tr>
   {% if full_duration_list %}
@@ -144,6 +200,13 @@ Added matched_greater_than query to the search features profile page -->
                 </select></td>
   		      </tr>
   {% endif %}
+  		      <tr>
+                <td>alias</td>
+                <td><select name="alias">
+                  <option value="false">false</option>
+                  <option value="true">true</option>
+                </select></td> Select true if you ony want to search for alias features profiles
+  		      </tr>
   {% if tsfresh_version_list %}
   		      <tr>
                 <td>tsfresh_version</td>
@@ -367,7 +430,9 @@ count
         <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
     {% endif %}
 
+{% if version != dev_ver %}
     <div class="tableFixHead">
+{% endif %}
 			<table class="table table-hover">
 				<thead>
 					<tr>
@@ -452,7 +517,7 @@ count
         {% if item[28] == 'No full duration graph' %}
             <td>No full duration image</td>
         {% else %}
-            <td><img src="ionosphere_images?image={{ item[28] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+            <td><img src="ionosphere_images?image={{ item[28] }}" loading="lazy" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
         {% endif %}
       {% endif %}
 <!-- # @modified 20210415 - Feature #4014: Ionosphere - inference
@@ -461,7 +526,7 @@ count
         {% if item[29] == 'No Redis data graph' %}
             <td>No Redis image</td>
         {% else %}
-            <td><img src="ionosphere_images?image={{ item[29] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+            <td><img src="ionosphere_images?image={{ item[29] }}" loading="lazy" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
         {% endif %}
       {% endif %}
     {% endif %}
@@ -546,7 +611,9 @@ for any of the returned features profiles the layers column values will be blank
   {% endfor %}
 				</tbody>
 			</table>
-    </div>
+{% if version != dev_ver %}
+      </div>
+{% endif %}
 
 		</div>
   {% endif %}

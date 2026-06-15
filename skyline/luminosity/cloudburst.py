@@ -277,7 +277,9 @@ class Cloudburst(Thread):
                     unique_metric_ids_errors += 1
             unique_metric_ids_with_metric[metric_id] = metric
         if unique_metric_ids_errors:
-            logger.error('error :: cloudburst :: find_cloudbursts :: unique_metric_ids_with_metric %s errors encountered, last error: %s' % (
+            # @modified 20241127 - Feature #4674: cloudburst active events only
+            # Changed from error to warning
+            logger.info('warning :: cloudburst :: find_cloudbursts :: unique_metric_ids_with_metric %s errors encountered, last error: %s' % (
                 str(len(errors)), str(errors[-1])))
 
         metric_ids_to_check = []
@@ -440,6 +442,15 @@ class Cloudburst(Thread):
                 logger.error('error :: cloudburst :: find_cloudbursts :: failed to get non_derivative_monotonic_metrics from Redis - %s' % e)
                 non_derivative_monotonic_metrics = []
 
+        # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Also check the metrics_manager.non_derivative_metrics set
+        try:
+            metrics_manager_non_derivative_metrics = self.redis_conn_decoded.smembers('metrics_manager.non_derivative_metrics')
+        except:
+            metrics_manager_non_derivative_metrics = []
+
         timer_start = timer()
         processed = 0
         no_data = 0
@@ -502,6 +513,14 @@ class Cloudburst(Thread):
                         calculate_derivative = True
                     if metric_name in non_derivative_monotonic_metrics:
                         calculate_derivative = False
+
+                    # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    # Also check the metrics_manager.non_derivative_metrics set
+                    if base_name in metrics_manager_non_derivative_metrics:
+                        calculate_derivative = False
+
                     if calculate_derivative:
                         try:
                             derivative_timeseries = nonNegativeDerivative(timeseries)
@@ -816,7 +835,7 @@ class Cloudburst(Thread):
                             logger.error('error :: cloudburst :: find_cloudbursts :: failed add timeseries to metrics_timeseries for %s - %s' % (
                                 base_name, err))
                     else:
-                        logger.warning('warning :: cloudburst :: find_cloudbursts :: failed to retrieve timeseries from VictoriaMetrics for %s: %s' % (
+                        logger.info('warning :: cloudburst :: find_cloudbursts :: failed to retrieve timeseries from VictoriaMetrics for %s: %s' % (
                             base_name, use_base_name))
 
             for base_name in current_base_names:
@@ -836,7 +855,7 @@ class Cloudburst(Thread):
                     # @modified 20220506 - Feature #4164: luminosity - cloudbursts
                     # Change error to warning
                     # logger.error('error :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
-                    logger.warning('warning :: cloudburst :: find_cloudbursts :: no timeseries from %s for %s' % (data_source, base_name))
+                    logger.info('warning :: cloudburst :: find_cloudbursts :: no timeseries from %s for %s' % (data_source, base_name))
                     continue
 
                 if truncate_last_datapoint:
@@ -1544,7 +1563,7 @@ class Cloudburst(Thread):
                                     if isinstance(anomaly_id, int):
                                         break
                                 except KeyError:
-                                    logger.warning('warning :: cloudburst :: find_cloudbursts :: due to KeyError in period_anomalies[%s][%s] could not determine anomaly_id in cloudburst_ts_range (%s, %s) for %s with metric_id %s from period_anomalies: %s' % (
+                                    logger.info('warning :: cloudburst :: find_cloudbursts :: due to KeyError in period_anomalies[%s][%s] could not determine anomaly_id in cloudburst_ts_range (%s, %s) for %s with metric_id %s from period_anomalies: %s' % (
                                         str(metric_id), str(anomaly_timestamp),
                                         str(cloudburst_ts_range_start),
                                         str(cloudburst_ts_range_end), base_name,
@@ -1738,7 +1757,7 @@ class Cloudburst(Thread):
         logger.info('luminosity/cloudburst :: starting find_cloudbursts')
 
         if SERVER_METRIC_PATH == '':
-            logger.warning('warning :: luminosity/cloudburst :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\'')
+            logger.info('warning :: luminosity/cloudburst :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\'')
 
         while 1:
             now = time()
@@ -1800,7 +1819,7 @@ class Cloudburst(Thread):
             pid_count = 0
             for i in range(1, LUMINOSITY_CLOUDBURST_PROCESSES + 1):
                 if i > len(unique_metrics):
-                    logger.warning('warning :: cloudburst :: skyline is set for more cores than needed.')
+                    logger.info('warning :: cloudburst :: skyline is set for more cores than needed.')
                     break
                 try:
                     p = Process(target=self.find_cloudbursts, args=(i, unique_metrics))
@@ -1933,7 +1952,7 @@ class Cloudburst(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: cloudburst :: failed to set expire on %s Redis set - %s' % (
                                 not_processed_metrics_key, e))
-                        logger.warning('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
+                        logger.info('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
                             str(len(not_processed_metrics)),
                             str(len(unique_metrics))))
                         del set_difference

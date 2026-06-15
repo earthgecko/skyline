@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>flux.listen &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>flux.listen &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -193,6 +193,11 @@
         <span class="n">incr_memcache_key</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">append_memcache_key</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># @added 20240318 - Feature #5308: flux - reload_for_keys</span>
+    <span class="kn">from</span> <span class="nn">functions.flux.reload_for_keys</span> <span class="kn">import</span> <span class="n">reload_for_keys</span>
+    <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+    <span class="kn">from</span> <span class="nn">functions.skyline.callback</span> <span class="kn">import</span> <span class="n">callback</span>
+
 <span class="c1"># @added 20200818 - Feature #3694: flux - POST multiple metrics</span>
 <span class="c1"># Added validation of FLUX_API_KEYS</span>
 <span class="n">valid_keys</span> <span class="o">=</span> <span class="p">[]</span>
@@ -282,7 +287,8 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="n">VORTEX_ALLOWED_SHARD_TEST_KEYS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VORTEX_ALLOWED_SHARD_TEST_KEYS</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="n">VORTEX_ALLOWED_SHARD_TEST_KEYS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;URG3U7IrNo18VheSZwP7Jyvg0jWs55Sn&#39;</span><span class="p">]</span>
+    <span class="c1"># VORTEX_ALLOWED_SHARD_TEST_KEYS = [&#39;xxx&#39;]</span>
+    <span class="n">VORTEX_ALLOWED_SHARD_TEST_KEYS</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">VORTEX_MAX_ALGORITHMS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VORTEX_MAX_ALGORITHMS</span>
 <span class="k">except</span><span class="p">:</span>
@@ -300,7 +306,11 @@
 <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
 <span class="c1"># This is a debug feature that allows to enable timing of functions to ensure</span>
 <span class="c1"># performance is maintained as much as possible</span>
-<span class="n">TIMINGS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1">#TIMINGS = False</span>
+<span class="n">TIMINGS</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+<span class="n">init_timings_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="c1"># @modified 20220209 - Feature #4284: flux - telegraf</span>
 <span class="c1"># Allow :</span>
@@ -333,7 +343,12 @@
 <span class="k">if</span> <span class="n">FLUX_AGGREGATE_NAMESPACES</span> <span class="ow">or</span> <span class="n">FLUX_EXTERNAL_AGGREGATE_NAMESPACES</span><span class="p">:</span>
     <span class="c1"># redis_conn_decoded = get_redis_conn_decoded(&#39;flux&#39;)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">aggregate_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;metrics_manager.flux.aggregate_metrics&#39;</span><span class="p">))</span>
+        <span class="c1"># @modified 20231031 - Support #5114: debug.flux.request_times</span>
+        <span class="c1">#                      Task #5088: Change membership of the list checks to sets</span>
+        <span class="c1"># Change aggregate_metrics from a list to a set</span>
+        <span class="c1"># aggregate_metrics = list(redis_conn_decoded.smembers(&#39;metrics_manager.flux.aggregate_metrics&#39;))</span>
+        <span class="n">aggregate_metrics</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;metrics_manager.flux.aggregate_metrics&#39;</span><span class="p">)</span>
+
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: there are </span><span class="si">%s</span><span class="s1"> metrics in the metrics_manager.flux.aggregate_metrics Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aggregate_metrics</span><span class="p">))))</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
@@ -350,6 +365,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">aggregate_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: listen :: failed to get metrics_manager.flux.aggregate_metrics memcache list&#39;</span><span class="p">)</span>
+
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err2</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not get memcache set metrics_manager.flux.aggregate_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">outer_err2</span><span class="p">))</span>
                 <span class="n">aggregate_metrics</span> <span class="o">=</span> <span class="p">[]</span>
@@ -513,10 +529,15 @@
 <span class="k">for</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">aggregate_namespaces_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
     <span class="n">aggregate_namespaces_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
 
+<span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+<span class="c1">#                   Task #5088: Change membership of the list checks to sets</span>
+<span class="n">aggregate_namespaces_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">aggregate_namespaces_list</span><span class="p">)</span>
 
 <span class="c1"># @added 20220117 - Feature #4324: flux - reload external_settings</span>
 <span class="c1">#                   Feature #4376: webapp - update_external_settings</span>
-<div class="viewcode-block" id="check_validate_key_update"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.check_validate_key_update">[docs]</a><span class="k">def</span> <span class="nf">check_validate_key_update</span><span class="p">(</span><span class="n">caller</span><span class="p">):</span>
+<div class="viewcode-block" id="check_validate_key_update">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.check_validate_key_update">[docs]</a>
+<span class="k">def</span> <span class="nf">check_validate_key_update</span><span class="p">(</span><span class="n">caller</span><span class="p">):</span>
 
     <span class="n">updated_valid_keys</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
@@ -567,7 +588,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">updated_valid_keys</span><span class="p">,</span> <span class="n">updated_external_flux_keys</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="validate_key"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_key">[docs]</a><span class="k">def</span> <span class="nf">validate_key</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">apikey</span><span class="p">):</span>
+
+<div class="viewcode-block" id="validate_key">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_key">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_key</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">apikey</span><span class="p">):</span>
 
     <span class="c1"># @added 20200818 - Feature #3694: flux - POST multiple metrics</span>
     <span class="c1"># Added metric_namespace_prefix which is declared via the FLUX_API_KEYS</span>
@@ -700,7 +724,10 @@
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">metric_namespace_prefix</span></div>
 
 
-<div class="viewcode-block" id="validate_timestamp"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_timestamp">[docs]</a><span class="k">def</span> <span class="nf">validate_timestamp</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="validate_timestamp">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_timestamp">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_timestamp</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
 
     <span class="n">timestampInvalidReason</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -754,8 +781,11 @@
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">timestampInvalidReason</span></div>
 
 
+
 <span class="c1"># @added 20201006 - Feature #3764: flux validate metric name</span>
-<div class="viewcode-block" id="validate_metric_name"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_metric_name">[docs]</a><span class="k">def</span> <span class="nf">validate_metric_name</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+<div class="viewcode-block" id="validate_metric_name">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_metric_name">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_metric_name</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
 
     <span class="c1"># @modified 20220211 - Feature #4380: flux - return reason with 400</span>
     <span class="c1"># Added reason</span>
@@ -800,6 +830,7 @@
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reason</span></div>
 
 
+
 <span class="c1"># @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
 <span class="c1"># To reduce the overhead of making a redis query for every metric</span>
 <span class="c1"># submitted, the metric name is checked against the initial loaded</span>
@@ -810,8 +841,12 @@
 <span class="c1">#                      Feature #4324: flux - reload external_settings</span>
 <span class="c1">#                     Feature #4376: webapp - update_external_settings</span>
 <span class="c1"># def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics_list):</span>
-<div class="viewcode-block" id="add_to_aggregate_metric_queue"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.add_to_aggregate_metric_queue">[docs]</a><span class="k">def</span> <span class="nf">add_to_aggregate_metric_queue</span><span class="p">(</span>
+<div class="viewcode-block" id="add_to_aggregate_metric_queue">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.add_to_aggregate_metric_queue">[docs]</a>
+<span class="k">def</span> <span class="nf">add_to_aggregate_metric_queue</span><span class="p">(</span>
         <span class="n">metric</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">aggregate_metrics_list</span><span class="p">,</span> <span class="n">aggregate_namespaces_lst</span><span class="p">):</span>
+
+
     <span class="n">added_to_aggregation_queue</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">return_status_code</span> <span class="o">=</span> <span class="mi">204</span>
     <span class="n">aggregate_metric</span> <span class="o">=</span> <span class="kc">False</span>
@@ -916,8 +951,11 @@
     <span class="k">return</span> <span class="n">added_to_aggregation_queue</span><span class="p">,</span> <span class="n">return_status_code</span></div>
 
 
+
 <span class="c1"># @added 20220126 - Feature #4400: flux - quota</span>
-<div class="viewcode-block" id="get_namespace_quota"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.get_namespace_quota">[docs]</a><span class="k">def</span> <span class="nf">get_namespace_quota</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_namespace_quota">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.get_namespace_quota">[docs]</a>
+<span class="k">def</span> <span class="nf">get_namespace_quota</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">):</span>
     <span class="n">quota</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">quota_str</span> <span class="o">=</span> <span class="n">namespace_quotas_dict</span><span class="p">[</span><span class="n">metric_namespace_prefix</span><span class="p">]</span>
@@ -930,9 +968,14 @@
     <span class="k">return</span> <span class="n">quota</span></div>
 
 
-<div class="viewcode-block" id="MetricData"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricData">[docs]</a><span class="k">class</span> <span class="nc">MetricData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="MetricData.on_get"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricData.on_get">[docs]</a>    <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+<div class="viewcode-block" id="MetricData">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricData">[docs]</a>
+<span class="k">class</span> <span class="nc">MetricData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricData.on_get">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricData.on_get">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/metric_data endpoint is called via a GET with the URI</span>
 <span class="sd">        parameters as defined below, with the optional fill parameter to allow</span>
@@ -945,6 +988,8 @@
 
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET request - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">))</span>
+
+        <span class="n">get_req_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
         <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
         <span class="n">start_request_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
@@ -1033,18 +1078,57 @@
             <span class="c1"># Added status parameter</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_key</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET </span><span class="si">%s</span><span class="s1"> - ok&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">))</span>
+                    <span class="c1"># @modified 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="c1"># logger.info(&#39;listen :: GET %s - ok&#39; % str(req.query_string))</span>
+
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="n">status_timing_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
                     <span class="c1"># @added 20220329 - Feature #4018: thunder - skyline.errors</span>
                     <span class="c1"># Report app up</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: set flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="c1"># @modified 20230928 - Feature #3394: flux health check</span>
+                    <span class="c1"># Try a few times if there is a failure</span>
+                    <span class="n">status_set</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">status_redis_times_checked</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">status_set</span> <span class="ow">and</span> <span class="n">status_redis_times_checked</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="n">status_redis_times_checked</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                            <span class="n">status_set</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: set flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">status_set</span><span class="p">:</span>
+                            <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                            <span class="c1"># Add some debugging for 499s</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">status_timing_start</span><span class="p">:</span>
+                                <span class="n">status_timing_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-                    <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
-                    <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-                    <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="k">if</span> <span class="n">status_timing_start</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET </span><span class="si">%s</span><span class="s1"> - ok - setex flux.listen set </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%s</span><span class="s1"> attempts, took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">status_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">status_redis_times_checked</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">((</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">status_timing_start</span><span class="p">))))</span>
+
+                    <span class="c1"># @modified 20230928 - Feature #3394: flux health check</span>
+                    <span class="c1"># Try a few times if there is a failure and report</span>
+                    <span class="k">if</span> <span class="n">status_set</span><span class="p">:</span>
+                        <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not set flux.listen Redis key for GET status&#39;</span><span class="p">)</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
+
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET status - took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">((</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">get_req_start</span><span class="p">))))</span>
+
                     <span class="k">return</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1075,6 +1159,21 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: added </span><span class="si">%s</span><span class="s1"> to Redis set flux.listen.discarded.invalid_key&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_value</span><span class="p">))</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+                        <span class="c1"># @added 20240318 - Feature #5308: flux - reload_for_keys</span>
+                        <span class="n">reload_results</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">reload_results</span> <span class="o">=</span> <span class="n">reload_for_keys</span><span class="p">(</span><span class="s1">&#39;listen :: MetricData GET&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: reload_for_keys falied, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="s1">&#39;reloading&#39;</span> <span class="ow">in</span> <span class="n">reload_results</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;reloading&#39;</span><span class="p">]:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;reload_for_key called and ttl now set to </span><span class="si">%s</span><span class="s1"> before next reload&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;reload_ttl&#39;</span><span class="p">])))</span>
+                        <span class="k">if</span> <span class="s1">&#39;errors&#39;</span> <span class="ow">in</span> <span class="n">reload_results</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: reload_for_key reported errors: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])))</span>
 
                         <span class="c1"># @added 20220118 - Feature #4380: flux - return reason with 400</span>
                         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;invalid key&#39;</span>
@@ -1617,12 +1716,24 @@
                 <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_204</span>
-        <span class="k">return</span></div></div>
+
+        <span class="c1"># @modified 20231024 - Feature #3394: flux health check</span>
+        <span class="c1"># Add some debugging for 499s, added timing</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET request took </span><span class="si">%.6f</span><span class="s1"> seconds to process&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">end_request_timer</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">)))</span>
+
+        <span class="k">return</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MetricDataPost"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricDataPost">[docs]</a><span class="k">class</span> <span class="nc">MetricDataPost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="MetricDataPost.on_post"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricDataPost.on_post">[docs]</a>    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+<div class="viewcode-block" id="MetricDataPost">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricDataPost">[docs]</a>
+<span class="k">class</span> <span class="nc">MetricDataPost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricDataPost.on_post">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricDataPost.on_post">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/metric_data_post endpoint is called via a POST with a json</span>
 <span class="sd">        object as defined below, with the optional fill parameter to allow</span>
@@ -1660,6 +1771,15 @@
             <span class="n">postData</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="n">post_req_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="n">timings_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">request_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post_req_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()))</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;request_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request_id</span>
+            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: request_id: </span><span class="si">%s</span><span class="s1"> - handling POST metric_data_post request&#39;</span> <span class="o">%</span> <span class="n">request_id</span><span class="p">)</span>
 
             <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
             <span class="n">start_request_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
@@ -1750,6 +1870,11 @@
 
                 <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
                 <span class="k">return</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;read_object_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="n">start_process_header_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
             <span class="c1"># Add metric to add to queue</span>
             <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1860,18 +1985,64 @@
                     <span class="k">return</span>
 
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: POST status - ok&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># @modified 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="c1"># logger.info(&#39;listen :: POST status - ok&#39;)</span>
+
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="n">status_timing_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
                     <span class="c1"># @added 20220329 - Feature #4018: thunder - skyline.errors</span>
                     <span class="c1"># Report app up</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: setex on flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="c1"># @modified 20230928 - Feature #3394: flux health check</span>
+                    <span class="c1"># Try a few times if there is a failure</span>
+                    <span class="n">status_set</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">status_redis_times_checked</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">status_set</span> <span class="ow">and</span> <span class="n">status_redis_times_checked</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="n">status_redis_times_checked</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                            <span class="n">status_set</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: setex flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">status_set</span><span class="p">:</span>
+                            <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                            <span class="c1"># Add some debugging for 499s</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">status_timing_start</span><span class="p">:</span>
+                                <span class="n">status_timing_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-                    <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
-                    <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-                    <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="k">if</span> <span class="n">status_timing_start</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: POST status - ok - setex flux.listen set </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%s</span><span class="s1"> attempts, took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">status_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">status_redis_times_checked</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">((</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">status_timing_start</span><span class="p">))))</span>
+
+                    <span class="c1"># @modified 20230928 - Feature #3394: flux health check</span>
+                    <span class="c1"># Try a few times if there is a failure and report</span>
+                    <span class="k">if</span> <span class="n">status_set</span><span class="p">:</span>
+                        <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not set flux.listen Redis key for POST status&#39;</span><span class="p">)</span>
+                        <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
+
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: POST status - took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">))))</span>
+
+                    <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                    <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;request_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: request_id: </span><span class="si">%s</span><span class="s1">, timings_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">request_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timings_dict</span><span class="p">)))</span>
+
                     <span class="k">return</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1935,6 +2106,21 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: added </span><span class="si">%s</span><span class="s1"> to Redis set flux.listen.discarded.invalid_key&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_value</span><span class="p">))</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20240318 - Feature #5308: flux - reload_for_keys</span>
+                    <span class="n">reload_results</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">reload_results</span> <span class="o">=</span> <span class="n">reload_for_keys</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: reload_for_keys failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="s1">&#39;reloading&#39;</span> <span class="ow">in</span> <span class="n">reload_results</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;reloading&#39;</span><span class="p">]:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;reload_for_key called and ttl now set to </span><span class="si">%s</span><span class="s1"> before next reload, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;reload_ttl&#39;</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">reload_results</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="s1">&#39;errors&#39;</span> <span class="ow">in</span> <span class="n">reload_results</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: reload_for_key reported errors: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">reload_results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">])))</span>
 
                     <span class="c1"># @added 20220118 - Feature #4380: flux - return reason with 400</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;invalid key&#39;</span>
@@ -2093,7 +2279,7 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: postData from failed POST saved to Redis hash </span><span class="si">%s</span><span class="s1">, postData: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">hash_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">)))</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: postData from failed POST saved to Redis hash </span><span class="si">%s</span><span class="s1">, postData: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: postData from failed POST saved to Redis hash </span><span class="si">%s</span><span class="s1">, postData: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">hash_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="c1"># @added 20211018 - Feature #4284: flux - telegraf</span>
@@ -2185,6 +2371,8 @@
                 <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                     <span class="n">end_telegraf_conversion_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: telegraf conversion took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_telegraf_conversion_timer</span> <span class="o">-</span> <span class="n">start_telegraf_conversion_timer</span><span class="p">))</span>
+                    <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;telegraf_conversion_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_telegraf_conversion_timer</span> <span class="o">-</span> <span class="n">start_telegraf_conversion_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">telegraf_metrics_list</span> <span class="ow">and</span> <span class="n">telegraf_payload</span><span class="p">:</span>
                 <span class="n">metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">telegraf_metrics_list</span><span class="p">)</span>
@@ -2215,6 +2403,19 @@
             <span class="n">skipped_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">not_skipped_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">received_namespaces</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;process_headers_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_process_header_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="c1"># Use a single incrby call instead of a redis conn per metric</span>
+            <span class="n">use_incrby</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">increment_by</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="n">start_received_namespaces</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">metric_data</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -2236,7 +2437,14 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not determine metrics in post - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
             <span class="n">received_namespaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">received_namespaces</span><span class="p">))</span>
 
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;received_namespaces&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_received_namespaces</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">ALL_SKIP_LIST</span><span class="p">:</span>
+
+                <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                <span class="n">start_all_skip_list</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                 <span class="n">namespace_not_skipped_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">skipped_metrics_query_redis</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2274,7 +2482,15 @@
                     <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                         <span class="n">end_not_skipped_metrics_dict_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: not_skipped_metrics_dict from Redis took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_not_skipped_metrics_dict_timer</span> <span class="o">-</span> <span class="n">start_not_skipped_metrics_dict_timer</span><span class="p">))</span>
+
+                        <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;all_skip_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_not_skipped_metrics_dict_timer</span> <span class="o">-</span> <span class="n">start_not_skipped_metrics_dict_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">skipped_metrics_query_redis</span><span class="p">:</span>
+
+                    <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                    <span class="n">start_skipped_metrics_query_redis</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                     <span class="n">flux_not_skipped_metrics_key</span> <span class="o">=</span> <span class="s1">&#39;flux.not_skipped_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">received_namespaces</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">metric</span> <span class="o">=</span> <span class="n">metrics_in_post</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">not_skipped_metric</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2305,6 +2521,10 @@
                         <span class="n">original_redis_not_skipped_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_skipped_metric</span>
                         <span class="n">not_skipped_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
 
+                    <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                    <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;skipped_metrics_query_redis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_skipped_metrics_query_redis</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
             <span class="c1"># @added 20220126 - Feature #4400: flux - quota</span>
             <span class="n">namespace_quota</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">current_namespace_metric_count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2319,6 +2539,12 @@
             <span class="c1"># Add flux required data to memcache as well</span>
             <span class="n">quota_metrics_from_memcache</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="n">checked_not_skipped_metrics</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">start_get_namespace_quota</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">metric_namespace_prefix</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: data for metric_namespace_prefix: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">))</span>
@@ -2329,15 +2555,21 @@
                 <span class="k">if</span> <span class="n">check_namespace_quota</span> <span class="ow">in</span> <span class="n">namespaces_with_quotas</span><span class="p">:</span>
                     <span class="n">namespace_quota</span> <span class="o">=</span> <span class="n">get_namespace_quota</span><span class="p">(</span><span class="n">check_namespace_quota</span><span class="p">)</span>
 
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: </span><span class="si">%s</span><span class="s1">, namespace_quota: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_quota</span><span class="p">)))</span>
+
                 <span class="c1"># @added 20230223 - Feature #4840: flux - prometheus - x-test-only header</span>
                 <span class="c1"># Do not check namespace_quota for test metrics</span>
                 <span class="k">if</span> <span class="n">test_only</span><span class="p">:</span>
                     <span class="n">namespace_quota</span> <span class="o">=</span> <span class="mi">0</span>
 
+                <span class="n">namespace_quota_key_reference_timestamp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">//</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="n">namespace_quota_redis_key</span> <span class="o">=</span> <span class="s1">&#39;flux.namespace_quota.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">check_namespace_quota</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_quota_key_reference_timestamp</span><span class="p">))</span>
+
                 <span class="k">if</span> <span class="n">namespace_quota</span><span class="p">:</span>
-                    <span class="n">namespace_quota_key_reference_timestamp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">//</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-                    <span class="n">namespace_quota_redis_key</span> <span class="o">=</span> <span class="s1">&#39;flux.namespace_quota.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">check_namespace_quota</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_quota_key_reference_timestamp</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: </span><span class="si">%s</span><span class="s1"> quota: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_quota</span><span class="p">)))</span>
                     <span class="n">current_namespace_metric_count</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">current_namespace_metric_count</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">scard</span><span class="p">(</span><span class="n">namespace_quota_redis_key</span><span class="p">)</span>
@@ -2362,6 +2594,7 @@
                                 <span class="n">namespace_metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
                     <span class="n">namespace_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">namespace_metrics</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: </span><span class="si">%s</span><span class="s1"> metrics from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">namespace_metrics</span><span class="p">)),</span> <span class="n">quota_namespace_metrics_redis_key</span><span class="p">))</span>
 
                     <span class="c1"># @added 20220202 - Feature #4412: flux - quota - thunder alert</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -2380,6 +2613,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: error determining namespace_quota, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;get_namespace_quota&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_get_namespace_quota</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">metrics</span><span class="p">:</span>
                 <span class="c1"># added 20201211 - Feature #3694: flux - POST multiple metrics</span>
                 <span class="c1"># Added metric count</span>
@@ -2393,6 +2629,7 @@
                 <span class="c1"># @added 20220209 - Feature #4432: functions.metrics.skip_metric</span>
                 <span class="n">metrics_found_in_redis</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">namespace_skipped_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
                 <span class="k">if</span> <span class="n">ALL_SKIP_LIST</span><span class="p">:</span>
 
                     <span class="n">not_found_in_not_skipped</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2416,6 +2653,11 @@
                     <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: metrics_found_in_redis count after not_skipped_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_found_in_redis</span><span class="p">)))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: not_found_in_not_skipped count after not_skipped_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">not_found_in_not_skipped</span><span class="p">)))</span>
+
+                    <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;skip_metrics_redis_resources&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_skip_metrics_redis_resources_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                        <span class="n">start_skipped_metrics_dict_redis_resources_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
                     <span class="k">if</span> <span class="n">not_found_in_not_skipped</span><span class="p">:</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">skipped_metrics_query_redis</span><span class="p">:</span>
@@ -2458,11 +2700,15 @@
                             <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                                 <span class="n">end_skipped_metrics_dict_redis_resources_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                                 <span class="k">if</span> <span class="n">skipped_metrics_dict</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: skipped_metrics_dict with </span><span class="si">%s</span><span class="s1"> metrics from Redis took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skipped_metrics_dict</span><span class="p">)),</span> <span class="p">(</span><span class="n">end_skipped_metrics_dict_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skipped_metrics_dict_redis_resources_timer</span><span class="p">)))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: skipped_metrics_dict with </span><span class="si">%s</span><span class="s1"> metrics from Redis hash </span><span class="si">%s</span><span class="s1"> took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skipped_metrics_dict</span><span class="p">)),</span> <span class="n">flux_skipped_metrics_key</span><span class="p">,</span>
+                                        <span class="p">(</span><span class="n">end_skipped_metrics_dict_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skipped_metrics_dict_redis_resources_timer</span><span class="p">)))</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: no skipped_metrics_dict from Redis took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                         <span class="p">(</span><span class="n">end_skipped_metrics_dict_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skipped_metrics_dict_redis_resources_timer</span><span class="p">)))</span>
+                                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                                <span class="n">start_get_namespace_quota</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;skipped_metrics_dict_redis_resources&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_skipped_metrics_dict_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skipped_metrics_dict_redis_resources_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">received_namespace</span> <span class="o">=</span> <span class="n">received_namespaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                             <span class="n">base_name</span> <span class="o">=</span> <span class="n">metrics_in_post</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -2470,6 +2716,8 @@
                             <span class="n">namespace_skipped_metric</span> <span class="o">=</span> <span class="kc">None</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">namespace_skipped_metric</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">flux_skipped_metrics_key</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                                <span class="n">checked_not_skipped_metrics</span> <span class="o">+=</span> <span class="mi">1</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="ow">not</span> <span class="n">get_memcache_key</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -2519,7 +2767,9 @@
                         <span class="n">end_skip_metrics_redis_resources_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: skip_metrics_redis_resources took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_skip_metrics_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skip_metrics_redis_resources_timer</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: metrics_found_in_redis count after skipped_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_found_in_redis</span><span class="p">)))</span>
-
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;skip_metrics_redis_resources - all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_skip_metrics_redis_resources_timer</span> <span class="o">-</span> <span class="n">start_skip_metrics_redis_resources_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+                        
                 <span class="c1"># @added 20220208 - Feature #4432: functions.metrics.skip_metric</span>
                 <span class="c1"># Performance of functions.metrics.skip_metric on a POST with</span>
                 <span class="c1"># 932 metrics and substantial SKIP_LIST and DO_NOT_SKIP_LIST</span>
@@ -2609,6 +2859,14 @@
                             <span class="nb">str</span><span class="p">(</span><span class="n">metrics_found_in_redis_count</span><span class="p">),</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">metrics_not_found_in_redis_count</span><span class="p">),</span>
                             <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">not_skipped_metrics</span><span class="p">))))</span>
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;skip_metrics_lists&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_skip_metrics_lists_timer</span> <span class="o">-</span> <span class="n">start_skip_metrics_lists_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
+                <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                <span class="c1">#                   Task #5088: Change membership of the list checks to sets</span>
+                <span class="n">namespace_metrics_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">namespace_metrics</span><span class="p">)</span>
+                <span class="n">checked_if_aggregate</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">checked_not_skipped_metrics</span> <span class="o">=</span> <span class="mi">0</span>
 
                 <span class="c1"># @added 20220126 - Feature #4400: flux - quota</span>
                 <span class="k">if</span> <span class="n">namespace_quota</span><span class="p">:</span>
@@ -2625,12 +2883,15 @@
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">skipped_metrics_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                             <span class="n">skipped_metrics_dict_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">skipped_metrics_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                         <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">metrics_in_post</span><span class="p">)):</span>
-                            <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">namespace_metrics</span><span class="p">:</span>
-                                <span class="n">known_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
-                            <span class="k">elif</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">skipped_metrics_dict_list</span><span class="p">:</span>
-                                <span class="n">known_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+                            <span class="c1"># @modified 20231031 - Support #5114: debug.flux.request_times</span>
+                            <span class="c1">#                      Task #5088: Change membership of the list checks to sets</span>
+                            <span class="c1"># if metric_name in namespace_metrics:</span>
+                            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">namespace_metrics_set</span><span class="p">:</span>
+                                <span class="n">known_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">skipped_metrics_dict_list</span><span class="p">:</span>
+                                <span class="n">known_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="n">new_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+                                <span class="n">new_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
 
                         <span class="c1"># @added 20220202 - Feature #4412: flux - quota - thunder alert</span>
                         <span class="k">if</span> <span class="n">test_metric_quota_exceeded_alert</span><span class="p">:</span>
@@ -2652,10 +2913,24 @@
                         <span class="n">end_namespace_quota_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: namespace_quota checks per metric took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_namespace_quota_timer</span> <span class="o">-</span> <span class="n">start_namespace_quota_timer</span><span class="p">))</span>
 
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;namespace_quota&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">namespace_quota</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;namespace_quota_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_namespace_quota_timer</span> <span class="o">-</span> <span class="n">start_namespace_quota_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
                 <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
                 <span class="c1"># Added TIMINGS</span>
                 <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                     <span class="n">start_metrics_processing_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                <span class="n">replace_underscore_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">valid_metric_name_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">valid_timestamp_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">check_aggregate_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">queue_put_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">namespace_quota_metrics_timings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">add_to_namespace_quota_set</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">update_namespace_quota_set_once</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">for</span> <span class="n">metric_data</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
 
@@ -2668,10 +2943,55 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
 
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                            <span class="n">start_replace_underscore_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+                        <span class="c1"># @added 20230927 - Feature #5086: flux.listen - automatically replace space with underscores in metric names</span>
+                        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">:</span>
+                            <span class="n">new_metric</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+                            <span class="n">metric</span> <span class="o">=</span> <span class="n">new_metric</span>
+                            <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_metric</span>
+                        <span class="c1"># @added 20240306 - Feature #5086: flux.listen - automatically replace space with underscores in metric names</span>
+                        <span class="c1"># Also replace double dots as this mess up Graphite and</span>
+                        <span class="c1"># Redis</span>
+                        <span class="k">if</span> <span class="s1">&#39;..&#39;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">:</span>
+                            <span class="n">new_metric</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                            <span class="n">metric</span> <span class="o">=</span> <span class="n">new_metric</span>
+                            <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_metric</span>
+
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                            <span class="n">replace_underscore_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_replace_underscore_timer</span><span class="p">)</span>
+
+<span class="c1"># @added 20230927</span>
+<span class="c1"># TODO flux - invalid metrics thunder alert</span>
+
+                        <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                        <span class="c1">#                   Task #5088: Change membership of the list checks to sets</span>
+                        <span class="n">valid_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">namespace_metrics_set</span><span class="p">:</span>
+                            <span class="n">valid_metric_name</span> <span class="o">=</span> <span class="kc">True</span>
+
                         <span class="c1"># @added 20201006 - Feature #3764: flux validate metric name</span>
                         <span class="c1"># @modified 20220211 - Feature #4380: flux - return reason with 400</span>
                         <span class="c1"># Added reason</span>
-                        <span class="n">valid_metric_name</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">validate_metric_name</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST multiple metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                        <span class="c1"># @modified 20231031 - Support #5114: debug.flux.request_times</span>
+                        <span class="c1">#                      Task #5088: Change membership of the list checks to sets</span>
+                        <span class="c1"># Only check if valid if not already in namespace_metrics_set</span>
+                        <span class="c1"># valid_metric_name, reason = validate_metric_name(&#39;listen :: MetricDataPOST POST multiple metrics&#39;, str(metric))</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_metric_name</span><span class="p">:</span>
+
+                            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                <span class="n">start_valid_metric_name_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+                            <span class="n">valid_metric_name</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">validate_metric_name</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST multiple metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+
+                            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                <span class="n">valid_metric_name_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_valid_metric_name_timer</span><span class="p">)</span>
+
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_metric_name</span><span class="p">:</span>
 
                             <span class="c1"># @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics</span>
@@ -2789,9 +3109,19 @@
                     <span class="k">if</span> <span class="n">timestamp_present</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">backfill</span><span class="p">:</span>
+
+                                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                                <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                    <span class="n">start_valid_timestamp_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                                 <span class="c1"># @modified 20220211 - Feature #4380: flux - return reason with 400</span>
                                 <span class="c1"># Added reason</span>
                                 <span class="n">valid_timestamp</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">validate_timestamp</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST multiple metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_present</span><span class="p">))</span>
+
+                                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                                <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                    <span class="n">valid_timestamp_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_valid_timestamp_timer</span><span class="p">)</span>
+
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="k">if</span> <span class="n">valid_timestamp</span><span class="p">:</span>
@@ -2984,29 +3314,65 @@
 
                         <span class="c1"># @added 20220126 - Feature #4400: flux - quota</span>
                         <span class="k">if</span> <span class="n">namespace_quota</span><span class="p">:</span>
+
+                            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                <span class="n">start_namespace_quota_metrics_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">namespace_metrics</span><span class="p">:</span>
                                     <span class="n">namespace_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">metric</span><span class="p">,</span> <span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+                                    <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                                    <span class="n">add_to_namespace_quota_set</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+                                    <span class="c1"># @modified 20231106 - Support #5114: debug.flux.request_times</span>
+                                    <span class="c1"># Only add to quota_namespace_metrics_redis_key once</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_namespace_quota_set_once</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">metric</span><span class="p">,</span> <span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: error adding metric to quota_namespace_metrics_redis_key, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
-                                <span class="n">redis_conn</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
-                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">metric</span><span class="p">,</span> <span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                            <span class="c1"># @modified 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="c1"># Only add to quota_namespace_metrics_redis_key once</span>
+                            <span class="c1"># @modified 20240711 - Support #5114: debug.flux.request_times</span>
+                            <span class="c1"># Only add if not present above</span>
+                            <span class="c1"># add_to_namespace_quota_set.append(metric)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">update_namespace_quota_set_once</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="n">redis_conn</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">metric</span><span class="p">,</span> <span class="n">namespace_quota_redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+                            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                <span class="n">namespace_quota_metrics_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_namespace_quota_metrics_timer</span><span class="p">)</span>
 
                         <span class="c1"># @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
                         <span class="k">if</span> <span class="n">aggregate_metrics</span> <span class="ow">or</span> <span class="n">aggregate_namespaces_list</span><span class="p">:</span>
+
+                            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                <span class="n">start_check_aggregate_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">added_to_aggregation_queue</span><span class="p">,</span> <span class="n">return_status_code</span> <span class="o">=</span> <span class="n">add_to_aggregate_metric_queue</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">aggregate_metrics</span><span class="p">,</span> <span class="n">aggregate_namespaces_list</span><span class="p">)</span>
+
+                                <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                                <span class="c1"># Added checked_if_aggregate</span>
+                                <span class="n">checked_if_aggregate</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                                <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                                    <span class="n">check_aggregate_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_check_aggregate_timer</span><span class="p">)</span>
+
                                 <span class="k">if</span> <span class="n">added_to_aggregation_queue</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">return_status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
                                         <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
@@ -3022,25 +3388,39 @@
                                 <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
                                 <span class="k">return</span>
 
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                            <span class="n">start_queue_put_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
                         <span class="n">flux</span><span class="o">.</span><span class="n">httpMetricDataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">metric_data</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
                         <span class="n">processed_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">original_base_name</span><span class="p">)</span>
+
+                        <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                        <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                            <span class="n">queue_put_timings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_queue_put_timer</span><span class="p">)</span>
 
                         <span class="c1"># modified 20201016 - Feature #3788: snab_flux_load_test</span>
                         <span class="k">if</span> <span class="n">FLUX_VERBOSE_LOGGING</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: POST mulitple metric data added to flux.httpMetricDataQueue - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
 
+                        <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+                        <span class="n">increment_by</span> <span class="o">+=</span> <span class="mi">1</span>
+
                         <span class="c1"># @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="n">redis_conn</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="c1"># logger.error(&#39;error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s&#39; % e)</span>
-                            <span class="c1"># @added 20220428 - Feature #4536: Handle Redis failure</span>
-                            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">incr_memcache_key</span><span class="p">(</span><span class="s1">&#39;flux&#39;</span><span class="p">,</span> <span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
+                        <span class="c1"># @modified 20231031 - Support #5114: debug.flux.request_times</span>
+                        <span class="c1"># Use a single incrby call instead of a redis conn and incr per metric</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_incrby</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">redis_conn</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="c1"># logger.error(&#39;error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s&#39; % e)</span>
+                                <span class="c1"># @added 20220428 - Feature #4536: Handle Redis failure</span>
+                                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">incr_memcache_key</span><span class="p">(</span><span class="s1">&#39;flux&#39;</span><span class="p">,</span> <span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
 
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -3049,11 +3429,76 @@
                         <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
                         <span class="k">return</span>
 
+                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                <span class="c1"># Only add to quota_namespace_metrics_redis_key once</span>
+                <span class="k">if</span> <span class="n">update_namespace_quota_set_once</span> <span class="ow">and</span> <span class="n">add_to_namespace_quota_set</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                        <span class="n">start_namespace_quota_set_update</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">add_to_namespace_quota_set_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">add_to_namespace_quota_set</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">add_to_namespace_quota_set</span><span class="p">))</span>
+                        <span class="c1"># redis_conn.expire(quota_namespace_metrics_redis_key, 80)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: added </span><span class="si">%s</span><span class="s1"> metrics to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">add_to_namespace_quota_set</span><span class="p">))),</span>
+                            <span class="n">quota_namespace_metrics_redis_key</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add </span><span class="si">%s</span><span class="s1"> metrics to Redis set </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">add_to_namespace_quota_set_set</span><span class="p">)),</span> <span class="n">quota_namespace_metrics_redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;update_namespace_quota_set_metric_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">add_to_namespace_quota_set_set</span><span class="p">)</span>
+                        <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;update_namespace_quota_set_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_namespace_quota_set_update</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
                 <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
                 <span class="c1"># Added TIMINGS</span>
                 <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
                     <span class="n">end_metrics_processing_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: metrics_processing took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end_metrics_processing_timer</span> <span class="o">-</span> <span class="n">start_metrics_processing_timer</span><span class="p">))</span>
+
+                    <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_processing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_metrics_processing_timer</span> <span class="o">-</span> <span class="n">start_metrics_processing_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                <span class="n">end_all_metrics_processing_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_processing - all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="n">end_all_metrics_processing_timer</span> <span class="o">-</span> <span class="n">start_metrics_processing_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">replace_underscore_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;replace_underscore_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">replace_underscore_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;replace_underscore_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">replace_underscore_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">replace_underscore_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">valid_metric_name_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;valid_metric_name_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_metric_name_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;valid_metric_name_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">valid_metric_name_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_metric_name_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">valid_timestamp_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;valid_timestamp_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_timestamp_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;valid_timestamp_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">valid_timestamp_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_timestamp_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">namespace_quota_metrics_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;namespace_quota_metrics_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">namespace_quota_metrics_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;namespace_quota_metrics_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">namespace_quota_metrics_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">namespace_quota_metrics_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">check_aggregate_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;check_aggregate_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_aggregate_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;check_aggregate_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">check_aggregate_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_aggregate_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">queue_put_timings</span><span class="p">:</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;queue_put_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue_put_timings</span><span class="p">)</span>
+                    <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;metrics_timings&#39;</span><span class="p">][</span><span class="s1">&#39;queue_put_timing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">queue_put_timings</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue_put_timings</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="c1"># Added checked_if_aggregate</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: listen :: checked_if_aggregate: </span><span class="si">%s</span><span class="s1"> metrics, checked_not_skipped_metrics: </span><span class="si">%s</span><span class="s1">, metrics_processed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">checked_if_aggregate</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">checked_not_skipped_metrics</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_metrics</span><span class="p">))))</span>
+
+            <span class="c1"># @added 20231031 - Support #5114: debug.flux.request_times</span>
+            <span class="c1"># Use a single incrby call instead of a redis conn and incr per metric</span>
+            <span class="k">if</span> <span class="n">increment_by</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">redis_conn</span><span class="o">.</span><span class="n">incrby</span><span class="p">(</span><span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">,</span> <span class="n">increment_by</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">incr_memcache_key</span><span class="p">(</span><span class="s1">&#39;flux&#39;</span><span class="p">,</span> <span class="s1">&#39;flux.listen.added_to_queue&#39;</span><span class="p">,</span> <span class="n">increment_by</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
 
             <span class="c1"># @added 20230223 - Feature #4840: flux - prometheus - x-test-only header</span>
             <span class="k">if</span> <span class="n">test_only</span><span class="p">:</span>
@@ -3314,6 +3759,9 @@
             <span class="c1"># handling of a single metric POST format.</span>
             <span class="c1"># if not metrics:</span>
 
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">start_flux_all_not_skipped_metrics</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
             <span class="c1"># @added 20220209 - Feature #4432: functions.metrics.skip_metric</span>
             <span class="k">if</span> <span class="n">not_skipped_metrics</span><span class="p">:</span>
                 <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
@@ -3375,6 +3823,12 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: an error occurred check flux.not_skipped_metrics to update - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">err</span><span class="p">))</span>
 
+                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;flux_all_not_skipped_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_flux_all_not_skipped_metrics</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+                
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">start_flux_all_skipped_metrics</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
             <span class="k">if</span> <span class="n">skipped_metrics</span><span class="p">:</span>
                 <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
                 <span class="k">for</span> <span class="n">received_namespace</span> <span class="ow">in</span> <span class="n">received_namespaces</span><span class="p">:</span>
@@ -3429,6 +3883,9 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: an error occurred check flux.skipped_metrics to update - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">err</span><span class="p">))</span>
+
+                <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+                <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;flux_all_skipped_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_flux_all_skipped_metrics</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
 
             <span class="c1"># @added 20220210 - Feature #4284: flux - telegraf</span>
             <span class="n">end_request_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
@@ -3540,23 +3997,45 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: returning 200 on metric_data_post request for metric_namespace_prefix: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_204</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: metric_data_post return 204 - metrics: </span><span class="si">%s</span><span class="s1">, processed: </span><span class="si">%s</span><span class="s1"> (to aggregate </span><span class="si">%s</span><span class="s1">), skipped: </span><span class="si">%s</span><span class="s1">, dropped non-numeric: </span><span class="si">%s</span><span class="s1">, metric_namespace_prefix: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+
+                <span class="c1"># @modified 20231024 - Feature #3394: flux health check</span>
+                <span class="c1"># Add some debugging for 499s, added timing</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: metric_data_post return 204 - metrics: </span><span class="si">%s</span><span class="s1">, processed: </span><span class="si">%s</span><span class="s1"> (to aggregate </span><span class="si">%s</span><span class="s1">), skipped: </span><span class="si">%s</span><span class="s1">, dropped non-numeric: </span><span class="si">%s</span><span class="s1">, metric_namespace_prefix: </span><span class="si">%s</span><span class="s1"> - took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">processed_metrics</span><span class="p">)),</span>
                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_added_to_aggregation</span><span class="p">)),</span>
                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">skipped_metrics</span><span class="p">)))),</span>
                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dropped_telegraf_non_numeric_value_metrics</span><span class="p">)),</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">)))</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_namespace_prefix</span><span class="p">),</span>
+                    <span class="c1"># @added 20231024 - Feature #3394: flux health check</span>
+                    <span class="c1"># Add some debugging for 499s, added timing</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">))))</span>
+
+            <span class="c1"># @added 20231106 - Support #5114: debug.flux.request_times</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;namespace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_namespace_prefix</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;processed_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_metrics</span><span class="p">)</span>
+            <span class="n">timings_dict</span><span class="p">[</span><span class="s1">&#39;request_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_request_timer</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">TIMINGS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: request_id: </span><span class="si">%s</span><span class="s1">, timings_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">request_id</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">timings_dict</span><span class="p">)))</span>
+
             <span class="k">return</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: metric_data_post failed, returning 500 - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
-            <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span></div></div>
+            <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span></div>
+</div>
+
 
 
 <span class="c1"># @added 20220405 - Feature #4516: flux - opentelemetry traces</span>
-<div class="viewcode-block" id="OTLPTracePost"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.OTLPTracePost">[docs]</a><span class="k">class</span> <span class="nc">OTLPTracePost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="OTLPTracePost">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.OTLPTracePost">[docs]</a>
+<span class="k">class</span> <span class="nc">OTLPTracePost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="OTLPTracePost.on_post"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.OTLPTracePost.on_post">[docs]</a>    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+<div class="viewcode-block" id="OTLPTracePost.on_post">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.OTLPTracePost.on_post">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/otlp/v1/trace endpoint is called via a POST with a content</span>
 <span class="sd">        type of application/x-protobuf</span>
@@ -3804,14 +4283,20 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to incrby to Redis key flux.listen.otlp_traces.metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
         <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_204</span>
-        <span class="k">return</span></div></div>
+        <span class="k">return</span></div>
+</div>
+
 
 
 <span class="c1"># @added 20221118 - Feature #4732: flux vortex</span>
 <span class="c1">#                   Feature #4734: mirage_vortex</span>
-<div class="viewcode-block" id="VortexDataPost"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexDataPost">[docs]</a><span class="k">class</span> <span class="nc">VortexDataPost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="VortexDataPost">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexDataPost">[docs]</a>
+<span class="k">class</span> <span class="nc">VortexDataPost</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="VortexDataPost.on_post"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexDataPost.on_post">[docs]</a>    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+<div class="viewcode-block" id="VortexDataPost.on_post">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexDataPost.on_post">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/vortex endpoint is called via a POST with a json</span>
 <span class="sd">        object as defined below, with the optional fill parameter to allow</span>
@@ -3831,11 +4316,14 @@
 <span class="sd">                    &quot;spectral_residual&quot;: {},</span>
 <span class="sd">                    &quot;dbscan&quot;: {},</span>
 <span class="sd">                    &quot;lof&quot;: {},</span>
-<span class="sd">                },                                          # optional</span>
+<span class="sd">                },                                             # optional</span>
 <span class="sd">                &quot;consensus&quot;: [[&quot;sigma&quot;, &quot;sr&quot;], [&quot;sigma&quot;, &quot;matrixprofile&quot;]],</span>
-<span class="sd">                &quot;consensus_count&quot;: 0,                       # optional</span>
+<span class="sd">                &quot;consensus_count&quot;: 0,                           # optional</span>
 <span class="sd">                &quot;check_all_consensuses&quot;: false,</span>
-<span class="sd">                &quot;reference&quot;: &quot;a reference id for you|str&quot;   # optional</span>
+<span class="sd">                &quot;reference&quot;: &quot;a reference id for you|str&quot;,      # optional</span>
+<span class="sd">                &quot;csv_upload&quot;: boolean,                          # optional</span>
+<span class="sd">                &quot;callback_url&quot;: &quot;a url to post the results to&quot;,  # optional</span>
+<span class="sd">                &quot;progress_url&quot;: &quot;a url to post the progress updates to&quot;,  # optional</span>
 <span class="sd">            }</span>
 
 <span class="sd">        For example::</span>
@@ -3850,8 +4338,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># @modified 20230502 Feature #4732: flux vortex</span>
-        <span class="c1">#                    Feature #4734: mirage_vortex</span>
+        <span class="c1"># @modified 20230502 - Feature #4732: flux vortex</span>
+        <span class="c1">#                      Feature #4734: mirage_vortex</span>
         <span class="c1"># Handle cluster fqdn being different from the hostname</span>
         <span class="c1"># by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES</span>
         <span class="c1"># def shard_host(metric, check_horizon_shards):</span>
@@ -3991,7 +4479,15 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen.vortex&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: vortex :: setex on flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s1">&#39;Error while reading from connection : (104&#39;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: vortex :: POST status - ok&#39;</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;flux.listen.vortex&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err2</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: vortex :: 2nd setex attempt on flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err2</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: vortex :: setex on flux.listen failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                     <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
                     <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
                     <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
@@ -4105,6 +4601,10 @@
                 <span class="s1">&#39;realtime_analysis&#39;</span><span class="p">,</span> <span class="s1">&#39;return_results&#39;</span><span class="p">,</span> <span class="s1">&#39;check_all_consensuses&#39;</span><span class="p">,</span>
                 <span class="c1"># @added 20230616 - Feature #4952: vortex - consensus_count</span>
                 <span class="s1">&#39;consensus_count&#39;</span><span class="p">,</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="s1">&#39;callback_url&#39;</span><span class="p">,</span> <span class="s1">&#39;progress_url&#39;</span><span class="p">,</span> <span class="s1">&#39;return_timeseries&#39;</span><span class="p">,</span>
+                <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                <span class="s1">&#39;csv_upload&#39;</span><span class="p">,</span>
             <span class="p">]</span>
             <span class="c1"># Allow FLUX_SELF_API_KEY requests to pass additional parameters</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">FLUX_SELF_API_KEY</span><span class="p">:</span>
@@ -4629,14 +5129,20 @@
             <span class="k">return</span>
 
         <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_204</span>
-        <span class="k">return</span></div></div>
+        <span class="k">return</span></div>
+</div>
+
 
 
 <span class="c1"># @added 20221118 - Feature #4732: flux vortex</span>
 <span class="c1">#                   Feature #4734: mirage_vortex</span>
-<div class="viewcode-block" id="VortexResults"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexResults">[docs]</a><span class="k">class</span> <span class="nc">VortexResults</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="VortexResults">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexResults">[docs]</a>
+<span class="k">class</span> <span class="nc">VortexResults</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="VortexResults.on_get"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexResults.on_get">[docs]</a>    <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+<div class="viewcode-block" id="VortexResults.on_get">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.listen.VortexResults.on_get">[docs]</a>
+    <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/vortex_results endpoint is called via a GET with headers and a</span>
 <span class="sd">        URI parameter of retries.</span>
@@ -4930,7 +5436,9 @@
                 <span class="n">err</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: vortex_results :: returning 500&#39;</span><span class="p">)</span>
             <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
-            <span class="k">return</span></div></div>
+            <span class="k">return</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -4940,7 +5448,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

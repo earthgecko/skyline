@@ -13,7 +13,9 @@ from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_b
 
 
 # @added 20210518 - Branch #1444: thunder
-def thunder_stale_metrics(current_skyline_app, log=True):
+# @modified 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+# Added load_shedding_active
+def thunder_stale_metrics(current_skyline_app, log=True, load_shedding_active=False):
     """
     Determine stale metrics in each top level namespace.
 
@@ -245,6 +247,67 @@ def thunder_stale_metrics(current_skyline_app, log=True):
             function_str, str(err)))
         metrics_manager_do_not_alert_on_stale_metrics = []
 
+    # @added 20240229 - Task #5178: Build and test skyline v4.1.0
+    # Also include skip and do_skip lists
+    metrics_manager_skip_list = []
+    try:
+        metrics_manager_skip_list = redis_conn_decoded.smembers('metrics_manager.skip_list')
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: failed to get metrics_manager.skip_list Redis set - %s' % (
+            function_str, str(err)))
+        metrics_manager_skip_list = []
+    metrics_manager_do_not_skip_list = []
+    try:
+        metrics_manager_do_not_skip_list = redis_conn_decoded.smembers('metrics_manager.do_not_skip_list')
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: failed to get metrics_manager.do_not_skip_list Redis set - %s' % (
+            function_str, str(err)))
+        metrics_manager_do_not_skip_list = []
+
+    # @added 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+    # Added load_shedding_active
+    skyline_feedback_metrics = []
+    skipped_checking_feedback_metrics_count = 0
+    if load_shedding_active:
+        if log:
+            current_logger.info('%s :: load_shedding_active determining skyline_feedback_metrics' % (
+                function_str))
+        try:
+            skyline_feedback_metrics = redis_conn_decoded.smembers('metrics_manager.analyzer.skyline_feedback_metrics')
+        except Exception as err:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: failed to get metrics_manager.analyzer.skyline_feedback_metrics Redis set - %s' % (
+                function_str, str(err)))
+            skyline_feedback_metrics = []
+        if log:
+            current_logger.info('%s :: load_shedding_active determined %s skyline_feedback_metrics' % (
+                function_str, str(len(skyline_feedback_metrics))))
+    feedback_labelled_metric_ids = []
+    if load_shedding_active:
+        if log:
+            current_logger.info('%s :: load_shedding_active determining feedback_labelled_metric_ids' % (
+                function_str))
+        try:
+            feedback_labelled_metric_ids = redis_conn_decoded.smembers('aet.metrics_manager.feedback.labelled_metric_ids')
+        except Exception as err:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: failed to get aet.metrics_manager.feedback.labelled_metric_ids Redis set - %s' % (
+                function_str, str(err)))
+            feedback_labelled_metric_ids = []
+        if log:
+            current_logger.info('%s :: load_shedding_active determined %s feedback_labelled_metric_ids' % (
+                function_str, str(len(feedback_labelled_metric_ids))))
+
     metrics_last_timestamps = []
     parent_namespaces = []
     unique_base_names = list(metrics_last_timestamp_dict.keys())
@@ -269,16 +332,58 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         if use_base_name in metrics_manager_do_not_alert_on_stale_metrics:
             continue
 
+        # @added 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+        # Added load_shedding_active
+        if load_shedding_active:
+            if isinstance(base_name, int):
+                if str(base_name) in feedback_labelled_metric_ids:
+                    skipped_checking_feedback_metrics_count += 1
+                    continue
+            else:
+                if use_base_name in skyline_feedback_metrics:
+                    skipped_checking_feedback_metrics_count += 1
+                    continue
+
+        # @added 20240229 - Task #5178: Build and test skyline v4.1.0
+        # Also include skip and do_skip lists
+        skip_metric = False
+        if base_name in metrics_manager_skip_list:
+            skip_metric = True
+        if base_name in metrics_manager_do_not_skip_list:
+            skip_metric = False
+        if skip_metric:
+            continue
+
         try:
             if base_name == use_base_name:
                 parent_namespace = base_name.split('.')[0]
                 if len(parent_namespace) > 0:
                     parent_namespaces.append(parent_namespace)
             metrics_last_timestamps.append([use_base_name, int(metrics_last_timestamp_dict[base_name])])
-        except Exception as e:
+        except Exception as err:
             last_traceback = traceback.format_exc()
-            last_error = e
+            last_error = str(err)
             error_count += 1
+
+    # @added 20240303 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+    # Added load_shedding_active
+    if load_shedding_active:
+        if log:
+            current_logger.info('%s :: load_shedding_active skipped checking %s feedback metrics' % (
+                function_str, str(skipped_checking_feedback_metrics_count)))
+
+    # @added 20240229 - Task #5178: Build and test skyline v4.1.0
+    # Also include skip and do_skip lists
+    try:
+        del metrics_manager_skip_list
+        del metrics_manager_do_not_skip_list
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: del metrics_manager_skip_list and metrics_manager_do_not_skip_list failed, err: %s' % (
+            function_str, str(err)))
+
     if last_error:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'

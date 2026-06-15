@@ -10,6 +10,16 @@ import warnings
 import copy
 
 import numpy as np
+
+# @added 20231210 - Task #5168: v4.1.0 - update dependencies
+# As of numpy 1.2.4 there is no attribute warnings in np.  Before that
+# np.warnings was the same as the stdlib warnings.  This breaks mass_ts.
+# https://github.com/scikit-learn/scikit-learn/pull/23654
+# 2023-12-10 16:26:11 :: 3926034 :: error :: inference :: 5320 mts.mass2_batch error: module 'numpy' has no attribute 'warnings'
+if np.__version__ >= '1.24':
+    import warnings
+    np.warnings = warnings
+
 import mass_ts as mts
 
 # import matplotlib.image as mpimg
@@ -34,7 +44,7 @@ this_host = str(os.uname()[1])
 try:
     SINGLE_MATCH = settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % e)
     SINGLE_MATCH = True
 
 try:
@@ -42,19 +52,19 @@ try:
     # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % e)
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % e)
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
 
 context = 'inference_inference'
@@ -374,7 +384,17 @@ def find_cloudburst_motifs(metric, snippet, timeseries, print_output=False):
 
     if not use_mass3:
         if not current_best_indices[0]:
-            return matched_motifs, timeseries_matched
+            # @modified 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+            #                      Feature #4014: Ionosphere - inference
+            #                      Task #5178: Build and test skyline v4.1.0
+            # Allow for current_best_indices[0] == 0, which is probably an exact_match
+            # as it was discovered that an exact match current_best_indices
+            # could be like [0, 180, 360, 540]
+            # 2024-01-05 10:08:35 :: 1106567 :: on_demand_motif_analysis :: current_best_indices for fp id 7277, current_best_indices: [0, 180, 360, 540]
+            # return matched_motifs, timeseries_matched
+            if len(current_best_indices) == 0:
+                return matched_motifs, timeseries_matched
+
     if use_mass3 and not current_best_indices:
         return matched_motifs, timeseries_matched
 

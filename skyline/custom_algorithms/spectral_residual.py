@@ -28,13 +28,18 @@ from custom_algorithm_sources.spectral_residual.spectral_residual import Spectra
 
 # @added 20221119 - Feature #4744: custom_algorithms - spectral_residual
 def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
-
     """
     Outlier detector for time-series data using the spectral residual algorithm.
-    Based on the alibi-detect implementation of "Time-Series Anomaly Detection
-    Service at Microsoft" (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+    Based on the alibi-detect implementation of:
+    
+    Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+
+    https://github.com/SeldonIO/alibi-detect/blob/81486cd48b19e4adbb2c5b9d27e0fb601f4a5d41/alibi_detect/od/sr.py
+
     For Mirage this algorithm is FAST
+    
     For Analyzer this algorithm is SLOW
+    
     Although this algorithm is fast, it is not fast enough to be run in Analyzer,
     even if only deployed against a subset of metrics.  In testing
     spectral_residual took between 0.134828 and 0.698201 seconds to run per
@@ -52,16 +57,93 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the anomalous_daily_peak
+        custom_algorithm and algorithm itself.  For the spectral_residual
         custom algorithm no specific algorithm_parameters are required apart
-        from an empty dict, example:
-        ``algorithm_parameters={'return_instance_score': True}``
+        from an empty dict but the spectral_residual algorithm_parameters
+        that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``3`` even in
+            in the real time context because spectral_residual often triggers on
+            the far leading side rather than the trailing side of a peak.
+        - ``'anomaly_window'`` (int): The anomaly_window value
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last 
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``3``.
+        - ``'threshold'`` (float): Threshold used to classify outliers.
+                Relative saliency map distance from the moving average. Default
+                is ``None`` because Skyline is using spectral_residual in an
+                unsupervised manner and makes use of the spectral_residual
+                infer_threshold function method to dynamically calculate the
+                outlier threshold from the data.
+        - ``'threshold_perc'`` (float):
+                A threshold a value inferred from the percentage of instances
+                considered to be outliers in a sample of the dataset.  Default
+                is ``99.0``.
+        - ``'window_amp'`` (int): Window for the average log amplitude.
+                Default is ``20``.
+        - ``'window_local'`` (int):
+                Window for the local average of the saliency map. Note that the
+                averaging is performed over the previous `window_local` data
+                points (i.e., is a local average of the preceding `window_local`
+                points for the current index). Default is ``20``.
+        - ``'n_est_points'`` (int):
+                Number of estimated points padded to the end of the sequence.
+                Default is ``20``.
+        - ``'n_grad_points'`` (int):
+                Number of points used for the gradient estimation of the
+                additional points padded to the end of the sequence. Default is
+                ``20``.
+        - ``'padding_amp_method'`` (str):
+                Padding method to be used prior to each convolution over log
+                amplitude.
+                Possible values: `constant` | `replicate` | `reflect`.
+                    - `constant` - padding with constant 0.
+                    - `replicate` - repeats the last/extreme value.
+                    - `reflect` - reflects the time series.
+                Default value: `reflect`.
+        - ``'padding_local_method'`` (str):
+                Padding method to be used prior to each convolution over
+                saliency map.
+                Possible values: `constant` | `replicate` | `reflect`.
+                    - `constant` - padding with constant 0.
+                    - `replicate` - repeats the last/extreme value.
+                    - `reflect` - reflects the time series.
+                Default value: `reflect`.
+        - ``'padding_amp_side'`` (str):
+                Whether to pad the amplitudes on both sides or only on one side.
+                Possible values: `bilateral` | `left` | `right`.
+                Default value: `bilateral`.
+        - ``'return_results'`` (bool):
+                If ``True``, returns the results dict in addition to anomalous
+                and anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool):
+                If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool):
+                If ``True``, enables debug printing  (for Jupyter testing).
+                Default is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 3,
+                'threshold': None,
+                'threshold_perc': 99.0,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
+    :type algorithm_parameters: dict
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore, instance_scores
-    :rtype: tuple(boolean, float, instance_scores)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 
@@ -165,11 +247,34 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
     except:
         n_grad_points = 5
 
+    padding_amp_method = 'reflect'
+    try:
+        padding_amp_method = algorithm_parameters['padding_amp_method']
+    except:
+        padding_amp_method = 'reflect'
+
+    padding_local_method = 'reflect'
+    try:
+        padding_local_method = algorithm_parameters['padding_local_method']
+    except:
+        padding_local_method = 'reflect'
+
+    padding_amp_side = 'bilateral'
+    try:
+        padding_amp_side = algorithm_parameters['padding_amp_side']
+    except:
+        padding_amp_side = 'bilateral'
+
     anomaly_window = 1
     try:
         anomaly_window = int(algorithm_parameters['anomaly_window'])
     except:
         anomaly_window = 1
+    # If the anomaly_window is 1, give spectral_residual more because
+    # it often triggers on the far leading side rather than the trailing
+    # side of a peak.
+    if anomaly_window == 1:
+        anomaly_window = 3
 
     if debug_print:
         print('running SpectralResidual with threshold: %s, window_amp: %s, window_local: %s, n_est_points: %s, n_grad_points: %s' % (
@@ -179,6 +284,13 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
         current_logger.debug('debug :: running SpectralResidual with threshold: %s, window_amp: %s, window_local: %s, n_est_points: %s, n_grad_points: %s' % (
             str(threshold), str(window_amp), str(window_local),
             str(n_est_points), str(n_grad_points)))
+
+    algorithm_parameters_used = {
+        'anomaly_window': anomaly_window, 'threshold': threshold,
+        'threshold_perc': threshold_perc, 'window_amp': window_amp,
+        'window_local': window_local, 'n_est_points': n_est_points,
+        'n_grad_points': n_grad_points,
+    }
 
     try:
         X = np.array([v for t, v in timeseries])
@@ -193,13 +305,26 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
             window_amp=20,                   # window for the average log amplitude
             window_local=20,                 # window for the average saliency map
             n_est_points=20,                 # nb of estimated points padded to the end of the sequence
-            padding_amp_method='reflect',    # padding method to be used prior to each convolution over log amplitude.
-            padding_local_method='reflect',  # padding method to be used prior to each convolution over saliency map.
-            padding_amp_side='bilateral'     # whether to pad the amplitudes on both sides or only on one side.
+            padding_amp_method=padding_amp_method,      # padding method to be used prior to each convolution over log amplitude.
+            padding_local_method=padding_local_method,  # padding method to be used prior to each convolution over saliency map.
+            padding_amp_side=padding_amp_side           # whether to pad the amplitudes on both sides or only on one side.
         )
         if not threshold:
             od.infer_threshold(X, t, threshold_perc=threshold_perc)
         od_preds = od.predict(X, t, return_instance_score=True, threshold_perc=threshold_perc)
+        if not threshold:
+            # @modified 20240110 - Feature #5198: flux - tornado
+            # Ensure this is coerced to a json friendly value not NaN
+            # algorithm_parameters_used['inferred_threshold'] = float(od_preds['data']['threshold'])
+            inferred_threshold = float(od_preds['data']['threshold'])
+            if np.isnan(inferred_threshold):
+                inferred_threshold = None
+            algorithm_parameters_used['inferred_threshold'] = inferred_threshold
+
+            # Coerce None to False for json
+            algorithm_parameters['threshold'] = False
+            algorithm_parameters_used['threshold'] = False
+
         if debug_print:
             try:
                 print('infer_threshold returned: %s' % str(od_preds['data']['threshold']))
@@ -247,7 +372,11 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
             'anomalies': anomalies,
             'anomalyScore_list': anomalyScore_list,
             'scores': sr_scores,
-            'SpectralResidual results': od_preds,
+            # @modified 20230714 - not being used and is np.array which json
+            # does not like
+            # 'SpectralResidual results': od_preds,
+            'algorithm_parameters': algorithm_parameters,
+            'algorithm_parameters_used': algorithm_parameters_used,
         }
         if debug_print:
             print('ran SpectralResidual OK in %.6f seconds' % (timer() - start))

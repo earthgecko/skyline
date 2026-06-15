@@ -86,6 +86,7 @@ following structure:
                     'namespaces': [''<metric_namespace_1>', '<metric_namespace_2>'],
                     'algorithm_source': '<absolute_path and filename>',
                     'algorithm_parameters': {'<algorithm_parameter_1>': <value>, '<algorithm_parameter_2>': <value>},
+                    'comparing_with_algorithm': '<MIRAGE_>',
                     'max_execution_time': <seconds|float>,
                     'debug_logging': <boolean>,
                     'alert_slack_channel': '<slack_channel>'

@@ -6,6 +6,7 @@ import copy
 from time import time
 from ast import literal_eval
 import json
+import zipfile
 
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
@@ -118,7 +119,7 @@ def save_local_csv():
             function_str, err))
         raise
     csv_filename = csv_file.filename
-    if not csv_filename.endswith('.csv'):
+    if not csv_filename.endswith('.csv') and not csv_filename.endswith('.csv.zip'):
         logger.error('error :: %s :: only .csv files accepted, rejecting %s' % (
             function_str, csv_filename))
         raise ValueError('error :: only .csv files are accepted')
@@ -137,6 +138,21 @@ def save_local_csv():
         logger.error('error :: %s :: failed to %s - %s' % (
             function_str, csv_filename, err))
         raise
+
+    # @added 20240513
+    # Handle zip files
+    if csv_filename.endswith('.zip'):
+        logger.info('%s :: unzipping - %s' % (function_str, str(local_csv_file)))
+        try:
+            with zipfile.ZipFile(local_csv_file, 'r') as zip_ref:
+                zip_ref.extractall(DATA_UPLOADS_PATH)
+            local_csv_file = '%s/%s' % (DATA_UPLOADS_PATH, csv_filename)
+            local_csv_file = local_csv_file.replace('.zip', '')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to unzip data archive - %s' % (
+                function_str, str(local_csv_file)))
+
     return local_csv_file
 
 
@@ -208,8 +224,8 @@ def get_timeseries_from_training_data():
             function_str, err))
         raise
     if not os.path.isfile(training_data_json):
-        logger.error('error :: %s :: training_data_json not passed in POST data - %s' % (
-            function_str, err))
+        logger.error('error :: %s :: training_data_json not passed in POST data' % (
+            function_str))
         raise ValueError('error :: file not found %s' % training_data_json)
     try:
         with open(training_data_json, 'r') as f:
@@ -279,7 +295,7 @@ def get_vortex_results(vortex_post_data):
         request_body = gzip.compress(json.dumps(vortex_post_data).encode('utf-8'))
         r = requests.post(url, data=request_body, headers=headers, timeout=60, verify=settings.VERIFY_SSL)
         if r.status_code != 200:
-            logger.warning('%s :: got response with status code %s and reason %s' % (
+            logger.info('warning :: %s :: got response with status code %s and reason %s' % (
                 function_str, str(r.status_code), str(r.reason)))
         else:
             logger.info('%s :: got vortex response' % function_str)
@@ -292,6 +308,8 @@ def get_vortex_results(vortex_post_data):
     except Exception as err:
         logger.error('error :: %s :: failed to get json response from %s - %s' % (
             function_str, url, err))
+        logger.debug('debug :: %s :: response content: %s' % (
+            function_str, str(r.content)))
         raise
     return vortex_results
 
@@ -338,6 +356,13 @@ def vortex_request():
     except:
         pass
 
+    # @added 20230616 - Feature #4952: vortex - consensus_count
+    try:
+        consensus_count = int(request.form['consensus_count'])
+    except:
+        consensus_count = 0
+    metric_data['consensus_count'] = consensus_count
+
     consensus = []
     try:
         consensus = get_consensus()
@@ -346,10 +371,13 @@ def vortex_request():
         logger.error('error :: %s :: get_consensus failed - %s' % (
             function_str, err))
         raise
-    if not consensus:
+    if not consensus and not consensus_count:
         logger.error('error :: %s :: no consensus determined' % (
             function_str))
         raise ValueError('error :: no consensus determined')
+
+    # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+    csv_upload = False
 
     timeseries = []
     local_csv_file = None
@@ -363,6 +391,8 @@ def vortex_request():
         if local_csv_file:
             try:
                 timeseries = csv_to_timeseries(skyline_app, local_csv_file)
+                # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                csv_upload = True
             except Exception as err:
                 logger.error('error :: %s :: csv_to_timeseries failed with %s - %s' % (
                     function_str, local_csv_file, err))
@@ -403,6 +433,10 @@ def vortex_request():
             logger.error('error :: %s :: failed to load timeseries from training_data_json' % (
                 function_str))
             raise ValueError('error :: failed to load timeseries from training_data_json')
+        if not isinstance(timeseries, list):
+            logger.error('error :: %s :: failed to load the timeseries list from training_data_json' % (
+                function_str))
+            raise ValueError('error :: failed to load timeseries list from training_data_json')
 
     if data_source in ['graphite', 'victoriametrics', 'redis']:
         try:
@@ -439,19 +473,15 @@ def vortex_request():
         except:
             pass
 
-    # @added 20230616 - Feature #4952: vortex - consensus_count
-    try:
-        consensus_count = int(request.form['consensus_count'])
-    except:
-        consensus_count = 0
-    metric_data['consensus_count'] = consensus_count
-
     vortex_post_data = copy.deepcopy(vortex_data)
     for key in list(metric_data.keys()):
         try:
             vortex_post_data[key] = copy.deepcopy(metric_data[key])
         except KeyError:
             continue
+
+    # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+    vortex_post_data['csv_upload'] = csv_upload
 
     logger.debug('debug :: %s :: get_vortex_results POSTing - %s' % (
         function_str, str(vortex_post_data)))
@@ -469,12 +499,20 @@ def vortex_request():
         try:
             status_code = results['status_code']
         except Exception as err:
-            logger.error('error :: %s :: failed to determine status_code from results: %s - %s' % (
-                function_str, str(results), err))
-            status_code = 0
+            try:
+                status_code = results['code']
+            except Exception as err2:
+                logger.error('error :: %s :: failed to determine status_code from results: %s, err: %s, err2: %s' % (
+                    function_str, str(results), err, err2))
+                status_code = 0
 
         if status_code == 200:
             successfully_processed = True
+        if status_code >= 400:
+            logger.error('error :: %s :: status_code: %s, results: %s' % (
+                function_str, str(status_code), str(results)))
+            raise ValueError('error :: /flux/vortex returned status_code: %s, with results: %s' % (
+                str(status_code), str(results)))
 
     logger.info('vortex_request :: status_code: %s, successfully_processed: %s' % (
         str(status_code), str(successfully_processed)))
@@ -483,8 +521,22 @@ def vortex_request():
         try:
             timestamp = results['metric_timestamp']
             use_metric = results['labelled_metric_name']
+    
+            # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+            if csv_upload:
+                use_metric = str(metric)
+
+            # @added 20230703 - Feature #4732: flux vortex
+            #                   Feature #4734: mirage_vortex
+            # Handle csv metrics
             training_data_url = '%s/ionosphere?timestamp=%s&metric=%s&requested_timestamp=%s' % (
                 settings.SKYLINE_URL, str(timestamp), use_metric, str(timestamp))
+
+            # @added 20230703 - Feature #4732: flux vortex
+            #                   Feature #4734: mirage_vortex
+            # Handle csv metrics
+            training_data_url = '%s&vortex_results=true' % training_data_url
+
             results['training_data_url'] = training_data_url
         except Exception as err:
             logger.error('error :: %s :: failed to add training_data_url - %s' % (

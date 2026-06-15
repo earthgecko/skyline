@@ -12,6 +12,9 @@ from database import get_engine, engine_disposal, metric_group_info_table_meta
 from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
 from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+# @added 20231211 - Feature #4164: luminosity - cloudbursts
+#                   Task #5168: v4.1.0 - update dependencies
+from skyline_functions import get_redis_conn_decoded
 
 
 def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces': []}):
@@ -75,6 +78,26 @@ def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces'
                 base_name = ids_with_base_names[int(mi_key)]
             except KeyError:
                 base_name = None
+
+        # @added 20231211 - Feature #4164: luminosity - cloudbursts
+        #                   Task #5168: v4.1.0 - update dependencies
+        # Try the aet.metrics_manager.inactive_ids_with_metric_names Redis hash
+        # first, rather than querying the DB for every inactive metric
+        if not base_name:
+            redis_conn_decoded = None
+            try:
+                redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: get_metric_group_info :: get_redis_conn_decoded failed - %s' % (
+                    current_skyline_app, str(err)))
+            if redis_conn_decoded:
+                try:
+                    mi_str = str(mi_key)
+                    base_name = redis_conn_decoded.hget('aet.metrics_manager.inactive_ids_with_metric_names',  mi_str)
+                except KeyError:
+                    base_name = None
+
         if not base_name:
             try:
                 base_name = get_base_name_from_metric_id(current_skyline_app, int(mi_key))

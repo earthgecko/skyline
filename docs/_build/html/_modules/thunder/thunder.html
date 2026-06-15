@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>thunder.thunder &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>thunder.thunder &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -151,9 +151,16 @@
 <span class="c1"># @added 20220202 - Feature #4412: flux - quota - thunder alert</span>
 <span class="kn">from</span> <span class="nn">functions.thunder.alert_on_quota_exceeded</span> <span class="kn">import</span> <span class="n">alert_on_quota_exceeded</span>
 
+<span class="c1"># @added 20231121 - Feature #5104: boundary - external_settings</span>
+<span class="c1"># Limit cardinality</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.alert_on_boundary_cardinality_breach</span> <span class="kn">import</span> <span class="n">alert_on_boundary_cardinality_breach</span>
+
 <span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
 <span class="c1">#                   Branch #4300: prometheus</span>
 <span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+
+<span class="c1"># @added 20240319 - Feature #5312: thunder - 207 alert</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.alert_on_invalid_metrics</span> <span class="kn">import</span> <span class="n">alert_on_invalid_metrics</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;thunder&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -183,7 +190,9 @@
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="Thunder"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder">[docs]</a><span class="k">class</span> <span class="nc">Thunder</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="Thunder">
+<a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder">[docs]</a>
+<span class="k">class</span> <span class="nc">Thunder</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Thunder class which controls the thunder thread and spawned</span>
 <span class="sd">    processes. Thunder is ONLY for alerting on Skyline operations.</span>
@@ -208,7 +217,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Thunder.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Thunder.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -219,7 +230,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Thunder.spin_thunder_process"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.spin_thunder_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_thunder_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">validated_event_details</span><span class="p">,</span> <span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Thunder.spin_thunder_process">
+<a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.spin_thunder_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">spin_thunder_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">validated_event_details</span><span class="p">,</span> <span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Roll some thunder.</span>
 
@@ -235,9 +249,9 @@
                 <span class="k">if</span> <span class="n">set_alert_cache_key</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> TTL&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">expiry</span><span class="p">)))</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: set_alert_cache_key failed setting key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">cache_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="c1"># Add a key file</span>
                 <span class="n">thunder_keys_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">)</span>
                 <span class="n">thunder_keys_file_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span> <span class="s1">&#39;expiry&#39;</span><span class="p">:</span> <span class="n">expiry</span><span class="p">}</span>
@@ -246,16 +260,16 @@
                         <span class="n">skyline_app</span><span class="p">,</span> <span class="n">thunder_keys_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">thunder_keys_file_data</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added Redis failover thunder_keys_file  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_keys_file</span><span class="p">))</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add Redis failover thunder_keys_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_keys_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add Redis failover thunder_keys_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_keys_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
-        <span class="k">def</span> <span class="nf">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">,</span> <span class="n">do_log</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">redis_item</span><span class="p">:</span>
                 <span class="c1"># Delete the item from the Redis set</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># removed_item = update_redis_set(</span>
                     <span class="c1"># @added 20220303 - Feature #4412: flux - quota - thunder alert</span>
-                    <span class="n">do_log</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># do_log = True</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">redis_item_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_item</span><span class="p">)</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">redis_item_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -267,6 +281,17 @@
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to removed data key from dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sample: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_item_dict</span><span class="p">))</span>
+                            <span class="c1"># @added 20231121 - Feature #5104: boundary - external_settings</span>
+                            <span class="c1"># Limit cardinality</span>
+                            <span class="k">if</span> <span class="n">redis_item_dict</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;boundary_cardinality_breach&#39;</span><span class="p">:</span>
+                                <span class="n">do_log</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not logging total event string as boundary_cardinality_breach, sampling with data removed&#39;</span><span class="p">)</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">del</span> <span class="n">redis_item_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;rejected_metrics&#39;</span><span class="p">]</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to removed data key from dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sample: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_item_dict</span><span class="p">))</span>
+
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed literal_eval the redis_item - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
@@ -278,17 +303,17 @@
                     <span class="c1"># if removed_item:</span>
                     <span class="c1">#     logger.error(&#39;error :: could not determine event_details from %s Redis set entry (removed) - %s&#39; % (</span>
                     <span class="c1">#         thunder_redis_set, str(redis_item)))</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">event_file</span><span class="p">:</span>
                 <span class="c1"># Delete the bad event_file</span>
                 <span class="n">removed_file</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">removed_file</span> <span class="o">=</span> <span class="n">remove_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove event_file </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">removed_file</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;event_file removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">event_file</span><span class="p">)))</span>
@@ -304,6 +329,16 @@
             <span class="n">event_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;metric_quota_exceeded&#39;</span><span class="p">:</span>
                 <span class="n">log_validated_event_details</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># @added 20231121 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Limit cardinality</span>
+            <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;boundary_cardinality_breach&#39;</span><span class="p">:</span>
+                <span class="n">log_validated_event_details</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># @added 20240319 - Feature #5312: thunder - 207 alert</span>
+            <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;invalid_data&#39;</span><span class="p">:</span>
+                <span class="n">log_validated_event_details</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed literal_eval the redis_item - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
@@ -326,9 +361,9 @@
             <span class="n">alert_vias</span> <span class="o">=</span> <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;alert_vias&#39;</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
             <span class="n">event_file</span> <span class="o">=</span> <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;event_file&#39;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: spin_thunder_process :: failed to determine variables from event_details - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">e</span><span class="p">))</span>
+                <span class="n">err</span><span class="p">))</span>
             <span class="c1"># return</span>
 
         <span class="c1"># Handle thunder/rolling alerts first, these are defined by source being</span>
@@ -346,9 +381,9 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_smtp: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_via_smtp</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">alert_via_smtp</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine alert_via_smtp for </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">alert_via_smtp</span><span class="p">:</span>
                 <span class="n">alert_vias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;alert_via_smtp&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_smtp appended to alert_vias&#39;</span><span class="p">)</span>
@@ -359,9 +394,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_slack KeyError&#39;</span><span class="p">)</span>
                 <span class="n">alert_via_slack</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine alert_via_slack for </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">alert_via_slack</span><span class="p">:</span>
                 <span class="n">alert_vias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;alert_via_slack&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_slack appended to alert_vias&#39;</span><span class="p">)</span>
@@ -371,9 +406,9 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_pagerduty: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_via_pagerduty</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">alert_via_pagerduty</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine alert_via_smtp for </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">alert_via_pagerduty</span><span class="p">:</span>
                 <span class="n">alert_vias</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;alert_via_pagerduty&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - alert_via_pagerduty appended to alert_vias&#39;</span><span class="p">)</span>
@@ -401,9 +436,9 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent thunder_alert(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">alert_via</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">subject</span><span class="p">)))</span>
                         <span class="n">alerts_sent</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to alert_via </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">alert_via</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">alert_via</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">alerts_sent</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;alert&#39;</span><span class="p">:</span>
@@ -419,10 +454,10 @@
                 <span class="n">parent_namespace</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;namespace&#39;</span><span class="p">]</span>
                 <span class="n">stale_metrics</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;stale_metrics&#39;</span><span class="p">]</span>
                 <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="n">alert_on_stale_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">stale_metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_on_stale_metrics failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="n">all_sent</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">alerts_sent_dict</span><span class="p">:</span>
                 <span class="n">all_sent</span> <span class="o">=</span> <span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;all_sent&#39;</span><span class="p">]</span>
@@ -445,10 +480,10 @@
             <span class="n">parent_namespace</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">parent_namespace</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;namespace&#39;</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine parent_namespace from data </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
                 <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
             <span class="n">send_no_data_alert</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">parent_namespace</span><span class="p">:</span>
@@ -462,16 +497,16 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Redis key </span><span class="si">%s</span><span class="s1"> exists, not send no_data alert for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">thunder_no_data_alert_key</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">))</span>
                             <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed Redis key </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">thunder_no_data_alert_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                            <span class="n">thunder_no_data_alert_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">parent_namespace</span> <span class="ow">and</span> <span class="n">send_no_data_alert</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="n">alert_on_no_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove event_file </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
                 <span class="n">all_sent</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">alerts_sent_dict</span><span class="p">:</span>
@@ -484,6 +519,34 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">all_sent</span><span class="p">:</span>
                     <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
+
+        <span class="c1"># @added 20231121 - Feature #5104: boundary - external_settings</span>
+        <span class="c1"># Limit cardinality</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span> <span class="ow">and</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;boundary_cardinality_breach&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;handling alert for boundary_cardinality_breach&#39;</span><span class="p">)</span>
+            <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">parent_namespace</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;namespace_prefix&#39;</span><span class="p">]</span>
+                <span class="n">rejected_metrics</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rejected_metrics&#39;</span><span class="p">]</span>
+                <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="n">alert_on_boundary_cardinality_breach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">rejected_metrics</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_on_boundary_cardinality_breach failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">message</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">all_sent</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">alerts_sent_dict</span><span class="p">:</span>
+                <span class="n">all_sent</span> <span class="o">=</span> <span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;all_sent&#39;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> alerts of </span><span class="si">%s</span><span class="s1"> sent for metric_quota_exceeded on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;to_send&#39;</span><span class="p">]),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;sent&#39;</span><span class="p">]),</span> <span class="n">parent_namespace</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">all_sent</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: all alerts were not sent - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">all_sent</span><span class="p">:</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+                <span class="n">create_alert_cache_key</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">validated_event_details</span><span class="p">))</span>
+                <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">,</span> <span class="n">do_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># @added 20220202 - Feature #4412: flux - quota - thunder alert</span>
         <span class="c1"># metrics over quota alerts</span>
@@ -512,12 +575,76 @@
                 <span class="n">create_alert_cache_key</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">validated_event_details</span><span class="p">))</span>
                 <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
 
+        <span class="c1"># @added 20240319 - Feature #5312: thunder - 207 alert</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;flux&#39;</span> <span class="ow">and</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;invalid_data&#39;</span><span class="p">:</span>
+            <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">parent_namespace</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;namespace&#39;</span><span class="p">]</span>
+                <span class="n">alerts_sent_dict</span> <span class="o">=</span> <span class="n">alert_on_invalid_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_on_invalid_metrics failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">parent_namespace</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">all_sent</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">in_expiry</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">alerts_sent_dict</span><span class="p">:</span>
+                <span class="n">all_sent</span> <span class="o">=</span> <span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;all_sent&#39;</span><span class="p">]</span>
+                <span class="n">in_expiry</span> <span class="o">=</span> <span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;in_expiry&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">in_expiry</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> alerts of </span><span class="si">%s</span><span class="s1"> sent for invalid_metrics on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;to_send&#39;</span><span class="p">]),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;sent&#39;</span><span class="p">]),</span> <span class="n">parent_namespace</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ttl</span> <span class="o">=</span> <span class="n">alerts_sent_dict</span><span class="p">[</span><span class="s1">&#39;ttl&#39;</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no alerts for invalid_metrics on </span><span class="si">%s</span><span class="s1"> were sent, in_expiry, ttl: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">parent_namespace</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ttl</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">all_sent</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: all alerts were not sent - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent_dict</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">all_sent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">in_expiry</span><span class="p">:</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">parent_namespace</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+                <span class="n">create_alert_cache_key</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">validated_event_details</span><span class="p">))</span>
+                <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
+
+        <span class="c1"># @added 20240521 - Feature #5352: vista - bigquery</span>
+        <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s1">&#39;bq_backfill_failed&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> thunder alert would be sent to slack for </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">event_type</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+                <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">subject</span> <span class="o">=</span> <span class="n">message</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">alerts_sent</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">alert_via</span> <span class="o">=</span> <span class="s1">&#39;alert_via_slack&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process - thunder rolling event alert_via: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_via</span><span class="p">))</span>
+                <span class="n">alert_sent</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Thunder - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="n">with_subject</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">+</span> <span class="n">with_subject</span>
+                    <span class="n">alert_sent</span> <span class="o">=</span> <span class="n">thunder_alert</span><span class="p">(</span><span class="n">alert_via</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to alert_via </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">alert_via</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">event_type</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">alerts_sent</span><span class="p">:</span>
+                    <span class="n">alerts_sent</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;alert&#39;</span><span class="p">:</span>
+                        <span class="n">create_alert_cache_key</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+                    <span class="n">remove_event</span><span class="p">(</span><span class="n">redis_item</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> alerts sent for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alerts_sent</span><span class="p">),</span> <span class="n">event_type</span><span class="p">))</span>
+
         <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_thunder_process took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">spin_end</span><span class="p">)</span>
 
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Thunder.run"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Thunder.run">
+<a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder.Thunder.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        - Called when the process intializes.</span>
 
@@ -574,24 +701,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
         <span class="c1"># Create the required THUNDER directories which are failed over to and</span>
         <span class="c1"># used in the event that Redis is down</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">THUNDER_EVENTS_DIR</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">mkdir_p</span><span class="p">(</span><span class="n">THUNDER_EVENTS_DIR</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_EVENTS_DIR</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_EVENTS_DIR</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">mkdir_p</span><span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
         <span class="n">last_sent_to_graphite</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
         <span class="n">thunder_alerts_sent</span> <span class="o">=</span> <span class="mi">0</span>
@@ -603,30 +730,30 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Redis ping OK&#39;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected via get_redis_conn&#39;</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                 <span class="c1"># continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn_decoded - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn_decoded - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected via get_redis_conn_decoded&#39;</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect via get_redis_conn_decoded - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect via get_redis_conn_decoded - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                 <span class="c1"># continue</span>
 
             <span class="c1"># Determine if any metric has been added to process</span>
@@ -651,14 +778,14 @@
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set thunder Redis key&#39;</span><span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">current_timestamp</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not update the Redis redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="n">e</span><span class="p">))</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">err</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not update the Redis </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_ENABLED</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 59 seconds settings.THUNDER_ENABLED not set&#39;</span><span class="p">)</span>
@@ -679,8 +806,8 @@
                         <span class="c1">#                      Branch #1444: thunder</span>
                         <span class="c1"># thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)</span>
                         <span class="n">thunder_events</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">))</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
                 <span class="c1"># If no data was returned from Redis ensure thunder_events is</span>
                 <span class="c1"># a set so that any event_files can be added to the set</span>
@@ -690,7 +817,10 @@
                         <span class="n">thunder_events</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">thunder_events</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no entries in thunder.events Redis set&#39;</span><span class="p">)</span>
-                    <span class="n">thunder_events</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @modified 20240206 - Task #4962: Build and test skyline v4.0.0</span>
+                    <span class="c1"># Ensure this is a set so it can be added to not appended</span>
+                    <span class="c1"># thunder_events = []</span>
+                    <span class="n">thunder_events</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
 
                 <span class="c1"># Check the filesystem for failover event files</span>
                 <span class="n">filesystem_check_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -707,20 +837,37 @@
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">event_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                                             <span class="n">data_dict_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to open event_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to open event_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="n">data_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">data_dict_str</span><span class="p">)</span>
-                                        <span class="k">if</span> <span class="n">data_dict</span><span class="p">:</span>
+
+                                        <span class="c1"># @modified 20240206 - Task #4962: Build and test skyline v4.0.0</span>
+                                        <span class="c1"># Do not do multiple actions here do</span>
+                                        <span class="c1"># them individually.  Moved to below</span>
+                                        <span class="c1"># so that only literal_eval is being</span>
+                                        <span class="c1"># done here</span>
+                                        <span class="c1"># if data_dict:</span>
+                                        <span class="c1">#     data_dict[&#39;event_file&#39;] = event_file</span>
+                                        <span class="c1">#     # thunder_events.add(str(data_dict))</span>
+                                        <span class="c1">#     thunder_events.append(str(data_dict))</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to literal_eval event_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                                    <span class="c1"># @added 20240206 - Task #4962: Build and test skyline v4.0.0</span>
+                                    <span class="c1"># Moved from above to run individually and</span>
+                                    <span class="c1"># not in the literal_eval state</span>
+                                    <span class="k">if</span> <span class="n">data_dict</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
                                             <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;event_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_file</span>
-                                            <span class="c1"># thunder_events.add(str(data_dict))</span>
-                                            <span class="n">thunder_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dict</span><span class="p">))</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to literal_eval event_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                            <span class="c1"># Add to the set, set has no append</span>
+                                            <span class="n">thunder_events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dict</span><span class="p">))</span>
+                                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add data to thunder_events set from event_file: </span><span class="si">%s</span><span class="s1"> to data_dict: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">event_file</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed evaluate event_file </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> thunder failover event files found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">thunder_event_files_count</span><span class="p">))</span>
 
                     <span class="c1"># Check the filesystem for failover key files</span>
@@ -737,17 +884,17 @@
                                             <span class="n">key_dict_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                                         <span class="n">key_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">key_dict_str</span><span class="p">)</span>
                                         <span class="n">thunder_key_files_count</span> <span class="o">+=</span> <span class="mi">1</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to open thunder_key_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                            <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                     <span class="n">timestamp</span> <span class="o">=</span> <span class="mi">0</span>
                                     <span class="k">if</span> <span class="n">key_dict</span><span class="p">:</span>
                                         <span class="k">try</span><span class="p">:</span>
                                             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">key_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
                                             <span class="n">expiry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key_dict</span><span class="p">[</span><span class="s1">&#39;expiry&#39;</span><span class="p">])</span>
-                                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine timestamp and expiry from key_dict created from thunder_key_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                                <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                                <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                     <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
                                         <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                                         <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">expiry</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">now</span><span class="p">:</span>
@@ -757,14 +904,14 @@
                                                 <span class="k">if</span> <span class="n">removed_file</span><span class="p">:</span>
                                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed expired thunder_key_file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                                         <span class="n">thunder_key_file</span><span class="p">))</span>
-                                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove </span><span class="si">%s</span><span class="s1">, continuing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                                    <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                                    <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                         <span class="k">if</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">expiry</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">now</span><span class="p">:</span>
                                             <span class="n">expiry</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">+</span> <span class="n">expiry</span><span class="p">)</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed evaluate thunder_key_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">thunder_key_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> thunder failover key files found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">thunder_key_files_count</span><span class="p">))</span>
 
                 <span class="c1"># @added 20220222 -Branch #1444: thunder</span>
@@ -783,22 +930,25 @@
                             <span class="n">redis_item</span> <span class="o">=</span> <span class="n">event_item</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">event_details</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">event_item</span><span class="p">)</span>
-                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">remove_item</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="n">event_details</span> <span class="o">=</span> <span class="kc">None</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine event_details from </span><span class="si">%s</span><span class="s1"> Redis set entry - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="n">missing_required_keys</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="k">if</span> <span class="n">event_details</span><span class="p">:</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine type from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">if</span> <span class="n">event_type</span> <span class="o">!=</span> <span class="s1">&#39;metric_quota_exceeded&#39;</span><span class="p">:</span>
+                                <span class="c1"># @modified 20231121 - Feature #5104: boundary - external_settings</span>
+                                <span class="c1"># Limit cardinality</span>
+                                <span class="c1"># if event_type != &#39;metric_quota_exceeded&#39;:</span>
+                                <span class="k">if</span> <span class="n">event_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;metric_quota_exceeded&#39;</span><span class="p">,</span> <span class="s1">&#39;boundary_cardinality_breach&#39;</span><span class="p">]:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validating thunder event_details: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">))</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validating thunder event_details for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_type</span><span class="p">))</span>
@@ -806,90 +956,90 @@
                                     <span class="n">level</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;alert&#39;</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine level from event_details dict set to alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;alert&#39;</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine type from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">event_type</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_type</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">message</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine message from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">message</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">app</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">app</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine app from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">app</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">metric</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine metric from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">metric</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">source</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">source</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine source from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">source</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">expiry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;expiry&#39;</span><span class="p">])</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">expiry</span> <span class="o">=</span> <span class="mi">900</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine expiry from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">expiry</span> <span class="o">=</span> <span class="mi">900</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;expiry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiry</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">timestamp</span> <span class="o">=</span> <span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine timestamp from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamp</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">alert_vias</span> <span class="o">=</span> <span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;alert_vias&#39;</span><span class="p">]</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">alert_vias</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine alert_vias from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">alert_vias</span> <span class="o">=</span> <span class="p">[]</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;alert_vias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alert_vias</span>
                                 <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;thunder&#39;</span><span class="p">:</span>
                                     <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;alert_vias&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">data</span> <span class="o">=</span> <span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine data from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
                                 <span class="c1"># Add the event_file, this is related to files used</span>
@@ -899,9 +1049,9 @@
                                     <span class="n">event_file</span> <span class="o">=</span> <span class="n">event_details</span><span class="p">[</span><span class="s1">&#39;event_file&#39;</span><span class="p">]</span>
                                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                                     <span class="n">event_file</span> <span class="o">=</span> <span class="kc">None</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine event_file from event_details dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">err</span><span class="p">))</span>
                                     <span class="n">event_file</span> <span class="o">=</span> <span class="kc">None</span>
                                 <span class="n">validated_event_details</span><span class="p">[</span><span class="s1">&#39;event_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event_file</span>
 
@@ -926,25 +1076,25 @@
                                         <span class="c1"># if removed_item:</span>
                                         <span class="c1">#     logger.error(&#39;error :: could not determine event_details from %s Redis set entry (removed) - %s&#39; % (</span>
                                         <span class="c1">#         thunder_redis_set, str(event_item)))</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove bad item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                            <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="c1"># Delete the bad event_file</span>
                                     <span class="n">removed_file</span> <span class="o">=</span> <span class="kc">False</span>
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="n">removed_file</span> <span class="o">=</span> <span class="n">remove_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove bad event_file </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                            <span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                     <span class="k">if</span> <span class="n">removed_file</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine event_details from the event_file (removed) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                             <span class="nb">str</span><span class="p">(</span><span class="n">event_file</span><span class="p">)))</span>
                                 <span class="k">continue</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: validating and checking event - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="n">e</span><span class="p">))</span>
+                                <span class="n">err</span><span class="p">))</span>
 
                         <span class="k">if</span> <span class="n">validated_event_details</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder event_details validated&#39;</span><span class="p">)</span>
@@ -963,10 +1113,10 @@
                             <span class="n">alerted</span> <span class="o">=</span> <span class="kc">None</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">alerted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alert_cache_key</span><span class="p">)</span>
-                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">alert_cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="n">alert_cache_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">alerted</span><span class="p">:</span>
                                 <span class="n">alerted</span> <span class="o">=</span> <span class="n">check_thunder_failover_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert_cache_key</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">alerted</span><span class="p">:</span>
@@ -988,6 +1138,18 @@
                                                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to removed data key from dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
                                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sample: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_item_dict</span><span class="p">))</span>
+                                                    
+                                                <span class="c1"># @added 20231121 - Feature #5104: boundary - external_settings</span>
+                                                <span class="c1"># Limit cardinality</span>
+                                                <span class="k">if</span> <span class="n">redis_item_dict</span><span class="p">[</span><span class="s1">&#39;event_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;boundary_cardinality_breach&#39;</span><span class="p">:</span>
+                                                    <span class="n">do_log</span> <span class="o">=</span> <span class="kc">False</span>
+                                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not logging total event string as boundary_cardinality_breach, sampling with data removed&#39;</span><span class="p">)</span>
+                                                    <span class="k">try</span><span class="p">:</span>
+                                                        <span class="k">del</span> <span class="n">redis_item_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;rejected_metrics&#39;</span><span class="p">]</span>
+                                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to removed data key from dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sample: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_item_dict</span><span class="p">))</span>
+
                                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed literal_eval the redis_item - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
@@ -1001,17 +1163,17 @@
                                         <span class="c1"># if removed_item:</span>
                                         <span class="c1">#     logger.info(&#39;alert key exists, removed event_details from %s Redis set entry - %s&#39; % (</span>
                                         <span class="c1">#         thunder_redis_set, str(redis_item)))</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                            <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                 <span class="k">if</span> <span class="n">event_file</span><span class="p">:</span>
                                     <span class="c1"># Delete the bad event_file</span>
                                     <span class="n">removed_file</span> <span class="o">=</span> <span class="kc">False</span>
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="n">removed_file</span> <span class="o">=</span> <span class="n">remove_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">event_file</span><span class="p">)</span>
-                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove event_file </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">event_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                            <span class="n">event_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                     <span class="k">if</span> <span class="n">removed_file</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert key exists, event_file removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                             <span class="nb">str</span><span class="p">(</span><span class="n">event_file</span><span class="p">)))</span>
@@ -1028,10 +1190,10 @@
                                 <span class="n">current_event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_event_cache_key</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">current_event</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;current_event_cache_key exist in Redis </span><span class="si">%s</span><span class="s1"> for this event, skipping&#39;</span> <span class="o">%</span> <span class="n">current_event_cache_key</span><span class="p">)</span>
-                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">current_event_cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="n">current_event_cache_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">current_event</span><span class="p">:</span>
                                 <span class="n">current_event</span> <span class="o">=</span> <span class="n">check_thunder_failover_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_event_cache_key</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">current_event</span><span class="p">:</span>
@@ -1043,10 +1205,10 @@
                         <span class="k">if</span> <span class="n">validated_event_details</span><span class="p">:</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">current_event_cache_key</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
-                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to setex </span><span class="si">%s</span><span class="s1"> Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">current_event_cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="n">current_event_cache_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">failover_key_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">THUNDER_KEYS_DIR</span><span class="p">,</span> <span class="n">current_event_cache_key</span><span class="p">)</span>
                                     <span class="n">failover_key_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()),</span> <span class="s1">&#39;expiry&#39;</span><span class="p">:</span> <span class="mi">59</span><span class="p">}</span>
@@ -1054,8 +1216,8 @@
                                         <span class="n">skyline_app</span><span class="p">,</span> <span class="n">failover_key_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">failover_key_data</span><span class="p">))</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added Redis failover - failover_key_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">failover_key_file</span><span class="p">))</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add Redis failover failover_key_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">failover_key_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add Redis failover failover_key_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">failover_key_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="c1"># @modified 20220110 - Bug #4364: Prune old thunder.events</span>
                             <span class="c1">#                      Branch #1444: thunder</span>
                             <span class="c1"># redis_item = event_item</span>
@@ -1118,7 +1280,12 @@
                     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping spin_thunder_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
-                            <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                            <span class="c1"># @modified 20240202 - Task #5178: Build and test skyline v4.1.0</span>
+                            <span class="c1"># p.join()</span>
+                            <span class="n">killing_pid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;kill spin_thunder_process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+                            <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killed spin_thunder_process process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
 
                     <span class="c1"># @added 20210907 - Bug #4258: cleanup thunder.events</span>
                     <span class="c1"># Remove event</span>
@@ -1147,9 +1314,9 @@
                             <span class="n">update_redis_set</span><span class="p">(</span>
                                 <span class="n">skyline_app</span><span class="p">,</span> <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">redis_item</span><span class="p">,</span>
                                 <span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">do_log</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">last_sent_to_graphite</span> <span class="o">+</span> <span class="mi">60</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending Graphite metrics&#39;</span><span class="p">)</span>
@@ -1165,8 +1332,8 @@
                 <span class="c1"># Not required here</span>
                 <span class="c1"># try:</span>
                 <span class="c1">#     thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)</span>
-                <span class="c1"># except Exception as e:</span>
-                <span class="c1">#     logger.error(&#39;error :: could not query Redis for set %s - %s&#39; % (thunder_redis_set, e))</span>
+                <span class="c1"># except Exception as err:</span>
+                <span class="c1">#     logger.error(&#39;error :: could not query Redis for set %s - %s&#39; % (thunder_redis_set, err))</span>
 
                 <span class="c1"># @added 20210907 - Bug #4258: cleanup thunder.events</span>
                 <span class="c1"># The original version of thunder never removed the</span>
@@ -1181,8 +1348,8 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;managing thunder.events Redis set and removing any items older than 86400&#39;</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">thunder_events_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">))</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">thunder_events_list</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;managed thunder.events Redis set, no items in set&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">thunder_events_list</span><span class="p">:</span>
@@ -1238,12 +1405,14 @@
                                         <span class="c1"># skyline_app, thunder_redis_set, redis_item,</span>
                                         <span class="n">skyline_app</span><span class="p">,</span> <span class="n">thunder_redis_set</span><span class="p">,</span>
                                         <span class="n">thunder_event_str</span><span class="p">,</span> <span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">do_log</span><span class="p">)</span>
-                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not remove item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">thunder_redis_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to manage a thunder_event in the thunder_events_list - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span></div></div>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to manage a thunder_event in the thunder_events_list - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1253,7 +1422,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -226,7 +226,7 @@ def get_victoriametrics_metric(
             current_logger.error('error :: %s :: unexpected response for %s response_dict: %s - %s' % (
                 function_str, metric, str(response_dict), err))
         if not result:
-            current_logger.warning('warning :: %s :: empty result for %s response_dict: %s' % (
+            current_logger.info('warning :: %s :: empty result for %s response_dict: %s' % (
                 function_str, metric, str(response_dict)))
             timeseries = []
             return False
@@ -332,7 +332,7 @@ def get_victoriametrics_metric(
                     current_logger.error('error :: %s :: unexpected response for %s response_dict: %s - %s' % (
                         function_str, metric, str(response_dict), err))
                 if not result:
-                    current_logger.warning('warning :: %s :: empty result for %s response_dict: %s' % (
+                    current_logger.info('warning :: %s :: empty result for %s response_dict: %s' % (
                         function_str, metric, str(response_dict)))
                     timeseries = []
                     return False

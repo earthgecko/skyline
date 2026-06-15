@@ -102,7 +102,7 @@ class SNAB_flux_load_test(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     def spin_snab_flux_load_test_process(self, current_timestamp):
@@ -551,7 +551,12 @@ class SNAB_flux_load_test(Thread):
                 for p in pids:
                     if p.is_alive():
                         logger.info('stopping spin_snab_flux_load_test_process - %s' % (str(p.is_alive())))
-                        p.join()
+                        # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                        # p.join()
+                        killing_pid = p.pid
+                        logger.info('kill spin_snab with pid: %s' % (str(killing_pid)))
+                        p.terminate()
+                        logger.info('killed spin_snab process with pid: %s' % (str(killing_pid)))
 
                 process_runtime = time() - current_timestamp
                 if process_runtime < 60:

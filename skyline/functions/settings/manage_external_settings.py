@@ -109,6 +109,13 @@ def manage_external_settings(current_skyline_app):
         if not enabled:
             continue
 
+        # @added 20240530 - Feature #5366: EXTERNAL_SETTINGS - only
+        only = []
+        try:
+            only = EXTERNAL_SETTINGS[external_settings_item]['only']
+        except KeyError:
+            only = []
+
         external_settings_dict = {}
         current_logger.info('%s :: fetching external settings from %s' % (
             function_str, str(endpoint)))
@@ -164,6 +171,20 @@ def manage_external_settings(current_skyline_app):
                         if not valid_element:
                             required_elements = False
                             continue
+
+                    # @added 20240530 - Feature #5366: EXTERNAL_SETTINGS - only
+                    if len(only) > 0:
+                        skip_config = True
+                        config_id = 'external-%s' % str(item['id'])
+                        if config_id in only:
+                            skip_config = False
+                        if str(item['id']) in only:
+                            skip_config = False
+                        if item['id'] in only:
+                            skip_config = False
+                        if skip_config:
+                            continue
+
                     if required_elements:
                         config_id = 'external-%s' % str(item['id'])
                         external_settings[config_id] = item
@@ -335,6 +356,20 @@ def manage_external_settings(current_skyline_app):
                     # external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id].copy()
                     external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = copy.deepcopy(LOCAL_EXTERNAL_SETTINGS[config_id])
 
+    # @added 20240308 - Feature #5304: ionosphere.find_repetitive_patterns
+    # Discard any item that has the testing key set
+    remove_config_ids = []
+    for config_id, item in external_settings.items():
+        try:
+            if external_settings[config_id]['testing']:
+                remove_config_ids.append(config_id)
+        except KeyError:
+            continue
+    for config_id in remove_config_ids:
+        current_logger.info('%s :: removing %s from external_settings as it has the testing key set' % (
+            function_str, str(config_id)))
+        del external_settings[config_id]
+
     redis_conn_decoded = None
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
@@ -357,7 +392,7 @@ def manage_external_settings(current_skyline_app):
                 last_known_redis_key, e))
         # @added 20220614 - Bug #4608: functions.settings.manage_external_settings - use cache data on bad response
         if error_use_cache_data:
-            current_logger.warning('warning :: manage_external_settings :: error_use_cache_data set to True so returning skyline.last_known.external_settings from cache')
+            current_logger.info('warning :: manage_external_settings :: error_use_cache_data set to True so returning skyline.last_known.external_settings from cache')
 
         return (external_settings, external_from_cache)
 

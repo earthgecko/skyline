@@ -124,14 +124,17 @@ def get_metric_analysed_events(
         except Exception as err:
             current_logger.error('error :: %s :: determine_data_frequency failed to determine resolution of Graphite data - %s' % (
                 function_str, err))
-        for item in long_duration_timeseries:
-            if int(item[0]) < last_day_timestamp:
-                if full_resolution > resolution:
-                    analysed_count += int(full_resolution / resolution)
+        # @modified 20240604 - Feature #5352: vista - bigquery
+        # Only check if there is data
+        if len(long_duration_timeseries) > 1:
+            for item in long_duration_timeseries:
+                if int(item[0]) < last_day_timestamp:
+                    if full_resolution > resolution:
+                        analysed_count += int(full_resolution / resolution)
+                    else:
+                        analysed_count += 1
                 else:
-                    analysed_count += 1
-            else:
-                break
+                    break
 
     timeseries = []
     try:

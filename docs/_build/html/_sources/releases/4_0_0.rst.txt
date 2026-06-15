@@ -415,7 +415,7 @@ Congratulations, you are now running the best OSS anomaly detection stack in the
 world (probably).
 
 Changes
--------
+=======
 
 New slack messaging does not handle public channel (111)
 thunder (1444)

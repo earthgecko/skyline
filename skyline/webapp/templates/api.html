@@ -1,4 +1,8 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 <!-- BEGIN /now block -->
@@ -1155,7 +1159,7 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[metric_name | str | <font color=red>required</font>]<br>
+  		        <td>graphite_metric=[metric_name | str | <font color=red>required</font>]<br>
                   from_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
                   until_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
               </td>
@@ -2060,6 +2064,64 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
 		    </tbody>
 		  </table>
 
+		  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?skip_analysis</span></span></h4>
+		  <table class="table table-hover">
+			<thead>
+			  <tr>
+				<th>Name</th>
+				<th>Description</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr>
+				<td>Description:</td>
+				<td>Allows to add a set of metric patterns to skip analysis on for a period.<br>
+				The <code>patterns</code> and <code>expiry</code> request arguments must be passed.<br>
+				<code>patterns</code> represents a comma separated list of metric patterns to skip analysis on for the number of
+				seconds specified by the expiry.  This acts as a temporary <code>settings.ANALYZER_SKIP</code> and allows for
+				totally skipping analysis of the metrics which match the pattern/s.  This is useful to disable analysis
+				temporarily when a number of metrics are expected to be become anomalous.  Note that no during the expiry
+				no anomalies or alerts will be recorded for the metrics in question they are simply discarded from analysis. 
+			</td>
+			  </tr>
+			  <tr>
+				<td>Endpoint:</td>
+				<td>/api?skip_analysis&patterns=[pattern,pattern | str]&expiry=[seconds | int ]</td>
+			  </tr>
+			  <tr>
+				<td>Method:</td>
+				<td>GET</td>
+			  </tr>
+			  <tr>
+				<td>Request examples:</td>
+				<td><code>/api?skip_analysis&patterns=telegraf.server1,nginx.server1&expiry=1800</code><br>
+				<code>/api?skip_analysis&patterns=job="prometheus"&expiry=1800&cluster_data=true</code> [optional for clustered Skyline]</td>
+			  </tr>
+			  <tr>
+				<td>Responses:</td>
+				<td>200 - json response, example
+				<code>
+
+{
+"data": {
+  "for_seconds": 1800,
+  "skip_analysis_count": 154,
+  "skip_analysis_on": [
+    "prometheus_remote_storage_bytes_total{job=\"prometheus\"}",
+	...
+  ]
+},
+"status": {
+  "cluster_data": true,
+  "request_time": 0.04792294651269913,
+  "response": 200
+}
+}</code><br>
+			</td>
+			  </tr>
+		  </tbody>
+		</table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?test_alert</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -2084,10 +2146,9 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack</code>
-              </td>
-		          <td><code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack&alerter_id=143</code> (optional alerter_id if from external alert settings)
-              </td>
+		          <td><code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack</code><br>
+		          <code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack&alerter_id=143</code> (optional alerter_id if from external alert settings)
+	              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>

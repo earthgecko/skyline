@@ -71,8 +71,8 @@ def get_fp_motif(
             current_logger.error('error :: %s :: get_db_fp_timeseries failed for fp id %s - %s' % (
                 function_str, str(fp_id), err))
     if not fp_timeseries:
-        current_logger.error('error :: %s :: no timeseries for fp id %s - %s' % (
-            function_str, str(fp_id), err))
+        current_logger.error('error :: %s :: no timeseries for fp id %s' % (
+            function_str, str(fp_id)))
         return fp_motif
 
     try:
@@ -109,7 +109,14 @@ def get_fp_motif(
             # useful.
             # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) and index <= best_index]
             # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) <= best_index]
-            fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) and index <= best_index]
+            # @modified 20241010 - Feature #5476: get_matched_timeseries - match_timestamp_aligned
+            # This method is only being used by get_matched_timeseries and the
+            # fp_motif_ts was not really used by anything so not found to be
+            # incorrect until now.  In other places the fp_motif was being
+            # determined from the motif_index and the fp_timeseries directly.
+            # The method used in ionosphere_backend.py for fp_motif is correct.
+            # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) and index <= best_index]
+            fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index and index <= (best_index + size)]
 
         # @added 20220718 - Feature #4014: Ionosphere - inference
         # Handle the index being 0 and the size greater that 90

@@ -54,7 +54,7 @@
               {% else %}
               <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="re">False</span></span></td>
               {% endif %}
-              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
+              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" loading="lazy" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
             {% endif %}
             </tr>
           {% endfor %}
@@ -68,7 +68,7 @@
               {% else %}
               <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="re">False</span></span></td>
               {% endif %}
-              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
+              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" loading="lazy" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
             {% endif %}
             </tr>
           {% endfor %}

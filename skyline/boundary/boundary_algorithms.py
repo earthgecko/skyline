@@ -6,6 +6,8 @@ import traceback
 import logging
 from time import time
 from redis import StrictRedis
+# @added 20231026 - Feature #5108: boundary - functions
+import bottleneck as bn
 
 import sys
 import os.path
@@ -310,11 +312,57 @@ def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metri
 
     return False
 
+# @added 20231026 - Feature #5108: boundary - functions
+def get_resolution(timeseries):
+    np_timestamps_array = np.array([t for t, v in timeseries])
+    ts_diffs = np.diff(np_timestamps_array)
+    resolution_counts = np.unique(ts_diffs, return_counts=True)
+    resolution = resolution_counts[0][np.argmax(resolution_counts[1])]
+    return resolution
+
+
+# @added 20231026 - Feature #5108: boundary - functions
+def moving_timeseries(timeseries, boundary_function, boundary_function_seconds):
+    """
+    Calculate the moving mean or median timeseries.
+    """
+    if len(timeseries) < 30:
+        return timeseries
+    rolling_timeseries = list(timeseries)
+    try:
+        resolution = get_resolution(timeseries)
+        if boundary_function_seconds < resolution:
+            return timeseries
+        window = int(boundary_function_seconds / resolution)
+        x_np = np.asarray([x[1] for x in timeseries])
+        if boundary_function == 'mean':
+            rolling_values = bn.move_mean(x_np, window=window)
+        if boundary_function == 'median':
+            rolling_values = bn.move_median(x_np, window=window)
+        rolling_list = rolling_values.tolist()
+        rolling_timeseries = []
+        for index, item in enumerate(timeseries):
+            try:
+                rolling_timeseries.append([item[0], rolling_list[index]])
+            except:
+                rolling_timeseries.append([item[0], None])
+        logger.info('preprocessed timeseries using window of %s and %s' % (
+            str(window), boundary_function))
+    except:
+        return timeseries
+    return rolling_timeseries
+
 
 def run_selected_algorithm(
         timeseries, metric_name, metric_expiration_time, metric_min_average,
         metric_min_average_seconds, metric_trigger, alert_threshold,
-        metric_alerters, autoaggregate, autoaggregate_value, algorithm):
+        metric_alerters, autoaggregate, autoaggregate_value, algorithm,
+        # @added 20231026 - Feature #5108: boundary - functions
+        boundary_function, boundary_function_seconds,
+        # @added 20240720 - Feature #5352: vista - bigquery
+        # Added external_settings and bq_accounts_settings
+        external_settings={}, bq_accounts_settings=None,
+        ):
     """
     Filter timeseries and run selected algorithm.
     """
@@ -338,10 +386,13 @@ def run_selected_algorithm(
     # In Boundary the direct settings CUSTOM_STALE_PERIOD dict is checked for
     # a custom stale period.  In Analyzer the metrics_manager Redis hask key is
     # used
+
     stale_period = STALE_PERIOD
     if CUSTOM_STALE_PERIOD or EXTERNAL_SETTINGS:
         try:
-            stale_period = custom_stale_period(skyline_app, metric_name, log=False)
+            # @modified 20240720 - Feature #5352: vista - bigquery
+            # Added external_settings and bq_accounts_settings
+            stale_period = custom_stale_period(skyline_app, metric_name, external_settings=external_settings, bq_accounts_settings=bq_accounts_settings, log=False)
             if stale_period != STALE_PERIOD:
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.debug('debug :: CUSTOM_STALE_PERIOD found - %s, %s' % (
@@ -397,8 +448,27 @@ def run_selected_algorithm(
                     metric_name, str(len(timeseries))))
         raise TooShort()
 
+    # @added 20231026 - Feature #5108: boundary - functions
+    use_timeseries = list(timeseries)
+    function_value = None
+    if boundary_function and boundary_function_seconds:
+        if boundary_function in ['mean', 'median']:
+            try:
+                logger.info('preprocessing %s timeseries to %s' % (metric_name, boundary_function))
+                use_timeseries = moving_timeseries(timeseries, boundary_function, boundary_function_seconds)
+                if use_timeseries:
+                    function_value = use_timeseries[-1][1]
+            except Exception as err:
+                logger.error('%s' % traceback.format_exc())
+                logger.error('error :: moving_timeseries failed - %s' % err)
+                use_timeseries = list(timeseries)
+
     try:
-        ensemble = [globals()[algorithm](timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger)]
+        # @modified 20231026 - Feature #5108: boundary - functions
+        # ensemble = [globals()[algorithm](timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger)]
+        # @modified 20231115 - Feature #5104: boundary - external_settings
+        # Cast variables as type because they can be str from the external_settings
+        ensemble = [globals()[algorithm](use_timeseries, metric_name, int(metric_expiration_time), float(metric_min_average), int(metric_min_average_seconds), float(metric_trigger))]
         if ensemble.count(True) == 1:
             if ENABLE_BOUNDARY_DEBUG:
                 logger.debug(
@@ -415,7 +485,9 @@ def run_selected_algorithm(
                         str(metric_trigger), str(alert_threshold),
                         str(metric_alerters), str(algorithm))
                 )
-            return True, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
+            # @modified 20231026 - Feature #5108: boundary - functions
+            # Added function_value
+            return True, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, function_value
         else:
             if ENABLE_BOUNDARY_DEBUG:
                 logger.debug(
@@ -432,7 +504,12 @@ def run_selected_algorithm(
                         str(metric_trigger), str(alert_threshold),
                         str(metric_alerters), str(algorithm))
                 )
-            return False, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
+            # @modified 20231026 - Feature #5108: boundary - functions
+            # Added function_value
+            return False, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, function_value
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
-        return False, [], 1, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
+        # @modified 20231026 - Feature #5108: boundary - functions
+        # Added function_value
+        function_value = None
+        return False, [], 1, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, function_value

@@ -1,13 +1,28 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
 <!-- BEGIN /now block -->
   <script src="/static/js/skyline.js"></script>
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><a href="/now">Now</a> / <span class="logo"><span class="sky">latest</span> <span class="re">anomalies</span></li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
 		<li><a href="/now">now</a></li>
 		<li class="active"><span class="logo"><span class="sky">latest</span> <span class="re">anomalies</span></li>
 	</ol>
+{% endif %}
 
 <!--  <div class="container main_container">-->
   <div class="container main_container">

@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>custom_algorithms.skyline_matrixprofile &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>custom_algorithms.skyline_matrixprofile &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -126,10 +126,9 @@
   <h1>Source code for custom_algorithms.skyline_matrixprofile</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">THIS IS A MORE FEATUREFUL CUSTOM ALGORITHM to provide a skeleton to develop your</span>
-<span class="sd">own custom algorithms.  The algorithm itself, although viable, is not</span>
-<span class="sd">recommended for production or general use, it is simply a toy algorithm here to</span>
-<span class="sd">demonstrate the structure of a more complex custom algorithm that has</span>
-<span class="sd">``algorithm_parameters`` passed and can also log if enabled.</span>
+<span class="sd">own custom algorithms.  This algorithm demonstrates the structure of a more</span>
+<span class="sd">complex custom algorithm that has ``algorithm_parameters`` passed and can also</span>
+<span class="sd">log if enabled.</span>
 <span class="sd">It is documented via comments #</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -139,6 +138,7 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
 
@@ -173,9 +173,52 @@
 <span class="c1">#     except:</span>
 <span class="c1">#         mp = None</span>
 <span class="c1"># import stumpy</span>
-<span class="kn">from</span> <span class="nn">custom_algorithm_sources</span> <span class="kn">import</span> <span class="n">stumpy</span>
+<span class="c1"># @modified 20240108 - Feature #5198: flux - tornado</span>
+<span class="c1"># Only load if tornado is not enabled</span>
+<span class="c1"># from custom_algorithm_sources import stumpy</span>
+<span class="c1"># @added 20240108 - Feature #5198: flux - tornado</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">nullcontext</span>
+<span class="n">FLUX_TORNADO_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">FLUX_TORNADO_URL</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">FLUX_SELF_API_KEY</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">FLUX_TORNADO_ENABLED</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">FLUX_TORNADO_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20240129 - Feature #5198: flux - tornado</span>
+<span class="c1"># Do not use flux tornado for skyline_matrixprofile if required</span>
+<span class="c1"># stumpy modules are already loaded</span>
+<span class="n">custom_algorithm_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;stumpy&#39;</span><span class="p">,</span><span class="s1">&#39;stump&#39;</span><span class="p">,</span><span class="s1">&#39;stumpy.stamp&#39;</span><span class="p">,</span><span class="s1">&#39;custom_algorithm_sources.stumpy&#39;</span><span class="p">,</span><span class="s1">&#39;custom_algorithm_sources.stumpy.stump&#39;</span><span class="p">]</span>
+<span class="n">algorithm_modules_loaded</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">custom_algorithm_modules</span><span class="p">]</span>
+<span class="n">required_loaded_algorithm_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom_algorithm_sources.stumpy.stump&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_algorithm_sources.stumpy&#39;</span><span class="p">]</span>
+<span class="n">required_loaded</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">required_loaded_algorithm_module</span> <span class="ow">in</span> <span class="n">required_loaded_algorithm_modules</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">required_loaded_algorithm_module</span> <span class="ow">in</span> <span class="n">algorithm_modules_loaded</span><span class="p">:</span>
+        <span class="n">required_loaded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">required_loaded_algorithm_module</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_loaded</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_loaded_algorithm_modules</span><span class="p">):</span>
+    <span class="n">FLUX_TORNADO_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">if</span> <span class="n">FLUX_TORNADO_ENABLED</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+    <span class="kn">import</span> <span class="nn">requests</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">FLUX_TORNADO_URL</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">FLUX_TORNADO_URL</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">FLUX_SELF_API_KEY</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">FLUX_SELF_API_KEY</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stumpy</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="n">stumpy</span><span class="o">.</span><span class="n">stump</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">custom_algorithm_sources</span> <span class="kn">import</span> <span class="n">stumpy</span>
 
 <span class="kn">from</span> <span class="nn">functions.timeseries.downsample</span> <span class="kn">import</span> <span class="n">downsample_timeseries</span>
+<span class="c1"># @added 20231227 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+<span class="c1">#                   Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries_predictions.fft_extrapolation</span> <span class="kn">import</span> <span class="n">fft_extrapolation</span>
 
 <span class="c1"># The name of the fucntion MUST be the same as the name declared in</span>
 <span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
@@ -184,7 +227,9 @@
 <span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
 <span class="c1"># for a full explanation about each.</span>
 <span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
-<div class="viewcode-block" id="skyline_matrixprofile"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.skyline_matrixprofile.skyline_matrixprofile">[docs]</a><span class="k">def</span> <span class="nf">skyline_matrixprofile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="skyline_matrixprofile">
+<a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.skyline_matrixprofile.skyline_matrixprofile">[docs]</a>
+<span class="k">def</span> <span class="nf">skyline_matrixprofile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The skyline_matrixprofile algorithm uses matrixprofile to identify discords.</span>
 
@@ -200,19 +245,53 @@
 <span class="sd">    :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],</span>
 <span class="sd">        [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``</span>
 <span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
-<span class="sd">        custom_algorithm and algorithm itself.  For the matrixprofile custom</span>
-<span class="sd">        algorithm the following parameters are required, example:</span>
-<span class="sd">        ``algorithm_parameters={</span>
-<span class="sd">            &#39;check_details&#39;: {&lt;empty_dict|check_details dict&gt;},</span>
-<span class="sd">            &#39;full_duration&#39;: full_duration,</span>
-<span class="sd">            &#39;windows&#39;: int</span>
-<span class="sd">        }``</span>
+<span class="sd">        custom_algorithm and algorithm itself. The following algorithm_parameters </span>
+<span class="sd">        can be passed to skyline_matrixprofile:</span>
+
+<span class="sd">        - ``&#39;anomaly_window&#39;`` (int): The anomaly_window value.</span>
+<span class="sd">            This specifies how many of the last data points should be considered</span>
+<span class="sd">            when determining if the metric is anomalous. Only the last</span>
+<span class="sd">            ``anomaly_window`` data points in the time series will be used to</span>
+<span class="sd">            determine if the metric is anomalous.  Default is ``1`` but with</span>
+<span class="sd">            matrix profile ``3`` generally works a bit better.</span>
+<span class="sd">        - ``&#39;windows&#39;`` (int): The window size to use for the matrix profile.</span>
+<span class="sd">            There is no default a value must be passed.</span>
+<span class="sd">        - ``&#39;k_discords&#39;`` (int): The number of discords to detect in the matrix </span>
+<span class="sd">            profile. Default is ``20``.</span>
+<span class="sd">        - ``&#39;use_fft_extrapolation&#39;`` (bool):</span>
+<span class="sd">            If ``True``, enables the use of FFT (Fast Fourier Transform)</span>
+<span class="sd">            extrapolation to pad the last window. Default is ``True``.</span>
+<span class="sd">        - ``&#39;context&#39;`` (str or None): Optional</span>
+<span class="sd">            This is for Skyline internal routing in terms of snab.  Default is</span>
+<span class="sd">            ``None``.</span>
+<span class="sd">        - ``&#39;check_details&#39;`` (dict or {}): Optional</span>
+<span class="sd">            The check_details dict from the Skyline app, for internal Skyline</span>
+<span class="sd">            use only. Default is an empty dictionary ``{}``.</span>
+<span class="sd">        - ``&#39;tornado_url&#39;`` (str or None): Optional</span>
+<span class="sd">            The URL for tornado if it is being used. Default is ``None``.</span>
+<span class="sd">        - ``&#39;tornado_api_key&#39;`` (str or None): Optional</span>
+<span class="sd">            The API key for authenticating on /flux/tornado, this will either be</span>
+<span class="sd">            the :mod:`settings.FLUX_SELF_API_KEY` or a key from</span>
+<span class="sd">            :mod:`settings.FLUX_API_KEYS`.  Required only if tornado is being</span>
+<span class="sd">            used.  Default is ``None``.</span>
+<span class="sd">        Example usage:</span>
+
+<span class="sd">            algorithm_parameters={</span>
+<span class="sd">                &#39;anomaly_window&#39;: 3,</span>
+<span class="sd">                &#39;windows&#39;: 5,</span>
+<span class="sd">                &#39;k_discords&#39;: 20,</span>
+<span class="sd">                &#39;use_fft_extrapolation&#39;: True,</span>
+<span class="sd">                &#39;tornado_url&#39;: &#39;http://127.0.0.1:8000/tornado?algorithm=stump&#39;,</span>
+<span class="sd">                &#39;tornado_api_key&#39;: &#39;&lt;FLUX_SELF_API_KEY&gt; or a key from FLUX_API_KEYS&#39;,</span>
+<span class="sd">                &#39;debug_logging&#39;: True,</span>
+<span class="sd">                &#39;return_results&#39;: True,</span>
+<span class="sd">            }</span>
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type parent_pid: int</span>
 <span class="sd">    :type timeseries: list</span>
 <span class="sd">    :type algorithm_parameters: dict</span>
-<span class="sd">    :return: True, False or Non</span>
-<span class="sd">    :rtype: boolean</span>
+<span class="sd">    :return: anomalous, anomalyScore, results</span>
+<span class="sd">    :rtype: tuple(bool, float, dict)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -230,7 +309,7 @@
     <span class="c1"># anomalyScore.</span>
     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;matrixprofile_scores&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;matrixprofile_scores&#39;</span><span class="p">:</span> <span class="p">[]}</span>
 
     <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -275,6 +354,9 @@
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_logging enabled with algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: FLUX_TORNADO_ENABLED: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">FLUX_TORNADO_ENABLED</span><span class="p">)))</span>
+
         <span class="k">except</span><span class="p">:</span>
             <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
             <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
@@ -288,6 +370,14 @@
             <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># @added 20231231 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+    <span class="c1">#                   Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+    <span class="n">use_fft_extrapolation</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">use_fft_extrapolation</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;use_fft_extrapolation&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">use_fft_extrapolation</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># @njit(cache=True)</span>
     <span class="c1"># def numba_stump(ts, windows):</span>
@@ -326,6 +416,30 @@
         <span class="n">anomaly_window</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># @added 20240108 - Feature #5198: flux - tornado</span>
+    <span class="n">flux_tornado_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tornado_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tornado_url</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;tornado_url&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">tornado_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tornado_api_key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">tornado_url</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tornado_api_key</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;tornado_api_key&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">tornado_api_key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">tornado_url</span> <span class="ow">and</span> <span class="n">tornado_api_key</span><span class="p">:</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: using tornado&#39;</span> <span class="o">%</span> <span class="n">func_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: not using tornado, stumpy loaded&#39;</span> <span class="o">%</span> <span class="n">func_name</span><span class="p">)</span>
 
     <span class="c1"># Allow the matrixprofile windows parameter to be passed in the</span>
     <span class="c1"># check_details for snab as well</span>
@@ -381,6 +495,22 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="c1"># Default to discovering 20 discords</span>
             <span class="n">k_discords</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="c1"># @added 20240129 - Feature #5198: flux - tornado</span>
+    <span class="c1"># Do not use flux tornado for skyline_matrixprofile if required</span>
+    <span class="c1"># stumpy modules are already loaded</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">FLUX_TORNADO_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">custom_algorithm_sources</span> <span class="kn">import</span> <span class="n">stumpy</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy imported from custom_algorithm_sources&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to load stumpy from custom_algorithm_sources- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
     <span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and the BELOW except</span>
     <span class="k">try</span><span class="p">:</span>
@@ -544,6 +674,8 @@
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: resolution failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">downsample_data</span><span class="p">:</span>
             <span class="n">original_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
@@ -569,8 +701,50 @@
         <span class="c1"># the timeseries</span>
         <span class="c1"># reversed_timeseries = timeseries[::-1]</span>
 
+        <span class="c1"># @added 20231227 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+        <span class="c1">#                   Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+        <span class="c1"># Although the original implementation of skyline_matrixprofile gets</span>
+        <span class="c1"># around the &quot;last window not analysed&quot; problem with the trigger_override</span>
+        <span class="c1"># method so that the anomaly is passed through multiple times.  Another</span>
+        <span class="c1"># method was tested and implemented in custom_algorithms on 20230731</span>
+        <span class="c1"># with Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+        <span class="c1"># which uses a fft extraplotation to pad the window in m66 and</span>
+        <span class="c1"># matrixprofile.   The predictions do not need to be accurate, just</span>
+        <span class="c1"># within a reasonable probability and providing data to the algorithm</span>
+        <span class="c1"># that will allow for the data points in the final window to be</span>
+        <span class="c1"># evaluated with the windowed algorithm in question.</span>
+        <span class="c1"># It was later discovered that Eamonn Keogh, et al use the min mp value</span>
+        <span class="c1"># in matrixprofile XXVIII (28) and TSAIDS to pad the end window of the</span>
+        <span class="c1"># time series, e.g.</span>
+        <span class="c1"># profile = np.insert(profile, len(profile),[np.min(profile)]*pad_size)</span>
+        <span class="c1"># So there is nothing wrong with using an fft extrapolation and in this</span>
+        <span class="c1"># context it is better than using the min mp.</span>
+        <span class="n">fft_extrapolation_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">use_fft_extrapolation</span><span class="p">:</span>
+            <span class="n">start_fft</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fft_extrapolation_timeseries</span> <span class="o">=</span> <span class="n">fft_extrapolation</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">n_predict</span><span class="o">=</span><span class="p">(</span><span class="n">windows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">log</span><span class="o">=</span><span class="n">debug_logging</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fft_extrapolation_timeseries</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                    <span class="n">fft_extrapolation_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">fft_extrapolation_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> fft_extrapolation error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">fft_timing</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_fft</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: fft_extrapolation_timeseries of length: </span><span class="si">%s</span><span class="s1"> (original: </span><span class="si">%s</span><span class="s1">), created in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fft_extrapolation_timeseries</span><span class="p">)),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)),</span> <span class="n">fft_timing</span><span class="p">))</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+
+            <span class="c1"># @modified 20231228 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+            <span class="c1">#                      Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fft_extrapolation_timeseries</span><span class="p">:</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fft_extrapolation_timeseries</span><span class="p">]</span>
 
             <span class="c1"># Do not reverse - after the right yssiM</span>
             <span class="c1"># dataset = dataset[::-1]</span>
@@ -593,97 +767,224 @@
             <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: preprocessing took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">func_name</span><span class="p">,</span> <span class="n">preprocessing_runtime</span><span class="p">))</span>
 
-        <span class="c1"># @added 20230113 - Task #4786: Switch from matrixprofile to stumpy</span>
-        <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">stumpy_available</span><span class="p">:</span>
-            <span class="n">start_dir_list</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-            <span class="n">loaded_modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dir</span><span class="p">())</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20240108 - Feature #5198: flux - tornado</span>
+        <span class="n">profile_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">tornado_url</span> <span class="ow">and</span> <span class="n">tornado_api_key</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: dir() took </span><span class="si">%s</span><span class="s1"> seconds and listed </span><span class="si">%s</span><span class="s1"> loaded modules&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_dir_list</span><span class="p">),</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loaded_modules</span><span class="p">))))</span>
-            <span class="k">if</span> <span class="s1">&#39;np&#39;</span> <span class="ow">in</span> <span class="n">loaded_modules</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: np is loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">func_name</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: np is not loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">func_name</span><span class="p">))</span>
-            <span class="k">if</span> <span class="s1">&#39;stump&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loaded_modules</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump is not loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">func_name</span><span class="p">))</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: using tornado stump to generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">))</span>
+            <span class="n">flux_tornado_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">tornado_api_key</span><span class="p">,</span>
+                <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;stump&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ts&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+                <span class="s2">&quot;windows&quot;</span><span class="p">:</span> <span class="n">windows</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">start_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                <span class="c1"># Add timeout for bandit B113</span>
+                <span class="c1">#r = requests.post(tornado_url, data=json.dumps(flux_tornado_dict), headers=headers)</span>
+                <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">20</span>
+                <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                        <span class="n">tornado_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">flux_tornado_dict</span><span class="p">),</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+                <span class="c1"># @modified 20241025 - Feature #5519: functions.skyline.coerce_to_valid_json</span>
+                <span class="c1">#                      Bug #5518: custom_algorithms_results - invalid JSON</span>
+                <span class="c1"># Separate the r, response and profile_list steps</span>
+                <span class="c1">#response = r.json()</span>
+                <span class="c1">#profile_list = response[&#39;data&#39;][&#39;profile&#39;]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get profile from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tornado_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># These get overridden they only hold the last request and bad</span>
+            <span class="c1"># response</span>
+            <span class="n">debug_request_file</span> <span class="o">=</span> <span class="s1">&#39;/tmp/skyline/</span><span class="si">%s</span><span class="s1">.tornado.request.debug.txt&#39;</span> <span class="o">%</span> <span class="n">func_name</span>  <span class="c1"># nosec B108</span>
+            <span class="n">debug_response_file</span> <span class="o">=</span> <span class="s1">&#39;/tmp/skyline/</span><span class="si">%s</span><span class="s1">.tornado.response.debug.txt&#39;</span> <span class="o">%</span> <span class="n">func_name</span>  <span class="c1"># nosec B108</span>
+            <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="kn">from</span> <span class="nn">stumpy</span> <span class="kn">import</span> <span class="n">stump</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get json from the response from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tornado_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">debug_request_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">flux_tornado_dict</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">debug_response_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: created debug_request_file: </span><span class="si">%s</span><span class="s1">, debug_response_file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="n">debug_request_file</span><span class="p">,</span> <span class="n">debug_response_file</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">profile_list</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;profile&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to determine [</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">profile</span><span class="se">\&#39;</span><span class="s1">] from the json from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tornado_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">debug_request_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">flux_tornado_dict</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">debug_response_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: created debug_request_file: </span><span class="si">%s</span><span class="s1">, debug_response_file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="n">debug_request_file</span><span class="p">,</span> <span class="n">debug_response_file</span><span class="p">))</span>
+
+            <span class="n">end_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">compute_runtime</span> <span class="o">=</span> <span class="n">end_compute</span> <span class="o">-</span> <span class="n">start_compute</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: tornado stumpy.stump took </span><span class="si">%.6f</span><span class="s1"> seconds to generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="n">compute_runtime</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">profile_list</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">profile_list</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create profile np.array from profile_list, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># @added 20230113 - Task #4786: Switch from matrixprofile to stumpy</span>
+            <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">stumpy_available</span><span class="p">:</span>
+                <span class="n">start_dir_list</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">loaded_modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dir</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: dir() took </span><span class="si">%s</span><span class="s1"> seconds and listed </span><span class="si">%s</span><span class="s1"> loaded modules&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_dir_list</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loaded_modules</span><span class="p">))))</span>
+                <span class="k">if</span> <span class="s1">&#39;np&#39;</span> <span class="ow">in</span> <span class="n">loaded_modules</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: np is loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">func_name</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: np is not loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">func_name</span><span class="p">))</span>
+                <span class="k">if</span> <span class="s1">&#39;stump&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">loaded_modules</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump is not loaded&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">func_name</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @modified 20240129 - Feature #5198: flux - tornado</span>
+                        <span class="c1"># from stumpy import stump</span>
+                        <span class="kn">from</span> <span class="nn">custom_algorithm_sources</span> <span class="kn">import</span> <span class="n">stumpy</span>
+                        <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump imported from stumpy&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">func_name</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to load stump from stumpy - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                        <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
                     <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump imported from stumpy&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump was already imported from stumpy&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">func_name</span><span class="p">))</span>
+
+            <span class="c1"># @added 20240129 - Feature #5198: flux - tornado</span>
+            <span class="c1"># Do not use flux tornado for skyline_matrixprofile if required</span>
+            <span class="c1"># stumpy modules are already loaded</span>
+            <span class="n">custom_algorithm_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom_algorithm_sources.stumpy&#39;</span><span class="p">,</span><span class="s1">&#39;custom_algorithm_sources.stumpy.stump&#39;</span><span class="p">]</span>
+            <span class="n">algorithm_modules_loaded</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">custom_algorithm_modules</span><span class="p">]</span>
+            <span class="n">required_loaded_algorithm_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom_algorithm_sources.stumpy.stump&#39;</span><span class="p">,</span> <span class="s1">&#39;custom_algorithm_sources.stumpy&#39;</span><span class="p">]</span>
+            <span class="n">load_required</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: algorithm_modules_loaded: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_modules_loaded</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">required_loaded_algorithm_module</span> <span class="ow">in</span> <span class="n">required_loaded_algorithm_modules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">required_loaded_algorithm_module</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">algorithm_modules_loaded</span><span class="p">:</span>
+                    <span class="n">load_required</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">stumpy</span><span class="o">.</span><span class="n">stump</span><span class="p">))</span> <span class="o">==</span> <span class="s2">&quot;&lt;class &#39;function&#39;&gt;&quot;</span><span class="p">:</span>
+                    <span class="n">load_required</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">load_required</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">load_required</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: importing stumpy from custom_algorithm_sources&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">custom_algorithm_sources</span> <span class="kn">import</span> <span class="n">stumpy</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy imported from custom_algorithm_sources&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">func_name</span><span class="p">))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
                         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
-                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to load stump from stumpy - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to load stumpy from custom_algorithm_sources- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
-                    <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">stumpy_available</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stump was already imported from stumpy&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">func_name</span><span class="p">))</span>
 
-        <span class="n">profile</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">start_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy</span>
-            <span class="c1"># if not stumpy_available:</span>
-            <span class="c1">#     profile = mp.compute(ts, windows=windows)</span>
-            <span class="c1"># else:</span>
-            <span class="c1">#     if debug_logging:</span>
-            <span class="c1">#         current_logger.debug(&#39;debug :: %s :: calculating profile with stump&#39; % (</span>
-            <span class="c1">#             algorithm_name))</span>
-            <span class="c1">#     profile = stump(ts, m=windows)</span>
-            <span class="c1">#    # profile = numba_stump(ts, windows)</span>
-            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: calculating profile with stump&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">))</span>
-            <span class="n">profile</span> <span class="o">=</span> <span class="n">stumpy</span><span class="o">.</span><span class="n">stump</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">windows</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: calculated profile with stump OK&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+            <span class="n">start_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy</span>
                 <span class="c1"># if not stumpy_available:</span>
-                <span class="c1">#     current_logger.error(&#39;error :: debug_logging :: %s :: failed to run mp.compute on ts - %s&#39; % (</span>
-                <span class="c1">#        algorithm_name, err))</span>
+                <span class="c1">#     profile = mp.compute(ts, windows=windows)</span>
                 <span class="c1"># else:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to run stump on ts - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
-            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
-        <span class="n">end_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-        <span class="n">compute_runtime</span> <span class="o">=</span> <span class="n">end_compute</span> <span class="o">-</span> <span class="n">start_compute</span>
-        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
-            <span class="c1"># @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy</span>
-            <span class="c1"># if not stumpy_available:</span>
-            <span class="c1">#     current_logger.debug(&#39;debug :: %s :: mp.compute took %.6f seconds&#39; % (</span>
-            <span class="c1">#         algorithm_name, compute_runtime))</span>
-            <span class="c1"># else:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump took </span><span class="si">%.6f</span><span class="s1"> seconds to generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">func_name</span><span class="p">,</span> <span class="n">compute_runtime</span><span class="p">))</span>
+                <span class="c1">#     if debug_logging:</span>
+                <span class="c1">#         current_logger.debug(&#39;debug :: %s :: calculating profile with stump&#39; % (</span>
+                <span class="c1">#             algorithm_name))</span>
+                <span class="c1">#     profile = stump(ts, m=windows)</span>
+                <span class="c1">#    # profile = numba_stump(ts, windows)</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: calculating profile with stump&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">))</span>
+                <span class="n">profile</span> <span class="o">=</span> <span class="n">stumpy</span><span class="o">.</span><span class="n">stump</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">windows</span><span class="p">)</span>
+                <span class="c1"># @added 20240105 - pass to tornado, tornado would use jit cache</span>
+                <span class="c1">#                   loaded functions e.g.</span>
+                <span class="c1"># flux/tornado?algorithm=stump with POST ts and m</span>
+                <span class="c1"># would this be faster than than the 0.5 to 13 seconds it currently</span>
+                <span class="c1"># takes in custom_algorithms loading the function?</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump generated a profile of length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">))))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump did not generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">func_name</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: calculated profile with stump OK&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="c1"># @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy</span>
+                    <span class="c1"># if not stumpy_available:</span>
+                    <span class="c1">#     current_logger.error(&#39;error :: debug_logging :: %s :: failed to run mp.compute on ts - %s&#39; % (</span>
+                    <span class="c1">#        algorithm_name, err))</span>
+                    <span class="c1"># else:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to run stump on ts - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+            <span class="n">end_compute</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">compute_runtime</span> <span class="o">=</span> <span class="n">end_compute</span> <span class="o">-</span> <span class="n">start_compute</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="c1"># @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy</span>
+                <span class="c1"># if not stumpy_available:</span>
+                <span class="c1">#     current_logger.debug(&#39;debug :: %s :: mp.compute took %.6f seconds&#39; % (</span>
+                <span class="c1">#         algorithm_name, compute_runtime))</span>
+                <span class="c1"># else:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump took </span><span class="si">%.6f</span><span class="s1"> seconds to generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="n">compute_runtime</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump generated a profile of length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">profile</span><span class="p">))))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: stumpy.stump did not generate a profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">))</span>
 
         <span class="n">start_discord</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
@@ -785,16 +1086,29 @@
         <span class="k">if</span> <span class="n">discords</span><span class="p">:</span>
             <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">anomaly_index</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">):</span>
-                    <span class="n">anomaly_index</span> <span class="o">=</span> <span class="n">index</span>
-                    <span class="k">break</span>
+            <span class="c1"># @modified 20231228 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+            <span class="c1">#                      Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+            <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+            <span class="c1"># Use a more efficient method here</span>
+            <span class="c1"># for index, item in enumerate(timeseries):</span>
+            <span class="c1">#     if int(item[0]) == int(anomaly_timestamp):</span>
+            <span class="c1">#         anomaly_index = index</span>
+            <span class="c1">#         break</span>
+            <span class="n">anomaly_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
             <span class="n">anonamlous_period_indices</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
-                <span class="c1"># @modified 20210630</span>
-                <span class="c1"># if index in range((anomaly_index - 10), anomaly_index):</span>
-                <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="n">anomaly_index</span> <span class="o">-</span> <span class="n">windows</span><span class="p">),</span> <span class="n">anomaly_index</span><span class="p">):</span>
-                    <span class="n">anonamlous_period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="c1"># @modified 20231228 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+            <span class="c1">#                      Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+            <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+            <span class="c1"># Use a more efficient method here</span>
+            <span class="c1"># for index, item in enumerate(timeseries):</span>
+            <span class="c1">#     # @modified 20210630</span>
+            <span class="c1">#     # if index in range((anomaly_index - 10), anomaly_index):</span>
+            <span class="c1">#     if index in range((anomaly_index - windows), anomaly_index):</span>
+            <span class="c1">#         anonamlous_period_indices.append(index)</span>
+            <span class="n">anonamlous_period_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="n">anomaly_index</span> <span class="o">-</span> <span class="n">windows</span><span class="p">),</span> <span class="n">anomaly_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">discord_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">discord</span> <span class="ow">in</span> <span class="n">discords</span><span class="p">:</span>
@@ -817,16 +1131,44 @@
                     <span class="k">if</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">discords</span><span class="p">:</span>
                         <span class="n">matrixprofile_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                         <span class="n">ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                        <span class="c1"># @added 20241025 - Bug #5518: custom_algorithms_results - invalid JSON</span>
+                        <span class="c1"># Coerce NaN to None or float</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span><span class="s1">&#39;Nan&#39;</span><span class="p">]:</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="c1"># @modified 20241025 - Bug #5518: custom_algorithms_results - invalid JSON</span>
+                        <span class="c1"># Use coerced value</span>
+                        <span class="c1">#anomalies[ts] = {&#39;value&#39;: item[1], &#39;index&#39;: index, &#39;score&#39;: 1}</span>
+                        <span class="n">anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">matrixprofile_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">anomaly_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">matrixprofile_anomalies</span><span class="p">[</span><span class="o">-</span><span class="n">anomaly_window</span><span class="p">:])</span>
-                <span class="k">if</span> <span class="n">anomaly_sum</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="c1"># @added 20240105 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+                <span class="c1">#                   Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+                <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: len(timeseries): </span><span class="si">%s</span><span class="s1">, anomaly_sum: </span><span class="si">%s</span><span class="s1">, len(matrixprofile_anomalies): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_sum</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrixprofile_anomalies</span><span class="p">))))</span>
+
+                <span class="c1"># @modified 20240105 - Feature #5052: skyline_matrixprofile - fft_extrapolation</span>
+                <span class="c1">#                      Feature #5040: functions.timeseries_prediction.fft_extrapolation</span>
+                <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+                <span class="c1"># Only use the anomaly_sum if not anomalous</span>
+                <span class="c1"># if anomaly_sum &gt; 0:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">anomaly_sum</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
 
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: anomalous - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -840,6 +1182,10 @@
                 <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">matrixprofile_anomalies</span><span class="p">,</span>
                 <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">matrixprofile_anomalies</span><span class="p">,</span>
             <span class="p">}</span>
+            <span class="c1"># @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots</span>
+            <span class="c1">#                   Feature #3566: custom_algorithms</span>
+            <span class="k">if</span> <span class="n">downsampled_timeseries</span> <span class="ow">and</span> <span class="n">downsample_data</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;downsampled_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsampled_timeseries</span>
 
         <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
@@ -883,6 +1229,7 @@
     <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -892,7 +1239,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

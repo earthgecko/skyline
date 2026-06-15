@@ -5,7 +5,7 @@ from smtplib import SMTP
 # @added 20220722 - Task #4624: Change all dict copy to deepcopy
 import copy
 
-import alerters
+#import alerters
 
 try:
     import urllib2
@@ -47,6 +47,11 @@ import requests
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
+
 # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
 # Handle flake8 E402
 if True:
@@ -108,7 +113,10 @@ if True:
         # @added 20200825 - Feature #3704: Add alert to anomalies
         add_panorama_alert,
         # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
-        encode_graphite_metric_name)
+        encode_graphite_metric_name,
+        # @added 20240523 - Feature #5356: get_batch_processing_namespaces
+        #                   Feature #5352: vista - bigquery
+        is_batch_metric)
     # @added 20210724 - Feature #4196: functions.aws.send_sms
     from functions.aws.send_sms import send_sms
     from functions.settings.get_sms_recipients import get_sms_recipients
@@ -127,6 +135,8 @@ if True:
     #                   Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
     from functions.metrics.get_dotted_representation import get_dotted_representation
+    # @added 20240407 - Feature #4214: alert.paused
+    from functions.settings.sms_alert_schedule import sms_alert_schedule
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -186,6 +196,12 @@ try:
 except:
     DOCKER_FAKE_EMAIL_ALERTS = False
 
+# @added 20230728 - Task #5032: Change matplotlib black background to grey
+# As it says on the tin and as prescribed by Dr Neil R Gunther.
+# background_hex_code = background_hex_code  # grey - pearlriver
+# background_hex_code = '#F5F5F5'  # white - whitesmoke
+background_hex_code = '#181b1f'  # grafana grey
+
 
 def alert_smtp(alert, metric, context):
     """
@@ -199,6 +215,10 @@ def alert_smtp(alert, metric, context):
         logger.info('debug :: alert_smtp - sending smtp alert')
         logger.info('debug :: alert_smtp - Memory usage at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+    try:
+        full_duration_seconds = int(settings.FULL_DURATION)
+    except:
+        full_duration_seconds = 86400
     # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
     # in the graph
     full_duration_in_hours = int(settings.FULL_DURATION) / 3600
@@ -213,6 +233,34 @@ def alert_smtp(alert, metric, context):
         base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
     else:
         base_name = metric_name
+
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error('error :: alert_smtp :: get_redis_conn_decoded failed - %s' % (
+            err))
+
+    # @added 20240522 - Feature #5352: vista - bigquery
+    batch_metric = False
+    if settings.BATCH_PROCESSING:
+        try:
+            batch_metric = is_batch_metric(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: alert_smtp :: is_batch_metric failed, err: %s' % err)
+            batch_metric = False
+    if batch_metric:
+        namespace_custom_full_durations = {}
+        try:
+            namespace_custom_full_durations = redis_conn_decoded.hgetall('metrics_manager.batch_processing_namespaces_full_durations')
+        except Exception as err:
+            logger.error('error :: alert_smtp :: hgetall failed on metrics_manager.batch_processing_namespaces_full_durations, err: %s' % err)
+        for namespace, full_duration_str in namespace_custom_full_durations.items():
+            if namespace in base_name:
+                full_duration_seconds = int(float(full_duration_str))
+                full_duration_in_hours = int(float(full_duration_str)) / 3600
+                logger.info('alert_smtp :: %s is a batch metric using custom full_duration: %s and full_duration_in_hours: %s' % (
+                    base_name, full_duration_str, str(full_duration_in_hours)))
+                break
 
     # @added 20220805 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -302,7 +350,7 @@ def alert_smtp(alert, metric, context):
                 return False
 
     # Backwards compatibility
-    if type(recipients) is str:
+    if isinstance(recipients, str):
         recipients = [recipients]
 
     # @added 20180524 - Task #2384: Change alerters to cc other recipients
@@ -537,7 +585,7 @@ def alert_smtp(alert, metric, context):
             # Fix the badly defined metric
             last_known_value_metrics.append(base_name)
     if base_name in last_known_value_metrics:
-        target_metric = 'keepLastValue(%s)' % str(target_metric)
+        target_metric = 'keepLastValue(%s)' % str(base_name)
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(keepLastValue(nonNegativeDerivative(%s)),%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
             graphite_render_uri, str(graphite_from),
@@ -706,11 +754,10 @@ def alert_smtp(alert, metric, context):
     timeseries_x = []
     timeseries_y = []
 
-    try:
-        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-    except Exception as err:
-        logger.error('error :: alert_smtp :: get_redis_conn_decoded failed - %s' % (
-            err))
+    # @added 20240111 - Task #5178: Build and test skyline v4.1.0
+    #                   Bug #2168: Strange Redis derivative graph
+    # Declare before the conditional blocks
+    using_original_redis_json = False
 
     if settings.SMTP_OPTS.get('embed-images') and plot_redis_data:
         # Create graph from Redis data
@@ -933,9 +980,19 @@ def alert_smtp(alert, metric, context):
             if LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - Memory usage before plot Redis data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
             # Too big
             # rcParams['figure.figsize'] = 12, 6
             rcParams['figure.figsize'] = 8, 4
+
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            rcParams['path.simplify_threshold'] = 1.0
+            plt.style.use('fast')
+
             try:
                 # fig = plt.figure()
                 fig = plt.figure(frameon=False)
@@ -945,9 +1002,13 @@ def alert_smtp(alert, metric, context):
                 #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
                 # ax.set_axis_bgcolor('black')
                 if hasattr(ax, 'set_facecolor'):
-                    ax.set_facecolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_facecolor('black')
+                    ax.set_facecolor(background_hex_code)
                 else:
-                    ax.set_axis_bgcolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_axis_bgcolor('black')
+                    ax.set_axis_bgcolor(background_hex_code)
 
                 try:
                     datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
@@ -1011,9 +1072,13 @@ def alert_smtp(alert, metric, context):
                 #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
                 # ax.set_axis_bgcolor('black')
                 if hasattr(ax, 'set_facecolor'):
-                    ax.set_facecolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_facecolor('black')
+                    ax.set_facecolor(background_hex_code)
                 else:
-                    ax.set_axis_bgcolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_axis_bgcolor('black')
+                    ax.set_axis_bgcolor(background_hex_code)
 
                 rcParams['xtick.direction'] = 'out'
                 rcParams['ytick.direction'] = 'out'
@@ -1503,6 +1568,13 @@ def alert_pagerduty(alert, metric, context):
             # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
             pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
 
+        # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # test_alert was never defined as it is not used here in mirage it is
+        # and is identified by triggered_algorithms being ['testing']
+        test_alert = False
+
         # @added 20200825 - Feature #3704: Add alert to anomalies
         # @modified 20220301 - Feature #4482: Test alerts
         # if settings.PANORAMA_ENABLED:
@@ -1587,7 +1659,7 @@ def alert_syslog(alert, metric, context):
         try:
             syslog_level = settings.SYSLOG_OPTS['level']
             if syslog_level not in ['warn', 'notice', 'info']:
-                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                logger.info('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
                 syslog_level = 'warn'
         except:
             syslog_level = 'warn'
@@ -2442,6 +2514,37 @@ def alert_slack(alert, metric, context):
             metric_timestamp = int(metric[2])
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
 
+            # @added 20230925 - Task #5000: Replace alert key scans with sets
+            # Instead of using expiring keys with have a compute cost with
+            # using scan_iter(match='[PATTERN]') switch to using entries in a
+            # hash key, the management of which has a must lower compute cost.
+            try:
+                redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            except Exception as err:
+                logger.error('error :: alert_slack :: get_redis_conn_decoded failed - %s' % (
+                    err))
+            hash_key = 'panorama.slack_threads_ts'
+            hash_key_key = str(slack_thread_ts)
+            hash_key_key_exists = False
+            try:
+                hash_key_key_exists = redis_conn_decoded.hget(hash_key, hash_key_key)
+            except Exception as err:
+                logger.error('error :: alert_slack :: could not query Redis for hash_key_key: %s' % err)
+            if hash_key_key_exists:
+                logger.info('alert_slack :: hash_key_key exists for previous channel, not updating %s' % str(hash_key_key))
+            else:
+                hash_key_value = {'metric': base_name, 'timestamp': metric_timestamp, 'slack_thread_ts': hash_key_key}
+                try:
+                    redis_conn_decoded.hset(hash_key, hash_key_key, str(hash_key_value))
+                    logger.info(
+                        'alert_slack :: added Panorama slack_thread_ts hash key - %s - %s' %
+                        (hash_key_key, str(hash_key_value)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: alert_slack :: failed to add Panorama slack_thread_ts hash key - %s - %s' %
+                        (hash_key_key, str(hash_key_value)))
+
             # @added 20190719 - Bug #3110: webapp - slack_response boolean object
             # When there are multiple channels declared Skyline only wants to
             # update the panorama.slack_thread_ts Redis key once for the
@@ -2493,6 +2596,9 @@ def alert_http(alert, metric, context):
 
     """
     if settings.HTTP_ALERTERS_ENABLED:
+
+        logger.debug('debug :: alert_http :: alert: %s, metric: %s, context: %s' % (
+            str(alert), str(metric), str(context)))
 
         # @added 20220301 - Feature #4482: Test alerts
         test_alert = False
@@ -2550,6 +2656,25 @@ def alert_http(alert, metric, context):
             full_duration = settings.FULL_DURATION
 
         source = context.lower()
+
+        logger.debug('debug :: alert_http :: source: %s, full_duration: %s' % (
+            str(source), str(full_duration)))
+
+        # @added 20240611 - Feature #3734: waterfall alerts
+        # Set original_source so that the alert can be removed from the correct
+        # resend queue
+        original_source = str(source)
+
+        # @added 20240402 - Feature #3734: waterfall alerts
+        # Set source on waterfall alerts for mirage to analyzer
+        if source == 'mirage':
+            source = 'analyzer'
+            logger.debug('debug :: alert_http :: original_source: %s, source: %s, full_duration: %s' % (
+                str(original_source), str(source), str(full_duration)))
+
+        if original_source == 'analyzer' and full_duration > settings.FULL_DURATION:
+            original_source = 'mirage'
+
         metric_alert_dict = {}
         alert_data_dict = {}
         try:
@@ -2678,7 +2803,18 @@ def alert_http(alert, metric, context):
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed to determine anomaly_json')
                 raw_timeseries = None
-                if anomaly_json:
+
+                # @added 20241025 - Bug #5520: Handle missing redis json in analyzer alert_http
+                # And stop useless work
+                calc_three_sigma_bounds = True
+                if alerter_name == 'http_alerter-mock_api_alerter_receiver':
+                    calc_three_sigma_bounds = False
+                if anomaly_json and not os.path.isfile(anomaly_json):
+                    logger.info('warning :: alert_http :: cannot calculate 3sigma upper and lower bounds, file does not exist anomaly_json: %s' % anomaly_json)
+
+                # @modified 20241025 - Bug #5520: Handle missing redis json in analyzer alert_http
+                # if anomaly_json:
+                if anomaly_json and os.path.isfile(anomaly_json) and calc_three_sigma_bounds:
                     try:
                         # Read the timeseries json file
                         with open(anomaly_json, 'r') as f:
@@ -2732,7 +2868,10 @@ def alert_http(alert, metric, context):
                         logger.error(traceback.format_exc())
                         logger.error('error :: alert_http :: failed to determine 3sigma upper and lower bounds')
                 else:
-                    logger.error('error :: alert_http :: failed to load timeseries data to calculate 3sigma bound from %s' % anomaly_json)
+                    # @modified 20241025 - Bug #5520: Handle missing redis json in analyzer alert_http
+                    # And stop useless work added if calc_three_sigma_bounds
+                    if calc_three_sigma_bounds:
+                        logger.error('error :: alert_http :: failed to load timeseries data to calculate 3sigma bound from %s' % anomaly_json)
 
             # @added 20201124 - Feature #3772: Add the anomaly_id to the http_alerter json
             # Added yhat values
@@ -2740,6 +2879,17 @@ def alert_http(alert, metric, context):
                 yhat_upper = sigma3_upper_bound
                 yhat_lower = sigma3_lower_bound
                 yhat_real_lower = sigma3_real_lower_bound
+
+            # @added 20241111 - Bug #5541: np.float64 - yhat and sigma3
+            #                   Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha and 
+            # Coerce np.float64 to float to be literal_eval and json safe
+            yhat_upper = float(yhat_upper) if isinstance(yhat_upper, np.float64) else yhat_upper
+            yhat_lower = float(yhat_lower) if isinstance(yhat_lower, np.float64) else yhat_lower
+            yhat_real_lower = float(yhat_real_lower) if isinstance(yhat_real_lower, np.float64) else yhat_real_lower
+            sigma3_upper_bound = float(sigma3_upper_bound) if isinstance(sigma3_upper_bound, np.float64) else sigma3_upper_bound
+            sigma3_lower_bound = float(sigma3_lower_bound) if isinstance(sigma3_lower_bound, np.float64) else sigma3_lower_bound
+            sigma3_real_lower_bound = float(sigma3_real_lower_bound) if isinstance(sigma3_real_lower_bound, np.float64) else sigma3_real_lower_bound
 
             # @added 20220830 - Feature #4652: http_alerter - dotted_representation
             #                   Task #2732: Prometheus to Skyline
@@ -2833,7 +2983,12 @@ def alert_http(alert, metric, context):
             return
 
         in_resend_queue = False
-        redis_set = '%s.http_alerter.queue' % str(source)
+        # @modified 20240611 - Feature #3734: waterfall alerts
+        # Use the original_source so that the alert can be removed from the correct
+        # resend queue
+        # redis_set = '%s.http_alerter.queue' % str(source)
+        redis_set = '%s.http_alerter.queue' % str(original_source)
+
         resend_queue = None
         previous_attempts = 0
         REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
@@ -2843,13 +2998,17 @@ def alert_http(alert, metric, context):
             # Change to a hash
             # resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
             resend_queue = []
-        except Exception as e:
-            logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+        except Exception as err:
+            logger.error('error :: alert_http :: could not query Redis for %s, err: %s' % (redis_set, err))
 
         # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
         #                   Feature #4652: http_alerter - dotted_representation
         # Change to a hash
-        redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(source)
+        # @modified 20240611 - Feature #3734: waterfall alerts
+        # Use the original_source so that the alert can be removed from the correct
+        # resend queue
+        # redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(source)
+        redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(original_source)
         resend_queue_dict = {}
         try:
             resend_queue_dict = REDIS_HTTP_ALERTER_CONN_DECODED.hgetall(redis_alert_queue_hash)
@@ -3145,6 +3304,20 @@ def alert_sms(alert, metric, context):
         logger.error(traceback.format_exc())
         logger.error('error :: get_sms_recipients failed checking %s - %s' % (
             base_name, e))
+
+    # @added 20240407 - Feature #4214: alert.paused
+    sms_enabled = True
+    try:
+        sms_enabled = sms_alert_schedule(skyline_app, base_name)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: sms_alert_schedule failed checking %s, err: %s' % (
+            base_name, err))
+        sms_enabled = True
+    if not sms_enabled:
+        logger.info('no sending SMS alert for %s because it is currently in a disabled period in SMS_ALERTS_SCHEDULE' % base_name)
+        return False
+
     logger.info('sending SMS alert to %s' % str(sms_recipients))
     for sms_number in sms_recipients:
         success = False
@@ -3158,7 +3331,7 @@ def alert_sms(alert, metric, context):
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warn('warning :: falied to send SMS alert to %s' % sms_number)
+            logger.info('warning :: falied to send SMS alert to %s' % sms_number)
     return
 
 

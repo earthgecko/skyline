@@ -1,0 +1,2 @@
+# Skip bare except (E722).
+ignore = ["E722"]

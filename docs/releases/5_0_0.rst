@@ -1,0 +1,322 @@
+=====
+5.0.0
+=====
+
+v5.0.0 - xx Xxx 2024
+
+Greetings Skylinian.
+
+The is a major release.
+This release with some miscellaneous changes and additions.
+
+Changes
+~~~~~~~
+
+- SNAB results now also displayed in training data page along with graphs with the
+  results of each algorithm run.
+- Low variance metrics can now be automatically identified and analysed at 30
+  days due to the fact that any outliers that occur occasionally on low variance
+  metrics will more likely trigger due to there being less instances of them in
+  the data.  The use of 30 days of data on these metrics results in a more
+  representative sample of the data and is more robust to outliers.  This
+  is not enabled by default as it requires exclusions to be defined, for
+  example errors or 500s you probably want to continue to analyse at 7 days,
+  rather than at 30 days.  See :mod:`settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE`.
+- Record results of individual algorithms run in snab checks.
+
+It is worth pointing out that although both Redis and Python could be updated
+with this version, Redis 7.2 has quite a few outstanding issues, so Redis is
+being kept at 6.2.  And there is no compelling reason to update to Python 3.8.18
+which is a security release relating to TLS server-side socket, seeing as all
+SSL with Skyline is handled via nginx, updating to 3.8.18 is not required
+because Skyline is not dealing with TLS client authentication.
+
+Upgrade notes
+~~~~~~~~~~~~~
+
+- These update instructions apply to upgrading from v4.0.0
+- There are changes to settings.py in v5.0.0
+- There are changes to dependencies in v5.0.0
+- There are DB changes in v5.0.0
+
+How to update from v4.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Build a new Python 3.10.15 version and virtualenv, use a new virtualenv with
+  all the required libraries and do not affect your running install so you can
+  rollback if necessarily.
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed
+- Copy your settings.py from v4.0.0 and update the copied v4.0.0 settings.py
+  with your new v5.0.0 settings
+- Stop the Skyline apps
+- **Remove** the numba cache dir
+- Move to the new version
+- Start the Skyline apps
+
+Ensure you read through all the steps below first and assess the steps you wish
+to do and if any paths, etc need to be changed for your set up.
+
+Here are the steps....
+
+- Get the new version.
+
+.. code-block:: bash
+
+    # Get the new version
+    NEW_SKYLINE_VERSION="v5.0.0"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v4.0.0"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # settings.py
+    cp "$NEW_SKYLINE_PATH/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak"
+
+    # Create a new settings.py file in the new version based on your existing
+    # settings.py file
+    cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # You can diff the new settings with your settings that you just copied
+    diff "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak" "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate
+
+- You are probably going to want to diff those settings in a visual diff like Meld.
+- Deploy the new Python version and a new virtualenv and install the dependencies.
+
+.. code-block:: bash
+
+  # DEPLOY A NEW Python 3.10.15 virtualenv
+  PYTHON_VERSION="3.10.15"
+  PYTHON_MAJOR_VERSION="3.10"
+  PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+  mkdir -p "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+  mkdir -p "${PYTHON_VIRTUALENV_DIR}/projects"
+  cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+  wget -q "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
+  tar -zxvf "Python-${PYTHON_VERSION}.tgz"
+  cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}
+  ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
+  make -j4
+  make altinstall
+
+  # Create a new skyline-py31015 virtualenv
+  PROJECT="skyline-py31015"
+  cd "${PYTHON_VIRTUALENV_DIR}/projects"
+  virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
+
+  # Ensure the requirements are installed in your new Python 3.10.15 virtualenv
+  cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+  source bin/activate
+
+  # Deploy the new requirements
+  "bin/pip${PYTHON_MAJOR_VERSION}" install -r "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt
+
+  deactivate
+  cd
+
+  # Fix python-daemon
+  cp "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak"
+  cat "$NEW_SKYLINE_PATH/utils/python-daemon/runner.2.3.0.py" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+  # minor change related to unbuffered bytes I/O
+  diff "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+
+- Ensure you have added all the new (and changed) settings to `$NEW_SKYLINE_PATH/skyline/settings.py` and test them
+
+.. code-block:: bash
+
+  # UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate
+
+  # **TEST**
+  # Test your new settings.py BEFORE continuing with the upgrade,
+  # test_settings.sh runs the validate_settings.py that the Skyline apps run
+  # when they start
+  $NEW_SKYLINE_PATH/bin/test_settings.sh
+
+- At this point we are going to stop the Skyline services.
+- Stop/disable any/all service controls like monit, etc that are controlling
+  Skyline services.
+
+.. code-block:: bash
+
+  # Stop/disable any/all service controls like monit, etc that are controlling
+  # Skyline services.
+
+  # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+  # or do not wish to run.
+  SKYLINE_SERVICES="thunder
+  analyzer
+  analyzer_batch
+  mirage
+  crucible
+  boundary
+  ionosphere
+  luminosity
+  panorama
+  webapp
+  vista
+  snab
+  flux
+  horizon"
+  for i in $SKYLINE_SERVICES
+  do
+    systemctl stop "$i"
+  done
+
+- Move the numba cache directory.  This needs to be done to ensure that new
+  jit cache files are compiled for numba jit functions with the updated Python
+  version and required dependencies like numpy.  It is moved so that it can be
+  rolled back to if needed without having to rebuild all the cached numba jit
+  functions.
+
+.. code-block:: bash
+
+  mv /opt/skyline/.cache/numba /opt/skyline/.cache/numba.skyline-v4.0.0.bak
+
+- Backup the DB and apply the update
+
+.. code-block:: bash
+
+    # BACKUP THE DB AND APPLY THE NEW SQL
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="skyline"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p -h $MYSQL_HOST $MYSQL_DB > $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Check you dump exists and has data
+    ls -al $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p -h $MYSQL_HOST $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v4.1.0.sql"
+    echo $?
+
+
+- Update the path in /etc/skyline/skyline.conf and the project symlink
+
+.. code-block:: bash
+
+    cp /etc/skyline/skyline.conf /etc/skyline/skyline.conf.v4.0.0.bak
+    cat /etc/skyline/skyline.conf.v4.0.0.bak | sed -e 's/py3817/py31015/g;s/python3\.8/python3\.10/g' > /etc/skyline/skyline.conf
+    ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" "${PYTHON_VIRTUALENV_DIR}/projects/skyline"
+
+- Update the Skyline systemd service files. **NOTE** if your service files are
+  managed by something like configration management, please manually assess the
+  changes required and update as appropriate.
+
+.. code-block:: bash
+
+    for i in $(find /opt/skyline/github/skyline/etc/systemd/system -type f)
+    do
+      /bin/cp -f $i /etc/systemd/system/
+    done
+    systemctl daemon-reload
+
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v5.0.0 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+    # Set permission on the dump dir
+    chown skyline:skyline "$CURRENT_SKYLINE_PATH"/skyline/webapp/static/dump
+
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # apart from the thunder Skyline app
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="horizon
+    flux
+    panorama
+    webapp
+    vista
+    analyzer
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    snab
+    thunder"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl start "$i"
+      if [ $? -ne 0 ]; then
+        echo "failed to start $i"
+      else
+        echo "started $i"
+      fi
+      systemctl enable "$i"
+    done
+    # Restart any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+- Check the logs.  You may see a few errors related to some missing Redis keys/hashes
+  this is expected as they do not exist on starting the new version.
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | grep -v access | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
+
+Congratulations, you are now running the best OSS anomaly detection stack in the
+world (probably).
+
+
+Changelog
+~~~~~~~~~
+
+
+- Feature #4994: custom_algorithm - mirages
+- Task #4996: Improve matplotlib performance
+- Task #5000: Replace alert key scans with sets
+- Feature #5008: webapp - snab report page
+- Task #5030: Change ALERT
+- Task #5032: Change matplotlib black background to grey
+- Feature #5038: snab_results_algorithms
+- Feature #5040: functions.timeseries_prediction.fft_extrapolation
+- Bug #5050: luminosity - process_correlations resolution handle NoneType
+- Feature #5054: custom_algorithm - azure_ai_anomalydetector
+- Feature #5070: snab - anomaly_detection_metrics
+- Task #5088: Change membership of the list checks to sets
+- Feature #5090: flux.d reload
+- Feature #5092: ionosphere - create_training_data
+- Task #5096: Incorporate irregular_unstable into Mirage
+- Feature #5102: webapp - api skip_analysis
+- Feature #5104: boundary - external_settings
+- Feature #5108: boundary - functions
+- Support #5114: debug.flux.request_times
+- Task #5186: analyzer_labelled_metrics - handle high frequency
+- Task #5188: Optimise redis renames
+- Feature #5190: Add custom_algorithm results to Mirage and plots
+
+And more ...

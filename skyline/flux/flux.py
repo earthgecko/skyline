@@ -32,6 +32,20 @@ if True:
     # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
     from aggregator import Aggregator
 
+    # @added 20240105 - Feature #5198: flux - tornado
+    try:
+        FLUX_TORNADO_ENABLED = settings.FLUX_TORNADO_ENABLED
+    except:
+        FLUX_TORNADO_ENABLED = False
+    TornadoPost = None
+    if FLUX_TORNADO_ENABLED:
+        try:
+            from tornado import TornadoPost
+        except Exception as err:
+            trace = traceback.format_exc()
+            print(trace)
+            print('error :: loading TornadoPost, err: %s' % err)
+
     # @added 20200517 - Feature #3550: flux.uploaded_data_worker
     try:
         flux_process_uploads = settings.FLUX_PROCESS_UPLOADS
@@ -197,6 +211,19 @@ httpMetricData = MetricData()
 populateMetric = PopulateMetric()
 httpMetricDataPost = MetricDataPost()
 
+# @added 20240105 - Feature #5198: flux - tornado
+httpTornadoPost = None
+if TornadoPost:
+    try:
+        httpTornadoPost = TornadoPost()
+        logger.info('httpTornadoPost loaded')
+    except Exception as err:
+        trace = traceback.format_exc()
+        print(trace)
+        print('error :: httpTornadoPost failed, err: %s' % err)
+        logger.error(trace)
+        logger.error('error :: httpTornadoPost failed, err: %s' % err)
+
 # @added 20211026 - Branch #4300: prometheus
 prometheusMetricDataPost = None
 # @modified 20220622 - Task #2732: Prometheus to Skyline
@@ -261,3 +288,8 @@ if VORTEX_ENABLED:
     api.add_route('/vortex_results', vortexResults)
     vortexPost = VortexDataPost()
     api.add_route('/vortex', vortexPost)
+
+# @added 20240105 - Feature #5198: flux - tornado
+if httpTornadoPost:
+    api.add_route('/tornado', httpTornadoPost)
+

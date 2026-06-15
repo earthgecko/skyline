@@ -1,0 +1,605 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.luminosity_pearson_closest &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.luminosity_pearson_closest</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.luminosity_pearson_closest</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">luminosity_pearson_closest.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_graphite_metric</span>
+<span class="kn">from</span> <span class="nn">functions.luminosity.pearson_closest</span> <span class="kn">import</span> <span class="n">pearson_closest</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_labelled_metrics_name</span> <span class="kn">import</span> <span class="n">get_base_name_from_labelled_metrics_name</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_names_and_metric_ids</span> <span class="kn">import</span> <span class="n">get_base_names_and_metric_ids</span>
+<span class="kn">from</span> <span class="nn">functions.plots.get_pearson_correlation_graphs</span> <span class="kn">import</span> <span class="n">get_pearson_correlation_graphs</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries.determine_data_frequency</span> <span class="kn">import</span> <span class="n">determine_data_frequency</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries.downsample</span> <span class="kn">import</span> <span class="n">downsample_timeseries</span>
+<span class="kn">from</span> <span class="nn">functions.victoriametrics.get_victoriametrics_metric</span> <span class="kn">import</span> <span class="n">get_victoriametrics_metric</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_WEBAPP_DEBUG from settings&#39;</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">full_duration_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">full_duration_seconds</span> <span class="o">=</span> <span class="mi">86400</span>
+
+<span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="n">full_duration_seconds</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span>
+
+<span class="c1"># @added 20240502 - Feature #5026: luminosity - pearson_closest </span>
+<span class="c1">#                   Feature #5342: utilities - pearson_closest</span>
+<div class="viewcode-block" id="determine_pearson_closest">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.luminosity_pearson_closest.determine_pearson_closest">[docs]</a>
+<span class="k">def</span> <span class="nf">determine_pearson_closest</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get pearson correlations</span>
+
+<span class="sd">    :param current_skyline_app: The skyline app</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :return: pearson_correlations</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;determine_pearson_closest&#39;</span>
+    <span class="n">pearson_correlations</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with metric: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric_id&#39;</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with metric_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no metric or metric_id argument passed&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pearson_correlations</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">namespaces</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">namespaces_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;namespaces&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">namespaces_str</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with namespaces parameter: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespaces_str</span><span class="p">)))</span>
+            <span class="n">namespaces</span> <span class="o">=</span> <span class="n">namespaces_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">namespaces_str</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">namespaces</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.*&#39;</span><span class="p">]</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with namespaces: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request no namespaces argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">namespaces</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request no namespaces argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">from_timestamp</span><span class="p">:</span>
+        <span class="n">new_from_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_from_timestamp</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">from_timestamp</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request no from_timestamp argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">until_timestamp</span><span class="p">:</span>
+        <span class="n">new_until_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_until_timestamp</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">until_timestamp</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request no until_timestamp argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">abs_threshold</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">abs_threshold_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;abs_threshold&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">abs_threshold_str</span><span class="p">:</span>
+            <span class="n">abs_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">abs_threshold_str</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request no valid abs_threshold argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">max_results</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;max_results&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">max_results</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_results&#39;</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request invalid max_results argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">plot_graphs</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;plot_graphs&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">plot_graphs_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plot_graphs&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot_graphs_str</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">plot_graphs</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> request invalid plot_graphs argument passed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+        <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">progress_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">progress_url</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;progress_url&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with progress_url: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">progress_url</span><span class="p">)))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="n">progress_url</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+        <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">base_names_with_ids</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ids_with_base_names</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">base_names_with_ids</span> <span class="o">=</span> <span class="n">get_base_names_and_metric_ids</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> :: get_base_names_and_metric_ids failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">base_names_with_ids</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">base_names_with_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_names_with_ids</span><span class="p">[</span><span class="n">base_name</span><span class="p">]))</span>
+            <span class="n">ids_with_base_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+
+    <span class="n">base_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">base_names_with_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">correlate_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">errs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">base_names</span><span class="p">:</span>
+        <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pattern_match</span><span class="p">,</span> <span class="n">matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">errs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;matched_or_regexed_in_list&#39;</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+            <span class="n">correlate_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: determined </span><span class="si">%s</span><span class="s1"> metrics to correlate from namespaces: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correlate_metrics</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">correlate_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: would offload to wind due to the number of metrics to correlate&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+
+    <span class="n">metric_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+            <span class="n">metric_timeseries</span> <span class="o">=</span> <span class="n">get_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_timeseries</span> <span class="o">=</span> <span class="n">get_victoriametrics_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to get metric time series, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mi">400</span>
+
+    <span class="n">metric_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_timeseries</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">metric_timeseries_length</span> <span class="o">&gt;</span> <span class="mi">2000</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: would offload to wind because of long time series, metric_timeseries_length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timeseries_length</span><span class="p">)))</span>
+
+    <span class="n">metrics_timeseries_use_key</span> <span class="o">=</span> <span class="s1">&#39;timeseries&#39;</span>
+    <span class="n">start_correlations</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">metrics_timeseries</span> <span class="o">=</span> <span class="p">{</span><span class="n">metric</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;timeseries&#39;</span><span class="p">:</span> <span class="n">metric_timeseries</span><span class="p">}}</span>
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">correlate_metrics</span><span class="p">:</span>
+        <span class="n">metric2_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;{&#39;</span> <span class="ow">in</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="n">base_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">):</span>
+                <span class="n">metric2_timeseries</span> <span class="o">=</span> <span class="n">get_victoriametrics_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">metric2_timeseries</span> <span class="o">=</span> <span class="n">get_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to get metric time series, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric2_timeseries</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeseries&#39;</span><span class="p">:</span> <span class="n">metric2_timeseries</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_timeseries</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: determine_data_frequency failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">downsample</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">use_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">resolution</span> <span class="o">&lt;</span> <span class="mi">600</span> <span class="ow">and</span> <span class="n">metric_timeseries_length</span> <span class="o">&gt;</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">downsample</span> <span class="o">=</span> <span class="mi">600</span>
+        <span class="n">use_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">downsample</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: downsampling to </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> second resolution and </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">downsample</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolution</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timeseries_length</span><span class="p">)))</span>
+
+    <span class="n">all_aligned_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i_metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_timeseries</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">i_metric_timeseries</span> <span class="o">=</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+        <span class="n">aligned_metric_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">downsample</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="n">downsample_timeseries</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">i_metric_timeseries</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">downsample</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: downsample_timeseries failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;downsampled_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsampled_timeseries</span>
+            <span class="n">i_metric_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">downsampled_timeseries</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">i_metric_timeseries</span><span class="p">:</span>
+            <span class="n">aligned_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span> <span class="o">//</span> <span class="n">use_resolution</span> <span class="o">*</span> <span class="n">use_resolution</span><span class="p">)</span>
+            <span class="n">all_aligned_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aligned_timestamp</span><span class="p">)</span>
+            <span class="n">aligned_metric_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">aligned_timestamp</span><span class="p">,</span> <span class="n">v</span><span class="p">])</span>
+        <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;aligned_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aligned_metric_timeseries</span>
+    <span class="n">unique_aligned_timestamps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_aligned_timestamps</span><span class="p">)))</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">unique_aligned_timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">unique_aligned_timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ct</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+    <span class="n">aligned_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">ct</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+        <span class="n">aligned_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ct</span><span class="p">)</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="n">ct</span> <span class="o">+</span> <span class="n">use_resolution</span>
+    <span class="n">aligned_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ct</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i_metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_timeseries</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">metric_timeseries_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">first_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;aligned_timeseries&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                    <span class="n">first_value</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">break</span>
+        <span class="n">last_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;aligned_timeseries&#39;</span><span class="p">]:</span>
+            <span class="n">metric_timeseries_dict</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="n">aligned_filled_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">unique_aligned_timestamps</span><span class="p">:</span>
+            <span class="n">data_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data_v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric_timeseries_dict</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data_v</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">last_value</span><span class="p">:</span>
+                        <span class="n">data_v</span> <span class="o">=</span> <span class="n">last_value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data_v</span> <span class="o">=</span> <span class="n">first_value</span>
+                <span class="n">last_value</span> <span class="o">=</span> <span class="n">data_v</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">last_value</span><span class="p">:</span>
+                    <span class="n">data_v</span> <span class="o">=</span> <span class="n">last_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_v</span> <span class="o">=</span> <span class="n">first_value</span>
+            <span class="n">aligned_filled_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">data_v</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;aligned_filled_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aligned_filled_timeseries</span>
+            <span class="k">if</span> <span class="n">i_metric</span> <span class="o">==</span> <span class="n">metric</span><span class="p">:</span>
+                <span class="n">metric_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">aligned_filled_timeseries</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: metric: </span><span class="si">%s</span><span class="s1">, len(aligned_filled_timeseries): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_metric</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">aligned_filled_timeseries</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: aligned_filled_timeseries failed on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">i_metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">metrics_timeseries_use_key</span> <span class="o">=</span> <span class="s1">&#39;aligned_filled_timeseries&#39;</span>
+
+    <span class="n">to_process_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metrics_timeseries</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="n">processed_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">callbacks_made</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_timeseries</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">processed_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pearson_cc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pearson_cc</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="n">pearson_closest</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="o">=</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="o">=</span><span class="n">until_timestamp</span><span class="p">,</span> <span class="n">downsample</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datapoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_timeseries</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">metric_timeseries</span><span class="o">=</span><span class="n">metric_timeseries</span><span class="p">,</span> <span class="n">metrics_timeseries</span><span class="o">=</span><span class="n">metrics_timeseries</span><span class="p">,</span> <span class="n">metrics_timeseries_use_key</span><span class="o">=</span><span class="n">metrics_timeseries_use_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pearson_closest failed to correlate </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pearson_cc</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span> 
+            <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">:</span> <span class="n">pearson_cc</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">pearson_cc</span><span class="p">):</span>
+                <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;reason&#39;</span><span class="p">:</span> <span class="n">reason</span><span class="p">}</span>
+        <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;downsample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsample</span>
+        <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;used_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_resolution</span>
+        <span class="k">if</span> <span class="n">progress_url</span><span class="p">:</span>
+            <span class="n">proportion_completed</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">processed_count</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">to_process_count</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">proportion_completed</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">proportion_completed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">callbacks_made</span><span class="p">:</span>
+                    <span class="n">use_progress_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?proportion_completed=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">progress_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">proportion_completed</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">use_progress_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">callbacks_made</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proportion_completed</span><span class="p">)</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: updated progress_url: </span><span class="si">%s</span><span class="s1">, got status code: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_progress_url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: request failed, progress_url: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="n">use_progress_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> correlations done, took </span><span class="si">%2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="p">)),</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_correlations</span><span class="p">)))</span>
+
+    <span class="n">sorted_pearson_correlations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">pearson_ccs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pearson_ccs_none</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">pearson_correlations</span><span class="p">:</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i_metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">abs_threshold</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span>
+                    <span class="k">continue</span>
+                <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;abs_pearson_cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">pearson_ccs_none</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_metric</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">abs_pearson_cc</span> <span class="o">=</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">abs_pearson_cc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;pearson_cc&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">abs_threshold</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">abs_pearson_cc</span> <span class="o">&lt;</span> <span class="n">abs_threshold</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span>
+                    <span class="k">continue</span>
+            <span class="n">pearson_ccs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i_metric</span><span class="p">,</span> <span class="n">abs_pearson_cc</span><span class="p">])</span>
+            <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">][</span><span class="s1">&#39;abs_pearson_cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abs_pearson_cc</span>
+        <span class="n">sorted_pearson_ccs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pearson_ccs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i_metric</span><span class="p">,</span> <span class="n">abs_pearson_cc</span> <span class="ow">in</span> <span class="n">sorted_pearson_ccs</span><span class="p">:</span>
+            <span class="n">sorted_pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i_metric</span> <span class="ow">in</span> <span class="n">pearson_ccs_none</span><span class="p">:</span>
+            <span class="n">sorted_pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">])</span>
+        <span class="n">pearson_correlations</span> <span class="o">=</span> <span class="n">sorted_pearson_correlations</span>
+    <span class="n">max_pearson_correlations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">pearson_correlations</span> <span class="ow">and</span> <span class="n">max_results</span><span class="p">:</span>
+        <span class="n">results_added</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i_metric</span><span class="p">,</span> <span class="n">corr_dict</span> <span class="ow">in</span> <span class="n">pearson_correlations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">results_added</span> <span class="o">==</span> <span class="n">max_results</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">max_pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">pearson_correlations</span><span class="p">[</span><span class="n">i_metric</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">max_pearson_correlations</span><span class="p">:</span>
+        <span class="n">pearson_correlations</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">max_pearson_correlations</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pearson_correlations</span> <span class="ow">and</span> <span class="n">plot_graphs</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/pearson_correlation_graphs&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pearson_correlation_graphs</span><span class="p">,</span> <span class="n">graph_pearson_correlations</span> <span class="o">=</span> <span class="n">get_pearson_correlation_graphs</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">pearson_correlations</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="s1">&#39;UTC&#39;</span><span class="p">,</span>
+                <span class="n">metrics_timeseries</span><span class="o">=</span><span class="n">metrics_timeseries</span><span class="p">,</span> <span class="n">metrics_timeseries_use_key</span><span class="o">=</span><span class="n">metrics_timeseries_use_key</span><span class="p">,</span>
+                <span class="n">pearson_correlations</span><span class="o">=</span><span class="n">pearson_correlations</span><span class="p">,</span> <span class="n">abs_threshold</span><span class="o">=</span><span class="n">abs_threshold</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_pearson_correlation_graphs failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">graph_pearson_correlations</span><span class="p">:</span>
+            <span class="n">pearson_correlations</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">graph_pearson_correlations</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">progress_url</span><span class="p">:</span>
+        <span class="n">use_progress_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?proportion_completed=1&#39;</span> <span class="o">%</span> <span class="n">progress_url</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">use_progress_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: request failed, progress_url: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">use_progress_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">pearson_correlations</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

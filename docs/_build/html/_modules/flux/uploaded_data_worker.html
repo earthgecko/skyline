@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>flux.uploaded_data_worker &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>flux.uploaded_data_worker &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -210,7 +210,9 @@
 <span class="n">ALLOWED_EXTENSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;xlsx&#39;</span><span class="p">,</span> <span class="s1">&#39;xls&#39;</span><span class="p">}</span>
 
 
-<div class="viewcode-block" id="UploadedDataWorker"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker">[docs]</a><span class="k">class</span> <span class="nc">UploadedDataWorker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+<div class="viewcode-block" id="UploadedDataWorker">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker">[docs]</a>
+<span class="k">class</span> <span class="nc">UploadedDataWorker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The worker grabs data files from the :mod:`settings.DATA_UPLOADS_PATH` and</span>
 <span class="sd">    processes the data files and sends to data to Graphite.</span>
@@ -223,7 +225,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="UploadedDataWorker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UploadedDataWorker.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -232,10 +236,13 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
             <span class="c1"># Log warning</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UploadedDataWorker.run"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UploadedDataWorker.run">
+<a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -551,7 +558,25 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: unzipping - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_filename</span><span class="p">))</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
-                            <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">extracted_data_dir</span><span class="p">)</span>
+                            <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                            <span class="c1"># bandit B202:tarfile_unsafe_members</span>
+                            <span class="c1"># tarfile.extractall used without any validation. Please check and discard dangerous members.</span>
+                            <span class="c1">#zip_ref.extractall(extracted_data_dir)</span>
+                            <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">zip_ref</span><span class="o">.</span><span class="n">namelist</span><span class="p">():</span>
+                                <span class="c1"># Ensure that the file path is safe, if any path</span>
+                                <span class="c1"># would escape, errors and raises an exception</span>
+                                <span class="c1"># to protect against directory traversal attacks</span>
+                                <span class="n">extracted_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extracted_data_dir</span><span class="p">,</span> <span class="n">member</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">extracted_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">extracted_data_dir</span><span class="p">):</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: Unsafe file path detected in the zip file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_file</span><span class="p">))</span>
+                                    <span class="n">processing_upload_failed</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                        <span class="n">upload_error</span> <span class="o">=</span> <span class="s1">&#39;Unsafe file path detected in the zip file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_filename</span>
+                                        <span class="n">upload_status</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">upload_error</span><span class="p">])</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">upload_error</span><span class="p">)</span>
+                                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsafe file path detected in the zip file&#39;</span><span class="p">)</span>
+                                <span class="n">zip_ref</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="n">extracted_data_dir</span><span class="p">)</span>
+
                         <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">extracted_data_dir</span><span class="p">):</span>
                             <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;info.json&#39;</span><span class="p">):</span>
@@ -1715,7 +1740,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">df</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="k">pass</span></div></div>
+                <span class="k">pass</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1725,7 +1752,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

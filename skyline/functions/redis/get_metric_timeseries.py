@@ -129,4 +129,25 @@ def get_metric_timeseries(current_skyline_app, metric_name, from_timestamp=None,
                 current_logger.error('error :: %s :: nonNegativeDerivative failed - %s' % (
                     function_str, e))
 
+    # @added 20241120 - Feature #5064: mirage.inflection
+    subsequence_requested = False
+    if from_timestamp:
+        subsequence_requested = True
+    if until_timestamp:
+        subsequence_requested = True
+    if subsequence_requested:
+        timeseries_from_timestamp = int(timeseries[0][0])
+        timeseries_until_timestamp = int(timeseries[-1][0])
+        if not from_timestamp:
+            from_timestamp = int(timeseries_from_timestamp)
+        if not until_timestamp:
+            until_timestamp = int(timeseries_until_timestamp)
+        subsequence = False
+        if from_timestamp < timeseries_from_timestamp:
+            subsequence = True
+        if until_timestamp < timeseries_until_timestamp:
+            subsequence = True
+        if subsequence:
+            timeseries = [item for item in timeseries if int(item[0]) >= int(from_timestamp) and int(item[0]) <= int(until_timestamp)]
+
     return timeseries

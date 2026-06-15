@@ -103,7 +103,7 @@ class Aggregator(Process):
         try:
             kill(self.parent_pid, 0)
         except:
-            logger.warn('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def run(self):
@@ -242,7 +242,7 @@ class Aggregator(Process):
                     failed_over_to_memcache = False
                 if failed_over_to_memcache:
                     redis_up = True
-                    logger.warning('warning :: aggregation :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
+                    logger.info('warning :: aggregation :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
 
             try:
                 time_now = int(time())
@@ -384,7 +384,7 @@ class Aggregator(Process):
                                     str(len(metrics_manager_flux_aggregate_namespaces))))
                             else:
                                 metrics_manager_flux_aggregate_namespaces = {}
-                                logger.warning('warning :: aggregator :: failed to get metrics_manager.flux.aggregate_namespaces memcache dict')
+                                logger.info('warning :: aggregator :: failed to get metrics_manager.flux.aggregate_namespaces memcache dict')
                         except Exception as err:
                             logger.error('error :: aggregator :: could not get memcache dict metrics_manager.flux.aggregate_namespaces - %s' % err)
                             metrics_manager_flux_aggregate_namespaces = {}
@@ -528,9 +528,9 @@ class Aggregator(Process):
                                     logger.error('error :: aggregator :: failed to hset %s in metrics_manager.flux.aggregate_namespaces.settings Redis hash - %s' % (
                                         metric, err))
                         else:
-                            # logger.warning('warning :: aggregator :: new metric - %s could not detemine metric_aggregation_settings from FLUX_AGGREGATE_NAMESPACES' % (
+                            # logger.info('warning :: aggregator :: new metric - %s could not detemine metric_aggregation_settings from FLUX_AGGREGATE_NAMESPACES' % (
                             #     metric))
-                            logger.warning('warning :: aggregator :: new metric - %s could not detemine metric_aggregation_settings from metrics_manager.flux.aggregate_namespaces data' % (
+                            logger.info('warning :: aggregator :: new metric - %s could not detemine metric_aggregation_settings from metrics_manager.flux.aggregate_namespaces data' % (
                                 metric))
 
                     interval = 60
@@ -538,7 +538,7 @@ class Aggregator(Process):
                         interval = int(metric_aggregation_settings['interval'])
                     except:
                         # logger.error(traceback.format_exc())
-                        logger.warning('warning :: aggregator :: failed to get interval from metric_aggregation_settings for %s, setting to default 60' % metric)
+                        logger.info('warning :: aggregator :: failed to get interval from metric_aggregation_settings for %s, setting to default 60' % metric)
                         interval = 60
                     if (time_now - last_metric_flush) < interval:
                         continue
@@ -562,7 +562,7 @@ class Aggregator(Process):
 
                     if not metric_aggregation_settings:
                         # logger.error('error :: no aggregation settings known for %s, discarding data' % metric)
-                        logger.warning('warning :: aggregator :: no aggregation settings known for %s, discarding data' % metric)
+                        logger.info('warning :: aggregator :: no aggregation settings known for %s, discarding data' % metric)
                         continue
 
                     if metric_values:

@@ -7,6 +7,11 @@ import traceback
 import datetime as dt
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
+
 if True:
     import matplotlib.pyplot as plt
     # import matplotlib.image as mpimg
@@ -53,8 +58,19 @@ def plot_motif_match(
     try:
         current_logger.info('plot_motif_match - creating graph image - %s' % output_file)
         not_anomalous_motif = [item[1] for item in not_anomalous_motif_sequence]
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
         # Plot match
         rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
         not_anomalous_timestamp = int(not_anomalous_motif_sequence[-1][0])

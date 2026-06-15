@@ -1,27 +1,27 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Overview &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Anomify - cutting edge Skyline" href="anomify-cutting-edge-skyline.html" />
+    <link rel="next" title="A brief history" href="brief-history.html" />
     <link rel="prev" title="Skyline documentation" href="index.html" /> 
 </head>
 
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,17 +46,20 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-skyline">What is Skyline?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-need">What you need</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#too-much-effort">Too much effort?</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -93,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -130,213 +131,81 @@
            <div itemprop="articleBody">
              
   <section id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h1>
-<p>Skyline is a Python based time series analysis and performance monitoring application
-that helps you to monitor and better understand complex systems and their
-interactions.  Skyline provides a unique kind of performance monitoring by using
-real time anomaly detection, threshold and dynamic threshold analysis, user
-input/training for machine learning with various correlation methods, to provide
-structured data sets of significant changes within metric populations.</p>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h2>
+<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h1>
+<p>Welcome to Skyline.</p>
+<section id="what-is-skyline">
+<h2>What is Skyline?<a class="headerlink" href="#what-is-skyline" title="Link to this heading"></a></h2>
+<p>Skyline is a Python based anomaly detection and not anomalous detection stack
+that analyses, anomaly detects, deflects, fingerprints, compares and learns vast
+amounts of streamed time series data.  Skyline consists of a number of apps that
+each do different things in the analysis pipeline.</p>
+<p><strong>The anomaly detection problem has been solved.</strong></p>
+<p>We have a plethora of algorithms and algorithmic methods for detecting anomalies.
+Detecting anomalies is <strong>EASY</strong>!  Not detecting anomalies is <strong>HARD</strong>.</p>
+<p>As Rajiv Shah (&#64;rajistics) from Snowflake recently said:</p>
+<blockquote>
+<div><p>“After simple baselines, Anomaly detection is hard.”</p>
+</div></blockquote>
+<p>The irony is that in advanced 3rd, 4th and 5th generation anomaly detection, it
+is not about detecting anomalies (the easy part).  Once you move from 1st and
+2nd generation anomaly detection methods, anomaly detection is about <strong>not</strong>
+detecting anomalies.  Luckily metrics are generally co-operative in that sense.</p>
+<p>Seeing as we desire our metrics to be not anomalous most of the time and we want
+to know when they ARE anomalous and given the fact that we try and build systems
+that try to behave within not anomalous bounds so they perform well, due to
+these facts we have:</p>
 <ul class="simple">
-<li><p>Skyline use the most appropriate state of the art algorithms for real time
-anomaly detection.</p></li>
-<li><p>Uses multi stage analysis and filtering to allow for the use of more time complex
-algorithms to be applied in the real time domain.</p></li>
-<li><p>Puts the user in control of false positive detections by allowing for
-simple user input to provide explainable ML methods with training data which
-massively reduce false positive detections and provides the system with data
-to begin learning with.</p></li>
-<li></li>
+<li><p>A lot of metric time series data that are not anomalous most of the time.</p></li>
+<li><p>A lot of data to train with on what is <strong>NOT anomalous</strong> given a time series
+data set, rather than simply focusing on what is anomalous, also focusing on
+what is not anomalous.</p></li>
 </ul>
-<p><strong>What is anomaly detection and time series analysis performance monitoring good for?</strong></p>
-<p>It is extremely useful in the operations and development arenas, to highlight a
-few use cases:</p>
+<p>Skyline focuses on anomaly detection but it’s primary focus has become on
+<strong>not anomalous</strong> detection.  This is acheived with using multiple time series
+similiarity search methods, which are highly accurate.</p>
 <ul class="simple">
-<li><p>In operations monitoring to provide a real time feed of significant changes
-and related events in your systems, the good, the bad and the unknown and
-unseen.</p></li>
-<li><p>Enabling developers to monitor components of their development environment
-helping them to build for performance by giving them a real time view of any
-performance related impacts any new feature may introduce.  For example a
-developer may create a new feature that periodically runs analysis on some
-data from a MySQL database.  The developer builds the feature, tests it to
-ensures that it provides the required functionality and releases the feature.
-The feature works but it introduces an additional 225K of
-<cite>mysql.handler_read_next</cite> operations on every run, which were not there before
-the feature was released.  The developer method works, but it could work much
-better.  Skyline provides the developer with information to enable them to be
-the best they can be in terms of performance and understanding impacts, in a
-areas where they may have zero or little domain knowledge, such as the
-internal metrics of MySQL/MariaDB.</p></li>
+<li><p>SITTSSCA - The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison
+Algorithm which compares the “fingerprints” of the two time series generated
+from features extracted from the time series.  These can determine if they
+closely resemble each other in terms of the “power/energy”, range and
+“movement”.</p></li>
+<li><p>Making extensive use of motifs with Matrix Profile and MASS (Mueen’s Algorithm
+for Similarity Search) (via stumpy) for searching time series sub-sequences
+(motifs) under z-normalized Euclidean distance for similarity.  These with a
+few additional simple validation algorithms such as area of the curve and
+max and min range comparison to ensure that matches are accurate.</p></li>
 </ul>
-<figure class="align-default">
-<img alt="mysql.handler_read_next" src="_images/mysql.handler_read_next.png" />
-</figure>
-<p>Our work can always be better.</p>
-<p>The question is why are we <strong>NOT</strong> doing anomaly detection on our things?
-Shouldn’t we be analysing our observability data?
-If the 3 pillars of observability are:</p>
-<ul class="simple">
-<li><p>logs</p></li>
-<li><p>metrics</p></li>
-<li><p>traces</p></li>
-</ul>
-<p>What do pillars hold up?</p>
-<p>Data analysis is the next generation of the observability stack, o11y 1.0
-was about collection, storage, retrieval and presentation.  Anomaly detection is
-is a part of the next generation of observability, putting all that data to use
-in real time - analysis.</p>
-<p><strong>What can Skyline be compared to</strong></p>
-<p>Although it may seem that there are various services and applications that might
-be compared to Skyline, in reality most of them are not comparable, for a variety
-of reason.</p>
-<p>Google, AWS and Azure all have some kind of anomaly detection service for timeseries
-data, but those services are generally one trick ponies or one or two trick black
-boxes.</p>
-<p>What none of those are is a dedicated, multi stage analysis pipeline with first and
-foremost human in the loop in terms of configuration, choice and model training.</p>
-<p>Skyline currently allows for 12 analysis stages by default implementing a number
-of different analysis methods:</p>
-<ol class="arabic simple">
-<li><p>analyzer - 3-sigma (to stage 2 if anomalous at 24h)</p></li>
-<li><p>mirage - 3-sigma (to stage 3 if anomalous at 7d)</p></li>
-<li><p>mirage - matrixprofile (to stage 4 if anomalous at 7d)</p></li>
-<li><p>mirage - anomalous_daily_peaks (to stage 5 if not a normal daily peak)</p></li>
-<li><p>mirage - irregular_unstable (to stage 6 if true or to stage 7 if not true and trained instances available)</p></li>
-<li><p>mirage - 3-sigma/matrixprofile/spectral_residual (to stage 7 if anomalous at 30d and trained instances available)</p></li>
-<li><p>ionosphere - motif matching on 24h trained data (to stage 8 if no matches found)</p></li>
-<li><p>ionosphere - motif matching on 7d trained data (to stage 9 if no matches found)</p></li>
-<li><p>ionosphere - features extracted and compared to 24h trained data (to stage 10 if no matches found)</p></li>
-<li><p>ionosphere - minmax features extracted and compared to 24h minmax trained data (to stage 11 if no matches found)</p></li>
-<li><p>ionosphere - features extracted and compared to 7d trained data (to stage 12 if no matches found)</p></li>
-<li><p>ionosphere - minmax features extracted and compared to 7d minmax trained data</p></li>
-</ol>
-<p>Skyline is unique.  It is the only real open source anomaly detection system, that
-allows for state of the art (SOTA) on realtime data and plugs into our existing
-telemetry systems to enable realtime anomaly detection on your metrics and even
-traces (converted to metrics).</p>
-<p>Skyline allows you to specify what algorithms to run, and even allows you to add
-your own, it allows you to provide the system with valid training data with the
-click of a button.  It records all anomalies, analysis results and reports on
-performance on a per metric basis.  You can even evaluate your own or other
-algorithms in the real time pipeline, without having them influence the outcome
-of any existing analysis.  This allows for benchmarking the actual performance of
-algorithms on your own real data.</p>
-<p>And it is cluster ready for production.  However be warned, it is a complex stack
-to set up and implement, once running it is fine, it bit like my Mercedes MB120
-van which has 662000 km on the clock.  However, like my van, it runs perfectly
-fine but when it comes to upgrading all the components and the app itself is a
-fairly large slice of orchestrated work, not for the faint hearted.</p>
-<p><strong>human-in-the-loop</strong></p>
-<p>The use multi-stage analysis and multiple algorithms decreases false positive
-detections.  However false positives are inevitable so the user can easily train
-Skyline, which enables massive reductions in false positives by utilising
-extracted features and shapelets/motifs from the user trained time series and running
-various state of the art similarity search methods against potentially anomalous
-instances of data.  These methods are <strong>extremely accurate</strong> and achieving a False
-negative rate of ~0.34% on a sample of 1000 matches from 246799 matches
-achieved over a period a 55 month period on the real time analysis of production
-system and application metrics.  Meaning that the system flagged an instance of
-data as matching a trained instance of data incorrectly only 838 times and it
-matched correctly 245961 times over the 55 month period.</p>
-<p><strong>Your</strong> input is more <strong>valuable</strong> than you know or even imagine!
-Even though you may think you know nothing or very little about metrics, you and
-your brain can be magnificent.</p>
-<p>In the world of machine learning achieving a 0.34% error rate on classifications
-is not bad, whether that be unsupervised, semi-supervised or a supervised
-machine learning algorithm, 0.34% is <strong>not</strong> bad, it is within acceptable
-limits in the context of what it is doing.</p>
-<p>It must be caveated that this error rate can be affected by data quality,
-currently no checks are implemented to ensure that the potentially anomalous
-timeseries being checked is the same length or at least similar length to the
-trained data set to which it is being compared.  Although the SITTSSCA method is
-fairly robust to some missing data, more dissimilar length timeseries will
-produce increasingly dissimilar features and the chance of them matching
-decreases quite rapidly.</p>
-<p><strong>Skyline is built for speed.</strong></p>
-<p>The analysis stages move from very simple and efficient algorithms, to more
-complex and specialised algorithms through the analysis pipeline. This ensures
-that more computationally expensive analysis is only carried out when it is
-needed and all analysis is conducted as fast as possible.</p>
-<p>Every optimisation that can be found is implemented, whether that be optimising
-a 0.077915 second operation to 0.005692 seconds with the use of bottleneck
-rather than pandas or finding optimisations in the algorithmic methodologies and
-pipeline and gaining wherever possible on suitable algorithms/methods with numba
-JIT compiled algorithms, every millisecond counts.  We are not talking about
-nanoseconds here because we are dealing with big data sets, so we must be realistic.</p>
-<p>Unfortunately no single anomaly detection algorithm or method or service is
-perfect.  Using any a single method to do anomaly detection is a flawed
-approach and achieves suboptimal long term results.  Anomaly detection is a
-constantly shifting space with new methodologies/papers/libraries published
-almost daily.  However the truth is that real world, real time implementations
-of high volume and high frequency metrics of many of these new
-methodologies/papers/libraries published are very few and far between.  And
-often they do not fit into the real time space, for many reasons, a few are:</p>
-<ul class="simple">
-<li><p>computational time complexity</p></li>
-<li><p>need for tuned hyperparameters on different types of data sets</p></li>
-<li><p>need for labelled data</p></li>
-</ul>
-<p>Skyline attempts to implement methods that work with zero domain knowledge, as
-the system runs and records data, it uses the data it creates itself to do zero
-knowledge discovery of relationships in the metrics and learn about them.</p>
-<p>Anomaly detection is not simply about fault detection and identifying problems,
-anomaly detection is about describing significant changes.  Skyline creates a
-real time event stream of significant changes to inform the user of what is
-happening on their systems, applications and metrics of interest. Do not think
-of Skyline as an alerting system, think of it as an event stream that can be
-trained.</p>
-<p>Skyline teaches you about your systems and allows you to train it on what is
-normal.  You can even configure it to try and learn for its self from what you
-trained it on.</p>
-<p>Skyline runs on Linux on commodity hardware or a cloud instance.</p>
-<p>At its core Skyline can currently makes use of the uses the following algorithms
-(or modifications thereof):</p>
-<ul class="simple">
-<li><p>9 three-sigma based algorithms, derived from Shewhart’s statistical process</p></li>
-<li><p>SITTSSCA - Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm</p></li>
-<li><p><a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> - Mueen’s Algorithm for Similarity Search (<a class="reference external" href="https://github.com/matrix-profile-foundation/mass-ts">mass-ts</a>)</p></li>
-<li><p>matrixprofile</p></li>
-<li><p>various <a class="reference external" href="https://github.com/arundo/adtk">adtk</a> algorithms - level shift, volatility shift and persist</p></li>
-<li><p>spectral_residual</p></li>
-<li><p>DBSCAN</p></li>
-<li><p>Local Outlier Factor (lof)</p></li>
-<li><p>PCA - Principal Component Analysis</p></li>
-<li><p>Isolation Forest</p></li>
-<li><p>Prophet</p></li>
-<li><p>One Class SVM</p></li>
-<li><p>MSTL</p></li>
-<li><p>Spectral Entropy</p></li>
-<li><p>Moving Average Convergence/Divergence</p></li>
-<li><p>m66</p></li>
-<li><p>AutoARIMA</p></li>
-<li><p>Any custom algorithm you want it to run, a bit like a lamdba function.</p></li>
-</ul>
+<p>The use of these methods enables Skyline to be trained and autonomously learn
+what is normal without any training (unsupervised).  This autonomous learning is
+highly accurate and reliable.  This is due to the fact it is based on
+well-established mathematical and geometric principles.  Compared to neural
+networks and black-box and probabilistic methods, which can be harder
+to understand and interpret, Matrix Profile and MASS are straightforward
+distance calculations which are relatively simple to understand in terms of
+explainability and they are reliable in terms of their results can be trusted
+because the results are based purely on maths and geometry.  It is a no
+parameters, zero knowledge, no tuning, FAST method that is accurate.</p>
+<p>It sounds perfect and it pretty much is.</p>
+<p>This all results in having a 6th generation anomaly detection and not anomalous
+detection system, that is years ahead of anything else in this space.</p>
+<p>However it takes a little effort on your part to set up and configure Skyline,
+and then there is the time it takes you to do training, but Skyline is now very
+good at learning on its own, so you no longer need to do much training.</p>
+</section>
+<section id="what-you-need">
+<h2>What you need<a class="headerlink" href="#what-you-need" title="Link to this heading"></a></h2>
+<p>Curiosity and a reasonable Linux VM running CentOS Stream 9 and quite a bit of
+time :)</p>
 </section>
 <section id="too-much-effort">
-<h2>Too much effort?<a class="headerlink" href="#too-much-effort" title="Permalink to this heading"></a></h2>
+<h2>Too much effort?<a class="headerlink" href="#too-much-effort" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://anomify.ai">anomify</a> offer a managed version of Skyline for people that do not have a vast
 amount of time to spare.  You’ll get access to unreleased features and support
-from developers that have honed numerous Skyline integrations.</p>
+from developers that have honed numerous Skyline integrations to alert on
+important metrics.</p>
 <p>Anomify are looking for further test partners with various types of data and
 data sources, if you think you may have interesting metrics send an email to
 <a class="reference external" href="mailto:hello&#37;&#52;&#48;anomify&#46;ai">hello<span>&#64;</span>anomify<span>&#46;</span>ai</a> and get in touch.</p>
-<p>The main objectives are:</p>
-<ul class="simple">
-<li><p>Provide an application that helps people monitor 10000s of metrics.</p></li>
-<li><p>Provide an application that allows the user to EASILY use their own valuable
-domain specific knowledge to create training data to improve analysis by
-introducing human-in-the-loop feedback.</p></li>
-<li><p>Computational efficiency</p></li>
-<li><p>Accuracy</p></li>
-<li><p>Reliability</p></li>
-<li><p>Maximise the usage of user trained data.</p></li>
-<li><p>Ongoing development, testing and implementation of relevant and applicable
-state of the art methods which have proven to result in improvements.</p></li>
-<li><p>Low cost in terms of user time and money (compute and storage)</p></li>
-</ul>
 </section>
 </section>
 
@@ -345,13 +214,13 @@ state of the art methods which have proven to result in improvements.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Skyline documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="anomify-cutting-edge-skyline.html" class="btn btn-neutral float-right" title="Anomify - cutting edge Skyline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="brief-history.html" class="btn btn-neutral float-right" title="A brief history" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

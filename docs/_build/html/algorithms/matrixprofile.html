@@ -1,27 +1,27 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>matrixprofile &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>matrixprofile &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="spectral_residual" href="spectral_residual.html" />
+    <link rel="next" title="m66" href="m66.html" />
     <link rel="prev" title="Custom algorithms" href="custom-algorithms.html" /> 
 </head>
 
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -64,6 +63,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Algorithms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="core-algorithms.html">Core algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">matrixprofile</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#considerations-when-implementing-matrixprofile">Considerations when implementing matrixprofile</a></li>
@@ -71,6 +71,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#enabling-matrixprofile-to-run-in-mirage">Enabling matrixprofile to run in Mirage</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sigma.html">sigma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
@@ -81,7 +83,9 @@
 <li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lad.html">LAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="probabilistic_forecasts_generalized_pareto_distribution_ets.html">probabilistic_forecasts_generalized_pareto_distribution_ets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grafana_promql_anomaly_detection.html">grafana_promql_anomaly_detection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -101,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -109,7 +114,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -147,7 +152,7 @@
            <div itemprop="articleBody">
              
   <section id="matrixprofile">
-<h1><a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a><a class="headerlink" href="#matrixprofile" title="Permalink to this heading"></a></h1>
+<h1><a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a><a class="headerlink" href="#matrixprofile" title="Link to this heading"></a></h1>
 <p>The Matrix Profile algorithm was pioneered by Professor Eamonn Keogh at the
 University of California-Riverside and Professor Abdullah Mueen at the
 University of New Mexico in 2015.  When it came onto the scene in 2015 it made
@@ -203,7 +208,7 @@ that is run only by Mirage after three-sigma consensus has been achieved.  It is
 too computationally and time expensive to run in Analyzer, although it could run
 in Analyzer if you only have a few 100 metrics.</p>
 <section id="considerations-when-implementing-matrixprofile">
-<h2>Considerations when implementing matrixprofile<a class="headerlink" href="#considerations-when-implementing-matrixprofile" title="Permalink to this heading"></a></h2>
+<h2>Considerations when implementing matrixprofile<a class="headerlink" href="#considerations-when-implementing-matrixprofile" title="Link to this heading"></a></h2>
 <p>By default in v3.0.0 matrixprofile is not enabled as an additional algorithm to
 run.  This is because it is a user decision as to whether they wish to implement
 matrixprofile as an algorithm to be added to the analysis pipeline.  The
@@ -263,7 +268,7 @@ are wanting to use Skyline as an alerter only or as an informational stream of
 the bad, the good and the unknown, that YOU learn from.</p>
 </section>
 <section id="however-trigger-history-override">
-<h2>HOWEVER - trigger_history_override<a class="headerlink" href="#however-trigger-history-override" title="Permalink to this heading"></a></h2>
+<h2>HOWEVER - trigger_history_override<a class="headerlink" href="#however-trigger-history-override" title="Link to this heading"></a></h2>
 <p>To overcome matrixprofile perhaps silencing too much, the <code class="docutils literal notranslate"><span class="pre">trigger_history_override</span></code>
 parameter can be passed on skyline_matrixprofile <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>
 a tradeoff value to use here is 6, meaning that if sigma algorithms have triggered
@@ -273,10 +278,11 @@ recorded as an anomaly (unless there is Ionosphere training the matches
 further down the analysis pipeline).</p>
 </section>
 <section id="enabling-matrixprofile-to-run-in-mirage">
-<h2>Enabling matrixprofile to run in Mirage<a class="headerlink" href="#enabling-matrixprofile-to-run-in-mirage" title="Permalink to this heading"></a></h2>
+<h2>Enabling matrixprofile to run in Mirage<a class="headerlink" href="#enabling-matrixprofile-to-run-in-mirage" title="Link to this heading"></a></h2>
 <p>See the current <code class="docutils literal notranslate"><span class="pre">'skyline_matrixprofile'</span></code> example in
 <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and change the <code class="docutils literal notranslate"><span class="pre">'namespaces':</span></code> parameter as
 appropriate.</p>
+<p>See the docstrings - <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.skyline_matrixprofile">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.skyline_matrixprofile</a></p>
 </section>
 </section>
 
@@ -285,13 +291,13 @@ appropriate.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="custom-algorithms.html" class="btn btn-neutral float-left" title="Custom algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="spectral_residual.html" class="btn btn-neutral float-right" title="spectral_residual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="m66.html" class="btn btn-neutral float-right" title="m66" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

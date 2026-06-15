@@ -7,8 +7,14 @@
 #sphinx-rtd-theme==1.1.1
 #recommonmark==0.7.1
 #Sphinx==7.0.1  # sphinx-rtd-theme 1.2.2 depends on sphinx<7 and >=1.6
-Sphinx==6.2.1
-sphinx-rtd-theme==1.2.2
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#Sphinx==6.2.1
+Sphinx==8.1.3
+
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#sphinx-rtd-theme==1.2.2
+sphinx-rtd-theme==3.0.1
+
 recommonmark
 
 nose==1.3.7
@@ -19,12 +25,19 @@ nose==1.3.7
 # @modified 20230106 - Task #4778: v4.0.0 - update dependencies
 #flake8==3.8.3
 #pyflakes==2.2.0
-flake8==6.0.0
-pyflakes==3.0.1
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#flake8==6.0.0
+flake8==7.1.1
+
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#pyflakes==3.0.1
+pyflakes==3.2.0
 
 # @modified 20230106 - Task #4778: v4.0.0 - update dependencies
 #termcolor==1.1.0
-termcolor==2.2.0
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#termcolor==2.2.0
+termcolor==2.5.0
 
 # @added 20170913 - Task #2160: Test skyline with bandit
 # For static analysis - https://github.com/openstack/bandit
@@ -32,4 +45,6 @@ termcolor==2.2.0
 #bandit==1.4.0
 # @modified 20230106 - Task #4778: v4.0.0 - update dependencies
 #bandit==1.6.2
-bandit==1.7.4
+# @modified 20241105 - Task #5525: Python 3.10 - update dependencies
+#bandit==1.7.4
+bandit==1.7.10

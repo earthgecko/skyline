@@ -77,14 +77,14 @@ def api_get_fp_timeseries(current_skyline_app):
                 try:
                     metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
                 except Exception as err:
-                    current_logger.err('error :: api_get_fp_timeseries :: get_metric_id_from_base_name failed with base_name %s - %s' % (
+                    current_logger.error('error :: api_get_fp_timeseries :: get_metric_id_from_base_name failed with base_name %s - %s' % (
                         str(base_name), err))
                 current_logger.info('api_get_fp_timeseries :: determined metric_id - %s' % str(metric_id))
             if not base_name:
                 try:
                     base_name = get_base_name_from_metric_id(current_skyline_app, metric_id)
                 except Exception as err:
-                    current_logger.err('error :: api_get_fp_timeseries :: get_base_name_from_metric_id failed with metric_id %s - %s' % (
+                    current_logger.error('error :: api_get_fp_timeseries :: get_base_name_from_metric_id failed with metric_id %s - %s' % (
                         str(metric_id), err))
             duration = until_timestamp - from_timestamp
         if metric_id and until_timestamp and duration:
@@ -123,20 +123,20 @@ def api_get_fp_timeseries(current_skyline_app):
     try:
         fp_id_row = get_ionosphere_fp_db_row(current_skyline_app, fp_id)
     except Exception as err:
-        current_logger.err('error :: api_get_fp_timeseries :: get_ionosphere_fp_db_row failed - %s' % err)
+        current_logger.error('error :: api_get_fp_timeseries :: get_ionosphere_fp_db_row failed - %s' % err)
     if fp_id_row:
         try:
             metric_id = fp_id_row['metric_id']
             current_logger.info('api_get_fp_timeseries :: determined metric_id as %s' % str(metric_id))
         except Exception as err:
-            current_logger.err('error :: api_get_fp_timeseries :: failed to determine metric_id from fp_id_row - %s' % err)
+            current_logger.error('error :: api_get_fp_timeseries :: failed to determine metric_id from fp_id_row - %s' % err)
 
     if not base_name:
         if metric_id:
             try:
                 base_name = get_base_name_from_metric_id(current_skyline_app, metric_id)
             except Exception as err:
-                current_logger.err('error :: api_get_fp_timeseries :: get_base_name_from_metric_id failed with metric_id %s - %s' % (
+                current_logger.error('error :: api_get_fp_timeseries :: get_base_name_from_metric_id failed with metric_id %s - %s' % (
                     str(metric_id), err))
         current_logger.info('api_get_fp_timeseries :: determined metric - %s' % str(base_name))
     else:
@@ -144,7 +144,7 @@ def api_get_fp_timeseries(current_skyline_app):
         try:
             metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
         except Exception as err:
-            current_logger.err('error :: api_get_fp_timeseries :: get_metric_id_from_base_name failed with base_name %s - %s' % (
+            current_logger.error('error :: api_get_fp_timeseries :: get_metric_id_from_base_name failed with base_name %s - %s' % (
                 str(base_name), err))
         current_logger.info('api_get_fp_timeseries :: determined metric_id - %s' % str(metric_id))
 

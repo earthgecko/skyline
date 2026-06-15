@@ -10,6 +10,12 @@ from skyline_functions import nonNegativeDerivative, sort_timeseries
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.downsample import downsample_timeseries
 
+# @added 20240125 - Task #5178: Build and test skyline v4.1.0
+try:
+    from settings import MIRAGE_ANALYSIS_RESOLUTION
+except:
+    MIRAGE_ANALYSIS_RESOLUTION = 0
+
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -37,8 +43,7 @@ logger = logging.getLogger(skyline_app_logger)
 # data pings as anomalous .... hmmm
 def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_derivative_metric):
     """
-    Returns a list of base_names that are metrics that defined in
-    DO_NOT_ALERT_ON_STALE_METRICS
+    Return the aligned, downsampled timeseries.
 
     :param current_skyline_app: the app calling the function
     :param external_settings: the external_settings dict
@@ -63,17 +68,11 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
         logger.error('error :: determine_data_frequency failed for %s - %s' % (
             metric, err))
         metric_resolution = 0
-    logger.info('Graphite data resolution is %s seconds for %s' % (
-        str(metric_resolution), metric))
-    try:
-        full_duration_resolution_str = self.redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', metric)
-        if full_duration_resolution_str:
-            full_duration_resolution = int(float(full_duration_resolution_str))
-    except Exception as err:
-        logger.error('error :: failed to determine current_resolution from analyzer.metrics_manager.resolutions Redis hash for %s - %s' % (
-            metric, err))
-    logger.info('Redis FULL_DURATION data resolution is %s seconds for %s' % (
-        str(full_duration_resolution), metric))
+    logger.info('Graphite data resolution is %s seconds with %s data points for %s' % (
+        str(metric_resolution), str(len(timeseries)), metric))
+    logger.info('Graphite data last data points for %s: %s' % (
+        metric, str(timeseries[-3:])))
+
     if metric_resolution != full_duration_resolution:
         # Get the Redis FULL_DURATION timeseries data for the metric
         logger.info('downsampling Redis FULL_DURATION data to %s seconds and aligning to replace Graphite FULL_DURATION period for %s' % (
@@ -88,7 +87,7 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
             logger.info('got %s data points from Redis FULL_DURATION data for %s to downsample' % (
                 str(len(full_duration_timeseries)), metric))
             logger.info('Redis FULL_DURATION data last data points for %s: %s' % (
-                metric, str(full_duration_timeseries[-12:])))
+                metric, str(full_duration_timeseries[-6:])))
         except Exception as err:
             logger.error('error :: failed to get full duration timeseries data from Redis for %s - %s' % (
                 metric, err))
@@ -96,20 +95,66 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
         logger.info('not preprocessing data because metric_resolution is %s seconds for %s' % (
             str(metric_resolution), metric))
 
+    # @added 20240125 - Task #5178: Build and test skyline v4.1.0
+    # If the Graphite metric_resolution is less than 600 downsample the Graphite
+    # data as well
+    use_resolution = int(metric_resolution)
+    if MIRAGE_ANALYSIS_RESOLUTION and metric_resolution < MIRAGE_ANALYSIS_RESOLUTION:
+        use_resolution = int(MIRAGE_ANALYSIS_RESOLUTION)
+        logger.info('downsampling Graphite data for %s with %s data points from %s seconds to %s seconds' % (
+            metric, str(len(timeseries)), str(metric_resolution),
+            str(use_resolution)))
+        method = 'mean'
+        try:
+            resampled_graphite_timeseries = downsample_timeseries(skyline_app, timeseries, metric_resolution, use_resolution, method, origin='end')
+        except Exception as err:
+            logger.error('error :: downsample_timeseries failed on timeseries - %s' % err)
+        # Remove all nan because they break histogram_bins
+        removed_nans = 0
+        if resampled_graphite_timeseries:
+            resampled_graphite_timeseries_no_nans = []
+            for ts, v in resampled_graphite_timeseries:
+                if str(v) == 'nan':
+                    removed_nans += 1
+                    continue
+                resampled_graphite_timeseries_no_nans.append([ts, v])
+        if removed_nans:
+            logger.info('removed %s nan values from downsampled Graphite data for %s' % (
+                str(removed_nans), metric))
+            resampled_graphite_timeseries = list(resampled_graphite_timeseries_no_nans)
+            del resampled_graphite_timeseries_no_nans
+        logger.info('downsampled Graphite data for %s downsampled to %s data points at %s seconds' % (
+            metric, str(len(resampled_graphite_timeseries)), str(use_resolution)))
+        logger.info('downsampled Graphite data last data points for %s: %s' % (
+            metric, str(resampled_graphite_timeseries[-3:])))
+        if resampled_graphite_timeseries:
+            timeseries = list(resampled_graphite_timeseries)
+            del resampled_graphite_timeseries
+
+    try:
+        full_duration_resolution_str = self.redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', metric)
+        if full_duration_resolution_str:
+            full_duration_resolution = int(float(full_duration_resolution_str))
+    except Exception as err:
+        logger.error('error :: failed to determine current_resolution from analyzer.metrics_manager.resolutions Redis hash for %s - %s' % (
+            metric, err))
+    logger.info('Redis FULL_DURATION data resolution is %s seconds for %s' % (
+        str(full_duration_resolution), metric))
+
     if full_duration_timeseries:
         method = 'mean'
         # if known_derivative_metric:
         #    method = 'sum'
         try:
-            resampled_aligned_timeseries = downsample_timeseries(skyline_app, full_duration_timeseries, full_duration_resolution, metric_resolution, method, origin='end')
+            # @modified 20240125 - Task #5178: Build and test skyline v4.1.0
+            # resampled_aligned_timeseries = downsample_timeseries(skyline_app, full_duration_timeseries, full_duration_resolution, metric_resolution, method, origin='end')
+            resampled_aligned_timeseries = downsample_timeseries(skyline_app, full_duration_timeseries, full_duration_resolution, use_resolution, method, origin='end')
         except Exception as err:
             logger.error('error :: downsample_timeseries failed on full_duration_timeseries - %s' % err)
         logger.info('FULL_DURATION data for %s downsampled to %s data points at %s seconds' % (
-            metric, str(len(resampled_aligned_timeseries)), str(metric_resolution)))
-        logger.info('Graphite data last data points for %s: %s' % (
-            metric, str(timeseries[-5:])))
+            metric, str(len(resampled_aligned_timeseries)), str(use_resolution)))
         logger.info('downsampled FULL_DURATION data last data points for %s: %s' % (
-            metric, str(resampled_aligned_timeseries[-5:])))
+            metric, str(resampled_aligned_timeseries[-3:])))
 
     # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
     #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -125,7 +170,8 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
     if removed_nans:
         logger.info('removed %s nan values from downsampled FULL_DURATION data for %s' % (
             str(removed_nans), metric))
-        resampled_aligned_timeseries = resampled_aligned_timeseries_no_nans
+        resampled_aligned_timeseries = list(resampled_aligned_timeseries_no_nans)
+        del resampled_aligned_timeseries_no_nans
 
     # The resampled_aligned_timeseries data must have nonNegativeDerivative
     # applied if it is a derivative_metric
@@ -136,7 +182,7 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
             derivative_resampled_aligned_timeseries = nonNegativeDerivative(resampled_aligned_timeseries)
             resampled_aligned_timeseries = derivative_resampled_aligned_timeseries
             logger.info('resampled_aligned_timeseries data last data points for %s (after nonNegativeDerivative): %s' % (
-                metric, str(resampled_aligned_timeseries[-12:])))
+                metric, str(resampled_aligned_timeseries[-6:])))
         except Exception as err:
             logger.error('error :: nonNegativeDerivative failed on resampled_aligned_timeseries for %s - %s' % (
                 metric, err))

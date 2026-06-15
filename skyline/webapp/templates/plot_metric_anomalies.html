@@ -20,6 +20,7 @@
   {% set use_base_name = metric %}
 {% endif %}
 
+<!--
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -28,6 +29,7 @@
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
 		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a></li>
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
 		  <li class="active"><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
@@ -43,9 +45,31 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+-->
+
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?not_anomalous=true"><span class="logo"><span class="re">Not</span> <span class="sky">anomalous</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="/panorama?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a>
+      </li>
+    </ul>
+  </div>
+  <br>
 
   <div class="container main_container">
-    <div class="container search_container">
+<!--    <div class="container search_container"> -->
       <h4><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></h4>
       <form action="panorama">
         <input type="hidden" name="plot_metric_anomalies" value="true" />
@@ -65,7 +89,7 @@
         <br>
         <input type="submit" value="Submit">
       </form>
-    </div>
+<!--    </div> -->
     <p>
 
 {% if plot_file or plot_matches %}
@@ -87,7 +111,7 @@
 
 {% if plot_file %}
     <h4><span class="logo"><span class="sky">Anomalies</span> <span class="re">{{ use_metric }}</span></span></h4>
-    <img src="panorama_images?image={{ plot_file }}" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
+    <img src="panorama_images?image={{ plot_file }}" loading="lazy" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ plot_file }}<br><br>
 {% else %}
   {% if metric %}
@@ -98,7 +122,7 @@ Image file: {{ plot_file }}<br><br>
 {% if plot_matches %}
   {% if matches_plot_file %}
       <h4><span class="logo"><span class="sky">Matches</span> <span class="re">{{ use_metric }}</span></span></h4>
-      <img src="panorama_images?image={{ matches_plot_file }}" alt="{{ metric }} - matches timeseries graph" class="img-responsive center-block" /><br>
+      <img src="panorama_images?image={{ matches_plot_file }}" loading="lazy" alt="{{ metric }} - matches timeseries graph" class="img-responsive center-block" /><br>
   Image file: {{ matches_plot_file }}<br><br>
   {% else %}
     {% if metric %}
@@ -110,7 +134,7 @@ Image file: {{ plot_file }}<br><br>
 {% if plot_all_events %}
   {% if events_plot_file %}
       <h4><span class="logo"><span class="sky">All events</span> <span class="re">{{ use_metric }}</span></span></h4>
-      <img src="panorama_images?image={{ events_plot_file }}" alt="{{ metric }} - all events timeseries graph" class="img-responsive center-block" /><br>
+      <img src="panorama_images?image={{ events_plot_file }}" loading="lazy" alt="{{ metric }} - all events timeseries graph" class="img-responsive center-block" /><br>
   Image file: {{ events_plot_file }}<br><br>
   {% endif %}
 {% endif %}

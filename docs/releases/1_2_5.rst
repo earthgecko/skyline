@@ -41,8 +41,8 @@ Changes from v1.2.4
   and 00:17 on some days (2492) #67
   +        # if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
   +        # IndexError: list index out of range
-    #68 Ionosphere validate learnt features profiles page
-    IssueID #2430: Ionosphere validate learnt features profiles page (#68)
+  #68 Ionosphere validate learnt features profiles page
+  IssueID #2430: Ionosphere validate learnt features profiles page (#68)
 - Added get_features_profiles_to_validate and get_metrics_with_features_profiles_to_validate
   functions to skyline/webapp/ionosphere_backend.py (2430, #68)
 - Added validate_features_profiles.html template and added the context to the

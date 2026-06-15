@@ -1,22 +1,37 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
+{% if version == dev_ver %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <div class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></span></a></li>
+      <li class="breadcrumb-item active" aria-current="page">Login</li>
+    </div>
+  </ol>
+</nav>
+<div class="container-fluid">
+{% else %}
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
-		<li><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+		<li><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></span></a></li>
 		<li class="active">login</li>
 	</ol>
-
+{% endif %}
 	<div class="row">
-
+{% if version == dev_ver %}
+    <div class="col-md-6 md-offset-3">
+{% else %}
 		<div class="col-md-6 col-md-offset-3">
-
-			<h3><span class="logo">Connect to your <span class="sky">Sky</span><span class="re">line</span> Redis database</h3>
-
+{% endif %}
+      <h3><span class="logo">Connect to your <span class="sky">Sky</span><span class="re">line</span> Redis database</h3>
 			<div class="well">
-
 				<form role="form" action="/rebrow" method="POST" class="form-horizontal">
-
 					<div class="form-group">
 						<label for="host" class="col-sm-3">Host:</label>
 						<div class="col-sm-9">
@@ -26,14 +41,12 @@
 							<p class="help-block">Set host to unix_socket if Skyline is running on docker</p>
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label for="port" class="col-sm-3">Port:</label>
 						<div class="col-sm-9">
 							<input id="port" name="port" type="number" value="6379" class="form-control" size="6" style="width: 100px"/>
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label for="db" class="col-sm-3">Database ID:</label>
 						<div class="col-sm-9">
@@ -41,7 +54,6 @@
 							<p class="help-block">If unsure, use 0 (zero).</p>
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label for="password" class="col-sm-3">Password:</label>
 						<div class="col-sm-9">
@@ -54,7 +66,6 @@
   {% endif %}
 						</div>
 					</div>
-
 <!-- # @added 20180529 - Feature #2378: Add redis auth to Skyline and rebrow -->
 					<div class="form-group">
 						<label for="db" class="col-sm-3">Token valid for:</label>
@@ -63,31 +74,29 @@
 							<p class="help-block">This is how many seconds you want your token for Redis authentication valid for, max allowed 86400.</p>
 						</div>
 					</div>
-
 <!-- # @added 20180727 - Feature #2378: Add redis auth to Skyline and rebrow -->
   {% if protocol != 'https' %}
-	  		<div class="alert alert-danger">
+	  	    <div class="alert alert-danger">
 <strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">is running misconfigured ::</span></span></b>
  You are not running Skyline behind a SSL terminated endpoint therefore POST
 data submitted by this form will be sent encrypted, including your Redis
 password or your proxy is not configured correctly and is not setting the
 X-Forwarded-Proto header.
-	  		</div>
+	  		  </div>
   {% endif %}
   {% if proxied == False %}
-	  		<div class="alert alert-danger">
+	  		  <div class="alert alert-danger">
 <strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">is running misconfigured ::</span></span></b>
  Skyline does not appear to be running behind a proxy or your proxy is not
 configured correctly and it is not setting the X-Forwarded-Proto header.
-	  		</div>
+	  		  </div>
   {% endif %}
   {% if client_message != False %}
-	  		<div class="alert alert-danger">
+	  		  <div class="alert alert-danger">
 <strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">message ::</span></span></b>
  {{ client_message }}
-	  		</div>
+	  		  </div>
   {% endif %}
-
 					<div class="form-group">
 						<div class="col-sm-9 col-sm-offset-3">
 							<button type="submit" class="btn btn-default btn-primary">Connect</button>
@@ -95,8 +104,11 @@ configured correctly and it is not setting the X-Forwarded-Proto header.
 					</div>
 				</form>
 			</div>
-
 		</div>
 	</div>
+{% if version == dev_ver %}
+<!-- Close class="container-fluid" div -->
+</div>
+{% endif %}
 
 {% endblock %}

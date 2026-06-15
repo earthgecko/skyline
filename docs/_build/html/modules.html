@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -34,9 +34,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -47,13 +44,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -79,6 +78,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -87,7 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -124,7 +124,7 @@
            <div itemprop="articleBody">
              
   <section id="skyline">
-<h1>skyline<a class="headerlink" href="#skyline" title="Permalink to this heading"></a></h1>
+<h1>skyline<a class="headerlink" href="#skyline" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a><ul>
@@ -177,26 +177,26 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.adtk_seasonal">skyline.custom_algorithms.adtk_seasonal module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.adtk_volatility_shift">skyline.custom_algorithms.adtk_volatility_shift module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.anomalous_daily_peak">skyline.custom_algorithms.anomalous_daily_peak module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#skyline-custom-algorithms-azure-ai-anomalydetector-module">skyline.custom_algorithms.azure_ai_anomalydetector module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.dbscan">skyline.custom_algorithms.dbscan module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.grafana_promql_anomaly_detection">skyline.custom_algorithms.grafana_promql_anomaly_detection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.irregular_unstable">skyline.custom_algorithms.irregular_unstable module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.isolation_forest">skyline.custom_algorithms.isolation_forest module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.lad">skyline.custom_algorithms.lad module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.last_same_hours">skyline.custom_algorithms.last_same_hours module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.lof">skyline.custom_algorithms.lof module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.longest_zero_streak">skyline.custom_algorithms.longest_zero_streak module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.low_variance_anomalous_peak_trough">skyline.custom_algorithms.low_variance_anomalous_peak_trough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.m66">skyline.custom_algorithms.m66 module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.macd">skyline.custom_algorithms.macd module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.median_absolute_deviation">skyline.custom_algorithms.median_absolute_deviation module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.moving_sum_and_value_decrease">skyline.custom_algorithms.moving_sum_and_value_decrease module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.moving_sum_decrease">skyline.custom_algorithms.moving_sum_decrease module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.mstl">skyline.custom_algorithms.mstl module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#skyline-custom-algorithms-numba-spectral-residual-module">skyline.custom_algorithms.numba_spectral_residual module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.one_class_svm">skyline.custom_algorithms.one_class_svm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.pca">skyline.custom_algorithms.pca module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.probabilistic_forecasts_generalized_pareto_distribution_ets">skyline.custom_algorithms.probabilistic_forecasts_generalized_pareto_distribution_ets module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.sigma">skyline.custom_algorithms.sigma module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.significant_change_window_percent_sustained">skyline.custom_algorithms.significant_change_window_percent_sustained module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#skyline-custom-algorithms-skyline-fbprophet-module">skyline.custom_algorithms.skyline_fbprophet module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.single_value_anomaly">skyline.custom_algorithms.single_value_anomaly module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.skyline_matrixprofile">skyline.custom_algorithms.skyline_matrixprofile module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#skyline-custom-algorithms-skyline-ppscore-module">skyline.custom_algorithms.skyline_ppscore module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.skyline_prophet">skyline.custom_algorithms.skyline_prophet module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.spectral_entropy">skyline.custom_algorithms.spectral_entropy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.custom_algorithms.html#module-custom_algorithms.spectral_residual">skyline.custom_algorithms.spectral_residual module</a></li>
@@ -213,6 +213,7 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric">skyline.flux.populate_metric module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric_worker">skyline.flux.populate_metric_worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.prometheus">skyline.flux.prometheus module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.tornado">skyline.flux.tornado module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.uploaded_data_worker">skyline.flux.uploaded_data_worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux.worker">skyline.flux.worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.flux.html#module-flux">Module contents</a></li>
@@ -239,6 +240,7 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.layers">skyline.ionosphere.layers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.learn_repetitive_patterns">skyline.ionosphere.learn_repetitive_patterns module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.motif_annihilation">skyline.ionosphere.motif_annihilation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere">Module contents</a></li>
 </ul>
 </li>
@@ -261,6 +263,7 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage">skyline.mirage.mirage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_alerters">skyline.mirage.mirage_alerters module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_algorithms">skyline.mirage.mirage_algorithms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_irregular_unstable">skyline.mirage.mirage_irregular_unstable module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_labelled_metrics">skyline.mirage.mirage_labelled_metrics module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_vortex">skyline.mirage.mirage_vortex module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.mirage.html#module-mirage.mirage_vortex_algorithms">skyline.mirage.mirage_vortex_algorithms module</a></li>
@@ -282,6 +285,7 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.snab.html#module-snab.snab">skyline.snab.snab module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.snab.html#module-snab.snab_flux_load_test">skyline.snab.snab_flux_load_test module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.snab.html#module-snab.snab_flux_load_test_agent">skyline.snab.snab_flux_load_test_agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.snab.html#module-snab.snab_results_algorithms">skyline.snab.snab_results_algorithms module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.snab.html#module-snab">Module contents</a></li>
 </ul>
 </li>
@@ -289,6 +293,7 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#skyline-thunder-agent-module">skyline.thunder.agent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#module-thunder.thunder">skyline.thunder.thunder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#module-thunder.thunder_alert">skyline.thunder.thunder_alert module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#module-thunder.thunder_alerters">skyline.thunder.thunder_alerters module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#module-thunder.thunder_rolling">skyline.thunder.thunder_rolling module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.thunder.html#module-thunder">Module contents</a></li>
@@ -304,6 +309,9 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.agent">skyline.vista.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.bq_backfill">skyline.vista.bq_backfill module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.bq_fetcher">skyline.vista.bq_fetcher module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.bq_update">skyline.vista.bq_update module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.fetcher">skyline.vista.fetcher module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista.worker">skyline.vista.worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.vista.html#module-vista">Module contents</a></li>
@@ -311,20 +319,35 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.add_bq_backfill_job">skyline.webapp.add_bq_backfill_job module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.add_bq_update_job">skyline.webapp.add_bq_update_job module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_alias_features_profile">skyline.webapp.api_alias_features_profile module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_bq_query">skyline.webapp.api_bq_query module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_create_training_data">skyline.webapp.api_create_training_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-get-analysed-events-module">skyline.webapp.api_get_analysed_events module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-get-analysed-timeseries-module">skyline.webapp.api_get_analysed_timeseries module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_anomalies_updated">skyline.webapp.api_get_anomalies_updated module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_anomaly">skyline.webapp.api_get_anomaly module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_bulk_training_data">skyline.webapp.api_get_bulk_training_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-get-flux-test-metrics-module">skyline.webapp.api_get_flux_test_metrics module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_fp_timeseries">skyline.webapp.api_get_fp_timeseries module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-get-metric-analysed-events-module">skyline.webapp.api_get_metric_analysed_events module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_metric_anomalies">skyline.webapp.api_get_metric_anomalies module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_namespace_metric_count">skyline.webapp.api_get_namespace_metric_count module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_get_panorama_all_activity">skyline.webapp.api_get_panorama_all_activity module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-mute-alerts-on-module">skyline.webapp.api_mute_alerts_on module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_populate_redis_metric">skyline.webapp.api_populate_redis_metric module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.api_reprocess_batch_metrics">skyline.webapp.api_reprocess_batch_metrics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-skip-analysis-module">skyline.webapp.api_skip_analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-api-smoke-module">skyline.webapp.api_smoke module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.backend">skyline.webapp.backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.crucible_backend">skyline.webapp.crucible_backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.expose_metrics">skyline.webapp.expose_metrics module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.get_analysed_events">skyline.webapp.get_analysed_events module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-get-boundary-metrics-module">skyline.webapp.get_boundary_metrics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-get-bq-backfill-job-module">skyline.webapp.get_bq_backfill_job module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-get-saved-training-data-module">skyline.webapp.get_saved_training_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.get_snab_report">skyline.webapp.get_snab_report module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.get_snab_results">skyline.webapp.get_snab_results module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn_features_profile">skyline.webapp.gunicorn_features_profile module</a></li>
@@ -332,15 +355,19 @@
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_performance">skyline.webapp.ionosphere_performance module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.luminosity_backend">skyline.webapp.luminosity_backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.luminosity_cloudbursts">skyline.webapp.luminosity_cloudbursts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.luminosity_pearson_closest">skyline.webapp.luminosity_pearson_closest module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.luminosity_plot_cloudburst">skyline.webapp.luminosity_plot_cloudburst module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.motif_annihilations_to_validate">skyline.webapp.motif_annihilations_to_validate module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.on_demand_motif_analysis">skyline.webapp.on_demand_motif_analysis module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.panorama_plot_anomalies">skyline.webapp.panorama_plot_anomalies module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.save_training_data_comment">skyline.webapp.save_training_data_comment module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.snab_backend">skyline.webapp.snab_backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.timeseries_graph">skyline.webapp.timeseries_graph module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.vortex">skyline.webapp.vortex module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp">skyline.webapp.webapp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp_features_profile">skyline.webapp.webapp_features_profile module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp.wind">skyline.webapp.wind module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="skyline.webapp.html#module-webapp">Module contents</a></li>
 </ul>
 </li>
@@ -366,6 +393,10 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#custom_algorithms_to_run.get_custom_algorithms_to_run"><code class="docutils literal notranslate"><span class="pre">get_custom_algorithms_to_run()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#custom_algorithms_to_run_conditions.current_value_below"><code class="docutils literal notranslate"><span class="pre">current_value_below()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#database.get_engine"><code class="docutils literal notranslate"><span class="pre">get_engine()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#database.engine_disposal"><code class="docutils literal notranslate"><span class="pre">engine_disposal()</span></code></a></li>
@@ -385,6 +416,11 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#database.metric_group_table_meta"><code class="docutils literal notranslate"><span class="pre">metric_group_table_meta()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#database.metric_group_info_table_meta"><code class="docutils literal notranslate"><span class="pre">metric_group_info_table_meta()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#database.ionosphere_minmax_table_meta"><code class="docutils literal notranslate"><span class="pre">ionosphere_minmax_table_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#database.algorithms_table_meta"><code class="docutils literal notranslate"><span class="pre">algorithms_table_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#database.snab_results_algorithms_table_meta"><code class="docutils literal notranslate"><span class="pre">snab_results_algorithms_table_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#database.comments_table_meta"><code class="docutils literal notranslate"><span class="pre">comments_table_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#database.anomalies_updated_table_meta"><code class="docutils literal notranslate"><span class="pre">anomalies_updated_table_meta()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#database.alias_features_profile_table_meta"><code class="docutils literal notranslate"><span class="pre">alias_features_profile_table_meta()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a><ul>
@@ -437,6 +473,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FULL_NAMESPACE"><code class="docutils literal notranslate"><span class="pre">FULL_NAMESPACE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.GRAPHITE_SOURCE"><code class="docutils literal notranslate"><span class="pre">GRAPHITE_SOURCE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.ENABLE_DEBUG"><code class="docutils literal notranslate"><span class="pre">ENABLE_DEBUG</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.ENABLE_DEBUG_ERROR_LOGS"><code class="docutils literal notranslate"><span class="pre">ENABLE_DEBUG_ERROR_LOGS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MINI_NAMESPACE"><code class="docutils literal notranslate"><span class="pre">MINI_NAMESPACE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FULL_DURATION"><code class="docutils literal notranslate"><span class="pre">FULL_DURATION</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MINI_DURATION"><code class="docutils literal notranslate"><span class="pre">MINI_DURATION</span></code></a></li>
@@ -454,8 +491,10 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.GRAPH_URL"><code class="docutils literal notranslate"><span class="pre">GRAPH_URL</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.CARBON_HOST"><code class="docutils literal notranslate"><span class="pre">CARBON_HOST</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.CARBON_PORT"><code class="docutils literal notranslate"><span class="pre">CARBON_PORT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.CARBON_PICKLE_PORT"><code class="docutils literal notranslate"><span class="pre">CARBON_PICKLE_PORT</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SKYLINE_METRICS_CARBON_HOST"><code class="docutils literal notranslate"><span class="pre">SKYLINE_METRICS_CARBON_HOST</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SKYLINE_METRICS_CARBON_PORT"><code class="docutils literal notranslate"><span class="pre">SKYLINE_METRICS_CARBON_PORT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SKYLINE_METRICS_CARBON_PICKLE_PORT"><code class="docutils literal notranslate"><span class="pre">SKYLINE_METRICS_CARBON_PICKLE_PORT</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.OCULUS_HOST"><code class="docutils literal notranslate"><span class="pre">OCULUS_HOST</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SERVER_METRICS_NAME"><code class="docutils literal notranslate"><span class="pre">SERVER_METRICS_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="docutils literal notranslate"><span class="pre">SKYLINE_FEEDBACK_NAMESPACES</span></code></a></li>
@@ -534,6 +573,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.AWS_SNS_SMS_ALERTS_ENABLED"><code class="docutils literal notranslate"><span class="pre">AWS_SNS_SMS_ALERTS_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.AWS_OPTS"><code class="docutils literal notranslate"><span class="pre">AWS_OPTS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SMS_ALERT_OPTS"><code class="docutils literal notranslate"><span class="pre">SMS_ALERT_OPTS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SMS_ALERTS_SCHEDULE"><code class="docutils literal notranslate"><span class="pre">SMS_ALERTS_SCHEDULE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.CUSTOM_ALERT_OPTS"><code class="docutils literal notranslate"><span class="pre">CUSTOM_ALERT_OPTS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.WORKER_PROCESSES"><code class="docutils literal notranslate"><span class="pre">WORKER_PROCESSES</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.HORIZON_IP"><code class="docutils literal notranslate"><span class="pre">HORIZON_IP</span></code></a></li>
@@ -587,7 +627,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MIRAGE_AUTOFILL_TOOSHORT"><code class="docutils literal notranslate"><span class="pre">MIRAGE_AUTOFILL_TOOSHORT</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS"><code class="docutils literal notranslate"><span class="pre">MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE"><code class="docutils literal notranslate"><span class="pre">MIRAGE_SKIP_IRREGULAR_UNSTABLE</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MIRAGE_LONG_DURATION_ALGORITHMS"><code class="docutils literal notranslate"><span class="pre">MIRAGE_LONG_DURATION_ALGORITHMS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.MIRAGE_ANALYSIS_RESOLUTION"><code class="docutils literal notranslate"><span class="pre">MIRAGE_ANALYSIS_RESOLUTION</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.BOUNDARY_PROCESSES"><code class="docutils literal notranslate"><span class="pre">BOUNDARY_PROCESSES</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.BOUNDARY_OPTIMUM_RUN_DURATION"><code class="docutils literal notranslate"><span class="pre">BOUNDARY_OPTIMUM_RUN_DURATION</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.ENABLE_BOUNDARY_DEBUG"><code class="docutils literal notranslate"><span class="pre">ENABLE_BOUNDARY_DEBUG</span></code></a></li>
@@ -732,6 +772,9 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_STATSD_PORT"><code class="docutils literal notranslate"><span class="pre">FLUX_STATSD_PORT</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_OTEL_ENABLED"><code class="docutils literal notranslate"><span class="pre">FLUX_OTEL_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_DROP_BUCKET_METRICS"><code class="docutils literal notranslate"><span class="pre">FLUX_DROP_BUCKET_METRICS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_PROMETHEUS_MAX_AGE"><code class="docutils literal notranslate"><span class="pre">FLUX_PROMETHEUS_MAX_AGE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_TORNADO_ENABLED"><code class="docutils literal notranslate"><span class="pre">FLUX_TORNADO_ENABLED</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.FLUX_TORNADO_URL"><code class="docutils literal notranslate"><span class="pre">FLUX_TORNADO_URL</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_ENABLED"><code class="docutils literal notranslate"><span class="pre">VISTA_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_VERBOSE_LOGGING"><code class="docutils literal notranslate"><span class="pre">VISTA_VERBOSE_LOGGING</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_FETCHER_PROCESSES"><code class="docutils literal notranslate"><span class="pre">VISTA_FETCHER_PROCESSES</span></code></a></li>
@@ -740,10 +783,13 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE"><code class="docutils literal notranslate"><span class="pre">VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_FETCH_METRICS"><code class="docutils literal notranslate"><span class="pre">VISTA_FETCH_METRICS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_GRAPHITE_BATCH_SIZE"><code class="docutils literal notranslate"><span class="pre">VISTA_GRAPHITE_BATCH_SIZE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_BQ_VIRTUALENV_PATH"><code class="docutils literal notranslate"><span class="pre">VISTA_BQ_VIRTUALENV_PATH</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.VISTA_BQ_ACCOUNTS"><code class="docutils literal notranslate"><span class="pre">VISTA_BQ_ACCOUNTS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_ENABLED"><code class="docutils literal notranslate"><span class="pre">SNAB_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_DATA_DIR"><code class="docutils literal notranslate"><span class="pre">SNAB_DATA_DIR</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_anomalyScore"><code class="docutils literal notranslate"><span class="pre">SNAB_anomalyScore</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_CHECKS"><code class="docutils literal notranslate"><span class="pre">SNAB_CHECKS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_SAVE_ALL_EVALUATED_TRAINING_DATA"><code class="docutils literal notranslate"><span class="pre">SNAB_SAVE_ALL_EVALUATED_TRAINING_DATA</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER"><code class="docutils literal notranslate"><span class="pre">SNAB_LOAD_TEST_ANALYZER</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_FLUX_LOAD_TEST_ENABLED"><code class="docutils literal notranslate"><span class="pre">SNAB_FLUX_LOAD_TEST_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.SNAB_FLUX_LOAD_TEST_METRICS"><code class="docutils literal notranslate"><span class="pre">SNAB_FLUX_LOAD_TEST_METRICS</span></code></a></li>
@@ -753,7 +799,6 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.LOCAL_EXTERNAL_SETTINGS"><code class="docutils literal notranslate"><span class="pre">LOCAL_EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.PROMETHEUS_INGESTION"><code class="docutils literal notranslate"><span class="pre">PROMETHEUS_INGESTION</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.PROMETHEUS_SETTINGS"><code class="docutils literal notranslate"><span class="pre">PROMETHEUS_SETTINGS</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.PROMETHEUS_METRIC_OPTS"><code class="docutils literal notranslate"><span class="pre">PROMETHEUS_METRIC_OPTS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.OTEL_ENABLED"><code class="docutils literal notranslate"><span class="pre">OTEL_ENABLED</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME"><code class="docutils literal notranslate"><span class="pre">OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_PORT"><code class="docutils literal notranslate"><span class="pre">OTEL_JAEGEREXPORTER_AGENT_PORT</span></code></a></li>
@@ -813,6 +858,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#slack_functions.slack_post_message"><code class="docutils literal notranslate"><span class="pre">slack_post_message()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.html#slack_functions.slack_post_reaction"><code class="docutils literal notranslate"><span class="pre">slack_post_reaction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.html#slack_functions.slack_file_upload"><code class="docutils literal notranslate"><span class="pre">slack_file_upload()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a><ul>
@@ -841,7 +887,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

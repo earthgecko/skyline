@@ -75,7 +75,7 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
         return matched_timeseries
 
     if not matched['match']:
-        current_logger.warning('warning :: %s :: no match found' % (function_str))
+        current_logger.info('warning :: %s :: no match found' % (function_str))
         return matched_timeseries
 
     try:
@@ -292,7 +292,7 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
         matched_timeseries['matched_fp_timeseries'] = fp_timeseries[-(len(match_timeseries)):]
         matched_timeseries['timeseries'] = match_timeseries
 
-    # Ensure timesereis are same length
+    # Ensure timeseries are same length
     matched_fp_timeseries_len = len(matched_timeseries['matched_fp_timeseries'])
     matched_timeseries_len = len(matched_timeseries['timeseries'])
 
@@ -300,6 +300,48 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
         matched_timeseries['matched_fp_timeseries'] = matched_timeseries['matched_fp_timeseries'][-matched_timeseries_len:]
     if matched_fp_timeseries_len < matched_timeseries_len:
         matched_timeseries['timeseries'] = matched_timeseries['timeseries'][-matched_fp_timeseries_len:]
+
+    # @added 20241002 - Feature #5476: get_matched_timeseries - match_timestamp_aligned
+    align_fp_timeseries = False
+    if 'timeseries' in matched_timeseries.keys():
+        if len(matched_timeseries['timeseries']) > 0:
+            if 'matched_fp_timeseries' in matched_timeseries.keys():
+                if len(matched_timeseries['matched_fp_timeseries']) > 0:
+                    align_fp_timeseries = True
+    if not align_fp_timeseries:
+        current_logger.info('%s :: not aligning match to timeseries' % (
+            function_str))
+
+    if align_fp_timeseries:
+        current_logger.info('%s :: aligning match to timeseries' % (
+            function_str))
+        matched_fp_timeseries_match_timestamp_aligned = []
+
+        # @added 20241015 - Feature #5476: get_matched_timeseries - match_timestamp_aligned
+        # Use standardised method
+        if 'motif_matched' in matched_timeseries.keys():
+            motif_start_index = matched_timeseries['motif_matched']['index']
+            motif_end_index = motif_start_index + matched_timeseries['motif_matched']['size']
+            match_values = [item[1] for index, item in enumerate(matched_timeseries['fp']['timeseries']) if index >= motif_start_index and index <= motif_end_index]
+        else:
+            match_values = [item[1] for item in matched_timeseries['fp']['timeseries']]
+        current_logger.info('%s :: len(match_values): %s, len(timeseries): %s' % (
+            function_str, str(len(match_values)),
+            str(len(matched_timeseries['timeseries']))))
+        last_value = None
+        for index, item in enumerate(matched_timeseries['timeseries']):
+            ts = int(item[0])
+            try:
+                # @modified 20241015 - Feature #5476: get_matched_timeseries - match_timestamp_aligned
+                # Use standardised method
+                # value = matched_timeseries['matched_fp_timeseries'][index][1]
+                value = match_values[index]
+                last_value = float(value)
+            except:
+                if isinstance(last_value, float):
+                    value = last_value
+            matched_fp_timeseries_match_timestamp_aligned.append([ts, value])
+        matched_timeseries['matched_fp_timeseries_match_timestamp_aligned'] = matched_fp_timeseries_match_timestamp_aligned
 
     # matched_timeseries['matched_fp_timeseries'] = fp_timeseries[-(len(match_timeseries)):]
     # matched_timeseries['timeseries'] = match_timeseries
@@ -332,6 +374,13 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
             del cache_matched_timeseries_details['fp_motif']['fp_motif_timeseries']
         except:
             pass
+
+        # @added 20241002 - Feature #5476: get_matched_timeseries - match_timestamp_aligned
+        try:
+            del cache_matched_timeseries_details['matched_fp_timeseries_match_timestamp_aligned']
+        except:
+            pass
+
         for key in list(cache_matched_timeseries_details.keys()):
             if isinstance(cache_matched_timeseries_details[key], Decimal):
                 float_value = float(cache_matched_timeseries_details[key])

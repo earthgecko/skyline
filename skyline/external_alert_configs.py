@@ -3,6 +3,7 @@ external_alert_configs
 """
 import logging
 import traceback
+import copy
 from ast import literal_eval
 import requests
 import simplejson as json
@@ -51,12 +52,20 @@ def get_external_alert_configs(current_skyline_app):
     EXTERNAL_ALERTS_JSON_ITEMS = (
         'alerter', 'expiration', 'namespace', 'namespace_prefix',
         'second_order_resolution', 'second_order_resolution_hours', 'learn_days',
-        'inactive_after'
+        'inactive_after',
+        # @added 20231025 - Feature #5104: boundary - external_settings
+        'boundary',
     )
     OPTIONAL_EXTERNAL_ALERTS_JSON_ITEMS = (
         'namespace_prefix', 'second_order_resolution_hours', 'learn_days',
-        'inactive_after'
+        'inactive_after',
     )
+
+    # @added 20231025 - Feature #5104: boundary - external_settings
+    external_boundary_metrics = {}
+
+    # @added 20231115 - Feature #5104: boundary - external_settings
+    empty_boundary_alert_configs = {}
 
     try:
         EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS
@@ -190,6 +199,22 @@ def get_external_alert_configs(current_skyline_app):
                 alerter_config = {'id': config_id}
                 namespace_prefix = None
                 namespace = None
+
+                # @added 20231025 - Feature #5104: boundary - external_settings
+                boundary_metrics_setting = False
+                if 'boundary' in list(external_alert_json['data'][alerter_id].keys()):
+                    # @modified 20231115 - Feature #5104: boundary - external_settings
+                    # Only if there is data in the key
+                    config_id = 'external-boundary-%s' % str(alerter_id)
+                    if len(external_alert_json['data'][alerter_id]['boundary']) > 0:
+                        boundary_metrics_setting = True
+                        alerter_config = {'id': config_id}
+                    else:
+                        # A boundary alert config but with no data, record it
+                        # and skip it.
+                        empty_boundary_alert_configs[config_id] = copy.deepcopy(external_alert_json['data'][alerter_id])
+                        continue
+
                 for key in EXTERNAL_ALERTS_JSON_ITEMS:
                     try:
                         if key == 'namespace_prefix':
@@ -199,6 +224,12 @@ def get_external_alert_configs(current_skyline_app):
                                 namespace_prefix = None
                         elif key == 'namespace':
                             namespace = external_alert_json['data'][alerter_id][key]
+
+                        # @added 20231025 - Feature #5104: boundary - external_settings
+                        elif key == 'boundary':
+                            if boundary_metrics_setting:
+                                alerter_config[key] = copy.deepcopy(external_alert_json['data'][alerter_id][key])
+
                         else:
                             alerter_config[key] = external_alert_json['data'][alerter_id][key]
                     except:
@@ -232,12 +263,31 @@ def get_external_alert_configs(current_skyline_app):
                         current_logger.error(traceback.format_exc())
                         current_logger.error('error :: get_external_alert_configs :: failed to add type external to alerter_config')
                         continue
+
+                    # @added 20231025 - Feature #5104: boundary - external_settings
+                    if boundary_metrics_setting:
+                        external_boundary_metrics[alerter_id] = copy.deepcopy(alerter_config)
+                        external_boundary_metrics[alerter_id]['namespace_prefix'] = namespace_prefix
+                        continue
+
                     try:
                         external_alert_configs[alerter_id] = alerter_config
                     except:
                         current_logger.error(traceback.format_exc())
                         current_logger.error('error :: get_external_alert_configs :: could not add alert_config dict to external_alert_configs dict from json - %s' % str(external_alert_json['data'][alerter_id]))
                         continue
+
+    # @added 20231115 - Feature #5104: boundary - external_settings
+    # Report empty boundary keys
+    if len(empty_boundary_alert_configs) > 0:
+        redis_key = 'skyline.empty.external_boundary_metrics'
+        try:
+            redis_conn_decoded.set(redis_key, str(empty_boundary_alert_configs))
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_external_alert_configs :: failed to set %s' % redis_key)
+        current_logger.info('warning :: get_external_alert_configs :: recieved %s external alerters with empty boundary keys, see Redis key %s' % (
+            str(len(empty_boundary_alert_configs)), redis_key))
 
     # If the key expired and no alerter_configs were constructed from the
     # external source then use the last known good external_alert_configs
@@ -272,6 +322,12 @@ def get_external_alert_configs(current_skyline_app):
         # smtp alert, as the smtp alert route creates the the training data
         # resources.
         for external_alert_config in external_alert_configs:
+
+            # @added 20231025 - Feature #5104: boundary - external_settings
+            current_logger.info('get_external_alert_configs :: external_alert_config: %s' % str(external_alert_config))
+            if 'external-boundary-' in external_alert_config:
+                continue
+
             config_id = None
             namespace = None
             expiration = None
@@ -334,6 +390,11 @@ def get_external_alert_configs(current_skyline_app):
     # external alerts - non-smtp
     if external_alert_configs:
         for external_alert_config in external_alert_configs:
+
+            # @added 20231025 - Feature #5104: boundary - external_settings
+            if 'external-boundary-' in external_alert_config:
+                continue
+
             config_id = None
             alerter = None
             namespace = None
@@ -422,5 +483,42 @@ def get_external_alert_configs(current_skyline_app):
             except:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_external_alert_configs :: failed to set %s' % redis_key)
+
+    # @added 20231025 - Feature #5104: boundary - external_settings
+    if external_boundary_metrics:
+        redis_key = 'skyline.external_boundary_metrics'
+        current_external_boundary_metrics = {}
+        try:
+            current_external_boundary_metrics = redis_conn_decoded.hgetall(redis_key)
+            current_logger.info('get_external_alert_configs :: retrieved %s current external_boundary_metrics from %s' % (
+                str(len(current_external_boundary_metrics)), redis_key))
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_external_alert_configs :: failed to set %s - %s' % (redis_key, err))
+        current_external_boundary_metrics_alerter_ids = list(current_external_boundary_metrics.keys())
+        new_external_boundary_metrics_alerter_ids = list(external_boundary_metrics.keys())
+        remove_alerter_ids = []
+        for alerter_id in current_external_boundary_metrics_alerter_ids:
+            if alerter_id not in new_external_boundary_metrics_alerter_ids:
+                remove_alerter_ids.append(alerter_id)
+        if remove_alerter_ids:
+            current_logger.info('get_external_alert_configs :: removing %s alerter_ids from %s, %s' % (
+                str(len(remove_alerter_ids)), redis_key, str(remove_alerter_ids)))
+            try:
+                redis_conn_decoded.hdel(redis_key, *set(remove_alerter_ids))
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_external_alert_configs :: failed to remove alerter_ids from %s - %s' % (redis_key, err))
+        external_boundary_metrics_strs = {}
+        for key in list(external_boundary_metrics.keys()):
+            external_boundary_metrics_strs[key] = str(external_boundary_metrics[key])
+        try:
+            redis_conn_decoded.hset(redis_key, mapping=external_boundary_metrics_strs)
+            current_logger.info('get_external_alert_configs :: added %s external boundary metrics to %s' % (
+                str(len(external_boundary_metrics)), redis_key))
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_external_alert_configs :: failed to set %s' % (
+                redis_key, err))
 
     return (external_alert_configs, external_from_cache, internal_alert_configs, internal_from_cache, all_alerts, all_from_cache)

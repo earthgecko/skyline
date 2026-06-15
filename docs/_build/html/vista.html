@@ -1,27 +1,27 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vista &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Vista &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="SNAB" href="SNAB.html" />
+    <link rel="next" title="Vista - BigQuery" href="vista-bigquery/index.html" />
     <link rel="prev" title="Thunder - Horizon" href="thunder/thunder_horizon.html" /> 
 </head>
 
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -101,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#missing-data">Missing data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -109,7 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -146,7 +146,7 @@
            <div itemprop="articleBody">
              
   <section id="vista">
-<h1>Vista<a class="headerlink" href="#vista" title="Permalink to this heading"></a></h1>
+<h1>Vista<a class="headerlink" href="#vista" title="Link to this heading"></a></h1>
 <p>Vista is the Skyline service that enables Skyline to fetch metrics from Graphite
 and Prometheus servers and populate your Skyline Graphite instance with
 them or derivatives of those metrics, via Skyline Flux, so they can be pickled
@@ -184,7 +184,7 @@ aggregated data retentions will not have the result a user may expect as the
 function is applied to the aggregated values.</p>
 </div>
 <section id="important-note-intended-use">
-<h2>Important note - Intended use<a class="headerlink" href="#important-note-intended-use" title="Permalink to this heading"></a></h2>
+<h2>Important note - Intended use<a class="headerlink" href="#important-note-intended-use" title="Link to this heading"></a></h2>
 <p>Vista is intended to be used to fetch tens to hundreds of metrics, it is not
 intended to fetch thousands of metrics.  Although theoretically it could
 probably fetch thousands of metrics, it is not intended for this purpose, that
@@ -192,7 +192,7 @@ type of implementation would much better suited to a Graphite to Graphite pickle
 or Prometheus <cite>remote_storage_adapter</cite> to Graphite.</p>
 </section>
 <section id="very-important-note-variations-in-data-and-graphs">
-<h2>Very important note - Variations in data and graphs<a class="headerlink" href="#very-important-note-variations-in-data-and-graphs" title="Permalink to this heading"></a></h2>
+<h2>Very important note - Variations in data and graphs<a class="headerlink" href="#very-important-note-variations-in-data-and-graphs" title="Link to this heading"></a></h2>
 <p>Variations in the remote and Graphite data SHOULD be expected.  This applies to
 both:
 - Prometheus &lt;- Vista -&gt; Graphite and;
@@ -212,7 +212,7 @@ probably a limited understanding of the time series data stores in question.</p>
 <p>There will always be the potential for slight differences.  Usefulness outweighs
 perfection and given the variables, perfection cannot be achieved.</p>
 <section id="prometheus-vs-graphite-graphs-and-data-sets">
-<h3>Prometheus vs Graphite graphs and data sets<a class="headerlink" href="#prometheus-vs-graphite-graphs-and-data-sets" title="Permalink to this heading"></a></h3>
+<h3>Prometheus vs Graphite graphs and data sets<a class="headerlink" href="#prometheus-vs-graphite-graphs-and-data-sets" title="Link to this heading"></a></h3>
 <p>Be aware that graphs rendered by Prometheus and Graphite may present different
 values in terms of max and min values.  Th raw data points in both Prometheus at
 <cite>step=60s</cite> and in Graphite in its first retention for a specific time period
@@ -274,7 +274,7 @@ never be identical, but they should be very similar.</p>
 </section>
 </section>
 <section id="important-note-graphite-aggregations">
-<h2>Important note - Graphite aggregations<a class="headerlink" href="#important-note-graphite-aggregations" title="Permalink to this heading"></a></h2>
+<h2>Important note - Graphite aggregations<a class="headerlink" href="#important-note-graphite-aggregations" title="Link to this heading"></a></h2>
 <p>Be aware that Vista is intended to fetch only the latest data points from the
 remote endpoint, at their highest resolution or relevant step.  In terms of the
 metric data being aggregated on your Graphite instance, the fetched metrics
@@ -289,7 +289,7 @@ Graphite data and graphs differ slightly from the remote source.</p>
 section on Pre-populating metrics with historic data.</p>
 </section>
 <section id="how-vista-works">
-<h2>How Vista works<a class="headerlink" href="#how-vista-works" title="Permalink to this heading"></a></h2>
+<h2>How Vista works<a class="headerlink" href="#how-vista-works" title="Link to this heading"></a></h2>
 <p>A key thing to understand is that metrics fetched by Vista are near real time.
 Vista will always be submitting data for the previous completed minute and never
 the current minute, therefore Vista related metrics are always being analysed by
@@ -320,7 +320,7 @@ added to Vista, see the below section on Pre-populating metrics with historic
 data.</p>
 </section>
 <section id="graphite-and-prometheus-metrics">
-<h2>Graphite and Prometheus metrics<a class="headerlink" href="#graphite-and-prometheus-metrics" title="Permalink to this heading"></a></h2>
+<h2>Graphite and Prometheus metrics<a class="headerlink" href="#graphite-and-prometheus-metrics" title="Link to this heading"></a></h2>
 <p>Although Graphite and Prometheus are somewhat similar in nature, they have
 subtle differences.  Seeing as Skyline is already very tightly integrated with
 Graphite, in order to integrate the analysis of Prometheus metrics into Skyline,
@@ -350,13 +350,13 @@ Skyline to analyse.</p></li>
 </ul>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
 <p>The Vista configuration variables are in <cite>settings.py</cite> under the Vista settings
 block and they are all prefixed with <cite>VISTA_</cite>.  All the settings variables have
 docstrings documenting their use and values, the main user setting is further
 described below.</p>
 <section id="settings-vista-fetch-metrics">
-<h3>settings.VISTA_FETCH_METRICS<a class="headerlink" href="#settings-vista-fetch-metrics" title="Permalink to this heading"></a></h3>
+<h3>settings.VISTA_FETCH_METRICS<a class="headerlink" href="#settings-vista-fetch-metrics" title="Link to this heading"></a></h3>
 <p>The metrics you want Vista to fetch from remote sources are defined in the
 <a class="reference internal" href="skyline.html#settings.VISTA_FETCH_METRICS" title="settings.VISTA_FETCH_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_FETCH_METRICS</span></code></a> tuple.</p>
 <p>The setting consists of a tuple of tuples, like the Analyzer
@@ -384,7 +384,7 @@ they are defined in the fetch tuples.</p>
 </div>
 </section>
 <section id="remote-target">
-<h3>remote_target<a class="headerlink" href="#remote-target" title="Permalink to this heading"></a></h3>
+<h3>remote_target<a class="headerlink" href="#remote-target" title="Link to this heading"></a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Only absolute name spaces must be declared in the tuple, wildcard
@@ -393,7 +393,7 @@ declared in a function that results in a single time series.</p>
 </div>
 </section>
 <section id="frequency">
-<h3>frequency<a class="headerlink" href="#frequency" title="Permalink to this heading"></a></h3>
+<h3>frequency<a class="headerlink" href="#frequency" title="Link to this heading"></a></h3>
 <p>How often to fetch new data from the remote host, under normal circumstances
 this would generally be 60 seconds, however it can be set to any frequency.  It
 must be noted that the metric in the fetch tuple is bound by frequency.  As
@@ -401,7 +401,7 @@ shown in the example above, there are two fetch tuples for graphite.example.org
 one that specifies metrics at 60 seconds and one for 3600 seconds (hourly).</p>
 </section>
 <section id="uri">
-<h3>uri<a class="headerlink" href="#uri" title="Permalink to this heading"></a></h3>
+<h3>uri<a class="headerlink" href="#uri" title="Link to this heading"></a></h3>
 <p><strong>Graphite</strong></p>
 <p>The uri parameter is currently always applied to Graphite sources.  The time frame
 you use in the uri should be short, this results in less bandwidth and less load
@@ -441,7 +441,7 @@ of raw data and url encodes the necessary parts.  You would not use this, it is
 just an example.</p>
 </section>
 <section id="namespace-prefix">
-<h3>namespace_prefix<a class="headerlink" href="#namespace-prefix" title="Permalink to this heading"></a></h3>
+<h3>namespace_prefix<a class="headerlink" href="#namespace-prefix" title="Link to this heading"></a></h3>
 <p>If you do not want to pass a namespace_prefix for metrics, set this to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;&#39;</span>
 </pre></div>
@@ -466,7 +466,7 @@ space on your Graphite:</p>
 </div>
 </section>
 <section id="populate-at-resolutions">
-<h3>populate_at_resolutions<a class="headerlink" href="#populate-at-resolutions" title="Permalink to this heading"></a></h3>
+<h3>populate_at_resolutions<a class="headerlink" href="#populate-at-resolutions" title="Link to this heading"></a></h3>
 <p>You may wish to pre-populate your Graphite with historic data for metrics so
 that Skyline can immediately begin analysing the metric with historic data and
 seasonality patterns.</p>
@@ -520,7 +520,7 @@ to add the trailing comma, ‘15d’ will be interpreted as:</p>
 </section>
 </section>
 <section id="missing-data">
-<h2>Missing data<a class="headerlink" href="#missing-data" title="Permalink to this heading"></a></h2>
+<h2>Missing data<a class="headerlink" href="#missing-data" title="Link to this heading"></a></h2>
 <p>Vista makes best effort to retrieve any missing metric data by referring to the
 last timestamp for data reported by flux.  Take for example a case where the
 Vista service has stopped or there was a network partition between your Skyline
@@ -537,13 +537,13 @@ which is better than air gaps.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="thunder/thunder_horizon.html" class="btn btn-neutral float-left" title="Thunder - Horizon" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="SNAB.html" class="btn btn-neutral float-right" title="SNAB" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="vista-bigquery/index.html" class="btn btn-neutral float-right" title="Vista - BigQuery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

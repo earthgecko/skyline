@@ -28,6 +28,13 @@ from random import shuffle
 # @added 20220722 - Task #4624: Change all dict copy to deepcopy
 import copy
 
+# @added 20231219 - Info #4620: memray
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Added the ability to disable as it has always been enabled by default in
+# analyzer_labelled_metrics in the same manner as is done in metrics_manager.py
+from contextlib import nullcontext
+
 import numpy as np
 import pandas as pd
 import memray
@@ -66,6 +73,14 @@ from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 # @added 20230404 - Feature #4890: analyzer_labelled_metrics - use mrange
 from functions.analyzer.get_tenant_id_mrange_split import get_tenant_id_mrange_split
 
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
+
+# @added 20240207 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+#                   Feature #4888: analyzer - load_shedding
+from functions.redis.get_metric_timeseries import get_metric_timeseries
+
 send_algorithm_run_metrics = False
 skyline_app = 'analyzer'
 skyline_app_thunder_key = 'analyzer_labelled_metrics'
@@ -86,7 +101,7 @@ except:
 try:
     MAX_ANALYZER_LABELLED_METRICS_PROCESS_RUNTIME = settings.MAX_ANALYZER_LABELLED_METRICS_PROCESS_RUNTIME
 except:
-    MAX_ANALYZER_LABELLED_METRICS_PROCESS_RUNTIME = 180
+    MAX_ANALYZER_LABELLED_METRICS_PROCESS_RUNTIME = 56
 
 try:
     SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
@@ -140,6 +155,17 @@ try:
 except:
     LOAD_SHEDDING_ENABLED = True
 
+# @added 20231219 - Info #4620: memray
+#                   Task #5178: Build and test skyline v4.1.0
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Added the ability to disable as it has always been enabled by default in
+# analyzer_labelled_metrics in the same manner as is done in metrics_manager.py
+try:
+    MEMRAY_ENABLED = settings.MEMRAY_ENABLED
+except:
+    MEMRAY_ENABLED = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -192,7 +218,7 @@ class AnalyzerLabelledMetrics(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     def spawn_alerter_process(self, alert, metric, context):
@@ -287,8 +313,29 @@ class AnalyzerLabelledMetrics(Thread):
             os.rename(memray_file, memray_file_last)
             logger.info('labelled_metrics_spin_process :: removed %s' % str(memray_file_last))
 
+        # @added 20231219 - Info #4620: memray
+        #                   Task #5178: Build and test skyline v4.1.0
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Added the ability to disable as it has always been enabled by default in
+        # analyzer_labelled_metrics in the same manner as is done in metrics_manager.py
+        # using the nullcontext
+        if MEMRAY_ENABLED:
+            memray_tracker = memray.Tracker(memray_file)
+            logger.info('metrics_manager :: memray Tracker enabled')
+        else:
+            memray_tracker = nullcontext()
+            logger.info('metrics_manager :: memray Tracker NOT enabled')
+
         try:
-            with memray.Tracker(memray_file):
+            # @modified 20231219 - Info #4620: memray
+            #                      Task #5178: Build and test skyline v4.1.0
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Added the ability to disable as it has always been enabled by default in
+            # analyzer_labelled_metrics in the same manner as is done in metrics_manager.py
+            # with memray.Tracker(memray_file):
+            with memray_tracker:
                 def median_absolute_deviation(timeseries):
                     try:
                         series = pd.Series([x[1] for x in timeseries])
@@ -362,8 +409,36 @@ class AnalyzerLabelledMetrics(Thread):
                     logger.error('error :: labelled_metrics_spin_process :: hgetall metrics_manager.algorithms.ids - %s' % str(err))
 
                 # @added 20210513 - Feature #4068: ANALYZER_SKIP
-                analyzer_skip_metrics_skipped = 0
                 analyzer_skip_metrics = []
+
+                # @added 20231017 - Feature #5102: webapp - api skip_analysis
+                api_skip_analysis_metrics = []
+                api_skipped_analysis_metrics = 0
+                try:
+                    api_skip_analysis_metrics = list(self.redis_conn_decoded.hkeys('metrics_manager.api_skip_analysis'))
+                except Exception as err:
+                    logger.error('error :: hkeys failed on metrics_manager.api_skip_analysis - %s' % (
+                        err))
+                if api_skip_analysis_metrics:
+                    logger.info('%s metrics found in metrics_manager.api_skip_analysis Redis set' % (
+                        str(len(api_skip_analysis_metrics))))
+                    try:
+                        api_skip_analysis_metrics = [m for m in api_skip_analysis_metrics if '_tenant_id="' in m]
+                        logger.info('%s analyzer_labelled metrics determined from api_skip_analysis_metrics' % (
+                            str(len(api_skip_analysis_metrics))))
+                    except Exception as err:
+                        logger.error('error :: failed to determine analyzer_labelled_metrics from api_skip_analysis_metrics - %s' % (
+                            err))
+                    try:
+                        for metric in api_skip_analysis_metrics:
+                            analyzer_skip_metrics.append(metric)
+                    except Exception as err:
+                        logger.error('error :: failed to add api_skip_analysis_metrics to analyzer_skip_metrics - %s' % (
+                            err))
+
+                # @added 20210513 - Feature #4068: ANALYZER_SKIP
+                analyzer_skip_metrics_skipped = 0
+                # analyzer_skip_metrics = []
                 if ANALYZER_SKIP:
                     logger.info('labelled_metrics_spin_process :: determining ANALYZER_SKIP metrics from analyzer.metrics_manager.analyzer_skip Redis set')
                     try:
@@ -375,10 +450,16 @@ class AnalyzerLabelledMetrics(Thread):
                     if analyzer_skip_metrics:
                         logger.info('labelled_metrics_spin_process :: removing %s ANALYZER_SKIP metrics from the %s assigned_metrics' % (
                             str(len(analyzer_skip_metrics)), str(assigned_metrics)))
-                        unique_labelled_metrics = list(set(unique_labelled_metrics) - set(analyzer_skip_metrics))
+                        # @modified 20240208 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        # unique_labelled_metrics = list(set(unique_labelled_metrics) - set(analyzer_skip_metrics))
+                        unique_labelled_metrics = list(set(assigned_metrics) - set(analyzer_skip_metrics))
                         analyzer_skip_metrics_skipped = len(set(analyzer_skip_metrics))
                     else:
                         logger.info('labelled_metrics_spin_process :: did not determine any ANALYZER_SKIP metrics from from analyzer.metrics_manager.analyzer_skip Redis set, will check dynamically')
+
+                # @added 20231017 - Feature #5102: webapp - api skip_analysis
+                if analyzer_skip_metrics:
+                    analyzer_skip_metrics = set(analyzer_skip_metrics)
 
                 # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
                 if not ANALYZER_ENABLED:
@@ -430,6 +511,11 @@ class AnalyzerLabelledMetrics(Thread):
                 mad_timings = []
                 downsample_timings = []
                 threesigma_timings = []
+
+                # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                # Added skip_timings
+                skip_timings = []
+                determine_data_frequency_timings = []
 
                 last_analysed_timeseries = []
                 last_analysed_metric = None
@@ -515,6 +601,7 @@ class AnalyzerLabelledMetrics(Thread):
                     labelled_metrics_resolution_sparsity_last_checked_dict = {}
 
                 # @added 20230404 - Feature #4888: analyzer - load_shedding
+                errors = []
                 analyzer_last_run_time = 0
                 analyzer_last_run_time_timestamp = int(spin_start)
                 load_shedding_active = False
@@ -532,8 +619,44 @@ class AnalyzerLabelledMetrics(Thread):
                         logger.info('labelled_metrics_spin_process :: load_shedding_active set to True because analyzer_last_run_time: %s' % str(analyzer_last_run_time))
                     if analyzer_last_run_time_timestamp <= (int(spin_start) - (settings.MAX_ANALYZER_PROCESS_RUNTIME + 30)):
                         load_shedding_active = True
-                        logger.info('labelled_metrics_spin_process :: load_shedding_active set to True because analyzer_last_run_time_timestamp is older than % seconds' % (
-                            str(analyzer_last_run_time_timestamp)))
+                        logger.info('labelled_metrics_spin_process :: load_shedding_active set to True because analyzer_last_run_time_timestamp is older than %s seconds' % (
+                            str((int(spin_start) - (settings.MAX_ANALYZER_PROCESS_RUNTIME + 30)))))
+
+                    # @added 20240207 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    if not load_shedding_active:
+                        try:
+                            high_run_time = self.redis_conn_decoded.exists('analyzer_labelled_metrics.high_run_time')
+                        except Exception as err:
+                            logger.error('error :: labelled_metrics_spin_process :: load_shedding_active failed to get key analyzer_labelled_metrics.high_run_time, err: %s' % err)
+                            high_run_time = False
+                        if high_run_time:
+                            load_shedding_active = True
+                            logger.info('labelled_metrics_spin_process :: load_shedding_active set to True because analyzer_labelled_metrics.high_run_time exists')
+
+
+                # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                feedback_metrics_enabled = False
+
+                # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                feedback_metrics_skipped = []
+                feedback_labelled_metric_ids = []
+                analyzer_labelled_metrics_busy = False
+                if settings.SKYLINE_FEEDBACK_NAMESPACES:
+
+                    # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    feedback_metrics_enabled = True
+
+                    try:
+                        analyzer_labelled_metrics_busy = self.redis_conn_decoded.get('analyzer_labelled_metrics.busy')
+                    except Exception as err:
+                        logger.error('error :: labelled_metrics_spin_process :: failed to get analyzer_labelled_metrics.busy Redis key' % (
+                            err))
+                if analyzer_labelled_metrics_busy:
+                    logger.info('labelled_metrics_spin_process :: analyzer_labelled_metrics_busy found')
+
                 logger.info('labelled_metrics_spin_process :: load_shedding_active: %s' % str(load_shedding_active))
                 last_analysed_ordered_metrics = []
                 load_shedding_assigned_metrics = []
@@ -573,22 +696,43 @@ class AnalyzerLabelledMetrics(Thread):
                         labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
                         assigned_labelled_metrics.append(labelled_metric_name)
                         assigned_labelled_metrics_dict[labelled_metric_name] = base_name
-                    if metrics_last_analysis_dict:
-                        metrics_last_analyzed_timestamp = [[int(timestamp_str), metric] for metric, timestamp_str in metrics_last_analysis_dict.items()]
+                    if last_metrics_last_analysis_dict:
+                        metrics_last_analyzed_timestamp = [[int(timestamp_str), metric] for metric, timestamp_str in last_metrics_last_analysis_dict.items()]
                         metrics_last_analyzed_timestamp_sorted = sorted(metrics_last_analyzed_timestamp, key=lambda x: x[0])
                         del metrics_last_analyzed_timestamp
-                        del metrics_last_analysis_dict
+                        del last_metrics_last_analysis_dict
                         metrics_last_analysis_dict = {}
                         metrics_last_analyzed_timestamp_sorted = [item for item in metrics_last_analyzed_timestamp_sorted if item[1] in assigned_labelled_metrics]
-                        logger.info('labelled_metrics_spin_process :: load_shedding_active reordered metrics by last analysed timestamp, first metric in list now: %s' % (
-                            str(metrics_last_analyzed_timestamp_sorted[0])))
-                        logger.info('labelled_metrics_spin_process :: load_shedding_active reordered metrics by last analysed timestamp, last metric in list now: %s' % (
-                            str(metrics_last_analyzed_timestamp_sorted[-1])))
+                        # @modified 20240229 - Task #5178: Build and test skyline v4.1.0
+                        #                      Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        # Wrapped in conditional
+                        if metrics_last_analyzed_timestamp_sorted:
+                            logger.info('labelled_metrics_spin_process :: load_shedding_active reordered metrics by last analysed timestamp, first metric in list now: %s' % (
+                                str(metrics_last_analyzed_timestamp_sorted[0])))
+                            logger.info('labelled_metrics_spin_process :: load_shedding_active reordered metrics by last analysed timestamp, last metric in list now: %s' % (
+                                str(metrics_last_analyzed_timestamp_sorted[-1])))
+                        else:
+                            logger.info('warning :: labelled_metrics_spin_process :: load_shedding_active but could not reorder metrics by last analysed timestamp because metrics_last_analyzed_timestamp_sorted is empty, the unordered list will be used')
                         last_analysed_ordered_metrics = [labelled_metric for ts, labelled_metric in metrics_last_analyzed_timestamp_sorted]
                         del metrics_last_analyzed_timestamp_sorted
                     if last_analysed_ordered_metrics:
                         load_shedding_assigned_metrics = [labelled_metric for labelled_metric in last_analysed_ordered_metrics if labelled_metric in assigned_labelled_metrics]
                     logger.info('labelled_metrics_spin_process :: load_shedding_last_analysed_ordered_metrics took %s seconds' % str((time() - start_load_shedding_get)))
+
+                if analyzer_labelled_metrics_busy or load_shedding_active or feedback_metrics_enabled:
+                    try:
+                        # @modified 20240208 - Task #5088: Change membership of the list checks to sets
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        #                      Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        # feedback_labelled_metric_ids = list(self.redis_conn_decoded.smembers('aet.metrics_manager.feedback.labelled_metric_ids'))
+                        feedback_labelled_metric_ids = self.redis_conn_decoded.smembers('aet.metrics_manager.feedback.labelled_metric_ids')
+                    except Exception as err:
+                        logger.error('error :: labelled_metrics_spin_process :: smembers failed on Redis set aet.metrics_manager.feedback.labelled_metric_ids - %s' % (
+                            err))
+                if feedback_labelled_metric_ids:
+                    logger.info('labelled_metrics_spin_process :: %s feedback_labelled_metric_ids from aet.metrics_manager.feedback.labelled_metric_ids set' % (
+                        str(len(feedback_labelled_metric_ids))))
+
                 if load_shedding_assigned_metrics:
                     logger.info('labelled_metrics_spin_process :: load_shedding_active replacing %s assigned_metrics with %s metrics ordered by last analysed timestamp' % (
                         str(len(assigned_labelled_metrics)), str(len(load_shedding_assigned_metrics))))
@@ -608,12 +752,40 @@ class AnalyzerLabelledMetrics(Thread):
                             str(len(not_present_metrics))))
                         load_shedding_assigned_metrics = load_shedding_assigned_metrics + not_present_metrics
                         del not_present_metrics
+
+                    # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    # Place feedback_metrics at the end
+                    load_shedding_assigned_feedback_metrics = []
+
                     assigned_metrics = []
                     for labelled_metric in load_shedding_assigned_metrics:
+
+                        # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        metric_id_str = labelled_metric.replace('labelled_metrics.', '')
+                        if metric_id_str in feedback_labelled_metric_ids:
+                            load_shedding_assigned_feedback_metrics.append(labelled_metric)
+                            continue
+
                         try:
                             assigned_metrics.append(assigned_labelled_metrics_dict[labelled_metric])
-                        except:
+                        except Exception as err:
                             errors.append([labelled_metric, 'load_shedding assigned_metrics', str(err)])
+
+                    # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    # Place feedback_metrics at the end
+                    logger.info('labelled_metrics_spin_process :: load_shedding_active placed %s NON feedback metrics at the front of the assigned_metrics list' % (
+                        str(len(assigned_metrics))))
+                    logger.info('labelled_metrics_spin_process :: load_shedding_active placing %s feedback metrics at the end of the assigned_metrics list' % (
+                        str(len(load_shedding_assigned_feedback_metrics))))
+                    for labelled_metric in load_shedding_assigned_feedback_metrics:
+                        try:
+                            assigned_metrics.append(assigned_labelled_metrics_dict[labelled_metric])
+                        except Exception as err:
+                            errors.append([labelled_metric, 'load_shedding assigned_metrics', str(err)])
+
                     del load_shedding_assigned_metrics
                     logger.info('labelled_metrics_spin_process :: load_shedding_active now %s assigned_metrics' % (
                         str(len(assigned_metrics))))
@@ -624,7 +796,11 @@ class AnalyzerLabelledMetrics(Thread):
                 labelled_metric_in_all_timeseries = []
                 labelled_metric_and_indices_in_all_timeseries = {}
                 timeseries_not_present_in_all_timeseries = {}
-                if filters_str:
+
+                # @modified 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                # If load shedding do not use mrange
+                # if filters_str:
+                if filters_str and not load_shedding_active:
                     filters = [filters_str]
                     logger.info('labelled_metrics_spin_process :: calling mrange with filters: %s' % str(filters))
                     r_start = time()
@@ -635,34 +811,57 @@ class AnalyzerLabelledMetrics(Thread):
                             err))
                         errors.append(['all_timeseries', 'ts().mrange', str(err)])
                         all_timeseries = []
-                    redis_timings.append(time() - r_start)
+                    redis_timing = (time() - r_start)
+                    redis_timings.append(redis_timing)
+                    logger.info('labelled_metrics_spin_process :: mrange returned %s timeseries in %s seconds' % (
+                        str(len(all_timeseries)), str(redis_timing)))
                     if all_timeseries:
-                        logger.info('labelled_metrics_spin_process :: mrange returned %s timeseries' % str(len(all_timeseries)))
                         labelled_metric_in_all_timeseries = [list(tlist.keys())[0] for tlist in all_timeseries]
                         for index, labelled_metric in enumerate(labelled_metric_in_all_timeseries):
                             labelled_metric_and_indices_in_all_timeseries[labelled_metric] = index
+                        logger.info('labelled_metrics_spin_process :: labelled_metric_and_indices_in_all_timeseries created with %s items' % (
+                            str(len(labelled_metric_and_indices_in_all_timeseries))))
 
                 # @added 20230404 - Feature #4888: analyzer - load_shedding
                 load_shedding_active_log_stop = False
                 activating_load_shedding = False
 
-                # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
-                feedback_metrics_skipped = []
-                feedback_labelled_metric_ids = []
-                analyzer_labelled_metrics_busy = False
-                if settings.SKYLINE_FEEDBACK_NAMESPACES:
-                    try:
-                        analyzer_labelled_metrics_busy = self.redis_conn_decoded.get('analyzer_labelled_metrics.busy')
-                    except Exception as err:
-                        logger.error('error :: labelled_metrics_spin_process :: failed to get analyzer_labelled_metrics.busy Redis key' % (
-                            err))
-                if analyzer_labelled_metrics_busy:
-                    logger.info('labelled_metrics_spin_process :: analyzer_labelled_metrics_busy found')
-                    try:
-                        feedback_labelled_metric_ids = list(self.redis_conn_decoded.smembers('aet.metrics_manager.feedback.labelled_metric_ids'))
-                    except Exception as err:
-                        logger.error('error :: labelled_metrics_spin_process :: smembers failed on Redis set aet.metrics_manager.feedback.labelled_metric_ids - %s' % (
-                            err))
+                # @added 20240208 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                # Set the feedback_keys
+                feedback_keys_set = 0
+                feedback_metrics_checked = 0
+                feedback_metrics_seen = 0
+                start_check_feedback = False
+
+                # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Do not downsample new metrics that do not have 75% of
+                # their FULL_DURATION data, unless they need to be
+                # downsampled (becasue they are of a higher frequency
+                # than 60s and handle higher scrape_interval or higher
+                # frequency data in general as well.  However we do not
+                # want to run the determine_data_frequency function
+                hash_key = 'labelled_metrics.metric_resolutions'
+                resolutions_found_in_redis_count = 0
+                resolutions_determined_count = 0
+                high_frequency_metric_count = 0
+                sparse_metric_count = 0
+                resolution_by_id_strs = {}
+                # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                #                   Task #5178: Build and test skyline v4.1.0
+                high_frequency_metric_count_metric_logged = False
+                resolution_debug_metric = None
+                downsampled_resolutions = {}
+
+                try:
+                    resolution_by_id_strs = self.redis_conn_decoded.hgetall(hash_key)
+                    logger.info('labelled_metrics_spin_process :: got %s entries from %s Redis hash' % (
+                        str(len(resolution_by_id_strs)), hash_key))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: labelled_metrics_spin_process :: failed to hgetall %s Redis hash - %s' % (
+                        hash_key, err))
 
                 # @added 20230426 - Feature #4724: custom_algorithms - anomalous_daily_peak
                 # Added expiry to record metrics identified as normal by anomalous_daily_peaks
@@ -698,18 +897,32 @@ class AnalyzerLabelledMetrics(Thread):
                                 normal_daily_peak_metrics_expiry[labelled_metric] = expire_at
                 logger.info('labelled_metrics_spin_process :: surfaced %s metrics currently in anomalous_daily_peak expiry' % str(len(normal_daily_peak_metrics_expiry)))
 
+                # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                #                   Feature #4888: analyzer - load_shedding
+                # Continue here if feedback metric
+                max_run_timestamp = (int(spin_start) + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5))
+                total_seconds_available_for_analysis = max_run_timestamp - int(time())
+                seconds_available_for_analysis_of_feedback_metrics = ((float(total_seconds_available_for_analysis) / 100) * 50)
+                analysis_start_time = time()
+                feedback_metrics_continued = False
+                logger.info('labelled_metrics_spin_process :: total_seconds_available_for_analysis: %s seconds' % (
+                    str(total_seconds_available_for_analysis)))
+
                 errors = []
                 for base_name in assigned_metrics:
                     metrics_dict[base_name] = {}
-                    self.check_if_parent_is_alive()
+
+                    # @modified 20240219 - do not check_if_parent_is_alive
+                    # self.check_if_parent_is_alive()
 
                     # @added 20230404 - Feature #4888: analyzer - load_shedding
                     # If load shedding is active and the process in approaching the
                     # MAX_ANALYZER_PROCESS_RUNTIME stop
                     right_now = int(time())
                     if not activating_load_shedding:
-                        if right_now >= (int(spin_start) + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5)):
-                            metrics_done = len(assigned_metrics) - len(metrics_dict)
+                        # if right_now >= (int(spin_start) + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5)):
+                        if right_now >= max_run_timestamp:
+                            metrics_done = len(metrics_dict)
                             metrics_not_done = len(assigned_metrics) - metrics_done
                             activating_load_shedding = True
                             logger.info('labelled_metrics_spin_process :: activating load shedding - approaching MAX_ANALYZER_PROCESS_RUNTIME so stopping, analysed %s metrics of the %s assigned metrics, %s metric not analysed' % (
@@ -758,11 +971,17 @@ class AnalyzerLabelledMetrics(Thread):
                             'normal_daily_peak_metrics_skipped': len(normal_daily_peak_metrics_skipped),
                             # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
                             'feedback_metrics_skipped': len(feedback_metrics_skipped),
+                            'feedback_metrics_seen': feedback_metrics_seen,
+                            'feedback_metrics_checked': feedback_metrics_checked,
                         }
                         logger.info('labelled_metrics_spin_process :: progress: %s' % str(stats))
 
                     # @added 20210513 - Feature #4068: ANALYZER_SKIP
                     if ANALYZER_SKIP and not analyzer_skip_metrics:
+
+                        # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                        skip_start = time()
+
                         pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', base_name, ANALYZER_SKIP)
                         del metric_matched_by
                         if pattern_match:
@@ -773,6 +992,25 @@ class AnalyzerLabelledMetrics(Thread):
                             labelled_metric = 'labelled_metrics.%s' % str(metric_id)
                             metrics_last_analysis_dict[labelled_metric] = int(right_now)
 
+                            # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                            skip_timing = (time() - skip_start)
+                            skip_timings.append(skip_timing)
+
+                            continue
+
+                        # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                        skip_timing = (time() - skip_start)
+                        skip_timings.append(skip_timing)
+
+                    # @added 20231017 - Feature #5102: webapp - api skip_analysis
+                    if analyzer_skip_metrics:
+                        if base_name in analyzer_skip_metrics:
+                            analyzer_skip_metrics_skipped += 1
+                            metrics_skipped += 1
+                            metric_id = assigned_metrics_dict[base_name]['id']
+                            labelled_metric = 'labelled_metrics.%s' % str(metric_id)
+                            metrics_last_analysis_dict[labelled_metric] = int(right_now)
+                            api_skipped_analysis_metrics += 1
                             continue
 
                     # @added 20210520 - Branch #1444: thunder
@@ -815,6 +1053,13 @@ class AnalyzerLabelledMetrics(Thread):
 
                     labelled_metric = 'labelled_metrics.%s' % str(metric_id)
 
+                    # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    if resolution_debug_metric:
+                        if labelled_metric == resolution_debug_metric:
+                            logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s metrics_dict: %s' % (
+                                labelled_metric, str(assigned_metrics_dict[base_name])))
+
                     if metrics_checked == 1:
                         logger.debug('debug :: labelled_metrics_spin_process :: %s, metrics_dict: %s' % (
                             str(base_name), str(assigned_metrics_dict[base_name])))
@@ -840,19 +1085,55 @@ class AnalyzerLabelledMetrics(Thread):
                     except:
                         normal_daily_peak_expiry = 0
 
+                    # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    # If the analysis time is reaching 50% of the allocated time
+                    # determine whether to invoke skipping feedback metrics
+                    if not analyzer_labelled_metrics_busy and not load_shedding_active:
+                        if feedback_metrics_enabled and not start_check_feedback:
+                            if (right_now - analysis_start_time) < seconds_available_for_analysis_of_feedback_metrics:
+                                start_check_feedback = True
+
                     # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
                     feedback_metric = False
-                    if analyzer_labelled_metrics_busy:
+                    # if analyzer_labelled_metrics_busy or load_shedding_active:
+                    if analyzer_labelled_metrics_busy or load_shedding_active or start_check_feedback:
                         if str(metric_id) in feedback_labelled_metric_ids:
                             feedback_metric = True
+                            feedback_metrics_seen += 1
                     feedback_metric_expiry = 0
                     if feedback_metric:
+
+                        # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        # Continue here if feedback metric
+                        if (right_now - analysis_start_time) > seconds_available_for_analysis_of_feedback_metrics:
+                            feedback_metrics_skipped.append(metric_id)
+                            metrics_last_timeseries_timestamp_update_dict[metric_id] = int(right_now)
+                            metrics_last_analysis_dict[labelled_metric] = int(right_now)
+                            if not feedback_metrics_continued:
+                                feedback_metrics_continued = True
+                                logger.info('labelled_metrics_spin_process :: max time for feedback metric analysis reached (%s seconds), analysed %s feedback metrics, not analysisng any more feedback metrics' % (
+                                    str(seconds_available_for_analysis_of_feedback_metrics),
+                                    str(feedback_metrics_checked)))
+                            continue
+
                         feedback_key = 'mirage_labelled_metrics.feedback.expiry.%s' % str(metric_id)
                         try:
-                            feedback_metric_expiry = self.redis_conn_decoded.get(feedback_key)
+                            # feedback_metric_expiry = self.redis_conn_decoded.get(feedback_key)
+                            feedback_metric_expiry = self.redis_conn_decoded.exists(feedback_key)
                         except Exception as err:
                             errors.append([labelled_metric, feedback_key, str(err)])
                             feedback_metric_expiry = 0
+
+                        # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        # Continue here if feedback metric
+                        if feedback_metric_expiry:
+                            feedback_metrics_skipped.append(metric_id)
+                            metrics_last_timeseries_timestamp_update_dict[metric_id] = int(right_now)
+                            metrics_last_analysis_dict[labelled_metric] = int(right_now)
+                            continue
 
                     timeseries = []
 
@@ -864,8 +1145,11 @@ class AnalyzerLabelledMetrics(Thread):
                             all_timeseries_index = labelled_metric_and_indices_in_all_timeseries[labelled_metric]
                             timeseries = all_timeseries[all_timeseries_index][labelled_metric][1]
                         except KeyError:
-                            logger.info('labelled_metrics_spin_process :: not present in all_timeseries - %s - %s' % (
-                                str(labelled_metric), base_name))
+                            # @modified 20240111 - Task #5178: Build and test skyline v4.1.0
+                            #                      Feature #4890: analyzer_labelled_metrics - use mrange
+                            # Do not log for each metric, log a summary at the end
+                            # logger.info('labelled_metrics_spin_process :: not present in all_timeseries - %s - %s' % (
+                            #     str(labelled_metric), base_name))
                             timeseries_not_present_in_all_timeseries[labelled_metric] = base_name
                             timeseries_not_present = True
                         except Exception as err:
@@ -909,6 +1193,19 @@ class AnalyzerLabelledMetrics(Thread):
                     # Convert Redis millisecond timestamps to second timestamps
                     timeseries = [[int(mts / 1000), value] for mts, value in timeseries]
 
+                    # @added 20240220 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    #                   Feature #4888: analyzer - load_shedding
+                    # Continue here if feedback metric
+                    if feedback_metric:
+                        feedback_metrics_checked += 1
+
+                    # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    if resolution_debug_metric:
+                        if labelled_metric == resolution_debug_metric:
+                            logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s len(timeseries): %s' % (
+                                labelled_metric, str(len(timeseries))))
+
                     last_timeseries_timestamp = 0
                     try:
                         last_timeseries_timestamp = int(timeseries[-1][0])
@@ -937,6 +1234,7 @@ class AnalyzerLabelledMetrics(Thread):
                         metrics_last_analysis_dict[labelled_metric] = int(right_now)
 
                         continue
+
                     # TODO: How to not classify as short if the metric stops and starts
                     # again.  In analyzer with FULL_DURATION data this is not so much of
                     # an issue, but with 3 hours of data...
@@ -1280,6 +1578,15 @@ class AnalyzerLabelledMetrics(Thread):
 
                     if calculate_derivative and not boring:
                         try:
+                            # In terms of RedisTimeSeries data applying
+                            # nonNegativeDerivative is comparable to applying
+                            # delta[1m] to Prometheus/VictoriaMetrics data only
+                            # you cannot apply a step of 60 if the resolution is
+                            # 60.  So in Prometheus/VictoriaMetrics the closest
+                            # would be delta[3m] which would create a similar
+                            # shaped and scale/range time series.  Whereas
+                            # applying rate[3m] would provide a similar shaped
+                            # time series but on a much reduced scale/range.
                             timeseries = nonNegativeDerivative(timeseries)
                         except Exception as err:
                             errors.append([labelled_metric, 'nonNegativeDerivative timeseries', str(err)])
@@ -1303,6 +1610,12 @@ class AnalyzerLabelledMetrics(Thread):
                         feedback_metrics_skipped.append(metric_id)
                         last_analysed_timeseries = list(timeseries)
                         last_analysed_metric = base_name
+                        # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                        #                   Task #5178: Build and test skyline v4.1.0
+                        if resolution_debug_metric:
+                            if labelled_metric == resolution_debug_metric:
+                                logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s, feedback_metric_expiry, check_for_anomalous: %s' % (
+                                    labelled_metric, str(check_for_anomalous)))
 
                     # @added 20230404 - Feature #4888: analyzer - load_shedding
                     metrics_last_analysis_dict[labelled_metric] = int(right_now)
@@ -1343,6 +1656,13 @@ class AnalyzerLabelledMetrics(Thread):
                         except Exception as err:
                             errors.append([labelled_metric, 'is_stationary', str(err)])
 
+                        # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                        #                   Task #5178: Build and test skyline v4.1.0
+                        if resolution_debug_metric:
+                            if labelled_metric == resolution_debug_metric:
+                                logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s - use_mad: %s' % (
+                                    labelled_metric, str(use_mad)))
+
                         if use_mad:
                             m_start = time()
                             try:
@@ -1359,6 +1679,14 @@ class AnalyzerLabelledMetrics(Thread):
                         last_analysed_timeseries = list(timeseries)
                         last_analysed_metric = base_name
 
+                    # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    if resolution_debug_metric:
+                        if labelled_metric == resolution_debug_metric:
+                            logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s - check_for_anomalous: %s (overridding)' % (
+                                labelled_metric, str(check_for_anomalous)))
+                            check_for_anomalous = True
+
                     full_duration_timeseries = []
                     if check_for_anomalous:
                         r_start = time()
@@ -1373,8 +1701,44 @@ class AnalyzerLabelledMetrics(Thread):
                         if not full_duration_timeseries:
                             check_for_anomalous = False
                         else:
-                            timeseries = full_duration_timeseries
-                            timeseries = [[int(mts / 1000), value] for mts, value in timeseries]
+                            # timeseries = full_duration_timeseries
+                            timeseries = [[int(mts / 1000), value] for mts, value in full_duration_timeseries]
+
+                    # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    if resolution_debug_metric:
+                        if labelled_metric == resolution_debug_metric:
+                            try:
+                                test_full_metric_resolution, timestamp_resolutions_count = determine_data_frequency(skyline_app, full_duration_timeseries, True)
+                            except Exception as err:
+                                errors.append([labelled_metric, 'determine_data_frequency', str(err)])
+                                test_full_metric_resolution = 0
+                            logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s - len(full_duration_timeseries): %s, test_full_metric_resolution: %s, sample: %s' % (
+                                labelled_metric, str(len(full_duration_timeseries)),
+                                str(test_full_metric_resolution), str(full_duration_timeseries[-3:])))
+                            try:
+                                test_metric_resolution, timestamp_resolutions_count = determine_data_frequency(skyline_app, timeseries, True)
+                            except Exception as err:
+                                errors.append([labelled_metric, 'determine_data_frequency', str(err)])
+                                test_metric_resolution = 0
+                            logger.debug('debug :: labelled_metrics_spin_process :: debug metric %s - len(timeseries): %s, test_metric_resolution: %s, sample: %s' % (
+                                labelled_metric, str(len(timeseries)),
+                                str(test_metric_resolution), str(timeseries[-3:])))
+
+                    # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    # Do not downsample new metrics that do not have 75% of
+                    # their FULL_DURATION data and handle higher scrape_interval
+                    # or higher frequency data as well.  Define a default
+                    # metric_resolution outside the below check_for_anomalous
+                    # block
+                    metric_resolution = 0
+                    metric_id_str = str(metric_id)
+                    try:
+                        metric_resolution = int(resolution_by_id_strs[metric_id_str])
+                        resolutions_found_in_redis_count += 1
+                    except:
+                        metric_resolution = 0
 
                     # @added 20230329 - Feature #4882: labelled_metrics - resolution and data sparsity
                     #                   Feature #3870: metrics_manager - check_data_sparsity
@@ -1402,6 +1766,13 @@ class AnalyzerLabelledMetrics(Thread):
                             last_sparsity_check_timestamp = 0
                             update_resolution_and_sparsity = True
                         if update_resolution_and_sparsity:
+                            # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                            #                   Task #5178: Build and test skyline v4.1.0
+                            if resolution_debug_metric and not high_frequency_metric_count_metric_logged:
+                                if labelled_metric == resolution_debug_metric:
+                                    logger.debug('debug :: labelled_metrics_spin_process :: %s updating metric_resolution' % (
+                                        labelled_metric))
+
                             start_resolution_and_sparsity_timing = time()
                             metric_resolution = 0
                             data_sparsity = None
@@ -1411,6 +1782,14 @@ class AnalyzerLabelledMetrics(Thread):
                                 errors.append([labelled_metric, 'determine_data_frequency', str(err)])
                                 metric_resolution = 0
                             if metric_resolution:
+
+                                # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                                #                   Task #5178: Build and test skyline v4.1.0
+                                if resolution_debug_metric and not high_frequency_metric_count_metric_logged:
+                                    if labelled_metric == resolution_debug_metric:
+                                        logger.debug('debug :: labelled_metrics_spin_process :: %s - metric_resolution: %s' % (
+                                            labelled_metric, str(metric_resolution)))
+
                                 labelled_metrics_resolutions[str(metric_id)] = metric_resolution
                                 try:
                                     data_sparsity = determine_data_sparsity(skyline_app, timeseries, resolution=metric_resolution, log=False)
@@ -1493,12 +1872,97 @@ class AnalyzerLabelledMetrics(Thread):
                     if check_for_anomalous:
                         run_selected_algorithm_count += 1
                         d_start = time()
-                        try:
-                            downsampled_timeseries = downsample_timeseries('analyzer', timeseries, 60, 600, 'mean', 'end')
-                        except Exception as err:
-                            errors.append([labelled_metric, 'downsample_timeseries', str(err)])
+
+                        # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                        #                   Task #5178: Build and test skyline v4.1.0
+                        # Do not downsample new metrics that do not have 75% of
+                        # their FULL_DURATION data, unless they need to be
+                        # downsampled (becasue they are of a higher frequency
+                        # than 60s and handle higher scrape_interval or higher
+                        # frequency data in general as well.  However we do not
+                        # want to run the determine_data_frequency function
+                        # on every metric all the time so above an attempt is
+                        # made to determine the metric_resolution from the
+                        # labelled_metrics.metric_resolutions Redis hash data
+                        do_downsample = True
+                        # Set default downsample_from and downsample_to values
+                        downsample_from = 60
+                        downsample_to = 600
+                        if not metric_resolution:
+
+                            # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                            # Added determine_data_frequency_timings
+                            determine_data_frequency_timing_start = time()
+
+                            try:
+                                metric_resolution, timestamp_resolutions_count = determine_data_frequency(skyline_app, timeseries, False)
+                                resolutions_determined_count += 1
+                            except Exception as err:
+                                errors.append([labelled_metric, 'determine_data_frequency', str(err)])
+                                metric_resolution = 0
+
+                            # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                            # Added determine_data_frequency_timings
+                            determine_data_frequency_timings.append(time() - determine_data_frequency_timing_start)
+
+                        if metric_resolution and metric_resolution < 60:
+                            do_downsample = True
+                            downsample_from = int(metric_resolution)
+                            high_frequency_metric_count += 1
+
+                        # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                        # Explicitly do not downsample if the resolution is 60
+                        if metric_resolution >= 50 and metric_resolution <= 70:
+                            do_downsample = False
+
+                        last_timestamp = timeseries[-1][0]
+                        if do_downsample:
+                            # Do not downsample data that does not have 75% of
+                            # FULL_DURATION unless it is high frequency and needs
+                            # downsampling
+                            first_timestamp = timeseries[0][0]
+                            if (last_timestamp - first_timestamp) < int((settings.FULL_DURATION / 4) * 3):
+                                do_downsample = False
+                                sparse_metric_count += 1
+                                if metric_resolution and metric_resolution < 60:
+                                    downsample_from = int(metric_resolution)
+                                    do_downsample = True
+                                    downsample_to = 60
+                            # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                            #                   Task #5178: Build and test skyline v4.1.0
+                            if resolution_debug_metric and not high_frequency_metric_count_metric_logged:
+                                if labelled_metric == resolution_debug_metric:
+                                    logger.debug('debug :: labelled_metrics_spin_process :: %s - metric_resolution: %s, do_downsample: %s, downsample_from: %s, downsample_to: %s' % (
+                                        labelled_metric, str(metric_resolution),
+                                        str(do_downsample), str(downsample_from),
+                                        str(downsample_to)))
+                                    high_frequency_metric_count_metric_logged = True
+
+                        # @modified 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Do not downsample new metrics that do not have 75% of
+                        # their FULL_DURATION data
+                        if do_downsample:
+                            downsampled_ok = False
+                            try:
+                                # @modified 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                                #                      Task #5178: Build and test skyline v4.1.0
+                                # Handle higher frequency data
+                                # downsampled_timeseries = downsample_timeseries('analyzer', timeseries, 60, 600, 'mean', 'end')
+                                downsampled_timeseries = downsample_timeseries('analyzer', timeseries, downsample_from, downsample_to, 'mean', 'end')
+                                downsampled_ok = True
+                            except Exception as err:
+                                errors.append([labelled_metric, 'downsample_timeseries', str(err)])
+                                downsampled_timeseries = list(timeseries)
+                            if downsampled_ok:
+                                key_str = 'downsampled.%s.to.%s' % (str(downsample_from), str(downsample_to))
+                                try:
+                                    downsampled_resolutions[key_str] += 1
+                                except:
+                                    downsampled_resolutions[key_str] = 1
+                            downsample_timings.append(time() - d_start)
+                        else:
                             downsampled_timeseries = list(timeseries)
-                        downsample_timings.append(time() - d_start)
 
                         # Calculate the derivate AFTER downsampling
                         if check_for_anomalous and calculate_derivative:
@@ -1508,6 +1972,19 @@ class AnalyzerLabelledMetrics(Thread):
                                 except Exception as err:
                                     errors.append([labelled_metric, 'nonNegativeDerivative downsampled_timeseries', str(err)])
 
+                        # @added 20240208 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                        #                   Feature #4888: analyzer - load_shedding
+                        # Set the feedback_key
+                        if analyzer_labelled_metrics_busy or load_shedding_active or load_shedding_hash_exists:
+                            if feedback_metric and not feedback_metric_expiry:
+                                feedback_key = 'mirage_labelled_metrics.feedback.expiry.%s' % str(metric_id)
+                                try:
+                                    self.redis_conn_decoded.setex(feedback_key, 600, str(last_timestamp))
+                                    feedback_keys_set += 1
+                                except Exception as err:
+                                    err_msg = 'failed to setex feedback_key: %s' % str(feedback_key)
+                                    errors.append([labelled_metric, err_msg, str(err)])
+
                         t_start = time()
                         try:
                             anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(downsampled_timeseries, base_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only, custom_stale_metrics_dict)
@@ -1515,6 +1992,13 @@ class AnalyzerLabelledMetrics(Thread):
                                 del negatives_found
                             except:
                                 pass
+                            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                            #                   Branch #5532: v5.0.0-alpha
+                            # Coerce all numpy.bool_ typed elements introduced with
+                            # numpy >= 2 to Python bool so they are literal_eval and
+                            # json safe
+                            ensemble = [item if item is None else bool(item) for item in ensemble]
+
                         # It could have been deleted by the Roomba
                         except TypeError:
                             exceptions['DeletedByRoomba'] += 1
@@ -1813,7 +2297,30 @@ class AnalyzerLabelledMetrics(Thread):
                     'normal_daily_peak_metrics_skipped': len(normal_daily_peak_metrics_skipped),
                     # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
                     'feedback_metrics_skipped': len(feedback_metrics_skipped),
+                    # @added 20240208 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                    'feedback_keys_set': feedback_keys_set,
+                    'feedback_metrics_seen': feedback_metrics_seen,
+                    'feedback_metrics_checked': feedback_metrics_checked,
+                    # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    'resolutions_found_in_redis_count': resolutions_found_in_redis_count,
+                    'resolutions_determined_count': resolutions_determined_count,
+                    'high_frequency_metric_count': high_frequency_metric_count,
+                    'sparse_metric_count': sparse_metric_count,
+                    # @added 20240219 - Feature #4068: ANALYZER_SKIP
+                    # Added skip timings and determine_data_frequency_timings
+                    'skip timings': sum(skip_timings),
+                    'skip_timings_count': len(skip_timings),                    
+                    'determine_data_frequency_timings': sum(determine_data_frequency_timings),
+                    'determine_data_frequency_timings_count': len(determine_data_frequency_timings),                    
                 }
+
+                # @added 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+                #                   Task #5178: Build and test skyline v4.1.0
+                if downsampled_resolutions:
+                    for key, value in downsampled_resolutions.items(): 
+                        stats[key] = value
+ 
                 logger.info('labelled_metrics_spin_process :: complete: %s' % str(stats))
                 for kkey, value in stats.items():
                     self.stats_q.put((kkey, value))
@@ -1842,8 +2349,8 @@ class AnalyzerLabelledMetrics(Thread):
                         logger.info('labelled_metrics_spin_process :: updated %s Redis set with %s errors' % (
                             len(errors), error_set))
                     else:
-                        logger.error('error :: labelled_metrics_spin_process :: failed to sadd to %s Redis set with %s errors, last err - %s' % (
-                            error_set, str(len(sadd_errors)), err))
+                        logger.error('error :: labelled_metrics_spin_process :: failed to sadd to %s Redis set with %s errors' % (
+                            error_set, str(len(sadd_errors))))
                     try:
                         self.redis_conn_decoded.expire(error_set, 120)
                     except Exception as err:
@@ -2095,6 +2602,13 @@ class AnalyzerLabelledMetrics(Thread):
                 # @added 20230405 - Feature #4890: analyzer_labelled_metrics - use mrange
                 # Added filters and all_timeseries
                 if timeseries_not_present_in_all_timeseries:
+
+                    # @added 20240111 - Task #5178: Build and test skyline v4.1.0
+                    #                   Feature #4890: analyzer_labelled_metrics - use mrange
+                    # Do not log for each metric in the above loop, log a summary
+                    logger.info('labelled_metrics_spin_process :: %s metrics reported in timeseries_not_present_in_all_timeseries' % (
+                        str(len(timeseries_not_present_in_all_timeseries))))
+
                     current_aligned_ts = int(int(spin_start) // 60 * 60)
                     hash_key = 'analyzer_labelled_metrics.timeseries_not_present_in_all_timeseries.%s' % str(current_aligned_ts)
                     logger.info('labelled_metrics_spin_process :: adding %s metrics to Redis %s hash key' % (
@@ -2115,8 +2629,8 @@ class AnalyzerLabelledMetrics(Thread):
                     if metrics_last_analysis_dict:
                         try:
                             self.redis_conn_decoded.hset(metrics_last_analysis_hash_key, mapping=metrics_last_analysis_dict)
-                            logger.info('labelled_metrics_spin_process :: load shedding - updated %s analysis timestamps in Redis analyzer.metrics.last_analysis hash key' % (
-                                str(len(metrics_last_analysis_dict))))
+                            logger.info('labelled_metrics_spin_process :: load shedding - updated %s analysis timestamps in Redis %s hash key' % (
+                                str(len(metrics_last_analysis_dict)), metrics_last_analysis_hash_key))
                             if load_shedding_active:
                                 # The load_shedding hash only has the expiry set if load
                                 # shedding is active, not if the hash is only being updated.
@@ -2139,6 +2653,11 @@ class AnalyzerLabelledMetrics(Thread):
 
         logger.info('labelled_metrics_spin_process :: %s metrics had monotonicity_checked and %s changed' % (
             str(monotonicity_checked), str(monotonicity_changed)))
+
+        # @added 20231017 - Feature #5102: webapp - api skip_analysis
+        if api_skipped_analysis_metrics:
+            logger.info('labelled_metrics_spin_process :: analysis skipped on %s metrics added via API skip_analysis' % (
+                str(api_skipped_analysis_metrics)))
 
         spin_end = time() - spin_start
         logger.info('labelled_metrics_spin_process :: process %s took %.2f seconds' % (str(i_process), spin_end))
@@ -2225,7 +2744,12 @@ class AnalyzerLabelledMetrics(Thread):
             for p in pids:
                 if p.is_alive():
                     logger.info('analyzer_labelled_metrics :: stopping spawn_trigger_alert - %s' % (str(p.is_alive())))
-                    p.join()
+                    # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                    # p.join()
+                    killing_pid = p.pid
+                    logger.info('analyzer_labelled_metrics :: kill spawn_trigger_alert with pid: %s' % ( str(killing_pid)))
+                    p.terminate()
+                    logger.info('analyzer_labelled_metrics :: killed spawn_trigger_alert process with pid: %s' % (str(killing_pid)))
 
         # Discover unique labelled_metrics
         logger.info('analyzer_labelled_metrics :: memory usage before loading unique labelled_metrics - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
@@ -2618,15 +3142,29 @@ class AnalyzerLabelledMetrics(Thread):
             # Discover assigned metrics
             keys_per_processor = int(ceil(float(unique_labelled_metrics_count) / float(ANALYZER_LABELLED_METRICS_PROCESSES)))
 
+            # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                   Task #5178: Build and test skyline v4.1.0
+            # Handle a single tenant_id
+            compute_filters = True
+            if len(tenant_ids_with_count) == 1:
+                logger.info('analyzer_labelled_metrics :: not computing filters_dict as there is a single tenant')
+                compute_filters = False
+                filters_dict = {}
+
             # @added 20230404 - Feature #4890: analyzer_labelled_metrics - use mrange
             # Added filters
-            try:
-                filters_dict = get_tenant_id_mrange_split(self, ANALYZER_LABELLED_METRICS_PROCESSES, tenant_ids_with_count)
-            except Exception as err:
-                logger.error(traceback.format_exc())
-                logger.error('error :: analyzer_labelled_metrics :: get_tenant_id_mrange_split failed - %s' % err)
-                filters_dict = {}
-            logger.info('analyzer_labelled_metrics :: filters_dict: %s' % str(filters_dict))
+            # @added 20231220 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                   Task #5178: Build and test skyline v4.1.0
+            # Handle a single tenant_id do not create the filters_dict if there
+            # is a single tenant
+            if compute_filters:
+                try:
+                    filters_dict = get_tenant_id_mrange_split(self, ANALYZER_LABELLED_METRICS_PROCESSES, tenant_ids_with_count)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: analyzer_labelled_metrics :: get_tenant_id_mrange_split failed - %s' % err)
+                    filters_dict = {}
+                logger.info('analyzer_labelled_metrics :: filters_dict: %s' % str(filters_dict))
 
             no_id_metrics = []
             # @added 20230123 - Task #2732: Prometheus to Skyline
@@ -2641,7 +3179,7 @@ class AnalyzerLabelledMetrics(Thread):
             pid_count = 0
             for i_process in range(1, ANALYZER_LABELLED_METRICS_PROCESSES + 1):
                 if i_process > unique_labelled_metrics_count:
-                    logger.warning('warning :: analyzer_labelled_metrics :: skyline is set for more cores than needed.')
+                    logger.info('warning :: analyzer_labelled_metrics :: skyline is set for more cores than needed.')
 
                 logger.info('analyzer_labelled_metrics :: memory usage before starting process - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
                 if i_process == ANALYZER_LABELLED_METRICS_PROCESSES:
@@ -2812,6 +3350,13 @@ class AnalyzerLabelledMetrics(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: analyzer_labelled_metrics :: SIGKILL failed - %s' % err)
                     # p.join()
+                # @added 20240202 - Task #5178: Build and test skyline v4.1.0
+                sleep(1)
+                if p.is_alive():
+                    killing_pid = p.pid
+                    logger.info('analyzer_labelled_metrics :: kill spin_process with pid: %s' % (str(killing_pid)))
+                    p.terminate()
+                    logger.info('analyzer_labelled_metrics :: killed spin_process process with pid: %s' % (str(killing_pid)))
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py
@@ -2823,7 +3368,13 @@ class AnalyzerLabelledMetrics(Thread):
             # Grab data from the queue and populate dictionaries
             exceptions = {}
             anomaly_breakdown = {}
-            while 1:
+
+            # @modified 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                      Task #5178: Build and test skyline v4.1.0
+            # Set this to wait for a time rather than while 1
+            # while 1:
+            while_start = time()
+            while time() < (while_start + 1):
                 try:
                     key, value = self.anomaly_breakdown_q.get_nowait()
                     if key not in anomaly_breakdown:
@@ -2833,7 +3384,12 @@ class AnalyzerLabelledMetrics(Thread):
                 except Empty:
                     break
 
-            while 1:
+            # @modified 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                      Task #5178: Build and test skyline v4.1.0
+            # Set this to wait for a time rather than while 1
+            # while 1:
+            while_start = time()
+            while time() < (while_start + 1):
                 try:
                     key, value = self.exceptions_q.get_nowait()
                     if key not in exceptions:
@@ -2843,7 +3399,9 @@ class AnalyzerLabelledMetrics(Thread):
                 except Empty:
                     break
 
-            exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other', 'EmptyTimeseries', 'NoNewData']
+            # @modified 20240306 - Task #5178: Build and test skyline v4.1.0
+            # Added TimeseriesDoesNotExist
+            exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other', 'EmptyTimeseries', 'NoNewData', 'TimeseriesDoesNotExist']
             for i_exception in exceptions_metrics:
                 if i_exception not in exceptions:
                     exceptions[i_exception] = 0
@@ -2851,21 +3409,21 @@ class AnalyzerLabelledMetrics(Thread):
                     if i_exception == 'TooShort':
                         try:
                             self.redis_conn_decoded.delete('aet.analyzer_labelled_metrics.tooshort')
-                            logger.info('deleted Redis set aet.analyzer_labelled_metrics.tooshort as no tooshort exceptions')
+                            logger.info('labelled_metrics_spin_process :: deleted Redis set aet.analyzer_labelled_metrics.tooshort as no tooshort exceptions')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to delete Redis set aet.analyzer_labelled_metrics.tooshort - %s' % (
                                 err))
                     if i_exception == 'Stale':
                         try:
                             self.redis_conn_decoded.delete('aet.analyzer_labelled_metrics.stale')
-                            logger.info('deleted Redis set aet.analyzer_labelled_metrics.stale as no stale exceptions')
+                            logger.info('labelled_metrics_spin_process :: deleted Redis set aet.analyzer_labelled_metrics.stale as no stale exceptions')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to delete Redis set aet.analyzer_labelled_metrics.stale - %s' % (
                                 err))
                     if i_exception == 'Boring':
                         try:
                             self.redis_conn_decoded.delete('aet.analyzer_labelled_metrics.boring')
-                            logger.info('deleted Redis set aet.analyzer_labelled_metrics.boring as no boring exceptions')
+                            logger.info('labelled_metrics_spin_process :: deleted Redis set aet.analyzer_labelled_metrics.boring as no boring exceptions')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to delete Redis set aet.analyzer_labelled_metrics.boring - %s' % (
                                 err))
@@ -2873,22 +3431,49 @@ class AnalyzerLabelledMetrics(Thread):
                     # @added 20230309 - Feature #4864: analyzer_labelled_metrics - exceptions metrics set
                     if i_exception == 'TooShort':
                         try:
-                            self.redis_conn_decoded.rename('analyzer_labelled_metrics.tooshort', 'aet.analyzer_labelled_metrics.tooshort')
-                            logger.info('renamed Redis set analyzer_labelled_metrics.tooshort to aet.analyzer_labelled_metrics.tooshort')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn_decoded.rename('analyzer_labelled_metrics.tooshort', 'aet.analyzer_labelled_metrics.tooshort')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer_labelled_metrics.tooshort', 'aet.analyzer_labelled_metrics.tooshort', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.stale to aet.analyzer.stale, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('labelled_metrics_spin_process :: renamed Redis set analyzer_labelled_metrics.tooshort to aet.analyzer_labelled_metrics.tooshort')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to rename Redis set analyzer_labelled_metrics.tooshort to aet.analyzer_labelled_metrics.tooshort - %s' % (
                                 err))
                     if i_exception == 'Stale':
                         try:
-                            self.redis_conn_decoded.rename('analyzer_labelled_metrics.stale', 'aet.analyzer_labelled_metrics.stale')
-                            logger.info('renamed Redis set analyzer_labelled_metrics.stale to aet.analyzer_labelled_metrics.stale')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn_decoded.rename('analyzer_labelled_metrics.stale', 'aet.analyzer_labelled_metrics.stale')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer_labelled_metrics.stale', 'aet.analyzer_labelled_metrics.stale', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer.stale to aet.analyzer.stale, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('labelled_metrics_spin_process :: renamed Redis set analyzer_labelled_metrics.stale to aet.analyzer_labelled_metrics.stale')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to rename Redis set analyzer_labelled_metrics.stale to aet.analyzer_labelled_metrics.stale - %s' % (
                                 err))
                     if i_exception == 'Boring':
                         try:
-                            self.redis_conn_decoded.rename('analyzer_labelled_metrics.boring', 'aet.analyzer_labelled_metrics.boring')
-                            logger.info('renamed Redis set analyzer_labelled_metrics.boring to aet.analyzer_labelled_metrics.boring')
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                            # self.redis_conn_decoded.rename('analyzer_labelled_metrics.boring', 'aet.analyzer_labelled_metrics.boring')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'analyzer_labelled_metrics.boring', 'aet.analyzer_labelled_metrics.boring', log=True)
+                            except Exception as err:
+                                logger.error('error :: redis_rename_key failed renaming analyzer_labelled_metrics.boring to aet.analyzer_labelled_metrics.boring, err: %s' % err)
+                            if redis_key_renamed:
+                                logger.info('labelled_metrics_spin_process :: renamed Redis set analyzer_labelled_metrics.boring to aet.analyzer_labelled_metrics.boring')
                         except Exception as err:
                             logger.error('error :: labelled_metrics_spin_process :: failed to rename Redis set analyzer_labelled_metrics.boring to aet.analyzer_labelled_metrics.boring - %s' % (
                                 err))
@@ -2900,7 +3485,13 @@ class AnalyzerLabelledMetrics(Thread):
                     anomaly_breakdown_algorithms.append(custom_algorithm)
 
             stats = {}
-            while 1:
+
+            # @modified 20231221 - Task #5186: analyzer_labelled_metrics - handle high frequency
+            #                      Task #5178: Build and test skyline v4.1.0
+            # Set this to wait for a time rather than while 1
+            # while 1:
+            while_start = time()
+            while time() < (while_start + 1):
                 try:
                     key, value = self.stats_q.get_nowait()
                     if key not in stats:
@@ -3017,7 +3608,15 @@ class AnalyzerLabelledMetrics(Thread):
             except:
                 pass
             try:
-                self.redis_conn.rename('analyzer_labelled_metrics.not_anomalous_metrics', 'aet.analyzer_labelled_metrics.not_anomalous_metrics')
+                # @modified 20231223 - Task #5188: Optimise redis renames
+                #                      Task #5178: Build and test skyline v4.1.0
+                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                # self.redis_conn.rename('analyzer_labelled_metrics.not_anomalous_metrics', 'aet.analyzer_labelled_metrics.not_anomalous_metrics')
+                redis_key_renamed = False
+                try:
+                    redis_key_renamed = redis_rename_key(skyline_app, 'analyzer_labelled_metrics.not_anomalous_metrics', 'aet.analyzer_labelled_metrics.not_anomalous_metrics', log=True)
+                except Exception as err:
+                    logger.error('error :: redis_rename_key failed renaming analyzer_labelled_metrics.not_anomalous_metrics to aet.analyzer_labelled_metrics.not_anomalous_metrics, err: %s' % err)
             except:
                 pass
             redis_set = 'analyzer_labelled_metrics.anomalous_metrics'
@@ -3031,7 +3630,15 @@ class AnalyzerLabelledMetrics(Thread):
             except:
                 pass
             try:
-                self.redis_conn.rename('analyzer_labelled_metrics.anomalous_metrics', 'aet.analyzer_labelled_metrics.anomalous_metrics')
+                # @modified 20231223 - Task #5188: Optimise redis renames
+                #                      Task #5178: Build and test skyline v4.1.0
+                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                # self.redis_conn.rename('analyzer_labelled_metrics.anomalous_metrics', 'aet.analyzer_labelled_metrics.anomalous_metrics')
+                redis_key_renamed = False
+                try:
+                    redis_key_renamed = redis_rename_key(skyline_app, 'analyzer_labelled_metrics.anomalous_metrics', 'aet.analyzer_labelled_metrics.anomalous_metrics', log=True)
+                except Exception as err:
+                    logger.error('error :: redis_rename_key failed renaming analyzer_labelled_metrics.anomalous_metrics to aet.analyzer_labelled_metrics.anomalous_metrics, err: %s' % err)
             except:
                 pass
 
@@ -3078,12 +3685,52 @@ class AnalyzerLabelledMetrics(Thread):
             # @added 20230404 - Feature #4888: analyzer - load_shedding
             cache_key = 'analyzer_labelled_metrics.run_time'
             try:
-                self.redis_conn_decoded.hset('analyzer_labelled_metrics.run_time', 'value', float(run_time))
-                self.redis_conn_decoded.hset('analyzer_labelled_metrics.run_time', 'timestamp', int(time()))
+                self.redis_conn_decoded.hset(cache_key, 'value', float(run_time))
+                self.redis_conn_decoded.hset(cache_key, 'timestamp', int(time()))
             except Exception as err:
-                logger.error('error :: Analyzer could not update the Redis analyzer_labelled_metrics.run_time hash - %s' % (
+                logger.error('error :: analyzer_labelled_metrics :: could not update the Redis analyzer_labelled_metrics.run_time hash - %s' % (
                     err))
 
+            # @added 20240207 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+            #                   Feature #4888: analyzer - load_shedding
+            # Also create busy key to enable feedback_labelled_metrics if the
+            # run_time is high. Determine the normal, expected run_time from the
+            # median and set busy if >= n percentile
+            run_time_metric = '%s.labelled_metrics.run_time' % (skyline_app_graphite_namespace)
+            run_time_metric_timeseries = []
+            try:
+                run_time_metric_timeseries = get_metric_timeseries(skyline_app, run_time_metric, from_timestamp=None, until_timestamp=None, log=True)
+            except Exception as err:
+                logger.error('error :: analyzer_labelled_metrics :: get_metric_timeseries failed to get %s, err: %s' % (
+                    run_time_metric, err))
+            if run_time_metric_timeseries:
+                busy = False
+                # @modified 20240208 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
+                # 75th percentile seems a bit sensitive
+                # percentile = 75
+                percentile = 85
+                if run_time >= 30:
+                    logger.info('analyzer_labelled_metrics :: high run_time %s, checking median and %s pth to determine if busy' % (
+                        str(run_time), str(percentile)))
+                    run_time_median = np.median([v for t, v in run_time_metric_timeseries])
+                    logger.info('analyzer_labelled_metrics :: run_time_median: %s' % str(run_time_median))
+                    if run_time >= run_time_median:
+                        run_time_percentile = np.percentile([v for t, v in run_time_metric_timeseries], percentile)
+                        logger.info('analyzer_labelled_metrics :: run_time_percentile (%s pth): %s' % (
+                            str(percentile), str(run_time_percentile)))
+                        if run_time >= run_time_percentile:
+                            busy = True
+                if busy:
+                    try:
+                        self.redis_conn_decoded.setex('analyzer_labelled_metrics.busy', 120, int(run_time))
+                        logger.info('analyzer_labelled_metrics :: created analyzer_labelled_metrics.busy key due to high run_time')
+                    except Exception as err:
+                        logger.error('error :: analyzer_labelled_metrics :: failed to setex analyzer_labelled_metrics.busy due to high run_time, err: %s' % err)
+                    try:
+                        self.redis_conn_decoded.setex('analyzer_labelled_metrics.high_run_time', 60, 1)
+                        logger.info('analyzer_labelled_metrics :: created analyzer_labelled_metrics.high_run_time key due to high run_time')
+                    except Exception as err:
+                        logger.error('error :: analyzer_labelled_metrics :: failed to setex analyzer_labelled_metrics.high_run_time, err: %s' % err)
 
             for stat in list(stats.keys()):
                 stat_name = stat.replace(' ', '_')

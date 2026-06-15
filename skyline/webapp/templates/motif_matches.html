@@ -9,6 +9,54 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a>
+    </li>
+  </ul>
+</div>
+<br>
+
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Search</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC"><span class="logo"><span class="sky">Matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page"  href="/ionosphere?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC"><span class="logo"><span class="sky">Motif</span> <span class="re">matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_validate=true&metric=all"><span class="logo"><span class="re">Validate</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?validate_motif_annihilations=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re"></span>motif_annihilations</span></span></a>
+    </li>
+    <li class="nav-item">
+<!--
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">List</span> <span class="re">by metrics</span></span></a>
+    </li>
+-->
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?performance=true"><span class="logo"><span class="sky">Performance</span></span></a>
+    </li>
+<!--
+<li class="nav-item">
+  <a class="nav-link" href="/ionosphere?fp_view=true&a_dated_list=true"><span class="logo"><span class="sky">List</span> <span class="re">by date</span></span></a>
+</li>
+-->
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -19,17 +67,6 @@
 		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
 		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
 		</ul>
-		<div class="tab-content">
-	  	<div class="tab-pane active" id="view">
-	<br>
-  <div class="navbar-header" role="navigation">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-  </div>
 
 <!--	<div class="col-md-9 col-md-pull-3"> -->
 	<div class="col-md-12">
@@ -45,12 +82,18 @@
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
+{% endif %}
+
 		<div class="tab-content">
 
   		<div class="col-md-12">
   		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motifs</span></span></h4>
   {% if matched_motifs %}
+    {% if version == dev_ver %}
+        <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#match_options">Show match options</button>
+    {% else %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#match_options">Show match options</button>
+    {% endif %}
         <div id="match_options" class="collapse">
   {% endif %}
         <form action="ionosphere">
@@ -133,10 +176,14 @@
       </div>
   {% endif %}
       </div>
-  {% if matched_motifs %}
+  {% if motif_matches %}
 	  <div class="tab-pane active" id="motif_matches">
+    {% if matched_motifs[0] %}
       <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motif :: </span></span>{{ for_metric }} -
           limited by {{ matched_motifs|length }} motif matches</h4>
+    {% else %}
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motif :: </span></span>{{ matched_motifs|length }}</h4>
+    {% endif %}
 			<table class="table table-hover">
 				<thead>
 					<tr>

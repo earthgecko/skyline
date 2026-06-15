@@ -20,6 +20,14 @@ skyline.thunder.thunder module
    :undoc-members:
    :show-inheritance:
 
+skyline.thunder.thunder\_alert module
+-------------------------------------
+
+.. automodule:: thunder.thunder_alert
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.thunder.thunder\_alerters module
 ----------------------------------------
 

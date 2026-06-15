@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.boundary package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.boundary package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -131,6 +131,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -178,42 +179,42 @@
            <div itemprop="articleBody">
              
   <section id="skyline-boundary-package">
-<h1>skyline.boundary package<a class="headerlink" href="#skyline-boundary-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.boundary package<a class="headerlink" href="#skyline-boundary-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-boundary-agent-module">
-<h2>skyline.boundary.agent module<a class="headerlink" href="#skyline-boundary-agent-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.boundary.agent module<a class="headerlink" href="#skyline-boundary-agent-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-boundary.boundary">
-<span id="skyline-boundary-boundary-module"></span><h2>skyline.boundary.boundary module<a class="headerlink" href="#module-boundary.boundary" title="Permalink to this heading"></a></h2>
+<span id="skyline-boundary-boundary-module"></span><h2>skyline.boundary.boundary module<a class="headerlink" href="#module-boundary.boundary" title="Link to this heading"></a></h2>
 <p>boundary.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="boundary.boundary.Boundary">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>Boundary Thread</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="boundary.boundary.Boundary.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="boundary.boundary.Boundary.unique_noHash">
-<span class="sig-name descname"><span class="pre">unique_noHash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.unique_noHash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.unique_noHash" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">unique_noHash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.unique_noHash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.unique_noHash" title="Link to this definition"></a></dt>
 <dd><p>Unique no hashed things</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="boundary.boundary.Boundary.spin_process">
-<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">added_at</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.spin_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_metrics_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">added_at</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.spin_process" title="Link to this definition"></a></dt>
 <dd><p>Assign a bunch of metrics for a process to analyze.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="boundary.boundary.Boundary.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary.html#Boundary.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary.Boundary.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -221,11 +222,11 @@
 
 </section>
 <section id="module-boundary.boundary_alerters">
-<span id="skyline-boundary-boundary-alerters-module"></span><h2>skyline.boundary.boundary_alerters module<a class="headerlink" href="#module-boundary.boundary_alerters" title="Permalink to this heading"></a></h2>
+<span id="skyline-boundary-boundary-alerters-module"></span><h2>skyline.boundary.boundary_alerters module<a class="headerlink" href="#module-boundary.boundary_alerters" title="Link to this heading"></a></h2>
 <p>boundary_alerters</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.skyline_app_logfile">
-<span class="sig-name descname"><span class="pre">skyline_app_logfile</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/var/log/skyline/boundary.log'</span></em><a class="headerlink" href="#boundary.boundary_alerters.skyline_app_logfile" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">skyline_app_logfile</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/var/log/skyline/boundary.log'</span></em><a class="headerlink" href="#boundary.boundary_alerters.skyline_app_logfile" title="Link to this definition"></a></dt>
 <dd><p>Create any alerter you want here. The function is invoked from trigger_alert.
 7 arguments will be passed in as strings:
 alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp</p>
@@ -233,53 +234,53 @@ alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, met
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_smtp">
-<span class="sig-name descname"><span class="pre">alert_smtp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_smtp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_smtp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_smtp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_smtp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_smtp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_pagerduty">
-<span class="sig-name descname"><span class="pre">alert_pagerduty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_pagerduty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_pagerduty" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_pagerduty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_pagerduty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_pagerduty" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_hipchat">
-<span class="sig-name descname"><span class="pre">alert_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_hipchat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_hipchat" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_syslog">
-<span class="sig-name descname"><span class="pre">alert_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_syslog" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_syslog" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_slack">
-<span class="sig-name descname"><span class="pre">alert_slack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_slack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_slack" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_slack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_slack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_slack" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_http">
-<span class="sig-name descname"><span class="pre">alert_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alerter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_http"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_http" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alerter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alerter_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelled_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_http"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_http" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#boundary.boundary_alerters.trigger_alert" title="boundary.boundary_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends and resend anomalies to a http
 endpoint.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.alert_sms">
-<span class="sig-name descname"><span class="pre">alert_sms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_sms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_sms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_sms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_sms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_sms" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#boundary.boundary_alerters.trigger_alert" title="boundary.boundary_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends anomalies to a SMS endpoint.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_alerters.trigger_alert">
-<span class="sig-name descname"><span class="pre">trigger_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alerter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#trigger_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.trigger_alert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">trigger_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alerter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alerter_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelled_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#trigger_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_alerters.trigger_alert" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-boundary.boundary_algorithms">
-<span id="skyline-boundary-boundary-algorithms-module"></span><h2>skyline.boundary.boundary_algorithms module<a class="headerlink" href="#module-boundary.boundary_algorithms" title="Permalink to this heading"></a></h2>
+<span id="skyline-boundary-boundary-algorithms-module"></span><h2>skyline.boundary.boundary_algorithms module<a class="headerlink" href="#module-boundary.boundary_algorithms" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.boundary_no_mans_land">
-<span class="sig-name descname"><span class="pre">boundary_no_mans_land</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#boundary_no_mans_land"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.boundary_no_mans_land" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">boundary_no_mans_land</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#boundary_no_mans_land"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.boundary_no_mans_land" title="Link to this definition"></a></dt>
 <dd><p>This is no man’s land. Do anything you want in here, as long as you return a
 boolean that determines whether the input timeseries is anomalous or not.</p>
 <p>To add an algorithm, define it here, and add its name to
@@ -288,7 +289,7 @@ boolean that determines whether the input timeseries is anomalous or not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.autoaggregate_ts">
-<span class="sig-name descname"><span class="pre">autoaggregate_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#autoaggregate_ts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.autoaggregate_ts" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">autoaggregate_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#autoaggregate_ts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.autoaggregate_ts" title="Link to this definition"></a></dt>
 <dd><p>This is a utility function used to autoaggregate a timeseries.  If a
 timeseries data set has 6 datapoints per minute but only one data value
 every minute then autoaggregate will aggregate every autoaggregate_value.</p>
@@ -296,19 +297,19 @@ every minute then autoaggregate will aggregate every autoaggregate_value.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.less_than">
-<span class="sig-name descname"><span class="pre">less_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#less_than"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.less_than" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">less_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#less_than"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.less_than" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the datapoint is less than metric_trigger</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.greater_than">
-<span class="sig-name descname"><span class="pre">greater_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#greater_than"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.greater_than" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">greater_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#greater_than"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.greater_than" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the datapoint is greater than metric_trigger</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.detect_drop_off_cliff">
-<span class="sig-name descname"><span class="pre">detect_drop_off_cliff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#detect_drop_off_cliff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.detect_drop_off_cliff" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">detect_drop_off_cliff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#detect_drop_off_cliff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.detect_drop_off_cliff" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last 10 datapoints is
 &lt;trigger&gt; times greater than the last data point AND if has not experienced
 frequent cliff drops in the last 10 datapoints.  If the timeseries has
@@ -321,14 +322,25 @@ lower value datapoints, but it still matches drops off cliffs.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="boundary.boundary_algorithms.get_resolution">
+<span class="sig-name descname"><span class="pre">get_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#get_resolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.get_resolution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="boundary.boundary_algorithms.moving_timeseries">
+<span class="sig-name descname"><span class="pre">moving_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_function_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#moving_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.moving_timeseries" title="Link to this definition"></a></dt>
+<dd><p>Calculate the moving mean or median timeseries.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="boundary.boundary_algorithms.run_selected_algorithm">
-<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_alerters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.run_selected_algorithm" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_expiration_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_min_average_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alert_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_alerters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autoaggregate_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary_function_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">external_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bq_accounts_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#boundary.boundary_algorithms.run_selected_algorithm" title="Link to this definition"></a></dt>
 <dd><p>Filter timeseries and run selected algorithm.</p>
 </dd></dl>
 
 </section>
 <section id="module-boundary">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-boundary" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-boundary" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -343,7 +355,7 @@ lower value datapoints, but it still matches drops off cliffs.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

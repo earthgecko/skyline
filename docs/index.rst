@@ -5,15 +5,15 @@
 :skyblue:`Sky`:red:`line` documentation
 =======================================
 
-|docs|
-
 Contents:
 
 .. toctree::
   :maxdepth: 1
 
   overview
+  brief-history
   anomify-cutting-edge-skyline
+  where-is-your-skyline
   requirements
   getting-started
   running-in-python-virtualenv
@@ -45,6 +45,7 @@ Contents:
   vortex
   thunder/index.rst
   vista
+  vista-bigquery/index.rst
   SNAB
   external_settings
   redis-integration
@@ -70,13 +71,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. |docs| image:: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
-
-.. |anomify| image:: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
-    :alt: anomify.ai/skyline
-    :scale: 100%
-    :target: https://anomify.ai/skyline

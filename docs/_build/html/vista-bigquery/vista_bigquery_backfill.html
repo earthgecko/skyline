@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vista - BigQuery - Testing and Backfill &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vista - BigQuery - Configuration" href="vista_bigquery_configuration.html" />
+    <link rel="prev" title="Vista - BigQuery - virtualenv" href="vista_bigquery_virtualenv.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Vista - BigQuery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_data_structure.html">Vista - BigQuery - Data Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_virtualenv.html">Vista - BigQuery - virtualenv</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Vista - BigQuery - Testing and Backfill</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_configuration.html">Vista - BigQuery - Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Vista - BigQuery</a></li>
+      <li class="breadcrumb-item active">Vista - BigQuery - Testing and Backfill</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/vista-bigquery/vista_bigquery_backfill.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="vista-bigquery-testing-and-backfill">
+<h1>Vista - BigQuery - Testing and Backfill<a class="headerlink" href="#vista-bigquery-testing-and-backfill" title="Link to this heading"></a></h1>
+<p>This section describes the steps required to test and/or backfill Skyline with
+data from BigQuery.</p>
+<p>After deploying a skyline-bq virtualenv and installing the isolated BigQuery
+related packages and preparing the table/query and access credentials for
+BigQuery you need to carry out the following steps to test and/or backfill data
+from BigQuery.</p>
+<p>Even if you do not wish to backfill Skyline with data from BigQuery you can
+still use the backfill functionality to testing the data fetching and submission
+process <strong>before</strong> enabling a fecth process.</p>
+<p>Please have the Skyline webapp UI Utilites BigQuery backfill tab open in your
+browser to refer to while working through this page.</p>
+<p>It is recommended that you change the following variables in settings.py to
+values similiar to the following but which are relevant to your data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">BATCH_PROCESSING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
+
+<span class="nv">BATCH_PROCESSING_STALE_PERIOD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>&lt;HOW_OLD_THE_DATA_MUST_BE_TO_BE_DEEMED_TO_OLD_TO_ANALYSE&gt;
+
+<span class="nv">BATCH_PROCESSING_DEBUG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
+
+<span class="nv">BATCH_PROCESSING_NAMESPACES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="s1">&#39;customer.account_activity&#39;</span><span class="o">]</span>
+
+<span class="nv">ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
+
+<span class="nv">ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[[</span><span class="s1">&#39;customer.account_activity&#39;</span>,<span class="w"> </span><span class="m">31536000</span><span class="o">]]</span>
+
+<span class="nv">BATCH_METRICS_CUSTOM_FULL_DURATIONS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="s1">&#39;customer.account_activity&#39;</span>:<span class="w"> </span><span class="m">31536000</span><span class="o">}</span>
+
+<span class="nv">VISTA_ENABLED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
+
+<span class="nv">VISTA_BQ_ACCOUNTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{}</span><span class="w">  </span><span class="c1"># see</span>
+</pre></div>
+</div>
+<p>Unfortunately you will have to have fair idea of what the metrics you are
+ingesting are like, in terms of monotonicity.</p>
+<p>You will also require a number of terminal windows open so you can tail -f the
+following logs during the process:
+- /var/logs/skyline/vista.log
+- /var/logs/skyline/flux.log
+- /var/logs/skyline/analyzer.log
+- /var/logs/skyline/analyzer_batch.log</p>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h2>
+<p>Because this is a complex process with complicated settings variables you will
+want to test.  The webapp UI Utilities page Backfill BigQuery function (or
+direct via the /bq_backfill Admin endpoint) allows you to specify a job and run
+it as dry_run to test with.</p>
+<p>When a job is run as dry_run and flux_test the following processes occur:
+- The job is added to the Vista work queue (Redis hash vista.bq_backfill.work)
+- Vista then spawns a bq_backfill process
+- The bq_backfill process determines the intervals which need to be fetched and</p>
+<blockquote>
+<div><p>iterates through each one and does the following
+- Fetches the data from BigQuery for the interval (saves to archive csv if enabled)
+- Converts the data to metrics
+- POSTs the metrics to flux
+- flux will accept the data and report what was accepted but will not process it</p>
+</div></blockquote>
+<p>Backfilling is handled via the webapp UI under Utilities tab (or directly via
+/bq-backfill with a JSON payload of the variables required).  It is important to
+understand that the backfilling variables that are required are tied to the
+<a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> configuration that you will define for the
+ongoing data retrieval and analysis.  To ensure that the configuration used for
+a backfilling task is the same as the configuration that is to be used for
+ongoing retrieval, a backfill job will only be run if a matching key is found in
+the <a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> dict in settings.py</p>
+<p>So first you need to add a dict for the job to <a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a>
+and <strong>most importantly</strong> set the schedule elements all to 0, which disables the
+job but allows it to be declared and present. This is equally applicable to
+external_settings should you happen to use those.</p>
+<p>In terms of Graphite you need to ensure that the value you pass for
+<code class="docutils literal notranslate"><span class="pre">max_creates_per_minute</span></code> for the job aligns with the <code class="docutils literal notranslate"><span class="pre">MAX_CREATES_PER_MINUTE</span></code>
+that is defined in carbon.conf.  If these are not algined carbon will drop
+metrics.  During the job run keep an eye on the Graphite’s own <code class="docutils literal notranslate"><span class="pre">creates</span></code> and
+<code class="docutils literal notranslate"><span class="pre">droppedCreates</span></code> metrics.</p>
+<p>It is recommended that you run the backfill in 2 stages:</p>
+<ul class="simple">
+<li><p>First stage run a main backfill job from the start of the date up until 3
+intervals <strong>BEFORE</strong> the current data.  Allow Analyzer to process the metrics
+and assign them as batch metrics and record the last timestamps for the
+metrics.  Here you are going to watch the tail -f on the logs to ensure that
+the metrics are being processed by analyzer and analyzer_batch.  Review the logs.</p></li>
+<li><p>Wait for at least 10 minutes for the analyzer/metrics_manager process to
+update all the internal data sets, etc  and review the analyzer.log grepping
+for <code class="docutils literal notranslate"><span class="pre">&quot;metrics_manager\|error</span> <span class="pre">::</span> <span class="pre">&quot;</span></code></p></li>
+<li><p>Second stage run - this time set the replace_redis_timeseries to false, set
+the from_timestamp using the until_timestamp from the first stage backfill job
+e.g.to (until_timestamp + interval) and set the until_timestamp for this
+backfill job to (current_interval_timestamp - interval) the
+current_interval_timestamp being the most recent timestamp in BigQuery. Run
+the job and watch the logs.</p></li>
+</ul>
+<p>At this point Skyline will have added the metrics internally and you are ready
+to enable the schedule in your <a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> (or
+external_settings) and restart Vista.</p>
+<p>The backfill job will be run using the variables defined in the settings (or
+external_settings), with the exception of the date conditional being replaced
+with the valid DATE_FORMAT at each interval.  Once the backfill job is complete,
+you can then set the required values for the schedule in
+<a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> (or external_settings) and restart Vista.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vista_bigquery_virtualenv.html" class="btn btn-neutral float-left" title="Vista - BigQuery - virtualenv" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vista_bigquery_configuration.html" class="btn btn-neutral float-right" title="Vista - BigQuery - Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

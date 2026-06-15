@@ -59,6 +59,14 @@ skyline.custom\_algorithms\_to\_run module
    :undoc-members:
    :show-inheritance:
 
+skyline.custom\_algorithms\_to\_run\_conditions module
+------------------------------------------------------
+
+.. automodule:: custom_algorithms_to_run_conditions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.database module
 -----------------------
 

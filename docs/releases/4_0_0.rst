@@ -2,7 +2,7 @@
 4.0.0
 =====
 
-v4.0.0 - xxx xx, 2023
+v4.0.0 - 28 June 2023
 
 This is a **MAJOR** release with changes and enhancements across the board,
 including changes and additions to backend components.
@@ -415,7 +415,7 @@ Congratulations, you are now running the best OSS anomaly detection stack in the
 world (probably).
 
 Changes
--------
+=======
 
 New slack messaging does not handle public channel (111)
 thunder (1444)

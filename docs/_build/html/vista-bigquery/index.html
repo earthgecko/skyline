@@ -1,0 +1,221 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vista - BigQuery &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vista - BigQuery - Data Structure" href="vista_bigquery_data_structure.html" />
+    <link rel="prev" title="Vista" href="../vista.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vista - BigQuery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_data_structure.html">Vista - BigQuery - Data Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_virtualenv.html">Vista - BigQuery - virtualenv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_backfill.html">Vista - BigQuery - Testing and Backfill</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_configuration.html">Vista - BigQuery - Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Vista - BigQuery</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/vista-bigquery/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="vista-bigquery">
+<h1>Vista - BigQuery<a class="headerlink" href="#vista-bigquery" title="Link to this heading"></a></h1>
+<p>Vista can be used to fetch data from BigQuery and submit it to Skyline as
+metrics for analysis and monitoring.</p>
+<p>This functionality is limited to adding metrics to Graphite as normal Graphite
+dotted namespace metrics.  It is currently not possible to add metrics from
+BigQuery data to VictoriaMetrics as labelled key/value formatted (Prometheus
+style) metrics.</p>
+<p>It is probable that data from BigQuery will not be real time data with a high
+frequency and the data will probably be more suited to much longer term storage
+and require batch processing.  Therefore using Graphite for the metrics is
+preferable to enable long retention and to facilitate batch processing.  Batch
+processing is not currently available for labelled metrics.</p>
+<p>The keys aspects to this Vista functionality are:</p>
+<ul class="simple">
+<li><p>The BigQuery table being queried should be fit for purpose.</p></li>
+<li><p>Skyline requires an additional isolated Python virtualenv for Google packages.</p></li>
+<li><p>Testing and backfilling data before fetching current data is possible [optional].</p></li>
+<li><p>Google authentication resources are required.</p></li>
+<li><p>The required configuration to enable Vista to fetch and process BigQuery data
+needs to be implemented.</p></li>
+</ul>
+<p>Step 1: prepare the BigQuery side of things and create a service account or oauth credentials which has access to the data see
+Step 2: create a skyline-bq virtualenv
+Step 3: define the fetch and analysis parameters in <a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> and other Vista and BigQuery related settings and restart the services
+Step 4: run a test and/or backfill with a Utilities /bq_backfill job [optional]
+Step 5: enable the schedule for the ongoing analysis in <a class="reference internal" href="../skyline.html#settings.VISTA_BQ_ACCOUNTS" title="settings.VISTA_BQ_ACCOUNTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_BQ_ACCOUNTS</span></code></a> and restart vista
+Step 6: define any alerts you want by adding relevant tuples to <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a>
+Step 7: define any boundary metrics or custom_algorithms you a want run on any of the BigQuery namespace metrics [optional]</p>
+<p>There are a number of considerations and requirements for BigQuery and each is
+covered in order and detail in the page links below.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vista_bigquery_data_structure.html">Vista - BigQuery - Data Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista_bigquery_virtualenv.html">Vista - BigQuery - virtualenv</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_virtualenv.html#create-the-skyline-bq-python-virtualenv">Create the skyline-bq Python virtualenv</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vista_bigquery_backfill.html">Vista - BigQuery - Testing and Backfill</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_backfill.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vista_bigquery_configuration.html">Vista - BigQuery - Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_configuration.html#updating-previous-data">Updating previous data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_configuration.html#recommendations">Recommendations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vista_bigquery_configuration.html#credentials">Credentials</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vista_bigquery_configuration.html#oauth-credentials">oauth_credentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vista_bigquery_configuration.html#service-credentials">service_credentials</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../vista.html" class="btn btn-neutral float-left" title="Vista" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vista_bigquery_data_structure.html" class="btn btn-neutral float-right" title="Vista - BigQuery - Data Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,14 +1,18 @@
+![Alt skyline](docs/images/skyline.v4.1.0.png)
 ## Skyline
 
-Skyline is a real time anomaly detection, time series analysis and performance
-monitoring system, built to enable passive monitoring on metrics, without the
-need to configure a model/thresholds for each one.  It is designed to be used
-wherever there are a large quantity of high-resolution time series which need
-constant monitoring. Once a metrics stream is set up additional metrics are
-automatically added to Skyline for analysis. Skyline's algorithms attempt to
-automatically detect what it means for each metric to be anomalous.  Once set up
-and running, Skyline allows the user to train it what is not anomalous on a per
-metric basis.
+Skyline is a real time Python based anomaly detection, time series analysis and
+performance monitoring system, built to enable passive monitoring on metrics,
+without the need to configure a model/thresholds for each one.  It is designed
+to be used wherever there are a large quantity of high-resolution time series
+which need constant monitoring. Once a metrics stream is set up additional
+metrics are automatically added to Skyline for analysis. Skyline's algorithms
+attempt to automatically detect what it means for each metric to be anomalous.  Once
+set up and running, Skyline allows the user to train it what is not anomalous on
+a per metric basis.
+
+Skyline can ingest metrics from Graphite, InfluxDB (via Telegraf), Prometheus
+and VictoriaMetrics.
 
 ## Documentation
 

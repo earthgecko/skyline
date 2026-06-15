@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mirage.mirage_irregular_unstable &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mirage.mirage_irregular_unstable</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mirage.mirage_irregular_unstable</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">mirage_irregular_unstable.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="kn">from</span> <span class="nn">functions.timeseries.normalized_variance</span> <span class="kn">import</span> <span class="n">normalized_variance</span>
+<span class="kn">from</span> <span class="nn">functions.victoriametrics.get_victoriametrics_metric</span> <span class="kn">import</span> <span class="n">get_victoriametrics_metric</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_graphite_metric</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+<div class="viewcode-block" id="mirage_irregular_unstable">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_irregular_unstable.mirage_irregular_unstable">[docs]</a>
+<span class="k">def</span> <span class="nf">mirage_irregular_unstable</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if a timeseries is irregular and unstable and if it is, determine</span>
+<span class="sd">    if it is also irregular and unstable at 30 days, if it is return the</span>
+<span class="sd">    timeseries_30d</span>
+
+<span class="sd">    :param base_name: the metric base_name.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],</span>
+<span class="sd">        [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :return: timeseries_30d</span>
+<span class="sd">    :rtype: tuple(boolean, float)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_irregular_unstable :: checking </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;irregular_unstable&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;resolution_7d&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;skipped&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;normalised_var_7d&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;normalised_var_30d&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;timeseries_30d&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+    <span class="n">timeseries_30d</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">low_variance_7d</span> <span class="o">=</span> <span class="mf">0.009</span>
+
+    <span class="c1"># On 20230505 for Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days</span>
+    <span class="c1"># After analysing and assessing the variance values for 251 tN SNAB results and</span>
+    <span class="c1"># 7 fN results and 1 unsure result, it was determined that at 30 days the</span>
+    <span class="c1"># normalised_var should be &lt; 0.0065.  Of the 251 tN result only 7 of those were</span>
+    <span class="c1"># &gt;= 0.0065 (0.0065, 0.0065, 0.0066, 0.0066, 0.0081, 0.0096, 0.0104).  These</span>
+    <span class="c1"># were reassessed and found that they could be deemed either way.  Further the</span>
+    <span class="c1"># unsure metric was 0.0065, therefore for the sake of perhaps 2.5% fPs we ensure</span>
+    <span class="c1"># less fNs or unsures (with current knowledge)</span>
+    <span class="n">low_variance_30d</span> <span class="o">=</span> <span class="mf">0.0065</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="n">np_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+        <span class="n">ts_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_timestamps</span><span class="p">)</span>
+        <span class="n">resolution_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ts_diffs</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_counts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">resolution_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;resolution_7d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolution</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">900</span><span class="p">:</span>
+            <span class="c1"># Not suited to low resolution data</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Not suited to low resolution &gt; 900&#39;</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">duration</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="o">&lt;</span> <span class="mi">446400</span><span class="p">:</span>
+            <span class="c1"># Not suitable for less than 5.25 days worth of data</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Not suitable for less than 5.25 days worth of data&#39;</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="n">normalized_var</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">normalized_var</span> <span class="o">=</span> <span class="n">normalized_variance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalized_var execution error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_var</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalized_var error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_var</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalised_var_7d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_var</span>
+        <span class="k">if</span> <span class="n">normalized_var</span> <span class="o">&gt;</span> <span class="n">low_variance_7d</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;normalized_var &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">low_variance_7d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">until_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;_tenant_id=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="n">timeseries_30d</span> <span class="o">=</span> <span class="n">get_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">timeseries_30d</span> <span class="o">=</span> <span class="n">get_victoriametrics_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: no timeseries_30d fetched for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no timeseries_30d fetched - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries_30d</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no timeseries_30d returned&#39;</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries_30d</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;len(timeseries_30d) &lt;= len(timeseries)&#39;</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="n">normalized_var_30d</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">normalized_var_30d</span> <span class="o">=</span> <span class="n">normalized_variance</span><span class="p">(</span><span class="n">timeseries_30d</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalized_var_30d execution error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_var_30d</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalized_var_30d error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_var_30d</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;normalised_var_30d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">normalized_var_30d</span>
+        <span class="k">if</span> <span class="n">normalized_var_30d</span> <span class="o">&gt;=</span> <span class="n">low_variance_30d</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;skipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;normalized_var_30d &gt;= </span><span class="si">%s</span><span class="s1"> (low_variance_30d)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">low_variance_30d</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;irregular_unstable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timeseries_30d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries_30d</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_irregular_unstable failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

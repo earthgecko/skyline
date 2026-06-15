@@ -170,7 +170,7 @@ def remove_namespace_quota_metrics(
                     current_logger.info('%s :: DRY RUN :: would update %s namespace in metrics_manager.flux.quota.namespace_metrics with %s metrics_to_keep' % (
                         function_str, namespace, str(len(metrics_to_keep))))
         else:
-            current_logger.warning('warning :: %s :: nothing to update for %s namespace in metrics_manager.flux.quota.namespace_metrics' % (
+            current_logger.info('warning :: %s :: nothing to update for %s namespace in metrics_manager.flux.quota.namespace_metrics' % (
                 function_str, namespace))
 
         # Set to inactive in the database before removing from the Redis keys

@@ -9,6 +9,8 @@ from skyline_functions import get_redis_conn_decoded
 from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 
+# @added 20240320 - Feature #4444: webapp - inactive_metrics
+from functions.database.queries.get_all_inactive_db_metric_names import get_all_inactive_db_metric_names
 
 # @added 20220216 - Feature #4444: webapp - inactive_metrics
 def get_inactive_metrics(current_skyline_app, namespace=None):
@@ -26,6 +28,34 @@ def get_inactive_metrics(current_skyline_app, namespace=None):
     function_str = 'functions.metrics.get_inactive_metrics'
     inactive_metrics = {}
 
+    # @added 20240320 - Feature #4444: webapp - inactive_metrics
+    # Just get the data from the DB instead of using all metrics in the DB and
+    # comparing to Redis metrics
+    inactive_metric_names_with_id = {}
+    try:
+        inactive_metric_names, inactive_metric_names_with_id = get_all_inactive_db_metric_names(current_skyline_app, with_ids=True)
+    except Exception as err:
+        current_skyline_app_logger = current_skyline_app + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: %s :: get_all_inactive_db_metric_names failed - %s' % (
+            current_skyline_app, function_str, str(err)))
+    pattern_match_errors = []
+    if inactive_metric_names_with_id:
+        for base_name in list(inactive_metric_names_with_id.keys()):
+            if namespace:
+                pattern_match = False
+                try:
+                    pattern_match, metric_matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, [namespace])
+                    del metric_matched_by
+                except Exception as err:
+                    pattern_match_errors.append([base_name, namespace, err])
+                if not pattern_match:
+                    continue
+            inactive_metrics[base_name] = inactive_metric_names_with_id[base_name]
+        return inactive_metrics
+
+    # old method
     base_names = []
     base_names_with_ids = {}
     with_ids = True

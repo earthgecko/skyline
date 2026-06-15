@@ -28,22 +28,47 @@ if HORIZON_SHARDS:
 
 
 # @added 20230201 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
-def is_shard_metric(metric):
+# @modified 20240112 - Task #5178: Build and test skyline v4.1.0
+#                      Feature #4792: functions.metrics_manager.manage_inactive_metrics
+# Added benchmark of testing on 200000 Prometheus, kubernetes, loki, cortex,
+# kubectl, thanos, mimir, cilium and node metrics
+def is_shard_metric(base_name):
     """
-    Determine if a metric belong to a cluster node.
-
-    :param self: the self object
-    :type self: object
-    :return: purged
-    :rtype: int
+    Fast efficient sharding to determine if a metric belong to a cluster node.
+    This will shard 200000 metric names from Prometheus metrics for kubernetes,
+    loki, cortex, kubectl, thanos, mimir, cilium node, etc in 0.9s
+    200000 metrics took: 0.916738748550415 seconds, 80349 shard metrics, 0 errors
+    These are long metric names and the following dict demonstrates the lengths
+    of the metrics names (bins are rounded up to the nearest hundred)
+    {700: 59232,
+    400: 76705,
+    800: 25142,
+    100: 15038,
+    200: 1095,
+    500: 14420,
+    600: 3577,
+    300: 2306,
+    900: 1316,
+    1100: 403,
+    1000: 506,
+    1200: 259,
+    1300: 1}
+    The method is fit for purpose.
+    
+    :param base_name: the metric base_name
+    :type metric: str
+    :return: shard_metric
+    :rtype: bool
 
     """
     try:
         shard_metric = False
         shard_number = 0
         if not HORIZON_SHARDS:
-            return shard_metric
-        metric_as_bytes = str(metric).encode()
+            # Standalone so it does belong to this shard
+            # return shard_metric
+            return True
+        metric_as_bytes = str(base_name).encode()
         value = zlib.adler32(metric_as_bytes)
         for shard_node in list(HORIZON_SHARDS.keys()):
             modulo_result = value % number_of_horizon_shards

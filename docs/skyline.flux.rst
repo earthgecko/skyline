@@ -68,6 +68,14 @@ skyline.flux.prometheus module
    :undoc-members:
    :show-inheritance:
 
+skyline.flux.tornado module
+---------------------------
+
+.. automodule:: flux.tornado
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.flux.uploaded\_data\_worker module
 ------------------------------------------
 

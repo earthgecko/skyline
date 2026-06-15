@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Development &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Development &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -99,6 +99,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html">Development - dawn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html">Jupyter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
@@ -137,11 +138,12 @@
            <div itemprop="articleBody">
              
   <section id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this heading"></a></h1>
+<h1>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#part-of-the-build">Part of the build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#local-copy-of-skyline">Local copy of <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#your-python-interpretor">Your Python interpretor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#rst-and-md-wtf">.rst and .md wtf?</a></li>
@@ -155,12 +157,20 @@
 <li class="toctree-l2"><a class="reference internal" href="dawn.html#build-script-utils-dawn-skyline-dawn-sh">Build script - utils/dawn/skyline.dawn.sh</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="dawn.html#redis-server-or-redis-stack-server">redis-server or redis-stack-server</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dawn.html#prometheus-and-victoriametrics">Prometheus and VictoriaMetrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dawn.html#additional-components">Additional components</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dawn.html#deploy-using-the-build-script">Deploy using the build script</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html#relevant-configuration-files">Relevant configuration files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html#take-skyline-for-a-spin">Take Skyline for a spin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html#post-installation-tasks">Post installation tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#patterns">Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jupyter.html#using-skyline-logging">Using Skyline logging</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Development - Webapp</a><ul>
@@ -224,14 +234,14 @@
 </ul>
 </div>
 <section id="dry">
-<h2>DRY<a class="headerlink" href="#dry" title="Permalink to this heading"></a></h2>
+<h2>DRY<a class="headerlink" href="#dry" title="Link to this heading"></a></h2>
 <p>The current iteration of Skyline has a fair bit of repetition in some of the
 functions, etc in each module.  The process of consolidating these is ongoing,
 however due to the nature of some of the things, some things do need slightly
 different implementations.</p>
 </section>
 <section id="on-going-refactoring">
-<h2>On going refactoring<a class="headerlink" href="#on-going-refactoring" title="Permalink to this heading"></a></h2>
+<h2>On going refactoring<a class="headerlink" href="#on-going-refactoring" title="Link to this heading"></a></h2>
 <p>The code style in the Skyline codebase is somewhat organic, over time more and
 changes have been made mostly in the following contexts.</p>
 <ul class="simple">
@@ -285,7 +295,7 @@ becomes desired.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

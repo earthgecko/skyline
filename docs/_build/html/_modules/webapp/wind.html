@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.wind &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.wind</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.wind</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">wind.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="wind">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.wind.wind">[docs]</a>
+<span class="k">def</span> <span class="nf">wind</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a job or accept the results of a job and submit them to the</span>
+<span class="sd">    appropriate work Redis hash.</span>
+
+<span class="sd">    wind expects a json payload with the required_keys and will either post to</span>
+<span class="sd">    results of the job to the originating source node or will accept the</span>
+<span class="sd">    results from a job and post them to the appropriate work Redis hash.</span>
+<span class="sd">    If results are present, results_url must be set to None, if this is a job</span>
+<span class="sd">    being submitted results_url must be set and results must be an empty dict or</span>
+<span class="sd">    None/null.</span>
+
+<span class="sd">    post_data = {</span>
+<span class="sd">        &#39;source_host&#39;: skyline_node,</span>
+<span class="sd">        &#39;app&#39;: &#39;ionosphere&#39;,</span>
+<span class="sd">        &#39;job&#39;: &#39;motif_annihilation&#39;,</span>
+<span class="sd">        &#39;redis_work_hash&#39;: &#39;ionosphere.find_repetitive_patterns.motif_annihilation.work&#39;,</span>
+<span class="sd">        &#39;redis_work_hash_key&#39;: &#39;1712230013.1507778&#39;,</span>
+<span class="sd">        &#39;data&#39;: {&#39;metric_id&#39;: metric_id, &#39;metric&#39;: metric,</span>
+<span class="sd">            &#39;anomaly_id&#39;: anomaly_id,</span>
+<span class="sd">            &#39;anomaly_timestamp&#39;: anomaly_timestamp</span>
+<span class="sd">        },</span>
+<span class="sd">        &#39;results_url&#39;: &#39;url_to_post_results_to or None/null&#39;,</span>
+<span class="sd">        &#39;results&#39;: results_dict_or_None/null,</span>
+<span class="sd">    }</span>
+
+<span class="sd">    :param results: a dict with status_code, etc to populate and return</span>
+<span class="sd">    :type results: dict</span>
+<span class="sd">    :return: results</span>
+<span class="sd">    :rtype:  dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">content_encoding</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">content_encoding</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: an error occurred determining content-encoding, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">content_encoding</span> <span class="o">==</span> <span class="s1">&#39;gzip&#39;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: handling gzip payload&#39;</span><span class="p">)</span>
+        <span class="n">post_data_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">postData_obj</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">data</span>
+            <span class="n">post_data_obj</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">postData_obj</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: gzip.decompress(postData_obj) failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">post_data_obj</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">post_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">post_data_obj</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: json.loads(post_data_obj) failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">post_data</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">post_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: no POST data, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: return 400 no POST data&#39;</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no POST data&#39;</span>
+            <span class="k">return</span> <span class="n">results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">post_data</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: no POST data&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: return 400 no POST data&#39;</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no POST data&#39;</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="n">required_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;source_host&#39;</span><span class="p">,</span> <span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="s1">&#39;job&#39;</span><span class="p">,</span> <span class="s1">&#39;redis_work_hash&#39;</span><span class="p">,</span> <span class="s1">&#39;redis_work_hash_key&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="s1">&#39;results_url&#39;</span>
+    <span class="p">]</span>
+    <span class="n">valid_jobs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;motif_annihilation&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;redis_work_hash&#39;</span><span class="p">:</span> <span class="s1">&#39;ionosphere.find_repetitive_patterns.motif_annihilation.work&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+    <span class="n">results_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">post_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;missing parameter in POST data&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: no </span><span class="si">%s</span><span class="s1"> in POST data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">key</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind, return 400&#39;</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reason</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;source_host&#39;</span><span class="p">:</span>
+            <span class="n">source_host</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;app&#39;</span><span class="p">:</span>
+            <span class="n">app</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;job&#39;</span><span class="p">:</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">job</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">valid_jobs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;invalid job passed&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: </span><span class="si">%s</span><span class="s1">, job: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">reason</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: return 400&#39;</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reason</span>
+                <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;redis_work_hash&#39;</span><span class="p">:</span>
+            <span class="n">redis_work_hash</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;redis_work_hash_key&#39;</span><span class="p">:</span>
+            <span class="n">redis_work_hash_key</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;invalid data passed&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: </span><span class="si">%s</span><span class="s1">, data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">reason</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: return 400&#39;</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reason</span>
+                <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;results_url&#39;</span><span class="p">:</span>
+            <span class="n">results_url</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">work_host</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;results&#39;</span><span class="p">:</span>
+            <span class="n">results_dict</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">results_url</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">work_host</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;work_host&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">work_host</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">work_host</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">work_host</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;work_host&#39;</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">work_host</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">job</span> <span class="o">==</span> <span class="s1">&#39;motif_annihilation&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;pw5_timeseries&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">post_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;invalid data passed&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: no pw5_timeseries passed&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: return 400&#39;</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reason</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">if</span> <span class="n">results_url</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: accepting </span><span class="si">%s</span><span class="s1"> job from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">job</span><span class="p">,</span> <span class="n">source_host</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">results_dict</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: accepting </span><span class="si">%s</span><span class="s1"> job results from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">job</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">work_host</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: get_redis_conn_decoded failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind, return 500&#39;</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Redis failed&#39;</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="n">added_at</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;added_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">added_at</span>
+    <span class="n">new_redis_work_hash_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">redis_work_hash_key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;redis_work_hash_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_redis_work_hash_key</span>
+
+    <span class="k">if</span> <span class="n">results_dict</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">redis_work_hash</span><span class="p">,</span> <span class="n">new_redis_work_hash_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_data</span><span class="p">))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;OK&#39;</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;job&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job</span>
+            <span class="n">job_result</span> <span class="o">=</span> <span class="s1">&#39;results submitted for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_work_hash_key</span><span class="p">,</span> <span class="n">redis_work_hash</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;action&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_result</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: request results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">results</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: redis_conn_decoded failed to set </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">redis_work_hash_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_work_hash</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind, return 500&#39;</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Redis failed add results&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: request results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">results</span>
+    <span class="k">if</span> <span class="n">results_url</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">redis_work_hash</span><span class="p">,</span> <span class="n">new_redis_work_hash_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_data</span><span class="p">))</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;OK&#39;</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;job&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job</span>
+            <span class="n">job_result</span> <span class="o">=</span> <span class="s1">&#39;submitted job for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">new_redis_work_hash_key</span><span class="p">,</span> <span class="n">redis_work_hash</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;action&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_result</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: request results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">results</span>        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: wind :: redis_conn_decoded failed to set </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">new_redis_work_hash_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_work_hash</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind, return 500&#39;</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Redis failed add results&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: request results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">results</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;wind :: request results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

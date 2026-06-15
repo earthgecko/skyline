@@ -141,7 +141,7 @@ class PopulateMetricWorker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             exit(0)
 
     def run(self):
@@ -327,7 +327,7 @@ class PopulateMetricWorker(Process):
                             last_metric_data = literal_eval(redis_last_metric_data)
                             last_flux_timestamp = int(last_metric_data[0])
                         else:
-                            logger.warning('warning ::populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                            logger.info('warning ::populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
                             last_flux_timestamp = False
                     except:
                         logger.error(traceback.format_exc())
@@ -396,7 +396,14 @@ class PopulateMetricWorker(Process):
                         logger.info('populate_metric_worker :: using Graphite URL - %s' % (
                             url))
 
-                        r = requests.get(url)
+                        # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                        # Add timeout for bandit B113
+                        #r = requests.get(url)
+                        connect_timeout = 5
+                        read_timeout = 10
+                        use_timeout = (int(connect_timeout), int(read_timeout))
+                        r = requests.get(url, timeout=use_timeout)
+
                         if r.status_code == 200:
                             js = []
                             try:
@@ -528,7 +535,14 @@ class PopulateMetricWorker(Process):
                 success = False
                 try:
                     logger.info('populate_metric_worker :: getting data from %s' % str(fetch_url))
-                    response = requests.get(fetch_url)
+                    # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                    # Add timeout for bandit B113
+                    #response = requests.get(fetch_url)
+                    connect_timeout = 5
+                    read_timeout = 10
+                    use_timeout = (int(connect_timeout), int(read_timeout))
+                    response = requests.get(fetch_url, timeout=use_timeout)
+
                     if response.status_code == 200:
                         success = True
                         logger.info('populate_metric_worker :: got responses from %s' % str(fetch_url))
@@ -548,7 +562,7 @@ class PopulateMetricWorker(Process):
                     if 'Remote end closed connection without response' in str(err):
                         remote_error = True
                     if remote_error:
-                        logger.warning('warning :: fetcher :: failed to get data from %s - %s' % (
+                        logger.info('warning :: fetcher :: failed to get data from %s - %s' % (
                             str(fetch_url), err))
                     else:
                         logger.error(traceback.format_exc())
@@ -578,7 +592,7 @@ class PopulateMetricWorker(Process):
                         #     str(response.status_code), str(response.reason)))
                         logger.error('error :: populate_metric_worker :: requests reports - %s' % (
                             err))
-                        logger.warning('warning :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))
+                        logger.info('warning :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))
 
                 if not success:
                     continue
@@ -599,7 +613,7 @@ class PopulateMetricWorker(Process):
                     # File "/opt/skyline/github/skyline/skyline/flux/populate_metric_worker.py", line 509, in run
                     #   datapoints = js[0]['datapoints']
                     # IndexError: list index out of range
-                    logger.warning('warning :: populate_metric_worker :: failed to get any datapoints from %s' % str(fetch_url))
+                    logger.info('warning :: populate_metric_worker :: failed to get any datapoints from %s' % str(fetch_url))
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))

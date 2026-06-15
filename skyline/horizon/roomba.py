@@ -31,6 +31,10 @@ if True:
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
     from skyline_functions import get_redis_conn, get_redis_conn_decoded
+    # @added 20240518 - Feature #5356: get_batch_processing_namespaces
+    #                   Feature #5352: vista - bigquery
+    from functions.settings.get_batch_processing_namespaces import get_batch_processing_namespaces
+
 
 parent_skyline_app = 'horizon'
 child_skyline_app = 'roomba'
@@ -98,7 +102,7 @@ class Roomba(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def vacuum(self, i, namespace, duration):
@@ -114,7 +118,25 @@ class Roomba(Thread):
         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
         # unique_metrics = list(self.redis_conn.smembers(namespace_unique_metrics))
-        unique_metrics = list(self.redis_conn_decoded.smembers(namespace_unique_metrics))
+        try:
+            unique_metrics = list(self.redis_conn_decoded.smembers(namespace_unique_metrics))
+        except Exception as err:
+            logger.error('error - smembers failed while creating unique_metrics, err: %s' % err)
+            unique_metrics = []
+
+        # @added 20240518 - Feature #5356: get_batch_processing_namespaces
+        #                   Feature #5352: vista - bigquery
+        #                   Feature #3480: batch_processing
+        # Use the metrics_manager set to also include BiqQuery batch metrics
+        batch_processing_namespaces = []
+        try:
+            batch_processing_namespaces = get_batch_processing_namespaces(skyline_app)
+        except Exception as err:
+            logger.error('error :: get_batch_processing_namespaces failed, err: %s' % err)
+            batch_processing_namespaces = []
+        if batch_processing_namespaces:
+            BATCH_PROCESSING_NAMESPACES = list(batch_processing_namespaces)
+            BATCH_PROCESSING = True
 
         # @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
         #                   Feature #3480: batch_processing
@@ -129,8 +151,8 @@ class Roomba(Thread):
                 batch_metrics2 = list(self.redis_conn_decoded.smembers('analyzer.batch_processing_metrics'))
                 all_batch_metrics = batch_metrics1 + batch_metrics2
                 batch_metrics = list(set(all_batch_metrics))
-            except:
-                logger.error('error - failed to get Redis set aet.analyzer.batch_processing_metrics')
+            except Exception as err:
+                logger.error('error - failed to get Redis set aet.analyzer.batch_processing_metrics, err: %s' % err)
                 batch_metrics = []
             if batch_metrics:
                 full_namespace_batch_metrics = []
@@ -169,6 +191,40 @@ class Roomba(Thread):
         trimmed_keys = 0
         active_keys = 0
 
+        # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+        # Order by last trimmed
+        logger.info('horizon.roomba :: ordering %s assigned_metrics by last trimmed' % str(len(assigned_metrics)))
+        assigned_metrics_set = set(assigned_metrics)
+        assigned_metrics_with_index = {}
+        index_with_assigned_metrics = {}
+        metrics_last_trimmed_timestamp_sorted_set = set()
+        for index in assigned_keys:
+            assigned_metrics_with_index[unique_metrics[index]] = index
+            index_with_assigned_metrics[index] = unique_metrics[index]
+        metrics_trimmed_dict = {}
+        last_metrics_trimmed_dict = {}
+        last_metrics_trimmed_dict_items_count = 0
+        try:
+            last_metrics_trimmed_dict = self.redis_conn_decoded.hgetall('horizon.roomba.metrics_last_trimmed')
+        except Exception as err:
+            logger.error('error :: horizon.roomba :: hgetall failed on horizon.roomba.metrics_last_trimmed, err: %s' % err)
+            last_metrics_trimmed_dict = {}
+        if last_metrics_trimmed_dict:
+            last_metrics_trimmed_dict_items_count = len(last_metrics_trimmed_dict)
+            logger.info('horizon.roomba :: got %s last trimmed metrics and timestamps from horizon.roomba.metrics_last_trimmed' % (
+                str(last_metrics_trimmed_dict_items_count)))
+            metrics_last_trimmed_timestamp = [[int(timestamp_str), metric] for metric, timestamp_str in last_metrics_trimmed_dict.items()]
+            metrics_last_trimmed_timestamp_sorted = sorted(metrics_last_trimmed_timestamp, key=lambda x: x[0])
+            metrics_sorted = [metric for metric, timestamp_str in metrics_last_trimmed_timestamp_sorted]
+            metrics_last_trimmed_timestamp_sorted_set = set(metrics_sorted)
+            del metrics_last_trimmed_timestamp
+            del metrics_last_trimmed_timestamp_sorted
+            unknown_last_trimmed_assigned_metrics = [metric for metric in assigned_metrics_set if metric not in metrics_last_trimmed_timestamp_sorted_set]
+            new_assigned_metrics = [metric for metric in metrics_sorted if metric in assigned_metrics_set]
+            del metrics_sorted
+            assigned_metrics = unknown_last_trimmed_assigned_metrics + new_assigned_metrics
+        logger.info('horizon.roomba :: ordered assigned_metrics by last trimmed')
+
         # @modified 20191016 - Task #3280: Handle py2 xange and py3 range
         #                      Branch #3262: py3
         # for i in xrange(len(assigned_metrics)):
@@ -181,6 +237,17 @@ class Roomba(Thread):
                 range_list.append(i)
         for i in range_list:
             self.check_if_parent_is_alive()
+
+            # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+            if not int(i) % 1000 or i == 100:
+                stats = {
+                    'namespace_keys': (len(assigned_metrics) - euthanized),
+                    'blocked': blocked,
+                    'euthanized': euthanized,
+                    'active_keys': active_keys,
+                    'trimmed': trimmed_keys,
+                }
+                logger.info('horizon.roomba :: vaccum progress: %s' % str(stats))
 
             pipe = self.redis_conn.pipeline()
             now = time()
@@ -255,6 +322,18 @@ class Roomba(Thread):
                         trimmed_keys += 1
                     pipe.set(key, value)
                     active_keys += 1
+
+                    # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+                    trimmed_at_str = str(int(now))
+                    metrics_trimmed_dict[key] = trimmed_at_str
+                    # If the hash did not exist create it
+                    if not last_metrics_trimmed_dict_items_count or key not in metrics_last_trimmed_timestamp_sorted_set:
+                        try:
+                            self.redis_conn_decoded.hset('horizon.roomba.metrics_last_trimmed', key, trimmed_at_str)
+                        except Exception as err:
+                            logger.error('error :: horizon.roomba :: hset failed to set %s in horizon.roomba.metrics_last_trimmed, err: %s' % (
+                                key, err))
+
                 else:
                     pipe.delete(key)
                     pipe.srem(namespace_unique_metrics, key)
@@ -275,6 +354,16 @@ class Roomba(Thread):
                 logger.info('%s :: vacuum Euthanizing %s' % (skyline_app, key))
             finally:
                 pipe.reset()
+
+        # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+        if metrics_trimmed_dict:
+            logger.info('%s :: vacuum adding %s metrics to horizon.roomba.metrics_last_trimmed' % (
+                skyline_app, str(len(metrics_trimmed_dict))))
+            try:
+                self.redis_conn_decoded.hset('horizon.roomba.metrics_last_trimmed', mapping=metrics_trimmed_dict)
+            except Exception as err:
+                logger.error('error :: %s :: hset failed on horizon.roomba.metrics_last_trimmed, err: %s' % (
+                    skyline_app, err))
 
         logger.info(
             '%s :: vacuum operated on %s %d keys in %f seconds' %
@@ -392,7 +481,8 @@ class Roomba(Thread):
                 logger.info('%s :: timed out, killing all Roomba processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                    # p.join()
 
             # sleeping in the main process is more CPU efficient than sleeping
             # in the vacuum def also roomba is quite CPU intensive so we only
@@ -403,7 +493,7 @@ class Roomba(Thread):
             try:
                 ROOMBA_OPTIMUM_RUN_DURATION = int(settings.ROOMBA_OPTIMUM_RUN_DURATION)
             except Exception as e:
-                logger.warning('%s :: roomba failed to determine ROOMBA_OPTIMUM_RUN_DURATION from settings, defaulting to 60 - %s' % (
+                logger.info('warning :: %s :: roomba failed to determine ROOMBA_OPTIMUM_RUN_DURATION from settings, defaulting to 60 - %s' % (
                     skyline_app, e))
                 ROOMBA_OPTIMUM_RUN_DURATION = 60
 

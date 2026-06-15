@@ -71,8 +71,8 @@ How to update from v1.2.11 (and v1.2.12)
 - Diff your current running version skyline/settings.py with the new version of
   skyline/settings.py and create a new settings.py in the temp location
   appropriate for Skyline v1.2.13 and your set up with the new v1.2.12
-  IONOSPHERE_ECHO_ settings (if updating from v1.2.11) and the new
-  ANALYZER_ENABLED and MIRAGE_PERIODIC_ settings from v1.2.13 ready to be
+  ``IONOSPHERE_ECHO_`` settings (if updating from v1.2.11) and the new
+  ANALYZER_ENABLED and ``MIRAGE_PERIODIC_`` settings from v1.2.13 ready to be
   deployed.  The new settings to be added for v1.2.13 are:
 
 .. code-block:: python

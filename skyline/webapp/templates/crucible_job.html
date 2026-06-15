@@ -9,19 +9,36 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?process_metrics=true" data-bs-toggle="tooltip" title="Process metrics adhoc with selected algorithms"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="?crucible_job=true" data-bs-toggle="tooltip" title="Explore Crucible job results"><span class="logo"><span class="sky">Crucible</span><span class="re"> jobs</span></span></a>
+    </li>
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
     <span class="icon-bar"></span>
     <span class="icon-bar"></span>
   </button>
-		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a></li>
-		  <li><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a></li>
-		  <li class="active"><a href="?crucible_job=true"><span class="logo"><span class="sky">Crucible</span> <span class="re">job<span></span></span></a></li>
-		</ul>
-	<div class="tab-content">
-	 	<div class="tab-pane active" id="view">
+	<ul class="nav nav-tabs" role="view_tablist" id="view">
+		<li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a></li>
+		<li><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a></li>
+		<li class="active"><a href="?crucible_job=true"><span class="logo"><span class="sky">Crucible</span> <span class="re">job<span></span></span></a></li>
+	</ul>
+{% endif %}
+  <div class="tab-content">
+	<div class="tab-pane active" id="view">
 	<br>
       <div class="navbar-header" role="navigation">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -51,7 +68,7 @@
     {% if image_files %}
       {% for image_file in image_files %}
         {% if 'skyline.consensus.anomalies.png' in image_file %}
-    <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+    <td><img src="ionosphere_images?image={{ image_file }}" loading="lazy" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
         {% endif %}
       {% endfor %}
     {% endif %}
@@ -68,7 +85,7 @@
 
   <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">Graphite graph</span></span>:: {{ graph_image_file }}</h4>
   {% if graph_image_file %}
-    <img src="ionosphere_images?image={{ graph_image_file }}" alt="{{ crucible_job_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    <img src="ionosphere_images?image={{ graph_image_file }}" loading="lazy" alt="{{ crucible_job_metric }} timeseries graph" class="img-responsive center-block" /><br>
   {% else %}
   		<pre>No graph_image_file was passed, which is not ideal</pre>
   {% endif %}
@@ -96,9 +113,9 @@
           {% endif %}
         {% endfor %}
         {% if 'skyline.consensus.anomalies.png' in image_file %}
-          <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+          <td><img src="ionosphere_images?image={{ image_file }}" loading="lazy" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
         {% else %}
-          <td><img src="ionosphere_images?image={{ image_file }}" alt="{{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" /></td>
+          <td><img src="ionosphere_images?image={{ image_file }}" loading="lazy" alt="{{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" /></td>
         {% endif %}
         </tr>
       {% endif %}
@@ -111,7 +128,7 @@
   {% if image_files %}
     {% for image_file in image_files %}
       {% if 'skyline.consensus.anomalies.png' in image_file %}
-    <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+    <td><img src="ionosphere_images?image={{ image_file }}" loading="lazy" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
       {% endif %}
     {% endfor %}
   {% endif %}

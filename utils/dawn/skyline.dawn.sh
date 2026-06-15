@@ -25,6 +25,15 @@
 #                      Task #4964: dawn - redis-stack-server
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
+# @modified 20231223 - Task #5178: Build and test skyline v4.1.0
+# @modified 20231230 - Task #5178: Build and test skyline v4.1.0
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+# @modified 20240202 - Task #5254: Upgrade Skyline to Python 3.10
+#                      Support #5252: numba 0.59.0 - minimum Python 3.9
+#                      Task #5178: Build and test skyline v4.1.0
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+# @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -54,8 +63,13 @@
 # to be sourced.
 YOUR_SERVER_IP_ADDRESS="YOUR_SERVER_IP"  # YOUR Skyline server public IP address
 # e.g. YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f2)"  # YOUR Skyline server public IP address
-YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.com"        # YOUR Skyline server FQDN
+YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.org"        # YOUR Skyline server FQDN
 YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP address that you will be connecting from
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+# Added firewall and disable IPv6
+FIREWALL_ENABLED=1                                         # CentOS ONLY - whether to enable the firewall and restrict as to YOUR_OTHER_IP_ADDRESS
+DISABLE_IPV6=1                                             # CentOS ONLY - whether to disable ipv6
 WEBAPP_AUTH_USER="admin"                                   # The username you want to use for http authentication
 WEBAPP_AUTH_USER_PASSWORD="$(echo ${HOSTNAME}_skyline)"    # The password you want to use for http authentication
 MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
@@ -65,21 +79,46 @@ REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
 # @modified 20220506 - Release #4552: v3.0.2
 # @modified 20220509 - Release #4552: v3.0.3
 # @modified 20220511 - Release #4562: v3.0.4
-SKYLINE_RELEASE="v4.0.0"                                   # The Skyline release to deploy
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#SKYLINE_RELEASE="v4.1.0"                                   # The Skyline release to deploy
+SKYLINE_RELEASE="v5.0.0-alpha"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
-INSTALL_GRAPHITE=1                                         # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
+INSTALL_GRAPHITE=1                                         # Install Graphite 0 = no, 1 = yes (CentOS 9 only)
 # @added 20230625 - Task #4962: Build and test skyline v4.0.0
 # Add the ability to install Prometheus and VictoriaMetrics
 # for testing purposes
-INSTALL_PROMETHEUS=0                                        # Install Prometheus 0 = no, 1 = yes (CentOS 8 only)
-PROMETHEUS_VERSION="2.45.0"
-INSTALL_VICTORIAMETRICS=0                                   # Install VictoriaMetric 0 = no, 1 = yes (CentOS 8 only)
-VICTORIAMETRICS_VERSION="1.87.6"
+INSTALL_PROMETHEUS=1                                        # Install Prometheus 0 = no, 1 = yes (CentOS 9 only)
+# @modified 20231223 - Task #5178: Build and test skyline v4.1.0
+#PROMETHEUS_VERSION="2.45.0"
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#PROMETHEUS_VERSION="2.48.1"
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#PROMETHEUS_VERSION="2.49.1"
+PROMETHEUS_VERSION="2.55.1"
+INSTALL_VICTORIAMETRICS=1                                   # Install VictoriaMetric 0 = no, 1 = yes (CentOS 9 only)
+# @modified 20231223 - Task #5178: Build and test skyline v4.1.0
+#VICTORIAMETRICS_VERSION="1.87.6"
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#VICTORIAMETRICS_VERSION="1.93.9"                            # You can run any version of the v1.93.x LTS line
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#VICTORIAMETRICS_VERSION="1.93.10"                            # You can run any version of the v1.93.x LTS line
+VICTORIAMETRICS_VERSION="1.105.0"
+
+# @added 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+INSTALL_TELEGRAF=1
+TELEGRAF_INTERFACES='["eth0","ens3","enp3s0"]'
+INSTALL_NODE_EXPORTER=1
+NODE_EXPORTER_VERSION="1.8.2"
+
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 FLUX_SELF_API_KEY="$(echo ${HOSTNAME}_YOURown32charSkylineAPIkeySecret | sed 's/[^a-zA-Z0-9]//g' | head -c 32)"
 # @modified 20230624 - Task #4962: Build and test skyline v4.0.0
 #GRAPHITE_VERSION="1.1.8"
 GRAPHITE_VERSION="1.1.10"
+# @added 20231223 - Task #5178: Build and test skyline v4.1.0
+GRAPHITE_RETENTION="60s:7d,10m:2y"
 # @added 20230624 - Task #4962: Build and test skyline v4.0.0
 #                   Task #4964: dawn - redis-stack-server
 #REDIS_BINARY="redis-server"
@@ -103,6 +142,17 @@ if [ -f /etc/skyline/skyline.dawn.conf ]; then
     echo -e $COLOUR_OFF
     exit 1
   fi
+
+  echo "Checking all the YOUR variables have been replaced in /etc/skyline/skyline.dawn.conf"
+  YOUR_FOUND=$(cat /etc/skyline/skyline.dawn.conf | grep -c "<YOUR_")
+  if [ $YOUR_FOUND -gt 0 ]; then
+    echo -e "error :: there are YOUR_ varibles defined in /etc/skyline/skyline.dawn.conf that HAVE NOT BEEN REPLACED - \e[31mFAIL $COLOUR_OFF"
+    echo -e $COLOUR_OFF
+    cat /etc/skyline/skyline.dawn.conf | grep "<YOUR_"
+    echo "Please replace them with your own variables and run the script again"
+    exit 1
+  fi
+
   source /etc/skyline/skyline.dawn.conf
   echo -e "source user conf - /etc/skyline/skyline.dawn.conf, \e[32mOK $COLOUR_OFF"
   sleep 1
@@ -136,7 +186,15 @@ REDIS_VERSION="redis-6.2.12"
 
 # @added 20230624 - Task #4964: dawn - redis-stack-server
 #                   Task #4962: Build and test skyline v4.0.0
-REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
+# @modified 20240129 - Task #5178: Build and test skyline v4.1.0
+#REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
+REDIS_STACK_VERSION="redis-stack-server-6.2.6-v11"
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#REDIS_STACK_VERSION_CENTOS_9="redis-stack-server-7.2.0-v8"
+REDIS_STACK_VERSION_CENTOS_9="redis-stack-server-7.2.0-v13"
 
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to Python-2.7.16
@@ -153,8 +211,15 @@ REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
 #PYTHON_VERSION="3.8.13"
 # @modified 20230624 - Task #4962: Build and test skyline v4.0.0
 #PYTHON_VERSION="3.8.16"
-PYTHON_VERSION="3.8.17"
-PYTHON_MAJOR_VERSION="3.8"
+# @modified 20240202 - Task #5254: Upgrade Skyline to Python 3.10
+#                      Support #5252: numba 0.59.0 - minimum Python 3.9
+#                      Task #4962: Build and test skyline v4.0.0
+#PYTHON_VERSION="3.8.17"
+#PYTHON_MAJOR_VERSION="3.8"
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#PYTHON_VERSION="3.10.13"
+PYTHON_VERSION="3.10.15"
+PYTHON_MAJOR_VERSION="3.10"
 
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 # @modified 20190412 - Task #2926: Update dependencies
@@ -167,7 +232,13 @@ PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 #PROJECT="skyline-py3813"
 # @modified 20230624 - Task #4962: Build and test skyline v4.0.0
 #PROJECT="skyline-py3816"
-PROJECT="skyline-py3817"
+# @modified 20240202 - Task #5254: Upgrade Skyline to Python 3.10
+#                      Support #5252: numba 0.59.0 - minimum Python 3.9
+#                      Task #4962: Build and test skyline v4.0.0
+# PROJECT="skyline-py3817"
+# @modified 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+#PROJECT="skyline-py31013"
+PROJECT="skyline-py31015"
 #VIRTUALENV_VERSION="15.2.0"
 # @modified 20201016 - Branch #3068: SNAB
 # This is specifically for Graphite
@@ -195,7 +266,7 @@ if [ "$YOUR_SERVER_IP_ADDRESS" == "" ]; then
   echo -e "error :: please set the YOUR_SERVER_IP_ADDRESS in USER DEFINED VARIABLES as currently is not set $YOUR_SERVER_IP_ADDRESS - \e[31mFAIL $COLOUR_OFF"
   ABORT=1
 fi
-if [ "$YOUR_SKYLINE_SERVER_FQDN" == "skyline-test.example.com" ]; then
+if [ "$YOUR_SKYLINE_SERVER_FQDN" == "skyline-test.example.org" ]; then
   echo -e "error :: please set the YOUR_SKYLINE_SERVER_FQDN in USER DEFINED VARIABLES - \e[31mFAIL $COLOUR_OFF"
   ABORT=1
 fi
@@ -240,6 +311,10 @@ if [ -f /etc/lsb-release ]; then
   fi
 fi
 
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+CENTOS_9=0
+
 CENTOS_8=0
 if [ -f /etc/redhat-release ]; then
   CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
@@ -262,6 +337,30 @@ if [ -f /etc/redhat-release ]; then
     if [ $CENTOS_8 -eq 1 ]; then
       OS_MAJOR_VERSION="8"
     fi
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+    CENTOS_9=$(cat /etc/redhat-release | grep -c "release 9")
+    if [ $CENTOS_9 -eq 1 ]; then
+      OS_MAJOR_VERSION="9"
+    fi
+
+  fi
+fi
+
+if [ $CENTOS_9 -eq 0 ]; then
+    echo -e "error :: the Skyline $SKYLINE_RELEASE skyline.dawn.sh build script is only compatible with CentOS Stream 9 not with $OS - \e[31mFAIL $COLOUR_OFF"
+    echo "Please use CentOS Stream 9"
+    exit 1
+fi
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+if [ $CENTOS_9 -eq 1 ]; then
+  if [ "$REDIS_BINARY" == "redis-server" ]; then
+    echo -e "error :: the REDIS_BINARY is set to redis-server which is not compatible with CentOS Stream 9 - \e[31mFAIL $COLOUR_OFF"
+    echo "Please use redis-stack-server as the REDIS_BINARY with CentOS Stream 9"
+    exit 1
   fi
 fi
 
@@ -275,18 +374,62 @@ if [ "$OS_MAJOR_VERSION" == "unknown" ]; then
 fi
 
 echo -e "\e[96m####    INSTALLING \e[31mSky\e[96mline     #### $COLOUR_OFF"
-echo "This will take 20-30 minutes on a cloud server"
+echo "This will take about 20-30 minutes on a 4 CPU cloud server"
 sleep 5
 
 # @added 20230624 - Task #4962: Build and test skyline v4.0.0
 #                   Task #4964: dawn - redis-stack-server
 # Do the user a favour if they are on Digitalocean otherwise
 # yum will fail
-if [ $CENTOS_8 -eq 1 ]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#if [ $CENTOS_8 -eq 1 ]; then
+if [[ $CENTOS_8 -eq 1 || $CENTOS_9 -eq 1 ]]; then
 # Actually just do it on any CentOS 8 node
 #  if [ -d /opt/digitalocean ]; then
     dnf -y update rpm
 #  fi
+fi
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+# Firewall
+if [[ $CENTOS_8 -eq 1 || $CENTOS_9 -eq 1 ]]; then
+  if [ $FIREWALL_ENABLED -eq 1 ]; then
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING and configuring firewalld    #### $COLOUR_OFF"
+    sleep 1
+
+    yum -y install firewalld
+    systemctl restart firewalld
+    firewall-cmd --remove-service=cockpit --permanent
+    firewall-cmd --remove-service=dhcpv6-client --permanent
+    firewall-cmd --permanent --new-ipset=trusted_ssh_hosts --type=hash:net
+
+    TRUSTED_IPS="$YOUR_SERVER_IP_ADDRESS
+$YOUR_OTHER_IP_ADDRESS" 
+    for i in $TRUSTED_IPS
+    do
+      firewall-cmd --permanent --ipset=trusted_ssh_hosts --add-entry="$i" 
+    done
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=22 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=80 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=443 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=8886 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=8887 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --add-rich-rule 'rule family=ipv4 source ipset=trusted_ssh_hosts port port=8888 protocol=tcp accept'
+    firewall-cmd --permanent --zone=public --remove-service=ssh
+    firewall-cmd --check-config
+    firewall-cmd --reload
+    systemctl enable firewalld
+    # DISABLE ipv6
+    if [ $DISABLE_IPV6 -eq 1 ]; then
+      echo -e "\e[96m####    Sky\e[31mline\e[96m - Disabling IPv6    #### $COLOUR_OFF"
+      sleep 1
+      sysctl -w net.ipv6.conf.all.disable_ipv6=1
+      sysctl -w net.ipv6.conf.default.disable_ipv6=1
+      sysctl -w net.ipv6.conf.tun0.disable_ipv6=1
+    fi
+  fi
 fi
 
 #### yum ####
@@ -298,6 +441,9 @@ if [ "$OS" == "CentOS" ]; then
     sleep 1
     yum -y update
     echo "True" > /tmp/skyline.dawn.yum.update.run.txt
+    # @added 20241029 - Task #5526: Build v5.0.0 and upgrade deps
+    # Hetzner cloud CentOS 9 build does not have tar
+    yum -y install tar
   else
     echo -e "Skipping running yum updates, already done - \e[32mOK $COLOUR_OFF"
     sleep 1
@@ -323,7 +469,6 @@ if [ "$OS" == "Ubuntu" ]; then
     sleep 1
   fi
 fi
-
 
 #### MariaDB ####
 if [ "$OS" == "CentOS" ]; then
@@ -362,7 +507,10 @@ if [ "$OS" == "CentOS" ]; then
   fi
 # @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 # Added CentOS 8
-  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
+  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8"  || "$OS_MAJOR_VERSION" == "9" ]]; then
     if [ ! -f /tmp/skyline.dawn.yum.mariadb-server.install.run.txt ]; then
       echo "Installing mariadb-server"
       sleep 1
@@ -375,7 +523,10 @@ if [ "$OS" == "CentOS" ]; then
         sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/server.cnf
       fi
 # @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
-      if [ "$OS_MAJOR_VERSION" == "8" ]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#      if [ "$OS_MAJOR_VERSION" == "8" ]; then
+      if [[ "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "9" ]]; then
         sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/mariadb-server.cnf
       fi
       systemctl start mariadb
@@ -601,6 +752,13 @@ if [ "$REDIS_BINARY" == "redis-server" ]; then
     # Optionally here if you have the time or interest you can run
     # make test
     echo "True" > /tmp/skyline.dawn.redis.make.install.txt
+
+# @added 20231223 - Task #5178: Build and test skyline v4.1.0
+# Required Redis sysctl settings
+    sysctl vm.overcommit_memory=1
+    echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+    echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
   else
     echo -e "Skipping running make install in /opt/redis/${REDIS_VERSION}, already done - \e[32mOK $COLOUR_OFF"
     sleep 1
@@ -660,7 +818,20 @@ if [ "$REDIS_BINARY" == "redis-stack-server" ]; then
   mkdir -p /opt/redis-stack-server
 
   CREATED=$(date)
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+  DO_REPO=0
   if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+    DO_REPO=1
+  fi
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "9" ]]; then
+    DO_REPO=1
+  fi
+
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+  if [ $DO_REPO -eq 1 ]; then
     if [ "$REDIS_INSTALL_METHOD" == "repo" ]; then
       echo "# @created $CREATED
 # @source /opt/skyline/github/skyline/utils/dawn/skyline.dawn.sh
@@ -693,16 +864,35 @@ gpgcheck=1" >> /etc/yum.repos.d/redis.repo
 # REDIS_INSTALL_METHOD="download"
 #REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
   if [ "$REDIS_INSTALL_METHOD" == "download" ]; then
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+    DO_REDIS_DOWNLOAD=0
     if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+      DO_REDIS_DOWNLOAD=1
+    fi
+    if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "9" ]]; then
+      DO_REDIS_DOWNLOAD=1
+      REDIS_STACK_VERSION="$REDIS_STACK_VERSION_CENTOS_9"
+    fi
+
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#    if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+    if [ $DO_REDIS_DOWNLOAD -eq 1 ]; then
       REDIS_GROUP="nobody"
-      if [ ! -f "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz" ]; then
-        echo "Downloading ${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
-        wget -O "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz" "https://packages.redis.io/redis-stack/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+# Changed rhel8 to rhel${OS_MAJOR_VERSION}
+      if [ ! -f "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz" ]; then
+        echo "Downloading ${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz"
+        wget -O "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz" "https://packages.redis.io/redis-stack/${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz"
       fi
       if [ ! -d "/opt/redis-stack-server/${REDIS_STACK_VERSION}" ]; then
-        echo "Unpacking ${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+        echo "Unpacking ${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz"
         cd /opt/redis-stack-server
-        tar -zxvf "${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+        tar -zxvf "${REDIS_STACK_VERSION}.rhel${OS_MAJOR_VERSION}.x86_64.tar.gz"
       fi
     fi
     if [[ "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "22.04" ]]; then
@@ -734,6 +924,13 @@ After=network.target
 Type=simple
 User=nobody
 ExecStart=/opt/redis-stack/bin/redis-server /etc/redis-stack.conf
+LimitNOFILE=10032
+NoNewPrivileges=yes
+# Make it very unlikely for OOMkiller to kill Redis
+OOMScoreAdjust=-900
+TimeoutStartSec=15
+TimeoutStopSec=15
+Group=$REDIS_GROUP
 WorkingDirectory=/var/lib/redis-stack
 UMask=0077
 
@@ -742,6 +939,11 @@ WantedBy=multi-user.target" > /etc/systemd/system/redis-stack-server.service
         systemctl daemon-reload
     fi
 
+  fi
+
+  REDIS_BASE_VERSION="6.2"
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "9" ]]; then
+    REDIS_BASE_VERSION="7.2"
   fi
 
   DEPLOY_REDIS_STACK_SERVER_CONFIG=0
@@ -768,9 +970,18 @@ WantedBy=multi-user.target" > /etc/systemd/system/redis-stack-server.service
       | sed -e 's/# maxmemory-policy noeviction/# maxmemory-policy noeviction\nmaxmemory-policy noeviction/1' \
       | sed -e 's/appendonly no/# appendonly no\nappendonly yes/1' \
       | sed -e 's/# save 60 10000/# save 60 10000\n# Skyline reduce save I\/O\nsave 300 1\n save 60 200000\nsave 10 500000/1' \
+      | sed -e 's/logfile ""/logfile "\/var\/log\/redis\.log"/1' \
       > /opt/redis-stack-server/skyline.redis.6.2.conf
     cat /opt/redis-stack-server/skyline.redis.6.2.conf > /etc/redis-stack.conf
+    touch /var/log/redis.log
+    chown nobody:nobody /var/log/redis.log
   fi
+
+# @added 20231223 - Task #5178: Build and test skyline v4.1.0
+# Required Redis sysctl settings
+  sysctl vm.overcommit_memory=1
+  echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+  echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
   systemctl start redis-stack-server
   REDIS_STACK_SERVER_INIT_EXIT_CODE=$?
@@ -788,13 +999,33 @@ if [ ! -f /tmp/skyline.dawn.memcached.install.txt ]; then
   sleep 2
   echo "Installing and starting memcached"
   sleep 1
-  if [ "$OS" == "CentOS" ]; then
-    yum -y install libevent libevent-devel memcached libmemcached
-    YUM_EXIT_CODE=$?
-    if [ $YUM_EXIT_CODE -ne 0 ]; then
-      echo -e "error :: yum failed to install libevent libevent-devel memcached libmemcached - \e[31mFAIL $COLOUR_OFF"
-      exit 1
-    fi
+    if [ "$OS" == "CentOS" ]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+      if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+        yum -y install libevent libevent-devel memcached libmemcached
+        YUM_EXIT_CODE=$?
+        if [ $YUM_EXIT_CODE -ne 0 ]; then
+          echo -e "error :: yum failed to install libevent libevent-devel memcached libmemcached - \e[31mFAIL $COLOUR_OFF"
+          exit 1
+        fi
+      fi
+  # @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+  #                   Task #5178: Build and test skyline v4.1.0
+      if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "9" ]]; then
+        yum -y install --enablerepo=crb libmemcached
+        YUM_EXIT_CODE=$?
+        if [ $YUM_EXIT_CODE -ne 0 ]; then
+          echo -e "error :: yum failed to install libmemcached - \e[31mFAIL $COLOUR_OFF"
+          exit 1
+        fi
+        yum -y install libevent libevent-devel memcached
+        YUM_EXIT_CODE=$?
+        if [ $YUM_EXIT_CODE -ne 0 ]; then
+          echo -e "error :: yum failed to install libevent libevent-devel memcached - \e[31mFAIL $COLOUR_OFF"
+          exit 1
+        fi
+      fi
     echo 'PORT="11211"
 USER="memcached"
 MAXCONN="1024"
@@ -836,6 +1067,20 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
         gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 \
         freetype-devel libpng-devel python-pip wget tar git
     fi
+
+# @added 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                   Task #5178: Build and test skyline v4.1.0
+    if [ "$OS_MAJOR_VERSION" == "9" ]; then
+      yum -y install --enablerepo=crb gdbm-devel
+      YUM_EXIT_CODE=$?
+      if [ $YUM_EXIT_CODE -ne 0 ]; then
+        echo -e "error :: yum failed to install gdbm-devel requirement to build Python - \e[31mFAIL $COLOUR_OFF"
+        exit 1
+      fi
+      yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
+        gcc gcc-c++ readline-devel ncurses-devel freetype-devel \
+        libpng-devel python3-pip wget tar git xz-devel # compat-readline5 none no 6 or 7
+    fi
 # @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
     if [ "$OS_MAJOR_VERSION" == "8" ]; then
       yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
@@ -851,7 +1096,14 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 #                   Info #2826: pandas and numpy no longer supporting Python 2.7
     yum -y install libffi-devel
 # @added 20220611 - Branch #4300: prometheus
-    yum -y install --enablerepo=powertools snappy-devel snappy
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+    if [ "$OS_MAJOR_VERSION" == "8" ]; then
+      yum -y install --enablerepo=powertools snappy-devel snappy
+    fi
+    if [ "$OS_MAJOR_VERSION" == "9" ]; then
+      yum -y install --enablerepo=crb snappy-devel snappy
+    fi
   fi
   if [ "$OS" == "Ubuntu" ]; then
     apt-get -y install build-essential
@@ -913,7 +1165,10 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
   fi
 
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
-  if [[ "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#  if [[ "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
+  if [[ "$OS_MAJOR_VERSION" == "9" || "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
     # @modified 20201016 - Branch #3068: SNAB
     # pip3 install --user virtualenv
     pip3 install virtualenv
@@ -1022,7 +1277,12 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/bin/python${PYTHON_MAJOR
   sleep 2
   cd "${PYTHON_VIRTUALENV_DIR}/projects" || exit 1
   virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
-  chown skyline:skyline -R "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+
+# @modified 20230203 - 
+# DOES THIS NEED TO BE CHOWNED???  Commented out let us see
+#  chown -R skyline:skyline "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+
+  ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/skyline" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
 else
   echo -e "Skipping, setting up the Skyline virtualenv, already done - \e[32mOK $COLOUR_OFF"
   sleep 1
@@ -1032,22 +1292,23 @@ fi
 echo "Creating the required Skyline directories and setting permissions for the skyline user"
 ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" "${PYTHON_VIRTUALENV_DIR}/projects/skyline"
 mkdir -p /var/log/skyline
-chown skyline:skyline -R /var/log/skyline
+chown -R skyline:skyline /var/log/skyline
 
 mkdir -p /var/run/skyline
-chown skyline:skyline -R /var/run/skyline
+chown -R skyline:skyline /var/run/skyline
 
 mkdir -p /var/log/skyline
-chown skyline:skyline -R /var/log/skyline
+chown -R skyline:skyline /var/log/skyline
 
 mkdir -p /opt/skyline/panorama/check
 mkdir -p /opt/skyline/mirage/check
 mkdir -p /opt/skyline/crucible/check
 mkdir -p /opt/skyline/crucible/data
 mkdir -p /opt/skyline/ionosphere/check
-chown skyline:skyline -R /opt/skyline
+mkdir -p /opt/skyline/vista
+chown -R skyline:skyline /opt/skyline
 mkdir -p /tmp/skyline
-chown skyline:skyline -R /tmp/skyline
+chown -R skyline:skyline /tmp/skyline
 
 mkdir -p /etc/skyline  # skyline user does not requirement permissions on this
 
@@ -1073,11 +1334,11 @@ if [ $CLONE -eq 1 ]; then
   git clone https://github.com/earthgecko/skyline.git
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
-  chown skyline:skyline -R /opt/skyline/github
+  chown -R skyline:skyline /opt/skyline/github
 else
   echo -e  "Skipping cloning Skyline, already done - \e[32mOK $COLOUR_OFF"
 fi
-chown skyline:skyline -R /opt/skyline/github
+chown -R skyline:skyline /opt/skyline/github
 
 if [ ! -f "/tmp/skyline.dawn.skyline.${SKYLINE_RELEASE}.txt" ]; then
   echo "Checking out Skyline at $SKYLINE_RELEASE"
@@ -1091,7 +1352,7 @@ if [ ! -f "/tmp/skyline.dawn.skyline.${SKYLINE_RELEASE}.txt" ]; then
   echo "True" > /tmp/skyline.dawn.${SKYLINE_RELEASE}.install.txt
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
-  chown skyline:skyline -R /opt/skyline/github
+  chown -R skyline:skyline /opt/skyline/github
   /bin/cp -f /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
 else
   if [ ! -f /etc/skyline/skyline.conf ]; then
@@ -1102,7 +1363,7 @@ else
 fi
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
-chown skyline:skyline -R /opt/skyline/github
+chown -R skyline:skyline /opt/skyline/github
 
 if [ "$STOP_HERE" == "before_skyline_requirements" ]; then
   echo "Stopping before Skyline running Skyline requirements after Skyline checkout so you can modified files"
@@ -1180,7 +1441,10 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
   deactivate
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
-  chown skyline:skyline -R "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+###
+### DOES THIS NEED TO BE OWNED?
+###
+#  chown -R skyline:skyline "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   echo -e "\e[96mSky\e[31mline\e[96m${COLOUR_OFF} - installed a VERY BIG data science Python stack - \e[32mOK $COLOUR_OFF"
   sleep 2
 else
@@ -1489,7 +1753,10 @@ fi
 if [ "$OS" == "CentOS" ]; then
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #  if [ $CENTOS_7 -eq 1 ]; then
-  if [[ $CENTOS_7 -eq 1 || $CENTOS_8 -eq 1 ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#  if [[ $CENTOS_7 -eq 1 || $CENTOS_8 -eq 1 ]]; then
+  if [[ $CENTOS_7 -eq 1 || $CENTOS_8 -eq 1 || $CENTOS_9 -eq 1 ]]; then
     /usr/sbin/setsebool -P httpd_can_network_connect 1
   fi
 fi
@@ -1516,7 +1783,10 @@ cd /tmp || exit 1
 # Allow to install Graphite on CentOS 6 for now, allows for an end to end
 # testing environment
 DO_GRAPHITE_INSTALL=0
-if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "8" ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+# if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "8" ]]; then
+if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "9" ]]; then
   if [ -z "$INSTALL_GRAPHITE" ]; then
     echo "Not installing Graphite"
   else
@@ -1553,7 +1823,10 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
                    libffi-devel
   fi
   # if [ $CENTOS_8 -eq 1 ]; then
-  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
+  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" || "$OS_MAJOR_VERSION" == "9" ]]; then
     yum -y install nginx cairo cairo-devel openssl-devel bzip2-devel \
       sqlite-devel memcached libffi-devel
   fi
@@ -1568,6 +1841,7 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   #### Create a Graphite Python virtualenv ####
   if [ ! -f "/opt/graphite/bin/python${PYTHON_MAJOR_VERSION}" ]; then
     echo -e "\e[96m####    Sky\e[31mline\e[96m - CREATING Graphite virtualenv    #### $COLOUR_OFF"
+
     sleep 2
     cd /opt || exit 1
 
@@ -1575,9 +1849,11 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     # As per https://github.com/graphite-project/graphite-web/issues/2566
     # pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
     # pip${PYTHON_MAJOR_VERSION} install virtualenv==16.7.10
-    pip3 uninstall -y virtualenv
-    pip3 install virtualenv==16.7.10
-
+    if [ $(echo "$PYTHON_VERSION" | cut -d'.' -f2) -lt 10  ]; then
+      echo "Graphite installation requires virtualenv==16.7.10, ensuring"
+      pip3 uninstall -y virtualenv
+      pip3 install virtualenv==16.7.10
+    fi
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" graphite
   else
     echo -e "Skipping, setting up the Graphite virtualenv, already done - \e[32mOK $COLOUR_OFF"
@@ -1620,6 +1896,17 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     if [ -d /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/twisted ]; then
       mv /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/twisted /opt/graphite/lib/
     fi
+
+    if [ -d /opt/graphite/lib/python3.10/site-packages/graphite ]; then
+      mv /opt/graphite/lib/python3.10/site-packages/graphite /opt/graphite/webapp/
+    fi
+    if [ -d /opt/graphite/lib/python3.10/site-packages/opt/graphite/lib/carbon ]; then
+      mv /opt/graphite/lib/python3.10/site-packages/opt/graphite/lib/carbon /opt/graphite/lib/
+    fi
+    if [ -d /opt/graphite/lib/python3.10/site-packages/opt/graphite/lib/twisted ]; then
+      mv /opt/graphite/lib/python3.10/site-packages/opt/graphite/lib/twisted /opt/graphite/lib/
+    fi
+
     mkdir -p /opt/graphite/storage/log/webapp
 
     sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
@@ -1632,10 +1919,15 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     # As per https://github.com/graphite-project/graphite-web/issues/2566
     deactivate
     cd
+
+    if [ $(echo "$PYTHON_VERSION" | cut -d'.' -f2) -lt 10  ]; then
+      echo "Upgrading virtualenv from 16.7.10 now Graphite is installed"
 #    pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
 #    pip${PYTHON_MAJOR_VERSION} install virtualenv
-    pip3 uninstall -y virtualenv
-    pip3 install virtualenv
+      pip3 uninstall -y virtualenv
+      pip3 install virtualenv
+    fi
+
   fi
 
   if [ "$OS" == "CentOS" ]; then
@@ -1739,7 +2031,11 @@ server {
   sleep 2
 
   cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
-  cat /opt/graphite/conf/storage-schemas.conf.example > /opt/graphite/conf/storage-schemas.conf
+# @modified 20231230 - Task #5178: Build and test skyline v4.1.0
+# Set Graphite retentions to 60s:7d:600s:2y
+#  cat /opt/graphite/conf/storage-schemas.conf.example > /opt/graphite/conf/storage-schemas.conf
+  cat /opt/graphite/conf/storage-schemas.conf.example | sed -e 's/retentions = .*/retentions = '$GRAPHITE_RETENTION'/g' > /opt/graphite/conf/storage-schemas.conf
+
   cat /opt/graphite/conf/storage-aggregation.conf.example > /opt/graphite/conf/storage-aggregation.conf
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
     # cat /opt/graphite/conf/relay-rules.conf.example | sed -e 's/127\.0\.0\.1:2014:b/127\.0\.0\.1:2024/g' > /opt/graphite/conf/relay-rules.conf
@@ -1766,7 +2062,10 @@ server {
   if [[ "$OS" == "Ubuntu" || "$OS" == "CentOS" ]]; then
 #      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
 #    if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
-    if [[ "$OS_MAJOR_VERSION" == "22.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
+# @modified 20240129 - Task #5244: Add CentOS Stream 9 to dawn build
+#                      Task #5178: Build and test skyline v4.1.0
+#    if [[ "$OS_MAJOR_VERSION" == "22.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
+    if [[ "$OS_MAJOR_VERSION" == "22.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1  || $CENTOS_9 -eq 1 ]]; then
       echo "[Unit]
 Description=carbon-cache instance %i (Graphite)
 
@@ -1854,7 +2153,7 @@ fi
 # @added 20230625 - Task #4962: Build and test skyline v4.0.0
 # Add the ability to install Prometheus and VictoriaMetrics
 # for testing purposes
-if [ $INSTALL_PROMETHEUS -eq 1 ]; then
+if [[ $INSTALL_PROMETHEUS -eq 1 || $INSTALL_VICTORIAMETRICS -eq 1 ]]; then
 
   echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING VictoriaMetrics (TESTING ONLY)    #### $COLOUR_OFF"
   mkdir -p /opt/victoriametrics
@@ -1903,6 +2202,8 @@ vmrestore"
       ln -sf "/opt/victoriametrics/${app}-prod-v${VICTORIAMETRICS_VERSION}" "/usr/local/bin/${app}-prod"
     done
   fi
+# @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+# Changed retentionPeriod from 30d to 36d for pw5_timeseries
   echo "####    victoriametrics.service    ####
 [Unit]
 Description=High-performance, cost-effective and scalable time series database, long-term remote storage for Prometheus
@@ -1916,7 +2217,7 @@ Restart=on-failure
 RestartSec=1
 User=victoriametrics
 Group=victoriametrics
-ExecStart=/usr/local/bin/victoria-metrics-prod -storageDataPath=/var/lib/victoria-metrics-data -retentionPeriod=30d -selfScrapeInterval=0s -httpListenAddr=127.0.0.1:8428 -loggerFormat=json
+ExecStart=/usr/local/bin/victoria-metrics-prod -storageDataPath=/var/lib/victoria-metrics-data -retentionPeriod=36d -selfScrapeInterval=0s -httpListenAddr=127.0.0.1:8428 -loggerFormat=json
 ExecStop=/bin/kill -s SIGTERM \$MAINPID
 LimitNOFILE=65536
 LimitNPROC=32000
@@ -1993,6 +2294,8 @@ server {
   cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.prometheus
   cat /opt/skyline/github/skyline/skyline/settings.py.no.prometheus \
     | sed -e "s/VICTORIAMETRICS_ENABLED = False/VICTORIAMETRICS_ENABLED = True/g" \
+    | sed -e "s/'public_url': None/'public_url': 'http:\/\/$YOUR_SKYLINE_SERVER_FQDN:8886'/g" \
+    | sed -e "s/# ('_tenant_id', 'smtp/('_tenant_id', 'smtp/g" \
     | sed -e "s/PROMETHEUS_INGESTION = False/PROMETHEUS_INGESTION = True/g" > /opt/skyline/github/skyline/skyline/settings.py
 
   mkdir -p /opt/prometheus/prometheus
@@ -2196,7 +2499,7 @@ done
 systemctl daemon-reload
 
 mkdir -p /opt/skyline/github/skyline/skyline/webapp/static/dump
-chown skyline:skyline -R /opt/skyline/github
+chown -R skyline:skyline /opt/skyline/github
 
 # @added 20230625 - Task #4962: Build and test skyline v4.0.0
 # Add the ability to install Prometheus and VictoriaMetrics
@@ -2279,6 +2582,229 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   systemctl restart graphite
 fi
 
+# @added 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+if [ $INSTALL_TELEGRAF -eq 1 ]; then
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - Installing telegraf    #### $COLOUR_OFF"
+  sleep 3
+  # influxdata-archive_compat.key GPG fingerprint:
+  #     9D53 9D90 D332 8DC7 D6C8 D3B9 D8FF 8E1F 7DF8 B07E
+  cat <<EOF | tee /etc/yum.repos.d/influxdata.repo
+[influxdata]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+EOF
+
+  yum -y install telegraf
+  if [ ! -f /etc/telegraf/telegraf.conf.bak ]; then
+    mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf.bak
+    echo '[global_tags]
+[agent]
+  interval = "60s" 
+  round_interval = true
+  metric_batch_size = 1000
+  metric_buffer_limit = 10000
+  collection_jitter = "0s" 
+  flush_interval = "60s" 
+  flush_jitter = "0s" 
+  precision = "" 
+  logfile = "/var/log/telegraf/telegraf.log" 
+  logfile_rotation_interval = "1d" 
+  logfile_rotation_max_archives = 14
+  hostname = "" 
+  omit_hostname = false
+[[outputs.graphite]]
+  servers = ["127.0.0.1:2003"]
+  prefix = "telegraf" 
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = false
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+[[inputs.diskio]]
+[[inputs.kernel]]
+[[inputs.mem]]
+[[inputs.processes]]
+[[inputs.swap]]
+[[inputs.system]]
+[[inputs.net]]
+  interfaces = '$TELEGRAF_INTERFACES'
+  ignore_protocol_stats = true' > /etc/telegraf/telegraf.conf
+
+    for i in $(find /etc/telegraf/telegraf.d/ -type f | grep conf)
+    do
+      echo "$i" 
+      cat "$i" | grep -v "^$\|#" 
+    done
+
+    cat /etc/telegraf/telegraf.conf | grep -v "^$\|#" 
+
+    echo '[[inputs.mysql]]
+  servers = ["root:'$MYSQL_ROOT_PASSWORD'@tcp(localhost:3306)/?tls=false"]
+  metric_version = 2
+  gather_slave_status                       = false
+  namedrop = ["binlog_",
+    "column_compressions", "column_decompressions",
+    "com_binlog", "com_checksum", "com_show_charsets","com_show_collations",
+    "com_show_authors", "com_show_contributors", "com_start_all_slaves",
+    "com_start_slave", "com_show_authors", "com_show_binlog_events",
+    "com_show_binlogs", "com_show_charsets", "com_show_collations",
+    "com_show_contributors", "com_show_engine_logs", "com_show_engine_mutex",
+    "com_show_engine_status", "com_show_master_status", "com_show_package",
+    "feature_application_time_periods",
+    "feature_check_constraint",
+    "feature_custom_aggregate_functions",
+    "feature_delay_key_write",
+    "feature_dynamic_columns",
+    "feature_fulltext",
+    "feature_gis",
+    "feature_invisible_columns",
+    "feature_locale",
+    "feature_subquery",
+    "feature_system_versioning",
+    "feature_timezone",
+    "feature_trigger",
+    "feature_window_functions",
+    "feature_xml",
+    "handler_discover",
+    "handler_external_lock",
+    "handler_icp_attempts",
+    "handler_icp_match",
+    "handler_mrr_init",
+    "handler_mrr_key_refills",
+    "handler_mrr_rowid_refills",
+    "handler_prepare",
+    "innodb_encryption_",
+    "innodb_have_",
+    "performance_schema_*_lost",
+    "rpl_semi_",
+    "slave_",
+    "ssl_",
+    "tc_log",
+    "threadpool_*",
+    "transactions_gtid_foreign_engine",
+    "transactions_multi_engine",
+    "uptime",
+    "wsrep_cluster_conf_id",
+    "wsrep_protocol_version" 
+  ]
+  [inputs.mysql.tags]
+    a_0_tag = "mariadb" 
+' > /etc/telegraf/telegraf.d/mysql.conf
+
+    echo '[[inputs.memcached]]
+  servers = ["localhost:11211"]
+  [inputs.memcached.tags]
+    a_0_tag = "memcached" 
+' > /etc/telegraf/telegraf.d/memcached.conf
+
+    echo '[[inputs.redis]]
+  servers = ["tcp://127.0.0.1:6379"]
+  password = "'$REDIS_PASSWORD'" 
+  [inputs.redis.tags]
+    a_0_tag = "redis" 
+    a_1_tag = "skyline_instance"
+' > /etc/telegraf/telegraf.d/redis_6379.conf
+    systemctl start telegraf
+  fi
+fi
+
+# @added 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+if [ $INSTALL_PROMETHEUS -eq 0 ]; then
+  if [ $INSTALL_NODE_EXPORTER -eq 1 ]; then
+    echo -e "\e[93mINSTALL_NODE_EXPORTER was requested but Prometheus was not selected to be installed so node_exporter will not be installed $COLOUR_OFF"
+    INSTALL_NODE_EXPORTER=0
+  fi
+fi
+if [ $INSTALL_NODE_EXPORTER -eq 1 ]; then
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - Installing node_exporter    #### $COLOUR_OFF"
+  mkdir -p /opt/node_exporter
+  cd /opt/node_exporter
+  if [ ! -f "/opt/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz" ]; then
+    wget "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz"
+    tar xvfz "node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz"
+    cd "node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64"
+    ln -s "/opt/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter" /usr/local/bin/node_exporter
+    echo "[Unit]
+Description=Node 
+Exporter After=network.target  
+
+[Service] 
+User=root 
+Group=root 
+Type=simple 
+ExecStart=/usr/local/bin/node_exporter --web.listen-address=127.0.0.1:9100
+
+[Install] 
+WantedBy=multi-user.target" > /opt/node_exporter/node-exporter.service
+    ln -s /opt/node_exporter/node-exporter.service /etc/systemd/system/node-exporter.service
+    systemctl daemon-reload
+    systemctl enable node-exporter
+    systemctl start node-exporter
+    # Deploy the prometheus config with the node_exporter scrape job
+    echo "global:
+  scrape_interval: 60s
+  evaluation_interval: 1m
+  external_labels:
+    monitor: master
+scrape_configs:
+- job_name: prometheus
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:9090
+  metrics_path: /metrics
+  metric_relabel_configs:
+  - source_labels:
+    - __name__
+    regex: (flag|go_.*|info_.*|prometheus_build_info{)
+    action: drop
+- job_name: victoria-metrics
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:8428
+  metrics_path: /metrics
+  metric_relabel_configs:
+  - source_labels:
+    - __name__
+    regex: (flag|go_.*|info_.*)
+    action: drop
+- job_name: node
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  static_configs:
+  - targets: ['localhost:9100']
+remote_write:
+- url: https://$YOUR_SKYLINE_SERVER_FQDN/flux/prometheus/write
+  tls_config:
+    # Disable validation of the server certificate
+    insecure_skip_verify: true
+  queue_config:
+    max_samples_per_send: 8000
+  write_relabel_configs:
+  headers:
+    key: $FLUX_SELF_API_KEY
+    x-tenant-id: 1
+    x-server-id: 1
+    x-server-url: http://$YOUR_SKYLINE_SERVER_FQDN:9090
+    dropLabels: \"[['monitor','master'],['another_label_to_drop','with_value_of_*']]\"
+  metadata_config:
+    send: true
+    send_interval: 1m
+    max_samples_per_send: 1000" > /etc/prometheus/prometheus.yml
+    chown prometheus:prometheus /etc/prometheus/prometheus.yml
+  fi
+fi
+
 # @added 20230625 - Task #4962: Build and test skyline v4.0.0
 # Add the ability to install Prometheus and VictoriaMetrics
 # for testing purposes
@@ -2288,22 +2814,6 @@ fi
 
 echo -e "\e[96m####    Sky\e[31mline\e[96m - DEPLOYED!!!! \o/    #### $COLOUR_OFF"
 
-echo -e "Skyline is deployed and running - \e[32mOK $COLOUR_OFF"
-echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN"
-echo "And view the logs in /var/log/skyline"
-echo "Or do
-# How are they running
-tail /var/log/skyline/*.log
-# Any errors - each app
-find /var/log/skyline -type f -name \"*.log\" | while read skyline_logfile
-do
-  echo \"#####
-# Checking for errors in \$skyline_logfile\"
-  cat \"\$skyline_logfile\" | grep -B2 -A10 -i \"error ::\|traceback\" | tail -n 60
-  echo \"\"
-  echo \"\"
-done"
-echo ""
 echo ""
 ENDED=$(date)
 echo "$0"
@@ -2326,8 +2836,25 @@ echo -e "\e[32m############################### $COLOUR_OFF"
 echo ""
 echo -e "\e[93mREMEMBER THIS IS A TEST DEPLOYMENT AND SHOULD BE DESTROYED OR RECONFIGURED AND HARDENED FOR PRODUCTION USE $COLOUR_OFF"
 echo ""
-echo "FIRST add the following record to you hosts file:"
+echo "COPY AND SAVE THIS OUTPUT FOR FUTURE REFERENCE in terms of what is accessible on what port, etc."
+echo ""
+echo "FIRST add the following record to your machine's hosts file (NOT the server's hosts file):"
 echo -e "\e[93m$YOUR_SERVER_IP_ADDRESS $YOUR_SKYLINE_SERVER_FQDN${COLOUR_OFF}"
+echo ""
+echo -e "Skyline is deployed and running - \e[32mOK $COLOUR_OFF"
+echo "And view the logs in /var/log/skyline"
+echo "Or do
+# How are they running
+tail /var/log/skyline/*.log
+# Any errors - each app
+find /var/log/skyline -type f -name \"*.log\" | while read skyline_logfile
+do
+  echo \"#####
+# Checking for errors in \$skyline_logfile\"
+  cat \"\$skyline_logfile\" | grep -B2 -A10 -i \"error ::\|traceback\" | tail -n 60
+  echo \"\"
+  echo \"\"
+done"
 echo ""
 echo -e "Then visit \e[93mhttps://$YOUR_SKYLINE_SERVER_FQDN${COLOUR_OFF} (rememeber to add it to your hosts file and accept the self-signed SSL cert)"
 echo -e "In the \e[96msky\e[31mline${COLOUR_OFF}/Panaroma tab shortly you should see an anomaly (but there will be no graph)"
@@ -2341,7 +2868,9 @@ else
 fi
 if [ $INSTALL_PROMETHEUS -eq 1 ]; then
   echo -e "To access Prometheus visit \e[93mhttp://$YOUR_SKYLINE_SERVER_FQDN:8887 $COLOUR_OFF which is available from YOUR IP address $YOUR_OTHER_IP_ADDRESS"
+  echo "Prometheus configuration is in /etc/prometheus/prometheus.yml"
   echo -e "To access VictoriaMetrics visit \e[93mhttp://$YOUR_SKYLINE_SERVER_FQDN:8886 $COLOUR_OFF which is available from YOUR IP address $YOUR_OTHER_IP_ADDRESS"
+  echo "VictoriaMetrics configuration is in /opt/victoriametrics/victoriametrics.service"
 fi
 echo "There are some errors expected in the logs related to no rows in MySQL tables and memcache, etc"
 echo "Skyline is installed in /opt/skyline/github/skyline and the deployed settings can be"
@@ -2359,6 +2888,23 @@ echo "kill \$(ps aux | grep -v grep | grep skyline | tr -s ' ' ',' | cut -d',' -
 echo "Or for each service run:"
 echo "sudo -u skyline /opt/skyline/github/skyline/bin/<service>.d stop"
 echo ""
+# @added 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+if [ $INSTALL_TELEGRAF -eq 1 ]; then
+  echo "telegraf has been installed from the influxdb repo and is pushing to Graphite, it can be controller using:"
+  echo "systemctl start|stop telegraf"
+  echo "The config is /etc/telegraf/telegraf.conf"
+  echo ""
+fi
+# @added 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+if [ $INSTALL_NODE_EXPORTER -eq 1 ]; then
+  echo "node_exporter has been installed and started, it can be controller using:"
+  echo "systemctl start|stop node-exporter"
+  echo "It is installed in /opt/node_exporter and listens on 127.0.0.1:9100"
+  echo "A node scrape job has been added to the prometheus config and it is being scraped."
+  echo "These metrics will be available in Prometheus, VictoriaMetrics and Skyline."
+  echo ""
+fi
+
 echo -e "\e[93mNOT SUITABLE FOR PRODUCTION WITHOUT RECONFIGURATION AND HARDENING!!!! $COLOUR_OFF"
 echo ""
 echo ""
@@ -2379,8 +2925,8 @@ fi
 
 echo -e "\e[96m####    Sky\e[31mline\e[96m - probably the best (OSS) anomaly detection stack in the world    #### $COLOUR_OFF"
 echo ""
-echo "Say goodbye to vendor algorithm tie-in and say hello to the most suitable, realtime, SOTA anomaly"
-echo "detection algortihms backed by the latest Python data science libraries and methods."
+echo "Say goodbye to vendor algorithm tie-in and say hello to the most suitable, real time, SOTA anomaly"
+echo "detection algorithms backed by the latest Python data science libraries and methods."
 echo ""
 echo "Here be numbas ..."
 echo ""

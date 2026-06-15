@@ -43,8 +43,8 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
     try:
         skyline_labelled_metrics_id_type = self.redis_conn_decoded.hgetall('skyline.labelled_metrics.id.type')
     except Exception as err:
-        logger.error('error :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: failed to hdel from %s - %s' % (
-            hash_key, err))
+        logger.error('error :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: failed to hgetall from skyline.labelled_metrics.id.type - %s' % (
+            err))
 
     # A dict of metrics to check, which is later ordered by timestamp
     # to determine which metrics to check in this run
@@ -84,7 +84,10 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
                 else:
                     # Even though the 30d and 7d check can set the expiry at less than
                     # 30d or 7d it is assumed it was last checked at least 7 days ago
-                    to_check[int(metric_id_str)]['last_checked'] = expiry_ts - (86400 * 7) + randint(0, 3600)
+                    # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                    # bandit - B311:blacklist
+                    # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+                    to_check[int(metric_id_str)]['last_checked'] = expiry_ts - (86400 * 7) + randint(0, 3600)  # nosec B311
         except:
             continue
 
@@ -124,22 +127,28 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
                 errors.append(['get_victoriametrics_metric', base_name, err])
                 continue
             if not timeseries:
-                errors.append(['no timeseries', base_name, err])
+                errors.append(['no timeseries', base_name])
                 continue
             checked_ids.append(metric_id)
             first_timestamp = timeseries[0][0]
             if first_timestamp < timestamp_30d:
                 # Check it again after 14 days with some randomness
-                expire = now + (86400 * 14) + randint(0, 7200)
+                # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                # bandit - B311:blacklist
+                # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+                expire = now + (86400 * 14) + randint(0, 7200)  # nosec B311
             if not expire:
                 if first_timestamp < timestamp_7d:
                     # Check it again after 1 days with some randomness
                     # because data at 7d change change monotonicity over
                     # 12 days say
-                    expire = now + (86400) + randint(0, 7200)
+                    # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                    # bandit - B311:blacklist
+                    # Standard pseudo-random generators are not suitable for security/cryptographic purposes
+                    expire = now + (86400) + randint(0, 7200)  # nosec B311
             if not expire:
                 # Check it again after between 1 and 5 hours
-                expire = now + 3600 + randint(0, 7200)
+                expire = now + 3600 + randint(0, 7200)  # nosec B311
             longterm_expires[str(metric_id)] = str(expire)
             is_strictly_increasing_monotonic = strictly_increasing_monotonicity(timeseries)
             if is_strictly_increasing_monotonic:
@@ -168,8 +177,8 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
                 str(item), err))
 
     if errors:
-        logger.error('error :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: encountered errors, sample follows: %s' % (
-            str(errors[-2:])))
+        logger.info('warning :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: encountered %s errors, sample follows: %s' % (
+            str(len(errors)), str(errors[-2:])))
 
     if update_types:
         logger.info('metrics_manager :: manage_labelled_metrics_longterm_metric_type :: updating %s metric ids that have changed type in skyline.labelled_metrics.id.type' % (
@@ -192,6 +201,8 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
             str(len(longterm_expires))))
         try:
             longterm_expired = self.redis_conn_decoded.hset('skyline.labelled_metrics.id.type.longterm_expire', mapping=longterm_expires)
+            logger.info('metrics_manager :: manage_labelled_metrics_longterm_metric_type :: updated %s metric ids expires in skyline.labelled_metrics.id.type.longterm_expire' % (
+                str(longterm_expired)))
         except Exception as err:
             logger.error('error :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: failed to update skyline.labelled_metrics.id.type.longterm_expire - %s' % (
                 err))

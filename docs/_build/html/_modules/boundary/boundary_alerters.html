@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>boundary.boundary_alerters &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>boundary.boundary_alerters &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -232,6 +232,8 @@
     <span class="kn">from</span> <span class="nn">functions.victoriametrics.get_victoriametrics_metric</span> <span class="kn">import</span> <span class="n">get_victoriametrics_metric</span>
     <span class="kn">from</span> <span class="nn">functions.metrics.get_metric_id_from_base_name</span> <span class="kn">import</span> <span class="n">get_metric_id_from_base_name</span>
     <span class="kn">from</span> <span class="nn">functions.metrics.get_dotted_representation</span> <span class="kn">import</span> <span class="n">get_dotted_representation</span>
+    <span class="c1"># @added 20240407 - Feature #4214: alert.paused</span>
+    <span class="kn">from</span> <span class="nn">functions.settings.sms_alert_schedule</span> <span class="kn">import</span> <span class="n">sms_alert_schedule</span>
 
 <span class="c1"># @added 20201127 - Feature #3820: HORIZON_SHARDS</span>
 <span class="k">try</span><span class="p">:</span>
@@ -279,7 +281,9 @@
     <span class="n">DOCKER_FAKE_EMAIL_ALERTS</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="alert_smtp"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_smtp">[docs]</a><span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_smtp">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_smtp">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
 
     <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
 
@@ -346,17 +350,17 @@
     <span class="c1">#                   Branch #4300: prometheus</span>
     <span class="c1"># Handle getting data from Graphite and victoriametrics</span>
     <span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
-    <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">base_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+    <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
         <span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;victoriametrics&#39;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">use_base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="n">use_base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
-    <span class="k">if</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
         <span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;victoriametrics&#39;</span>
-        <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
 
     <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
     <span class="c1"># Use alert_context</span>
@@ -590,6 +594,23 @@
     <span class="k">if</span> <span class="n">no_email</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - no_email is set in BOUNDARY_SMTP_OPTS, not executing SMTP command&#39;</span><span class="p">)</span>
 
+    <span class="c1"># @added 20230913 - Feature #4932: mute_alerts_on</span>
+    <span class="n">metric_muted</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_muted</span> <span class="ow">and</span> <span class="n">use_base_name</span> <span class="o">!=</span> <span class="n">metric_name</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">use_base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">metric_muted</span><span class="p">:</span>
+        <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - </span><span class="si">%s</span><span class="s1"> is muted, not alerting&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_base_name</span><span class="p">))</span>
+
     <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
     <span class="c1"># Do not send to each recipient, send to primary_recipient and cc the other</span>
     <span class="c1"># recipients, thereby sending only one email</span>
@@ -681,10 +702,41 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+
+<div class="viewcode-block" id="alert_pagerduty">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_pagerduty">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_ENABLED</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">pygerduty</span>
         <span class="n">pager</span> <span class="o">=</span> <span class="n">pygerduty</span><span class="o">.</span><span class="n">PagerDuty</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;subdomain&#39;</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
+
+        <span class="c1"># @added 20230913 - Feature #4932: mute_alerts_on</span>
+        <span class="n">metric_muted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">use_base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+            <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+            <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_muted</span> <span class="ow">and</span> <span class="n">use_base_name</span> <span class="o">!=</span> <span class="n">metric_name</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">use_base_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">metric_muted</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_pagerduty - </span><span class="si">%s</span><span class="s1"> is muted, not alerting&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="c1"># @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts</span>
         <span class="c1"># pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS[&#39;key&#39;], &#39;Anomalous metric: %s (value: %s) - %s&#39; % (metric_name, datapoint, algorithm))</span>
         <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s1">&#39;Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">) - </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> times&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -701,7 +753,10 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="alert_hipchat"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_hipchat">[docs]</a><span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="alert_hipchat">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_hipchat">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_ENABLED</span><span class="p">:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
@@ -788,7 +843,10 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+
+<div class="viewcode-block" id="alert_syslog">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_syslog">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_ENABLED</span><span class="p">:</span>
         <span class="n">syslog_ident</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_OPTS</span><span class="p">[</span><span class="s1">&#39;ident&#39;</span><span class="p">]</span>
         <span class="c1"># @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts</span>
@@ -836,9 +894,12 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+
 <span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
 <span class="c1">#                   Feature #2618: alert_slack</span>
-<div class="viewcode-block" id="alert_slack"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_slack">[docs]</a><span class="k">def</span> <span class="nf">alert_slack</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_slack">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_slack">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_slack</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -880,6 +941,24 @@
     <span class="k">if</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
         <span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;victoriametrics&#39;</span>
         <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># @added 20230913 - Feature #4932: mute_alerts_on</span>
+    <span class="n">metric_muted</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_muted</span> <span class="ow">and</span> <span class="n">use_base_name</span> <span class="o">!=</span> <span class="n">metric_name</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">use_base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">metric_muted</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - </span><span class="si">%s</span><span class="s1"> is muted, not alerting&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># The known_derivative_metric state is determine in case we need to surface</span>
     <span class="c1"># the png image from Graphite if the Ionosphere image is not available for</span>
@@ -1342,8 +1421,18 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">image_file</span><span class="p">)</span></div>
 
 
+
 <span class="c1"># @added 20200122: Feature #3396: http_alerter</span>
-<div class="viewcode-block" id="alert_http"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_http">[docs]</a><span class="k">def</span> <span class="nf">alert_http</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+<span class="c1"># @modified 20231115 -Feature #5104: boundary - external_settings</span>
+<div class="viewcode-block" id="alert_http">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_http">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_http</span><span class="p">(</span>
+        <span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">alerter_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># @added 20231122 - Feature #5104: boundary - external_settings</span>
+        <span class="c1">#                   Feature #3772: Add the anomaly_id to the http_alerter json</span>
+        <span class="c1"># Added labelled_metric</span>
+        <span class="n">labelled_metric</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :func:`~trigger_alert` and sends and resend anomalies to a http</span>
 <span class="sd">    endpoint.</span>
@@ -1382,6 +1471,17 @@
 
         <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
+        <span class="c1"># @added 20230913 - Feature #4932: mute_alerts_on</span>
+        <span class="n">metric_muted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_muted</span> <span class="o">=</span> <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;metrics_manager.mute_alerts_on&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to hgetall metrics_manager.mute_alerts_on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">metric_muted</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_htpp - </span><span class="si">%s</span><span class="s1"> is muted, not alerting&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
         <span class="n">metric_alert_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">alert_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1408,27 +1508,58 @@
                 <span class="s2">&quot;metric_trigger&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span>
                 <span class="s2">&quot;alert_threshold&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span>
                 <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">alerter_token</span>
+                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">alerter_token</span><span class="p">,</span>
+                <span class="c1"># @modified 20231115 -Feature #5104: boundary - external_settings</span>
+                <span class="c1"># Added alerter_id </span>
+                <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_id</span><span class="p">),</span>
             <span class="p">}</span>
 
             <span class="c1"># @added 20221208 - Feature #3772: Add the anomaly_id to the http_alerter json</span>
             <span class="n">anomaly_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">anomaly_id_redis_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.anomaly_id.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp_str</span><span class="p">)),</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="c1"># @added 20231122 - Feature #5104: boundary - external_settings</span>
+            <span class="c1">#                   Feature #3772: Add the anomaly_id to the http_alerter json</span>
+            <span class="c1"># Added labelled_metric</span>
+            <span class="k">if</span> <span class="n">labelled_metric</span><span class="p">:</span>
+                <span class="n">anomaly_id_redis_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.anomaly_id.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp_str</span><span class="p">)),</span> <span class="n">labelled_metric</span><span class="p">)</span>
+                <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;labelled_metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labelled_metric</span>
+
             <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">while</span> <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+
+            <span class="c1"># @added 20231115 -Feature #5104: boundary - external_settings</span>
+            <span class="c1">#                  Feature #4482: Test alerts</span>
+            <span class="c1"># Add the anomalyScore to be compatible with the Analyzer and Mirage</span>
+            <span class="c1"># alerters</span>
+            <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;anomalyScore&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="c1"># Added a default anomaly_id if testing</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;testing&#39;</span><span class="p">:</span>
+                <span class="n">anomaly_id</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">=</span> <span class="mi">21</span>
+
+            <span class="c1"># @modified 20231129 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># while try_get_anomaly_id_redis_key_count &lt; 20:</span>
+            <span class="k">while</span> <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anomaly_id_redis_key</span><span class="p">))</span>
                     <span class="k">break</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="c1"># @modified 20231129 - Feature #5104: boundary - external_settings</span>
+                    <span class="c1"># sleep(1)</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_id</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http - failed to determine anomaly_id from Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_id_redis_key</span><span class="p">)</span>
                 <span class="n">anomaly_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - determined anomaly_id as </span><span class="si">%s</span><span class="s1">, appending to alert&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
             <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span>
+            <span class="c1"># @added 20231129 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Send &#39;None&#39; instead of &#39;0&#39;</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - replaced anomaly_id in metric_alert_dict of </span><span class="se">\&#39;</span><span class="s1">0</span><span class="se">\&#39;</span><span class="s1"> with </span><span class="se">\&#39;</span><span class="s1">None</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="c1"># @added 20220301 - Feature #4482: Test alerts</span>
             <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;testing&#39;</span><span class="p">:</span>
@@ -1535,26 +1666,52 @@
 
             <span class="c1"># @added 20221212 - Feature #3772: Add the anomaly_id to the http_alerter json</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
                     <span class="n">anomaly_id</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">anomaly_id_redis_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.anomaly_id.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])),</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])),</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="s1">&#39;labelled_metric&#39;</span> <span class="ow">in</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">]:</span>
+                        <span class="n">anomaly_id_redis_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.anomaly_id.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])),</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;labelled_metric&#39;</span><span class="p">])</span>
                     <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">while</span> <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+                    <span class="c1"># @modified 20231129 - Feature #5104: boundary - external_settings</span>
+                    <span class="c1"># while try_get_anomaly_id_redis_key_count &lt; 20:</span>
+                    <span class="k">while</span> <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
                         <span class="n">try_get_anomaly_id_redis_key_count</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">anomaly_id_redis_key</span><span class="p">))</span>
                             <span class="k">break</span>
                         <span class="k">except</span><span class="p">:</span>
-                            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="c1"># @modified 20231129 - Feature #5104: boundary - external_settings</span>
+                            <span class="c1"># sleep(1)</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_id</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http - failed to determine anomaly_id from Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_id_redis_key</span><span class="p">)</span>
                         <span class="n">anomaly_id</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - determined anomaly_id as </span><span class="si">%s</span><span class="s1">, appending to alert&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
                     <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span>
+                    <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span>
+                    <span class="c1"># @added 20231129 - Feature #5104: boundary - external_settings</span>
+                    <span class="c1"># Send &#39;None&#39; instead of &#39;0&#39;</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                        <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - replaced anomaly_id as </span><span class="se">\&#39;</span><span class="s1">0</span><span class="se">\&#39;</span><span class="s1"> to </span><span class="se">\&#39;</span><span class="s1">None</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed to determine anomaly_id for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+
+            <span class="c1"># @added 20231129 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Send &#39;None&#39; instead of &#39;0&#39;</span>
+            <span class="n">anomaly_none</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;anomaly_id&#39;</span> <span class="ow">in</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                        <span class="n">alert_data_dict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;alert&#39;</span><span class="p">][</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - replaced anomaly_id as </span><span class="se">\&#39;</span><span class="s1">0</span><span class="se">\&#39;</span><span class="s1"> to </span><span class="se">\&#39;</span><span class="s1">None</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">anomaly_none</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed to check anomaly_id in </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="c1"># @modified 20200403 - Feature #3396: http_alerter</span>
             <span class="c1"># Changed timeouts from 2, 2 to 5, 20</span>
@@ -1569,6 +1726,11 @@
             <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">alert_data_dict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> responded with status code </span><span class="si">%s</span><span class="s1"> and reason </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">)))</span>
+
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to post alert to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -1661,8 +1823,35 @@
                 <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">fail_alerter</span> <span class="o">=</span> <span class="kc">True</span>
 
+            <span class="c1"># @added 20231129 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Send &#39;None&#39; instead of &#39;0&#39;</span>
+            <span class="k">if</span> <span class="n">anomaly_none</span><span class="p">:</span>
+                <span class="k">return</span>
+
             <span class="n">number_of_send_attempts</span> <span class="o">=</span> <span class="n">previous_attempts</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;attempts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_send_attempts</span>
+
+            <span class="c1"># @added 20231122 - Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Do not add the alert back to the resend queue if it has been</span>
+            <span class="c1"># attempted 5 times. This mitigates situations where an external</span>
+            <span class="c1"># failure creates an offset in timestamps between the boundary</span>
+            <span class="c1"># alert key and the panorama alert key which can be produced by a</span>
+            <span class="c1"># syslog trigger_alert and have Panorama record an anomaly</span>
+            <span class="c1"># resend queue and introduces an offset between panorama,</span>
+            <span class="c1"># the syslog alerter and the http_alert timestamps, which</span>
+            <span class="c1"># could not be fully reproduced or debugged sufficiently</span>
+            <span class="c1"># to determine the exact chain of events with the</span>
+            <span class="c1"># logging level implemented at the time.  The situation</span>
+            <span class="c1"># develops in where Panorama has an app alert key so</span>
+            <span class="c1"># will not record an anomaly if an offset due to an</span>
+            <span class="c1"># external failure is introduced</span>
+            <span class="k">if</span> <span class="n">add_to_resend_queue</span> <span class="ow">and</span> <span class="n">number_of_send_attempts</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: NOT readding adding alert to </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%s</span><span class="s1"> falied attempts to send to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">redis_alert_queue_hash</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_of_send_attempts</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_alert_dict</span><span class="p">)))</span>
+
             <span class="k">if</span> <span class="n">add_to_resend_queue</span><span class="p">:</span>
 
                 <span class="c1"># @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue</span>
@@ -1723,8 +1912,11 @@
         <span class="k">return</span></div>
 
 
+
 <span class="c1"># @added 20210724 - Feature #4196: functions.aws.send_sms</span>
-<div class="viewcode-block" id="alert_sms"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_sms">[docs]</a><span class="k">def</span> <span class="nf">alert_sms</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_sms">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_sms">[docs]</a>
+<span class="k">def</span> <span class="nf">alert_sms</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :func:`~trigger_alert` and sends anomalies to a SMS endpoint.</span>
 
@@ -1748,6 +1940,20 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_sms_recipients failed checking </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+    <span class="c1"># @added 20240407 - Feature #4214: alert.paused</span>
+    <span class="n">sms_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sms_enabled</span> <span class="o">=</span> <span class="n">sms_alert_schedule</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: sms_alert_schedule failed checking </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">sms_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sms_enabled</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no sending SMS alert for </span><span class="si">%s</span><span class="s1"> because it is currently in a disabled period in SMS_ALERTS_SCHEDULE&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;disabled&#39;</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending SMS alert to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sms_recipients</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">sms_number</span> <span class="ow">in</span> <span class="n">sms_recipients</span><span class="p">:</span>
         <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1761,12 +1967,27 @@
         <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent SMS alert to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sms_number</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: failed to send SMS alert to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sms_number</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: failed to send SMS alert to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sms_number</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">success</span></div>
 
 
 <span class="c1"># @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts</span>
 <span class="c1"># def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):</span>
-<div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">):</span>
+<span class="c1"># @modified 20231115 -Feature #5104: boundary - external_settings</span>
+<span class="c1"># Added alerter_id</span>
+<span class="c1"># @modified 20231122 - Feature #5104: boundary - external_settings</span>
+<span class="c1">#                      Feature #3772: Add the anomaly_id to the http_alerter json</span>
+<span class="c1"># Added anomaly_id</span>
+<span class="c1"># def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):</span>
+<div class="viewcode-block" id="trigger_alert">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.trigger_alert">[docs]</a>
+<span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span>
+        <span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">alerter_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># @added 20231122 - Feature #5104: boundary - external_settings</span>
+        <span class="c1">#                      Feature #3772: Add the anomaly_id to the http_alerter json</span>
+        <span class="c1"># Added anomaly_id and labelled_metric</span>
+        <span class="n">anomaly_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labelled_metric</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">alerter</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_smtp&#39;</span>
@@ -1780,12 +2001,18 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s1">&#39;alert_http&#39;</span><span class="p">:</span>
             <span class="c1"># @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts</span>
-            <span class="nb">getattr</span><span class="p">(</span><span class="n">boundary_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">)</span>
+            <span class="c1"># @modified 20231115 -Feature #5104: boundary - external_settings</span>
+            <span class="c1"># Added alerter_id</span>
+            <span class="c1"># @modified 20231122 - Feature #5104: boundary - external_settings</span>
+            <span class="c1">#                      Feature #3772: Add the anomaly_id to the http_alerter json</span>
+            <span class="c1"># Added labelled_metric</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">boundary_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">alerter_id</span><span class="o">=</span><span class="n">alerter_id</span><span class="p">,</span> <span class="n">labelled_metric</span><span class="o">=</span><span class="n">labelled_metric</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">getattr</span><span class="p">(</span><span class="n">boundary_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -1795,7 +2022,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -134,6 +134,9 @@ See the current ``'skyline_matrixprofile'`` example in
 :mod:`settings.CUSTOM_ALGORITHMS` and change the ``'namespaces':`` parameter as
 appropriate.
 
+See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.skyline_matrixprofile
+
+
 .. _MASS: https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html
 .. _matrixprofile: https://github.com/matrix-profile-foundation/matrixprofile
 .. _stumpy: https://github.com/TDAmeritrade/stumpy

@@ -15,7 +15,11 @@ from custom_algorithms import record_algorithm_error
 import numpy as np
 
 from custom_algorithm_sources.sigma.sigma import run_sigma_algorithms
-from custom_algorithm_sources import stumpy
+
+# @added 20230706 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+# After analysis of results matrixprofile never triggers so disable
+# from custom_algorithm_sources import stumpy
+
 from custom_algorithm_sources.spectral_residual.spectral_residual import SpectralResidual
 from skyline_functions import get_graphite_metric
 from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
@@ -34,6 +38,9 @@ from functions.timeseries.downsample import downsample_timeseries
 def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     """
+    NOTE: This algorithm analyses time series that are deemed to be ANOMALOUS so
+    the default anomalous value is True.
+
     A timeseries is NOT anomalous if it has low variance over 30 days and does
     not trigger multiple algorithms.
 
@@ -64,21 +71,17 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the irregular_unstable
-        custom algorithm no specific algorithm_parameters are required apart
-        from an empty dict, example: ``algorithm_parameters={}``.  But the
-        number_of_daily_peaks can be passed define how many peaks must exist in
-        the window period to be classed as normal.  If this is set to 3 and say
-        that we are checking a possible anomaly at 00:05, there need to be 3
-        peaks that occur over the past 7 days in the dialy 23:35 to 00:05 window
-        if there are not at least 3 then this is considered as anomalous.
-        ``algorithm_parameters={'number_of_daily_peaks': 3}``
+        custom_algorithm and algorithms itself.  The required elements in
+        algorithm_parameters are metric or base_name.  Additional parameters
+        can be passed, please refer to the algorithm_parameters[key] that are
+        looked up in the beginning of the code below to determine what
+        algorithm_parameters can be passed.
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore
-    :rtype: tuple(boolean, float)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 
@@ -93,6 +96,9 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
     # anomalyScore.
     anomalous = None
     anomalyScore = None
+
+    # @added 20230706 - Feature #4988: Allow snab to return and save results
+    results = {}
 
     current_logger = None
 
@@ -114,7 +120,14 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         except:
             normalised_var = np.nan
         return normalised_var
-    
+
+    # @added 20230706 - Feature #4988: Allow snab to return and save results
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+    except:
+        return_results = False
+
     # Use the algorithm_parameters to determine the sample_period
     debug_logging = None
     try:
@@ -136,6 +149,10 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             # spewing tons of errors into the log e.g. analyzer.log
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
             # Return None and None as the algorithm could not determine True or False
+            # @added 20230720 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                return (False, 0.0, {})
+
             return (None, None)
 
     print_debug = False
@@ -145,14 +162,31 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         print_debug = False
 
     base_name = None
+
+    # @added 20230721 - Feature #4988: Allow snab to return and save results
+    # Check for base_name as well as metric.  Allow the user to pass the
+    # base_name or metric, as it is confusing, base_name/metric sometimes
+    # same same but different
     try:
-        base_name = algorithm_parameters['metric']
-        if print_debug:
-            print("algorithm_parameters['metric']:", base_name)
+        if 'base_name' in list(algorithm_parameters.keys()):
+            base_name = algorithm_parameters['base_name']
+            if print_debug:
+                print("algorithm_parameters['base_name']:", base_name)
     except:
-        record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
-        # Return None and None as the algorithm could not determine True or False
-        return (None, None)
+        base_name = None
+
+    if not base_name:
+        try:
+            base_name = algorithm_parameters['metric']
+            if print_debug:
+                print("algorithm_parameters['metric']:", base_name)
+        except:
+            record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            # @added 20230720 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                return (None, None, {})
+            # Return None and None as the algorithm could not determine True or False
+            return (None, None)
 
     # @added 20230419 - Feature #4892: SNAB - labelled_metrics
     labelled_metric_name = None
@@ -231,17 +265,40 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             resolution = resolution_counts[0][np.argmax(resolution_counts[1])]
             if resolution > 900:
                 # Not suited to low resolution data
+
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                if return_results:
+                    results = {'anomalous': True, 'anomalyScore': 1.0, 'reason': 'Not suited to low resolution data with a resolution > 900'}
+                    return (True, 1.0, results)
+
                 return (True, 1.0)
             duration = timestamps[-1] - timestamps[0]
             if duration < 446400:
                 # Not suitable for less than 5.25 days worth of data
+
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                if return_results:
+                    results = {'anomalous': True, 'anomalyScore': 1.0, 'reason': 'Not suitable for less than 5.25 days worth of data'}
+                    return (True, 1.0, {})
+
                 return (True, 1.0)
             normalised_var = normalised_variance(values)
-        except:
+        except Exception as err:
             if print_debug:
                 print('error :: normalised_variance')
                 print(traceback.format_exc())
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                # @modified 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                # return (None, None, {})
+                algo_error = 'algorithm error: %s' % str(err)
+                results = {'anomalous': None, 'anomalyScore': None, 'reason': algo_error}
+                return (None, None, results)
+
             # Return None and None as the algorithm could not determine True or False
             return (None, None)
 
@@ -252,8 +309,20 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             print('irregular_unstable normalised_var: %s' % (str(normalised_var)))
 
         if not normalised_var:
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                # @modified 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                # return (None, None, {})
+                results = {'anomalous': None, 'anomalyScore': None, 'reason': 'normalised_var not determined'}
+                return (None, None, results)
+
             return (None, None)
         if normalised_var > low_variance:
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                results = {'anomalous': True, 'anomalyScore': 1.0, 'reason': 'not low variance data'}
+                return (True, 10, results)
             return (True, 1.0)
 
         timeseries = []
@@ -264,14 +333,33 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
                 timeseries = get_graphite_metric(current_skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object')
             else:
                 timeseries = get_victoriametrics_metric(current_skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object')
-        except:
+        except Exception as err:
             if print_debug:
                 print('error :: no timeseries fetched')
                 print(traceback.format_exc())
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                reason = 'failed to get data from time series database, err: %s' % str(err)
+                results = {'anomalous': None, 'anomalyScore': None, 'reason': reason}
+
+                return (None, None, results)
+
             # Return None and None as the algorithm could not determine True or False
             return (None, None)
         if not timeseries:
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                reason = 'no time series data to analyse'
+                results = {'anomalous': None, 'anomalyScore': None, 'reason': reason}
+
+                return (None, None, results)
             return (None, None)
         if print_debug:
             print('irregular_unstable long timeseries length: %s' % (str(len(timeseries))))
@@ -300,8 +388,16 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         normalised_var = np.nan
         try:
             normalised_var = normalised_variance([item[1] for item in timeseries])
-        except:
+        except Exception as err:
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                reason = 'normalised_variance failed, err: %s' % str(err)
+                results = {'anomalous': None, 'anomalyScore': None, 'reason': reason}
+
+                return (None, None, results)
             # Return None and None as the algorithm could not determine True or False
             return (None, None)
         if print_debug:
@@ -320,10 +416,24 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         # less fNs or unsures (with current knowledge)
         # if normalised_var > low_variance:
         if normalised_var >= 0.0065:
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                results = {'anomalous': True, 'anomalyScore': 1.0, 'reason': 'not low variance data'}
+                return (True, 1.0, results)
             return (True, 1.0)
+
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        results['algorithms'] = {}
+        if return_results:
+            results['30day_aligned_and_merged_timeseries'] = True
+        results['timeseries'] = list(timeseries)
 
         X = np.array([v for t, v in timeseries])
         t = np.array([t for t, v in timeseries])
+
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        if return_results:
+            sr_success = False
 
         consensus = []
         # Check spectral_residual at 30 days (or greater than 7 day)
@@ -346,6 +456,9 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             if not threshold:
                 od.infer_threshold(X, t, threshold_perc=threshold_perc)
             od_preds = od.predict(X, t, return_instance_score=True, threshold_perc=threshold_perc)
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                sr_success = True
             if print_debug:
                 try:
                     print('infer_threshold returned: %s' % str(od_preds['data']['threshold']))
@@ -363,68 +476,149 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             if anomaly_sum > 0:
                 consensus.append('spectral_residual')
                 anomalous = True
+            sr_run_time = time() - start_sr
             if print_debug:
-                print('spectral_residual - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_sr)))
+                print('spectral_residual - anomalous: %s, took %s seconds' % (str(anomalous), sr_run_time))
         except:
             if print_debug:
                 print('error :: spectral_residual')
                 print(traceback.format_exc())
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
 
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        if return_results:
+            sr_anomalyScore = 0
+            if sr_success:
+                if anomalous:
+                    sr_anomalyScore = 1
+            # Always convert from numpy.int64 and numpy.float64 type
+            anomalies = {}
+            anomalyScore_list = []
+            sr_scores = []
+            if sr_success:
+                for index, item in enumerate(timeseries):
+                    anomaly_score = 0
+                    sr_score = 0.0
+                    try:
+                        sr_score = float(od_preds['data']['instance_score'][index])
+                    except:
+                        sr_score = 0.0
+                    if str(sr_score) in ['nan', 'NaN']:
+                        sr_score = 0.0
+                    try:
+                        anomaly_score = int(od_preds['data']['is_outlier'][index])
+                    except:
+                        anomaly_score = 0
+                    if anomaly_score == 1:
+                        ts = int(item[0])
+                        anomalies[ts] = {'value': item[1], 'index': index, 'score': sr_score}
+                    anomalyScore_list.append(anomaly_score)
+                    sr_scores.append(sr_score)
+            results['algorithms']['spectral_residual'] = {
+                'analysis_runtime': sr_run_time,
+                'success': sr_success,
+                'anomalous': anomalous,
+                'anomalyScore': sr_anomalyScore,
+                'unreliable': False,
+                'anomalies': anomalies,
+                'anomalyScore_list': anomalyScore_list,
+                'scores': sr_scores,
+                # @added 20230706 - Feature #4988: Allow snab to return and save results
+                # no ndarray in json
+                # 'SpectralResidual results': od_preds,
+            }
+
         if debug_logging:
             current_logger.debug('debug :: irregular_unstable :: spectral_residual - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_sr)))
 
-        # Check matrixprofile at 30 days (or greater than 7 day)
-        profile = None
-        discords = []
-        anomalous = False
-        start_mp = time()
-        try:
-            profile = stumpy.stump(X, m=windows)
-            if isinstance(profile, np.ndarray):
-                profile = np.argsort(profile[:, 0])[-k_discords:]
-                for discord in np.sort(profile):
-                    discords.append(discord)
-            if discords:
-                anomaly_timestamp = int(timeseries[-1][0])
-                anomaly_index = 0
-                for index, item in enumerate(timeseries):
-                    if int(item[0]) == int(anomaly_timestamp):
-                        anomaly_index = index
-                        break
-                anonamlous_period_indices = []
-                for index, item in enumerate(timeseries):
-                    if index in range((anomaly_index - windows), anomaly_index):
-                        anonamlous_period_indices.append(index)
-                discord_anomalies = []
-                for discord in discords:
-                    if discord in anonamlous_period_indices:
-                        anomalous = True
-                        for index in anonamlous_period_indices:
-                            if discord == index:
-                                discord_anomalies.append(index)
-            if anomalous:
-                consensus.append('matrixprofile')
-            if print_debug:
-                print('matrixprofile - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_mp)))
-        except:
-            if print_debug:
-                print('error :: matrixprofile')
-                print(traceback.format_exc())
-            record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+        # @added 20230706 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        # After analysis of results matrixprofile never triggers so disable
+        use_matrixprofile = False
 
-        if debug_logging:
-            current_logger.debug('debug :: irregular_unstable :: matrixprofile - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_sr)))
+        # @modified 20230706 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        # After analysis of results matrixprofile never triggers, so disabled
+        if use_matrixprofile:
+            # Check matrixprofile at 30 days (or greater than 7 day)
+            profile = None
+            discords = []
+            anomalous = False
+            start_mp = time()
+            try:
+                # @modified 20230706 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                # After analysis of results matrixprofile never triggers so disable
+                # Do not import stumpy, no need to incur the overhead
+                # profile = stumpy.stump(X, m=windows)
+                profile = None
+                if isinstance(profile, np.ndarray):
+                    profile = np.argsort(profile[:, 0])[-k_discords:]
+                    for discord in np.sort(profile):
+                        discords.append(discord)
+                if discords:
+                    anomaly_timestamp = int(timeseries[-1][0])
+                    anomaly_index = 0
+                    # @modified 20231228 - Feature #5052: skyline_matrixprofile - fft_extrapolation
+                    #                      Feature #5040: functions.timeseries_prediction.fft_extrapolation
+                    #                      Task #5178: Build and test skyline v4.1.0
+                    # Use a more efficient method here
+                    # for index, item in enumerate(timeseries):
+                    #     if int(item[0]) == int(anomaly_timestamp):
+                    #         anomaly_index = index
+                    #         break
+                    anomaly_index = len(timeseries) - 1
 
-        if len(consensus) == 2:
-            if print_debug:
-                print('irregular_unstable consensus: %s, took %s seconds' % (str(consensus), (time() - start)))
-            return (True, 1.0)
+                    anonamlous_period_indices = []
+                    # @modified 20231228 - Feature #5052: skyline_matrixprofile - fft_extrapolation
+                    #                      Feature #5040: functions.timeseries_prediction.fft_extrapolation
+                    #                      Task #5178: Build and test skyline v4.1.0
+                    # Use a more efficient method here
+                    # for index, item in enumerate(timeseries):
+                    #     if index in range((anomaly_index - windows), anomaly_index):
+                    #         anonamlous_period_indices.append(index)
+                    anonamlous_period_indices = list(range((anomaly_index - windows), anomaly_index + 1))
+
+                    discord_anomalies = []
+                    for discord in discords:
+                        if discord in anonamlous_period_indices:
+                            anomalous = True
+                            for index in anonamlous_period_indices:
+                                if discord == index:
+                                    discord_anomalies.append(index)
+                if anomalous:
+                    consensus.append('matrixprofile')
+                if print_debug:
+                    print('matrixprofile - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_mp)))
+            except:
+                if print_debug:
+                    print('error :: matrixprofile')
+                    print(traceback.format_exc())
+                record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+            if debug_logging:
+                current_logger.debug('debug :: irregular_unstable :: matrixprofile - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_sr)))
+            if len(consensus) == 2:
+                if print_debug:
+                    print('irregular_unstable consensus: %s, took %s seconds' % (str(consensus), (time() - start)))
+
+                # @added 20240124 - Task #5178: Build and test skyline v4.1.0
+                # Handle if results need to be passed
+                if return_results:
+                    return (True, 1.0, results)
+
+                return (True, 1.0)
 
         anomalous = False
         start_s = time()
         try:
             anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, sigma_consensus, anomaly_window)
+            # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            #                   Feature #4482: Test alerts
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe.  ideally if isinstance np.bool_ but without incurring
+            # the overhead of importing numpy here just to load the type
+            if type(anomalous) is not None and type(anomalous).__name__ == 'bool_':
+                anomalous = bool(anomalous)
+
             if anomalous:
                 consensus.append('sigma')
         except:
@@ -432,6 +626,7 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
                 print('error :: sigma')
                 print(traceback.format_exc())
             record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+        sigma_run_time = time() - start_sr
         if debug_logging:
             current_logger.debug('debug :: irregular_unstable :: sigma - anomalous: %s, took %s seconds' % (str(anomalous), (time() - start_sr)))
 
@@ -441,12 +636,49 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         if print_debug:
             print('irregular_unstable consensus: %s, took %s seconds' % (str(consensus), (time() - start)))
 
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        if return_results:
+            sigma_anomalyScore = 0
+            if anomalous:
+                sigma_anomalyScore = 1
+            # sigma anomalies object
+            # anomalies[ts] = {
+            #     'anomalous': True,
+            #     'anomalyScore': ensemble.count(True) / len(algorithms_run),
+            #     'index': anomaly_index,
+            #     'value': timeseries[anomaly_index][1],
+            #     'algorithms_results': algorithms_run,
+            #     'score': 1,
+            # }
+            anomalyScore_list = []
+            sigma_anomaly_timestamps = list(anomalies.keys())
+            for index, item in enumerate(timeseries):
+                ts = int(item[0])
+                sscore = 0.0
+                if ts in sigma_anomaly_timestamps:
+                    sscore = 1.0
+                anomalyScore_list.append(sscore)
+            results['algorithms']['sigma'] = {
+                'analysis_runtime': sigma_run_time,
+                'success': True,
+                'anomalous': anomalous,
+                'anomalyScore': sigma_anomalyScore,
+                'unreliable': False,
+                'anomalies': anomalies,
+                'anomalyScore_list': anomalyScore_list,
+            }
+
         if len(consensus) >= 2:
             anomalous = True
             anomalyScore = 1.0
             if debug_logging:
                 current_logger.debug('debug :: irregular_unstable :: anomalous: %s, consensus: %s, took %s seconds' % (
                     str(anomalous), str(consensus), (time() - start)))
+
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                return (True, 1.0, results)
+
             return (True, 1.0)
         else:
             anomalous = False
@@ -454,6 +686,11 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             if debug_logging:
                 current_logger.debug('debug :: irregular_unstable :: anomalous: %s, consensus: %s, took %s seconds' % (
                     str(anomalous), str(consensus), (time() - start)))
+
+            # @added 20230706 - Feature #4988: Allow snab to return and save results
+            if return_results:
+                return (False, 0.0, results)
+
             return (False, 0.0)
 
     except StopIteration:
@@ -464,9 +701,17 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
         # anything to the log, so the pythonic except is used to "sample" any
         # algorithm errors to a tmp file and report once per run rather than
         # spewing tons of errors into the log e.g. analyzer.log
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        if return_results:
+            return (None, None, {})
+
         return (None, None)
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+        # @added 20230706 - Feature #4988: Allow snab to return and save results
+        if return_results:
+            return (None, None, {})
+
         # Return None and None as the algorithm could not determine True or False
         return (None, None)
 

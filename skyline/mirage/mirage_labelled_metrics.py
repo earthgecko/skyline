@@ -228,7 +228,7 @@ class MirageLabelledMetrics(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
@@ -298,7 +298,9 @@ class MirageLabelledMetrics(Thread):
 
         string_keys = ['metric']
         float_keys = ['value']
-        int_keys = ['hours_to_resolve', 'metric_timestamp']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = ['hours_to_resolve', 'metric_timestamp', 'anomaly_id']
         # @added 20200916 - Branch #3068: SNAB
         #                   Task #3744: POC matrixprofile
         boolean_keys = ['snab_only_check']
@@ -517,7 +519,7 @@ class MirageLabelledMetrics(Thread):
 
         # @added 20230425 - Feature #4894: labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES
         feedback_labelled_metric_ids = []
-        feedback_labelled_metric_ids_skipped = []
+        # feedback_labelled_metric_ids_skipped = []
         analyzer_labelled_metrics_busy = False
         if settings.SKYLINE_FEEDBACK_NAMESPACES:
             try:
@@ -525,6 +527,8 @@ class MirageLabelledMetrics(Thread):
             except Exception as err:
                 logger.error('error :: mirage_labelled_metrics :: failed to get analyzer_labelled_metrics.busy Redis key' % (
                     err))
+        if not analyzer_labelled_metrics_busy:
+            analyzer_labelled_metrics_busy = False
 
         # @added 20230605 - Feature #4932: mute_alerts_on
         mute_alerts_on = []
@@ -833,6 +837,55 @@ class MirageLabelledMetrics(Thread):
 
             metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
 
+            # @added 20240229 - Feature #5292: mirage - skip analysis if smtp alert key
+            # If there is a mirage smtp alert key for the metric skip analysis
+            # on it.  Although this reduces the number of anomalies that will be
+            # detected and sent to Panorama.  It also means that Panorama will
+            # record less anomalies, because the alert expiry is probably always
+            # going to be longer than the PANORAMA_EXPIRY_TIME.  Prior to this
+            # change Panorama would record an anomaly every PANORAMA_EXPIRY_TIME
+            # as Mirage would not check if any alert or Panorama key existed, it
+            # just analysed the metric and then checked if an alert key existed
+            # for alerting purposes, it would still send the anomaly to panorama
+            # every time and Panorama would decide whether to record the anomaly
+            # or not.
+            mirage_alert_key_ttl = 0
+            mirage_smtp_alert_key = 'mirage.last_alert.smtp.%s' % metric
+            try:
+                mirage_alert_key_ttl = self.redis_conn_decoded.ttl(mirage_smtp_alert_key)
+            except Exception as err:
+                logger.error('error :: mirage_labelled_metrics :: ttl failed on %s, err: %s' % (
+                    mirage_smtp_alert_key, err))
+            if mirage_alert_key_ttl > 59:
+                logger.info('mirage_labelled_metrics :: skipping analysis - smtp alert key exists %s with TTL: %s seconds, removing check' % (
+                    mirage_smtp_alert_key, str(mirage_alert_key_ttl)))
+                # Remove metric check file
+                if os.path.isfile(metric_check_file):
+                    os.remove(metric_check_file)
+                    logger.info('mirage_labelled_metrics :: removed check file - %s' % (metric_check_file))
+                else:
+                    logger.info('mirage_labelled_metrics :: could not remove check file - %s' % (metric_check_file))
+                # Remove the metric directory
+                if os.path.exists(metric_data_dir):
+                    try:
+                        rmtree(metric_data_dir)
+                        logger.info('mirage_labelled_metrics :: removed data dir - %s' % metric_data_dir)
+                    except:
+                        logger.error('error :: mirage_labelled_metrics :: failed to rmtree - %s' % metric_data_dir)
+                redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
+                for waterfall_alert in analyzer_waterfall_alerts:
+                    if waterfall_alert[0] == metric:
+                        if int(waterfall_alert[1]) == metric_timestamp:
+                            try:
+                                self.redis_conn.srem(redis_set, str(waterfall_alert))
+                                logger.info('mirage_labelled_metrics :: removed waterfall alert item from Redis set %s - %s' % (
+                                    redis_set, str(waterfall_alert)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: mirage_labelled_metrics :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
+                                    metric, str(metric_timestamp), redis_set))
+                continue
+
             # Ignore any metric check with a timestamp greater than MIRAGE_STALE_SECONDS
             int_metric_timestamp = int(metric_timestamp)
             int_run_timestamp = int(run_timestamp)
@@ -1021,7 +1074,7 @@ class MirageLabelledMetrics(Thread):
                         logger.error('error :: mirage_labelled_metrics :: failed to update skyline.labelled_metrics.id.type.longterm_expire with new expire value - %s' % (
                             err))
                 if save_test_data:
-                    output_object_path = os.path.dirname(metric_json_file_saved)
+                    output_object_path = os.path.dirname(metric_json_file)
                     if not os.path.isdir(output_object_path):
                         try:
                             mkdir_p(output_object_path)
@@ -1031,9 +1084,9 @@ class MirageLabelledMetrics(Thread):
                             logger.error(
                                 'error :: failed to create output_object_path - %s - %s' % (
                                 str(output_object_path,), err))
-                    with open(metric_json_file_saved, 'w') as f:
+                    with open(metric_json_file, 'w') as f:
                         f.write(json.dumps(test_timeseries))
-                    os.chmod(metric_json_file_saved, mode=0o644)
+                    os.chmod(metric_json_file, mode=0o644)
 
                 # @modified 20230522 - metric_type.longterm_expire
                 # Only surface if the test data was not saved
@@ -1129,11 +1182,12 @@ class MirageLabelledMetrics(Thread):
             if first_timestamp:
                 if first_timestamp > valid_if_before_timestamp:
                     valid_mirage_timeseries = False
+                    logger.info('warning :: first_timestamp is greater than first FULL_DURATION timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
             else:
                 valid_mirage_timeseries = False
-                logger.warning('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
+                logger.info('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
 
-            valid_mirage_timeseries = True
+            # valid_mirage_timeseries = True
 
             redis_metric_name = '%s' % str(metric)
             metric_id = 0
@@ -1152,6 +1206,15 @@ class MirageLabelledMetrics(Thread):
             # @added 20200904 - Feature #3734: waterfall alerts
             anomalous = None
 
+            # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+            #                      Feature #3566: custom_algorithms
+            # Added custom_algorithms_results
+            custom_algorithms_results = {
+                'metric': metric, 'labelled_metric': redis_metric_name,
+                'algorithms': {}, 'timeseries': timeseries,
+            }
+            custom_algorithm_results = {}
+
             # @added 20201001 - Branch #3068: SNAB
             #                   Task #3748: POC SNAB
             # Add timings
@@ -1163,9 +1226,43 @@ class MirageLabelledMetrics(Thread):
                     # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
                     #                      Task #4778: v4.0.0 - update dependencies
                     # Added current_func
-                    anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func='mirage_labelled_metrics')
+                    # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                    #                      Feature #3566: custom_algorithms
+                    # Added custom_algorithms_results
+                    # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
+                    # Added mirage_busy
+                    anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func='mirage_labelled_metrics', mirage_busy=analyzer_labelled_metrics_busy)
+
+                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
 
                     logger.info('mirage_labelled_metrics :: analysed :: %s - anomalous: %s' % (metric, str(anomalous)))
+
+                    # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                    #                   Feature #3566: custom_algorithms
+                    # Added custom_algorithms_results
+                    if custom_algorithm_results:
+                        for custom_algorithm in list(custom_algorithm_results.keys()):
+                            if 'algorithms' in custom_algorithm_results[custom_algorithm]:
+                                for algorithm in custom_algorithm_results[custom_algorithm]['algorithms']:
+                                    try:
+                                        custom_algorithms_results['algorithms'][algorithm] = copy.deepcopy(custom_algorithm_results[custom_algorithm]['algorithms'][algorithm])
+                                    except Exception as err:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to copy results for %s, err: %s' % (
+                                            str(algorithm), err))
+                            else:
+                                try:
+                                    custom_algorithms_results['algorithms'][custom_algorithm] = copy.deepcopy(custom_algorithm_results[custom_algorithm])
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to copy results for %s, err: %s' % (
+                                        str(custom_algorithm), err))
+
                 else:
                     logger.info('mirage_labelled_metrics :: not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
                     anomalous = False
@@ -1321,6 +1418,12 @@ class MirageLabelledMetrics(Thread):
                 logger.info('mirage_labelled_metrics :: checking irregular_unstable %s' % (
                     metric))
                 result = True
+
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                # Added default results
+                results = {}
+
                 start_irregular_unstable = time()
                 try:
                     custom_algorithm = 'irregular_unstable'
@@ -1332,6 +1435,10 @@ class MirageLabelledMetrics(Thread):
                             'low_variance': 0.009, 'labelled_metric_name': labelled_metric_name,
                             'metric': labelled_metric_base_name,
                             'debug_logging': True,
+                            # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                            #                   Feature #3566: custom_algorithms
+                            # Added return_results
+                            'return_results': True,
                         },
                         'max_execution_time': 3.0,
                         'consensus': 1,
@@ -1343,10 +1450,17 @@ class MirageLabelledMetrics(Thread):
                         'run_only_if_consensus': False,
                         'trigger_history_override': False,
                         'use_with': ['mirage'],
+                        # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                        #                   Feature #3566: custom_algorithms
+                        # Added return_results
+                        'return_results': True,
                     }
                     # use_debug_logging_here = False
                     use_debug_logging_here = True
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, os.getpid(), labelled_metric_name, timeseries, 'irregular_unstable', custom_algorithms_to_run[custom_algorithm], use_debug_logging_here, current_func='mirage_labelled_metrics')
+                    # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                    #                   Feature #3566: custom_algorithms
+                    # Added results
+                    result, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, os.getpid(), labelled_metric_name, timeseries, 'irregular_unstable', custom_algorithms_to_run[custom_algorithm], use_debug_logging_here, current_func='mirage_labelled_metrics')
                     algorithms_run.append(custom_algorithm)
                     ensemble.append(result)
                     if DEBUG_CUSTOM_ALGORITHMS or use_debug_logging_here:
@@ -1359,6 +1473,13 @@ class MirageLabelledMetrics(Thread):
                     result = None
                 logger.info('mirage_labelled_metrics :: irregular_unstable ran with result: %s (took %.6f seconds), for %s - %s' % (
                     str(result), (time() - start_irregular_unstable), labelled_metric_name, labelled_metric_base_name))
+
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                # Added custom_algorithms_results
+                if results:
+                    custom_algorithms_results['algorithms'][custom_algorithm] = copy.deepcopy(results)
+
                 # Although fine in a notebook does not have the desired effect
                 # in the runtime so convert to a str and check
                 # if result is False:
@@ -1382,6 +1503,7 @@ class MirageLabelledMetrics(Thread):
                 logger.info('mirage_labelled_metrics :: checking anomalous_daily_peak %s' % (
                     metric))
                 result = True
+
                 start_anomalous_daily_peak = time()
                 try:
                     custom_algorithm = 'anomalous_daily_peak'
@@ -1426,6 +1548,7 @@ class MirageLabelledMetrics(Thread):
                     result = None
                 logger.info('mirage_labelled_metrics :: anomalous_daily_peak ran with result: %s (took %.6f seconds), for %s' % (
                     str(result), (time() - start_anomalous_daily_peak), metric))
+
                 # Although fine in a notebook does not have the desired effect
                 # in the runtime so convert to a str and check
                 # if result is False:
@@ -1454,6 +1577,13 @@ class MirageLabelledMetrics(Thread):
                     except Exception as err:
                         logger.error('error :: mirage_labelled_metrics :: failed to add %s to Redis hash %s - %s' % (
                             str(redis_metric_name), str(redis_hash), err))
+
+            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe
+            ensemble = [item if item is None else bool(item) for item in ensemble]
 
             # @added 20220504 - Feature #2580: illuminance
             # @modified 20230419 - Feature #2580: illuminance
@@ -1588,18 +1718,66 @@ class MirageLabelledMetrics(Thread):
                 # if test_alert:
                 #     triggered_algorithms = ['testing']
 
+                # @added 20230718 - Feature #5004: Add snab to mirage_labelled_metrics
+                #                   Feature #4988: Allow snab to return and save results
+                snab_check_namespace = False
+                snab_algorithms_to_run = []
+                if SNAB_ENABLED and SNAB_CHECKS:
+                    for app in SNAB_CHECKS:
+                        if app == skyline_app:
+                            for snab_context in SNAB_CHECKS[app]:
+                                if snab_check_namespace:
+                                    break
+                                for algorithm in SNAB_CHECKS[app][snab_context]:
+                                    if snab_check_namespace:
+                                        break
+                                    try:
+                                        for namespace in SNAB_CHECKS[app][snab_context][algorithm]['namespaces']:
+                                            if namespace in labelled_metric_base_name:
+                                                snab_check_namespace = True
+                                                snab_algorithms_to_run.append(algorithm)
+                                                break                                        
+                                    except Exception as err:
+                                        logger.error('error :: failed to check if %s is a snab_check_metric - %s' % (
+                                            labelled_metric_base_name, err))
+
                 # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
                 #                      Branch #3068: SNAB
                 # Added second_order_resolution_seconds, triggered_algorithms and algorithms_run
                 # anomalous_metric = [datapoint, base_name, metric_timestamp]
                 # @modified 20230419 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
                 # Added snab_algorithms_to_run
-                snab_algorithms_to_run = []
-                if SNAB_ENABLED:
-                    if irregular_unstable_timeseries:
-                        snab_algorithms_to_run = ['irregular_unstable']
+                # @modified 20230718 - Feature #5004: Add snab to mirage_labelled_metrics
+                # irregular_unstable testing has completed, now handling snab in
+                # the snab_check_namespace block above
+                # snab_algorithms_to_run = []
+                # if SNAB_ENABLED:
+                #     if irregular_unstable_timeseries:
+                #         snab_algorithms_to_run = ['irregular_unstable']
 
                 anomalous_metric = [datapoint, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run, snab_algorithms_to_run]
+
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                # Save custom_algorithms_results
+                if custom_algorithms_results:
+                    timeseries_dir = metric.replace('.', '/')
+                    training_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+                        str(timeseries_dir))
+                    if not os.path.exists(training_dir):
+                        mkdir_p(training_dir)
+                    custom_algorithms_results['results_path'] = training_dir
+                    results_json = '%s/%s.custom_algorithms_results.json' % (training_dir, metric)
+                    try:
+                        with open(results_json, 'w') as f:
+                            f.write(json.dumps(custom_algorithms_results, skipkeys=True))
+                        os.chmod(results_json, mode=0o644)
+                        logger.info('saved custom_algorithms_results json %s' % results_json)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to save results json %s - %s' % (
+                            results_json, err))
 
                 if not ionosphere_unique_metrics:
                     try:
@@ -1671,9 +1849,13 @@ class MirageLabelledMetrics(Thread):
                     try:
                         last_negative_timestamp = int(negatives_found[-1][0])
                         last_negative_value = negatives_found[-1][1]
-                        remove_after_timestamp = int(last_negative_timestamp + second_order_resolution_seconds)
-                        data = str([base_name, metric_timestamp, datapoint, last_negative_timestamp, last_negative_value, second_order_resolution_seconds, remove_after_timestamp])
-                        self.redis_conn.sadd(redis_set, data)
+                        # @modified 20240312 - Feature #3508: ionosphere.untrainable_metrics
+                        #                      Feature #5304: ionosphere.find_repetitive_patterns
+                        # Only if float
+                        if isinstance(last_negative_value, float):
+                            remove_after_timestamp = int(last_negative_timestamp + second_order_resolution_seconds)
+                            data = str([base_name, metric_timestamp, datapoint, last_negative_timestamp, last_negative_value, second_order_resolution_seconds, remove_after_timestamp])
+                            self.redis_conn.sadd(redis_set, data)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: mirage_labelled_metrics :: failed to add %s to Redis set %s' % (
@@ -2087,6 +2269,15 @@ class MirageLabelledMetrics(Thread):
         except Exception as err:
             logger.error('error :: mirage_labelled_metrics :: failed iterate to self.mirage_labelled_metrics_exceptions_q - %s' % err)
 
+        # @added 20230705 - break.it.to.fake.it
+        # Debug p.join and p.terminate hanging when killing the processes
+        # at times.
+        break_it_to_fake_it = False
+        # break_it_to_fake_it = True
+        if break_it_to_fake_it:
+            logger.debug('debug :: mirage_labelled_metrics :: break.it.to.fake.it sleeping to be terminated')
+            sleep((settings.MAX_ANALYZER_PROCESS_RUNTIME + 10))
+
     def run(self):
         """
         Called when the process intializes.
@@ -2127,7 +2318,10 @@ class MirageLabelledMetrics(Thread):
         last_sent_to_graphite = int(time())
 
         # @added 20220421 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
-        filesafe_names_dict = {}
+        # @modified 20240123 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+        #                      Task #5236: mirage_labelled_metrics - optimise check sort
+        # mirage_labelled_metrics does not deal with filesafe_names
+        # filesafe_names_dict = {}
 
         last_redis_self_key_update = 0
 
@@ -2243,22 +2437,46 @@ class MirageLabelledMetrics(Thread):
 
                 # @added 20220421 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
                 # Handle filesafe names
-                filesafe_names_list = []
-                if filesafe_names_dict:
-                    filesafe_names_list = list(filesafe_names_dict.keys())
+                # @modified 20240123 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+                #                      Task #5236: mirage_labelled_metrics - optimise check sort
+                # mirage_labelled_metrics does not deal with filesafe_names
+                # filesafe_names_list = []
+                # if filesafe_names_dict:
+                #     filesafe_names_list = list(filesafe_names_dict.keys())
 
                 # Discover metric to analyze
                 metric_var_files = []
+
+                # @added 20240123 - Task #5236: mirage_labelled_metrics - optimise check sort
+                # analyzer_labelled_metrics.metric_ckeck keys are formatted as
+                # metric_id.timestamp and the sort results in the check list in
+                # mirage_labelled_metrics were being ordered by metric_id not
+                # timestamp
+                check_timestamps = []
 
                 labelled_metrics_to_check_dict = {}
                 try:
                     labelled_metrics_to_check_dict = self.redis_conn_decoded.hgetall('analyzer_labelled_metrics.mirage_check')
                 except Exception as err:
-                    logger.error('failed to cleanup mirage_algorithm.error files - %s' % (traceback.format_exc()))
+                    logger.error('failed to cleanup mirage_algorithm.error files, err: %s, traceback: %s' % (err, traceback.format_exc()))
                 if labelled_metrics_to_check_dict:
                     for key in list(labelled_metrics_to_check_dict.keys()):
                         check_key = 'analyzer_labelled_metrics.mirage_check.%s' % key
                         metric_var_files.append(check_key)
+                        # @added 20240123 - Task #5236: mirage_labelled_metrics - optimise check sort
+                        check_timestamp = int(key.split('.')[1])
+                        check_timestamps.append(check_timestamp)
+
+                # @added 20240123 - Task #5236: mirage_labelled_metrics - optimise check sort
+                check_timestamps_ids = [[index, t] for index, t in enumerate(check_timestamps)]
+                check_timestamps_ids = sorted(check_timestamps_ids, key=lambda x: x[1])
+                timestamp_sorted_metric_var_files = []
+                for index, t in check_timestamps_ids:
+                    timestamp_sorted_metric_var_files.append(metric_var_files[index])
+                if timestamp_sorted_metric_var_files:
+                    metric_var_files = list(timestamp_sorted_metric_var_files)
+                    del timestamp_sorted_metric_var_files
+                    del labelled_metrics_to_check_dict
 
                 if len(metric_var_files) > 0:
                     break
@@ -2382,20 +2600,47 @@ class MirageLabelledMetrics(Thread):
                     logger.info('mirage_labelled_metrics :: %s :: timed out, killing all spin_process processes' % (skyline_app))
                     for p in pids:
                         try:
+                            # @added 20230705 - break.it.to.fake.it - for debug
+                            cpid = str(p.pid)
+                            logger.info('mirage_labelled_metrics :: killing pid %s spin_process' % str(cpid))
+
                             # @modified 20230410 - moved p.join before p.terminate
-                            p.join()
+                            # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                            # No p.join()
+                            # p.join()
                             p.terminate()
                             # @modified 20221125 - added join back
                             # p.join()
+                            # @added 20230705 - break.it.to.fake.it - ADDED this comment
+                            # Debugged the above p.join and p.terminate hanging when killing
+                            # the processes at times and it is exactly that at times.
+                            # Introducing a sleep in the spin_process resulted in this p.join
+                            # and p.terminate working exactly as desired, the processes were
+                            # teminated and mirage_labelled_metrics ran again as desired.
+                            # This issue of hanging and the processes never returning which
+                            # causes mirage_labelled_metrics to hang HERE is not caused by the
+                            # method in use here, it is related to a host related issue like
+                            # events_freezable or something similar.  So how to fix this...
+                            # via a log watch process.
+                            logger.info('mirage_labelled_metrics :: killed pid %s spin_process' % str(cpid))
+
                         except Exception as err:
                             logger.error('error :: mirage_labelled_metrics :: %s :: error terminating pid - %s' % (
                                 skyline_app, err))
+                    # @added 20230705 - break.it.to.fake.it - for debug
+                    logger.info('mirage_labelled_metrics :: killed spin_process pids')
 
                 for p in pids:
                     try:
                         if p.is_alive():
                             logger.info('mirage_labelled_metrics :: %s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
-                            p.join()
+                            # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                            # p.join()
+                            killing_pid = p.pid
+                            logger.info('mirage_labelled_metrics :: %s :: kill spin_process with pid: %s' % (skyline_app, str(killing_pid)))
+                            p.terminate()
+                            logger.info('mirage_labelled_metrics :: %s :: killed spin_process process with pid: %s' % (skyline_app, str(killing_pid)))
+
                     except Exception as err:
                         logger.error('error :: mirage_labelled_metrics :: %s :: error joining pid - %s' % (
                             skyline_app, err))
@@ -2816,11 +3061,14 @@ class MirageLabelledMetrics(Thread):
 
                 # @added 20220421 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
                 # Refresh
-                try:
-                    filesafe_names_dict = self.redis_conn_decoded.hgetall('metrics_manager.filesafe_base_names')
-                except Exception as err:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: mirage_labelled_metrics :: hgetall metrics_manager.filesafe_base_names failed - %s' % err)
+                # @modified 20240123 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+                #                      Task #5236: mirage_labelled_metrics - optimise check sort
+                # mirage_labelled_metrics does not deal with filesafe_names
+                # try:
+                #     filesafe_names_dict = self.redis_conn_decoded.hgetall('metrics_manager.filesafe_base_names')
+                # except Exception as err:
+                #     logger.error(traceback.format_exc())
+                #     logger.error('error :: mirage_labelled_metrics :: hgetall metrics_manager.filesafe_base_names failed - %s' % err)
 
             # Sleep if it went too fast
             # if time() - now < 1:

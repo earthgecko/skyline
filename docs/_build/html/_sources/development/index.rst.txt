@@ -6,6 +6,7 @@ Development
 
   building-documentation
   dawn
+  jupyter
   webapp
   debugging
   ionosphere

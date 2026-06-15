@@ -57,12 +57,18 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     :param algorithm_parameters: a dictionary of any required parameters for the
         custom_algorithm and algorithm itself.  For the matrixprofile custom
         algorithm the following parameters are required, example:
-        ``algorithm_parameters={
-            'c': 9.0,
-            'run_every': 5,
-            'side': 'both',
-            'window': 5
-        }``
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'c': 9.0,
+                'run_every': 5,
+                'side': 'both',
+                'window': 5,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -91,6 +97,10 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     of the below log, it is clear that the running adtk_level_shift on all
     metrics is probably not desirable, even if it is possible to do, it is very
     noisy.
+
+    UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
+    is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
+    is!
 
     2021-03-06 10:46:38 :: 1582754 :: algorithm run count - histogram_bins run 567 times
     2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - histogram_bins has 567 timings
@@ -164,7 +174,7 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     For metrics with a different resolution/frequency may require different
     values appropriate for metric resolution.
 
-    Example CUSTOM_ALGORITHMS configuration:
+    Example CUSTOM_ALGORITHMS configuration::
 
     'adtk_level_shift': {
         'namespaces': [

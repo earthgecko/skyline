@@ -9,6 +9,11 @@ import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
+
 if True:
     import matplotlib.pyplot as plt
     from matplotlib.pylab import rcParams
@@ -54,9 +59,19 @@ def create_matplotlib_graph(
         current_logger.info('create_matplotlib_graph - graph image already exists - %s' % output_file)
         return (True, output_file)
 
+    # @added 20230728 - Task #5032: Change matplotlib black background to grey
+    # As it says on the tin and as prescribed by Dr Neil R Gunther.
+    # background_hex_code = background_hex_code  # grey - pearlriver
+    # background_hex_code = '#F5F5F5'  # white - whitesmoke
+    background_hex_code = '#181b1f'  # grafana grey
+
     try:
         current_logger.info('create_matplotlib_graph - creating graph image - %s' % output_file)
         current_logger.info('create_matplotlib_graph - with monotonic timeseries of length %s' % str(len(monotonic_timeseries)))
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        matplotlib.rcParams['path.simplify_threshold'] = 1.0
 
         # @added 20211103 - Branch #3068: SNAB
         #                      Bug #4308: matrixprofile - fN on big drops
@@ -105,13 +120,24 @@ def create_matplotlib_graph(
         amin_series = [array_amin] * len(values)
         mean_series = [mean] * len(values)
         rcParams['figure.figsize'] = 8, 4
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        rcParams['path.simplify_threshold'] = 1.0
+        plt.style.use('fast')
+
         fig = plt.figure(frameon=False)
         ax = fig.add_subplot(111)
         ax.set_title(graph_title, fontsize='small')
         if hasattr(ax, 'set_facecolor'):
-            ax.set_facecolor('black')
+            # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+            # As it says on the tin and as prescribed by Dr Neil R Gunther.
+            # ax.set_facecolor('black')
+            ax.set_facecolor(background_hex_code)
         else:
-            ax.set_axis_bgcolor('black')
+            # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+            # ax.set_axis_bgcolor('black')
+            ax.set_axis_bgcolor(background_hex_code)
         datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
         plt.xticks(rotation=0, horizontalalignment='center')
 
@@ -165,13 +191,17 @@ def create_matplotlib_graph(
             ax.grid(b=True, which='both', axis='both', color='lightgray',
                     linestyle='solid', alpha=0.5, linewidth=0.6)
         else:
-            ax.grid(visible==True, which='both', axis='both', color='lightgray',
+            ax.grid(visible=True, which='both', axis='both', color='lightgray',
                     linestyle='solid', alpha=0.5, linewidth=0.6)
 
         if hasattr(ax, 'set_facecolor'):
-            ax.set_facecolor('black')
+            # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+            # ax.set_facecolor('black')
+            ax.set_facecolor(background_hex_code)
         else:
-            ax.set_axis_bgcolor('black')
+            # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+            # ax.set_axis_bgcolor('black')
+            ax.set_axis_bgcolor(background_hex_code)
         rcParams['xtick.direction'] = 'out'
         rcParams['ytick.direction'] = 'out'
         ax.margins(y=.02, x=.03)

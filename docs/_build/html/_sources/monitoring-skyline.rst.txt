@@ -1,6 +1,6 @@
-==================
-Monitoring Skyline
-==================
+====================================
+Monitoring :skyblue:`Sky`:red:`line`
+====================================
 
 It should be noted that something should monitor the Skyline processes.
 Over a long enough timeline Python or Redis or some I/O issue is going to lock

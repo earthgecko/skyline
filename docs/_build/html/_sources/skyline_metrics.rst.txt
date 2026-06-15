@@ -63,14 +63,14 @@ labelled/tagged metrics.
   :mod:`settings.SKIP_LIST` as they are feedback metrics.
 - ``skyline.analyzer.$host.anomaly_breakdown.$algorithm``: How many times each
   algorithm triggerred.  Same category as the above metrics.
-- ``skyline.analyzer.$host.exceptions.Boring``: the number of metrics with timeseries
+- ``skyline.analyzer.$host.exceptions.Boring``: the number of metrics with time series
   that have the same value for :mod:`settings.MAX_TOLERABLE_BOREDOM` (default 100)
   in a row.
 - ``skyline.analyzer.$host.exceptions.Other``: unknown exceptions
 - ``skyline.analyzer.$host.exceptions.TooShort``: the number of metrics that have
-  timeseries that are too short to be analysed (:mod:`settings.MIN_TOLERABLE_LENGTH`)
+  time series that are too short to be analysed (:mod:`settings.MIN_TOLERABLE_LENGTH`)
 - ``skyline.analyzer.$host.exceptions.EmptyTimeseries``: the number of metrics
-  that have empty timeseries.
+  that have empty time series.
 - ``skyline.analyzer.$host.exceptions.Stale``: **IMPORTANT** the number of
   metrics that have not sent new data in :mod:`settings.STALE_PERIOD`.  If this
   number spikes up it means that there is a problem with the data being fed to
@@ -145,12 +145,12 @@ labelled/tagged metrics.
 - ``skyline.analyzer.$host.metrics_sparsity.metrics_sparsity_increasing``: the
   number of metrics that are moving away from a fully populated state.
 - ``skyline.analyzer.$host.metrics_sparsity.avg_sparsity``: **IMPORTANT** this
-  is number describes how well populated the metric timeseries population is.
+  is number describes how well populated the metric time series population is.
   100 is perfect, going below about 93% on high resolution metrics indicates a
   problem, either the metrics are missing data, some have gone offline or
   network partitions are being encountered.
 - ``skyline.analyzer.$host.duration``: The duration (in hours) of the
-  :mod:`settings.CANARY_METRIC` timeseries data.
+  :mod:`settings.CANARY_METRIC` time series data.
 - ``skyline.analyzer.$host.ionosphere_metrics``: the number of metrics in the
   population that have been trained.
 - ``skyline.analyzer.$host.metrics_manager_run_time``: **IMPORTANT** the number

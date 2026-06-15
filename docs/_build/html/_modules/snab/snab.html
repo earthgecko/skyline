@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snab.snab &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>snab.snab &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -146,6 +146,9 @@
 <span class="c1"># @added 20220722 - Task #4624: Change all dict copy to deepcopy</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 
+<span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="c1"># @modified 20220726 - Task #2732: Prometheus to Skyline</span>
@@ -160,6 +163,9 @@
 <span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
 
 <span class="kn">from</span> <span class="nn">custom_algorithms.irregular_unstable</span> <span class="kn">import</span> <span class="n">irregular_unstable</span>
+
+<span class="c1"># @added 20230801 - Feature #5038: snab_results_algorithms</span>
+<span class="kn">from</span> <span class="nn">snab_results_algorithms</span> <span class="kn">import</span> <span class="n">snab_results_algorithms</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
@@ -218,7 +224,9 @@
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="SNAB"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB">[docs]</a><span class="k">class</span> <span class="nc">SNAB</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="SNAB">
+<a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB">[docs]</a>
+<span class="k">class</span> <span class="nc">SNAB</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The SNAB class which controls the snab thread and spawned</span>
 <span class="sd">    processes.</span>
@@ -242,7 +250,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SNAB.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SNAB.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -255,7 +265,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
             <span class="n">sys_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SNAB.spin_snab_process"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.spin_snab_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_snab_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">check_details</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SNAB.spin_snab_process">
+<a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.spin_snab_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">spin_snab_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">check_details</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a metric and algorithm for a process to analyze.</span>
 
@@ -348,6 +361,11 @@
         <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+        <span class="c1"># Allow results to be returned and saved</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">snab_id</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">spin_snab_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_snab_process - </span><span class="si">%s</span><span class="s1">, processing check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -375,6 +393,13 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - spin_snab_process - </span><span class="si">%s</span><span class="s1">, failed to parse check_details dict&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">spin_snab_process_pid</span><span class="p">)))</span>
             <span class="k">return</span> <span class="n">anomalous</span>
+
+        <span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+        <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">return_results</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_results&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># @added 20230419 - Feature #4892: SNAB - labelled_metrics</span>
         <span class="c1">#                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days</span>
@@ -475,6 +500,10 @@
                 <span class="c1"># Use downsampled_timeseries data</span>
                 <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;downsample_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsampled</span>
 
+                <span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
                 <span class="n">custom_algorithm_dict</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">],</span>
                     <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="n">algorithm_source</span><span class="p">,</span>
@@ -486,7 +515,20 @@
                     <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;snab&#39;</span><span class="p">],</span>
                     <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="n">algorithm_debug_logging</span><span class="p">,</span>
                 <span class="p">}</span>
-                <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">custom_algorithm_dict</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+
+                <span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;return_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">return_results</span>
+                    <span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">return_results</span>
+
+                <span class="c1"># @modified 20230706 - Feature #4988: Allow snab to return and save results</span>
+                <span class="c1"># Allow results to be returned</span>
+                <span class="c1"># anomalous, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">custom_algorithm_dict</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">custom_algorithm_dict</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly detected :: with </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
@@ -501,6 +543,13 @@
                     <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">))</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;error&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> reported an error on </span><span class="si">%s</span><span class="s1">, error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]))</span>
 
         <span class="c1"># @added 20201001 - Branch #3068: SNAB</span>
         <span class="c1">#                   Task #3748: POC SNAB</span>
@@ -545,6 +594,13 @@
         <span class="n">slack_post</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="c1"># @added 20230801 - Feature #5038: snab_results_algorithms</span>
+        <span class="c1">#                   Feature #4988: Allow snab to return and save results</span>
+        <span class="c1"># Add default variables</span>
+        <span class="n">snab_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">algorithm_group</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">original_check_details</span><span class="p">[</span><span class="s1">&#39;alert_slack_channel&#39;</span><span class="p">]:</span>
                 <span class="n">send_to_slack</span> <span class="o">=</span> <span class="kc">True</span>
@@ -560,7 +616,7 @@
                     <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span>
                         <span class="n">algorithm_group</span> <span class="o">=</span> <span class="s1">&#39;matrixprofile&#39;</span>
 
-                    <span class="c1"># @added 20230417 - Feature #4848mirage - analyse.irregular.unstable.timeseries.at.30days</span>
+                    <span class="c1"># @added 20230417 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_group</span><span class="p">:</span>
                         <span class="n">algorithm_group</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
 
@@ -640,6 +696,21 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine snab_id from Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">snab_id_redis_key</span><span class="p">)</span>
                             <span class="n">snab_slack_comment</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The anomaly id was not determined to generate snab results links&#39;</span>
 
+                    <span class="c1"># @modified 20231012 - Feature #4988: Allow snab to return and save results</span>
+                    <span class="c1"># Moved determining anomaly_status to before slack msg so</span>
+                    <span class="c1"># that is an error is report snab links are not added</span>
+                    <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;NOT ANOMALOUS&#39;</span>
+                    <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                        <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;ANOMALOUS&#39;</span>
+                    <span class="c1"># @added 20231012 - Feature #4988: Allow snab to return and save results</span>
+                    <span class="c1"># Handle if an error is reported</span>
+                    <span class="k">if</span> <span class="n">anomalous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+                        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s1">&#39;error&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                                <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]:</span>
+                                    <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN - error reported&#39;</span>
+
                     <span class="k">if</span> <span class="n">anomaly_id</span> <span class="ow">and</span> <span class="n">snab_id</span><span class="p">:</span>
                         <span class="n">snab_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/api?snab=true&amp;snab_id=</span><span class="si">%s</span><span class="s1">&amp;anomaly_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
@@ -649,11 +720,20 @@
                         <span class="n">fN_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=fN&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
                         <span class="n">unsure_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=unsure&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
                         <span class="n">null_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=NULL&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
-                        <span class="n">snab_slack_comment</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&#39;</span> <span class="o">+</span> <span class="n">tP_link</span> <span class="o">+</span> <span class="s1">&#39;|tP - true positive&gt;   ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fP_link</span> <span class="o">+</span> <span class="s1">&#39;|fP - false positive&gt;  ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">null_link</span> <span class="o">+</span> <span class="s1">&#39;|NULL - reset to NULL&gt;</span><span class="se">\n</span><span class="s1">&lt;&#39;</span> <span class="o">+</span> <span class="n">tN_link</span> <span class="o">+</span> <span class="s1">&#39;|tN - true negative&gt;  ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fN_link</span> <span class="o">+</span> <span class="s1">&#39;|fN - false negative&gt;  :: &lt;&#39;</span> <span class="o">+</span> <span class="n">unsure_link</span> <span class="o">+</span> <span class="s1">&#39;|unsure&gt;&#39;</span>
+                        <span class="c1"># @added 2023082 - Feature #5042: Add save_training_data link options to SNAB slack results message</span>
+                        <span class="n">fP_link_save_training_data</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=fP&amp;save_training_data=true&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
+                        <span class="n">fN_link_save_training_data</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=fN&amp;save_training_data=true&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
+                        <span class="n">unsure_link_save_training_data</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;result=unsure&amp;save_training_data=true&#39;</span> <span class="o">%</span> <span class="n">snab_link</span>
+                        <span class="c1"># @modified 2023082 - Add save_training_data link options to SNAB slack results message</span>
+                        <span class="c1"># snab_slack_comment = &#39;\n&lt;&#39; + tP_link + &#39;|tP - true positive&gt;   ::  &lt;&#39; + fP_link + &#39;|fP - false positive&gt;   ::  &lt;&#39; + null_link + &#39;|NULL - reset to NULL&gt;\n&lt;&#39; + tN_link + &#39;|tN - true negative&gt;   ::  &lt;&#39; + fN_link + &#39;|fN - false negative&gt;  :: &lt;&#39; + unsure_link + &#39;|unsure&gt;&#39;</span>
+                        <span class="c1"># @modified 20231012 - Feature #4988: Allow snab to return and save results</span>
+                        <span class="c1"># Only add a the snab links if the anomaly_status is not</span>
+                        <span class="c1"># UNKNOWN</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;UNKOWN&#39;</span> <span class="ow">in</span> <span class="n">anomaly_status</span><span class="p">:</span>
+                            <span class="n">snab_slack_comment</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&#39;</span> <span class="o">+</span> <span class="n">tP_link</span> <span class="o">+</span> <span class="s1">&#39;|tP - true positive&gt;   ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fP_link</span> <span class="o">+</span> <span class="s1">&#39;|fP - false positive&gt;   ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fP_link_save_training_data</span> <span class="o">+</span> <span class="s1">&#39;|fP - false positive (save_training_data)&gt;   ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">null_link</span> <span class="o">+</span> <span class="s1">&#39;|NULL - reset to NULL&gt;</span><span class="se">\n</span><span class="s1">&lt;&#39;</span> <span class="o">+</span> <span class="n">tN_link</span> <span class="o">+</span> <span class="s1">&#39;|tN - true negative&gt;   ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fN_link</span> <span class="o">+</span> <span class="s1">&#39;|fN - false negative&gt;  ::  &lt;&#39;</span> <span class="o">+</span> <span class="n">fN_link_save_training_data</span> <span class="o">+</span> <span class="s1">&#39;|fN - false negative (save_training_data)&gt;   :: &lt;&#39;</span> <span class="o">+</span> <span class="n">unsure_link</span> <span class="o">+</span> <span class="s1">&#39;|unsure&gt;   :: &lt;&#39;</span> <span class="o">+</span> <span class="n">unsure_link_save_training_data</span> <span class="o">+</span> <span class="s1">&#39;|unsure (save_training_data)&gt;&#39;</span>
 
-                    <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;NOT ANOMALOUS&#39;</span>
                     <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
-                        <span class="n">anomaly_status</span> <span class="o">=</span> <span class="s1">&#39;ANOMALOUS&#39;</span>
+                        <span class="c1"># anomaly_status = &#39;ANOMALOUS&#39;</span>
                         <span class="k">if</span> <span class="n">snab_only</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span>
                                 <span class="n">subsequent_minutes</span> <span class="o">=</span> <span class="mi">0</span>
@@ -689,13 +769,24 @@
 
                     <span class="n">snab_slack_verbose</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">if</span> <span class="n">snab_slack_verbose</span><span class="p">:</span>
-                        <span class="n">slack_message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline SNAB - </span><span class="si">%s</span><span class="s1">* check for *</span><span class="si">%s</span><span class="s1">* with *</span><span class="si">%s</span><span class="s1">* on </span><span class="si">%s</span><span class="se">\n</span><span class="s1">*</span><span class="si">%s</span><span class="s1">* at </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="c1"># @modified 20230713 - Feature #4988: Allow snab to return and save results</span>
+                        <span class="c1"># Added runtime</span>
+                        <span class="n">slack_message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline SNAB - </span><span class="si">%s</span><span class="s1">* check for *</span><span class="si">%s</span><span class="s1">* with *</span><span class="si">%s</span><span class="s1">* on </span><span class="si">%s</span><span class="se">\n</span><span class="s1">*</span><span class="si">%s</span><span class="s1">* at </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="s1">, runtime: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">anomaly_status</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_value</span><span class="p">),</span>
-                            <span class="n">slack_time_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">updated_check_details</span><span class="p">))</span>
+                            <span class="n">slack_time_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">analysis_run_time</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">updated_check_details</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">slack_message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline SNAB - </span><span class="si">%s</span><span class="s1">* check for *</span><span class="si">%s</span><span class="s1">* with *</span><span class="si">%s</span><span class="s1">* on </span><span class="si">%s</span><span class="se">\n</span><span class="s1">*</span><span class="si">%s</span><span class="s1">* at </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="c1"># @modified 20230713 - Feature #4988: Allow snab to return and save results</span>
+                        <span class="c1"># Added runtime</span>
+                        <span class="n">slack_message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline SNAB - </span><span class="si">%s</span><span class="s1">* check for *</span><span class="si">%s</span><span class="s1">* with *</span><span class="si">%s</span><span class="s1">* on </span><span class="si">%s</span><span class="se">\n</span><span class="s1">*</span><span class="si">%s</span><span class="s1">* at </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="s1">, runtime: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">anomaly_status</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_value</span><span class="p">),</span>
-                            <span class="n">slack_time_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">))</span>
+                            <span class="n">slack_time_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">analysis_run_time</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+                            <span class="n">slack_message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline SNAB - </span><span class="si">%s</span><span class="s1">* check for *</span><span class="si">%s</span><span class="s1">* with *</span><span class="si">%s</span><span class="s1">* on </span><span class="si">%s</span><span class="s1"> - `</span><span class="si">%s</span><span class="s1">`</span><span class="se">\n</span><span class="s1">*</span><span class="si">%s</span><span class="s1">* at </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="s1">, runtime: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">anomaly_status</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_value</span><span class="p">),</span> <span class="n">slack_time_string</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">analysis_run_time</span><span class="p">))</span>
 
                     <span class="c1"># @added 20200929 - Task #3748: POC SNAB</span>
                     <span class="c1">#                   Branch #3068: SNAB</span>
@@ -756,7 +847,11 @@
             <span class="n">cache_key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
-                    <span class="n">cache_key</span><span class="p">,</span> <span class="mi">86400</span><span class="p">,</span>
+                    <span class="c1"># @modified 20230925 - Task #5000: Replace alert key scans with sets</span>
+                    <span class="c1"># Switch to hash key instead of scan_iter so create key but</span>
+                    <span class="c1"># just for debug and expire quicker</span>
+                    <span class="c1"># cache_key, 86400,</span>
+                    <span class="n">cache_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s1">&#39;added Panorama panorama.snab.slack_thread_ts Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
@@ -766,6 +861,117 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="s1">&#39;error :: failed to add Panorama panorama.snab.slack_thread_ts Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                     <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20230925 - Task #5000: Replace alert key scans with sets</span>
+            <span class="c1"># Instead of using expiring keys with have a compute cost with</span>
+            <span class="c1"># using scan_iter(match=&#39;[PATTERN]&#39;) switch to using entries in a</span>
+            <span class="c1"># hash key, the management of which has a must lower compute cost.</span>
+            <span class="n">hash_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.snab.slack_threads_ts&#39;</span>
+            <span class="n">hash_key_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span>
+            <span class="n">hash_key_value</span> <span class="o">=</span> <span class="n">slack_thread_ts</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">hash_key</span><span class="p">,</span> <span class="n">hash_key_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hash_key_value</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;alert_slack :: added </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> Redis hash&#39;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="n">hash_key_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hash_key_value</span><span class="p">),</span> <span class="n">hash_key</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: alert_slack :: failed to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> Redis hash - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="n">hash_key_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">hash_key_value</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="c1"># @added 20230706 - Feature #4988: Allow snab to return and save results</span>
+        <span class="c1"># Allow results to be returned and saved</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_name</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labelled_metric_name</span>
+            <span class="n">use_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+                <span class="n">use_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">snab_id</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;snab_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snab_id</span>
+
+            <span class="c1"># @added 20230801 - Feature #5038: snab_results_algorithms</span>
+            <span class="c1">#                   Feature #4988: Allow snab to return and save results</span>
+            <span class="c1"># Add anomaly_id</span>
+            <span class="k">if</span> <span class="n">anomaly_id</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomaly_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomaly_id</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_group</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span>
+                    <span class="n">algorithm_group</span> <span class="o">=</span> <span class="s1">&#39;matrixprofile&#39;</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_group</span><span class="p">:</span>
+                    <span class="n">algorithm_group</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm_group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_group</span>
+
+
+            <span class="k">if</span> <span class="s1">&#39;timeseries&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using timeseries from results&#39;</span><span class="p">)</span>
+
+                <span class="c1"># @added 20230825 - Feature #5038: snab_results_algorithms</span>
+                <span class="c1">#                   Feature #4988: Allow snab to return and save results</span>
+                <span class="c1"># Add last datapoints</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;results_timeseries_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>
+
+            <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">use_metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
+                <span class="n">ts_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/snab.</span><span class="si">%s</span><span class="s1">.results.timeseries.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">training_dir</span><span class="p">,</span> <span class="n">use_metric_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">timeseries_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                    <span class="n">timeseries_formatted</span> <span class="o">=</span> <span class="n">timeseries_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+                    <span class="n">timeseries_formatted</span> <span class="o">=</span> <span class="n">timeseries_formatted</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span><span class="s1">&#39;)&#39;</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ts_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">timeseries_formatted</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">ts_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;saved results timeseries json </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_file</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to save results timeseries json </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">ts_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;timeseries_json&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts_file</span>
+                <span class="n">results_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/snab.</span><span class="si">%s</span><span class="s1">.results.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">training_dir</span><span class="p">,</span> <span class="n">use_metric_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">results_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="c1"># @modified 20230714 - Feature #4988: Allow snab to return and save results</span>
+                        <span class="c1"># Added skipkeys to gracefully skip any user algorithm</span>
+                        <span class="c1"># key that may have None, etc</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">skipkeys</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;saved results json </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">results_json</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to save results json </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">results_json</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: no training_dir: </span><span class="si">%s</span><span class="s1">, to save results json to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">training_dir</span><span class="p">,</span> <span class="n">results_json</span><span class="p">))</span>
+
+        <span class="c1"># @added 20230729 - Feature #5038: snab_results_algorithms</span>
+        <span class="c1">#                   Feature #4988: Allow snab to return and save results</span>
+        <span class="c1"># Save the results for each algorithm in the the results</span>
+        <span class="n">i_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">&#39;algorithms&#39;</span> <span class="ow">in</span> <span class="n">results</span> <span class="ow">and</span> <span class="n">snab_id</span> <span class="ow">and</span> <span class="n">anomaly_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding results for </span><span class="si">%s</span><span class="s1"> algorithms&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]))))</span>
+            <span class="n">i_algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">i_algorithms</span><span class="p">:</span>
+            <span class="n">inserted_results</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">inserted_results</span> <span class="o">=</span> <span class="n">snab_results_algorithms</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: snab_results_algorithms failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inserted_results</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding algorithm results for </span><span class="si">%s</span><span class="s1"> algorithms&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inserted_results</span><span class="p">))))</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_DATA_DIR</span> <span class="ow">in</span> <span class="n">anomaly_data</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_data</span><span class="p">):</span>
@@ -840,7 +1046,10 @@
 
         <span class="k">return</span> <span class="n">anomalous</span></div>
 
-<div class="viewcode-block" id="SNAB.run"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SNAB.run">
+<a class="viewcode-back" href="../../skyline.snab.html#snab.snab.SNAB.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        - Called when the process intializes.</span>
 
@@ -957,9 +1166,60 @@
                 <span class="n">sorted_snab_work</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">unsorted_snab_work</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">snab_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">)</span>
+                    <span class="c1"># @modified 20230717 - Feature #4988: Allow snab to return and save results</span>
+                    <span class="c1">#                      Feature #4888: analyzer - load_shedding</span>
+                    <span class="c1"># Change set to list</span>
+                    <span class="c1"># snab_work = self.redis_conn_decoded.smembers(snab_work_redis_set)</span>
+                    <span class="n">snab_work</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+                <span class="c1"># @added 20230717 - Feature #4988: Allow snab to return and save results</span>
+                <span class="c1">#                   Feature #4888: analyzer - load_shedding</span>
+                <span class="n">skyline_busy</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">metrics_last_analysis_hash_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer.metrics.last_analysis_timestamp&#39;</span>
+                <span class="n">load_shedding_hash_exists</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">load_shedding_hash_exists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;analyzer.metrics.last_analysis_timestamp&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to exists on Redis hash analyzer.metrics.last_analysis_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">err</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">load_shedding_hash_exists</span><span class="p">:</span>
+                    <span class="n">skyline_busy</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">snab_work</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline is busy - analyzer.metrics.last_analysis_timestamp load shedding hash exists&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">skyline_busy</span><span class="p">:</span>
+                    <span class="n">analyzer_labelled_metrics_busy</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">analyzer_labelled_metrics_busy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;analyzer_labelled_metrics.busy&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get analyzer_labelled_metrics.busy Redis key, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">analyzer_labelled_metrics_busy</span><span class="p">:</span>
+                        <span class="n">skyline_busy</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">snab_work</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline is busy - analyzer_labelled_metrics.busy hash exists&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">skyline_busy</span><span class="p">:</span>
+                    <span class="n">mirage_busy</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">mirage_busy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;mirage.busy&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to exists on Redis key mirage.busy - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">mirage_busy</span><span class="p">:</span>
+                        <span class="n">skyline_busy</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">snab_work</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline is busy - mirage.busy key exists&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">skyline_busy</span> <span class="ow">and</span> <span class="n">snab_work</span><span class="p">:</span>
+                    <span class="c1"># @modified 20230717 - Feature #4988: Allow snab to return and save results</span>
+                    <span class="c1">#                      Feature #4888: analyzer - load_shedding</span>
+                    <span class="c1"># Do not skip totally, just do one check per 10 seconds</span>
+                    <span class="c1"># logger.info(&#39;skyline is busy - skipping work and resetting snab_work&#39;)</span>
+                    <span class="c1"># snab_work = []</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline is busy - sleeping for 10 seconds before doing 1 snab_work item&#39;</span><span class="p">)</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                    <span class="n">snab_work</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">snab_work</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+
                 <span class="k">if</span> <span class="n">snab_work</span><span class="p">:</span>
                     <span class="n">total_snab_work_item_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_work</span><span class="p">)</span>
                     <span class="c1"># If multiple work items exist sort them by oldest timestamp</span>
@@ -1000,7 +1260,12 @@
                                 <span class="n">use_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">use_timestamp</span><span class="p">:</span>
                                 <span class="n">age</span> <span class="o">=</span> <span class="n">current_timestamp</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">use_timestamp</span><span class="p">)</span>
-                                <span class="k">if</span> <span class="n">age</span> <span class="o">&gt;</span> <span class="mi">900</span><span class="p">:</span>
+                                <span class="c1"># @modified 20230730 - Feature #4988: Allow snab to return and save results</span>
+                                <span class="c1">#                      Feature #4888: analyzer - load_shedding</span>
+                                <span class="c1"># Now that snab is checking the busy keys</span>
+                                <span class="c1"># remove the age limit</span>
+                                <span class="c1"># if age &gt; 900:</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">age</span><span class="p">:</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_item</span><span class="p">))</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed snab check older than 900 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">check_details</span><span class="p">)))</span>
@@ -1156,7 +1421,12 @@
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping spin_snab_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                        <span class="c1"># @modified 20240202 - Task #5178: Build and test skyline v4.1.0</span>
+                        <span class="c1"># p.join()</span>
+                        <span class="n">killing_pid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;kill spin_snab_process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killed spin_snab_process process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
 
                 <span class="c1"># Determine the results of the assigned check from the updated</span>
                 <span class="c1"># check_details for the purpose of sending snab metrics</span>
@@ -1427,7 +1697,9 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">snab_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></div></div>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_work_redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1437,7 +1709,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

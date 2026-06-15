@@ -1,11 +1,15 @@
 import logging
 import sys
 import traceback
-from os import getpid
+from os import getpid, uname
 from os.path import isdir
 from daemon import runner
 from time import sleep
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
+
+# @added 20240626 - Feature #5352: vista - bigquery
+#                   Feature #5372: vista - bq_update
+from contextlib import nullcontext
 
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -23,6 +27,34 @@ if True:
         print(traceback.format_exc())
         print('failed to import Skyline modules')
         sys.exit(1)
+
+# @added 20240626 - Feature #5352: vista - bigquery
+#                   Feature #5372: vista - bq_update
+# Only enable vista bq_fetcher on the node or cluster if BQ is enabled and this
+# is the worker node
+VISTA_BQ_WORKER = False
+VISTA_BQ_VIRTUALENV_PATH = None
+try:
+    VISTA_BQ_VIRTUALENV_PATH = settings.VISTA_BQ_VIRTUALENV_PATH
+except:
+    VISTA_BQ_VIRTUALENV_PATH = None
+if VISTA_BQ_VIRTUALENV_PATH:
+    VISTA_BQ_WORKER = True
+try:
+    HORIZON_SHARDS = settings.HORIZON_SHARDS
+except:
+    HORIZON_SHARDS = {}
+this_host = str(uname()[1])
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
+if HORIZON_SHARDS and VISTA_BQ_VIRTUALENV_PATH:
+    if HORIZON_SHARD != 0:
+        VISTA_BQ_WORKER = False
+if VISTA_BQ_WORKER:
+    from bq_fetcher import Bq_Fetcher
+else:
+    Bq_Fetcher = nullcontext()
 
 skyline_app = 'vista'
 skyline_app_logger = '%sLog' % skyline_app
@@ -58,6 +90,12 @@ class Vista():
         # Start the fetcher
         logger.info('%s :: agent :: starting Fetcher' % skyline_app)
         Fetcher(pid).start()
+
+        # @added 20240626 - Feature #5352: vista - bigquery
+        #                   Feature #5372: vista - bq_update
+        if VISTA_BQ_WORKER:
+            logger.info('%s :: agent :: starting Bq_Fetcher' % skyline_app)
+            Bq_Fetcher(pid).start()
 
         while 1:
             sleep(100)
