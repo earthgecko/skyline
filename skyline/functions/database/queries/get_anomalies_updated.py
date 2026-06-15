@@ -41,9 +41,19 @@ def get_anomalies_updated(current_skyline_app, anomaly_ids):
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_anomalies_updated :: anomalies_updated_table_meta, err: %s' % str(err))
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_updated_table], anomalies_updated_table.c.anomaly_id.in_(anomaly_ids))
-            results = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_updated_table], anomalies_updated_table.c.anomaly_id.in_(anomaly_ids))
+            stmt = select(anomalies_updated_table).\
+                    where(anomalies_updated_table.c.anomaly_id.in_(anomaly_ids))
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
             for row in results:
                 anomaly_id = row['anomaly_id']
                 updated_anomalies[anomaly_id] = dict(row)
@@ -58,7 +68,7 @@ def get_anomalies_updated(current_skyline_app, anomaly_ids):
                     updated_anomalies[anomaly_id]['previous_value'] = previous_value
                 except:
                     pass
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_anomalies_updated :: failed to build updated_anomalies dict, err: %s' % str(err))
