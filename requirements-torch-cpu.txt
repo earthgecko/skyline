@@ -1,1 +1,6 @@
-pandas-gbq==0.22.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+# @added 20241203 - GraphSubDetector
+torch_geometric==2.6.1
+# @added 20241208 - Feature #: custom_algorithms - GNNSubDetector
+pytorch-tcn==1.2.1
