@@ -178,7 +178,7 @@ def panorama_request():
     # if metric
     #     logger.info('Getting db id for %s' % metric)
     #     # @modified 20170913 - Task #2160: Test skyline with bandit
-    #     # Added nosec to exclude from bandit tests
+    #     # Added "nosec" to exclude from bandit tests
     #     query = 'select id from metrics WHERE metric=\'%s\'' % metric  # nosec
     #     try:
     #         result = mysql_select(skyline_app, query)
@@ -194,6 +194,20 @@ def panorama_request():
     #                  Task #4778: v4.0.0 - update dependencies
     # Use sqlalchemy rather than string-based query construction
     engine = None
+
+    # @added 20260228 - Task #5176: Migrate to sqlalchemy v2 API
+    #                   Task #5628: Build v5.0.0 and test
+    # Deprecate mysql_select and onlyuse sqlalchemy
+    try:
+        engine, fail_msg, trace = get_engine(skyline_app)
+        if fail_msg != 'got MySQL engine':
+            logger.error('error :: could not get a MySQL engine fail_msg - %s' % str(fail_msg))
+        if trace != 'none':
+            logger.error('error :: could not get a MySQL engine trace - %s' % str(trace))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not get a MySQL engine - %s' % str(err))
+
 
     if latest_anomalies:
         logger.info('Getting latest anomalies')
@@ -211,6 +225,8 @@ def panorama_request():
         rows = []
         try:
             rows = db_latest_anomalies(skyline_app)
+            logger.info('debug ::  panorama_request - db_latest_anomalies called')
+
         except:
             logger.error('error :: failed to get anomalies from db: %s' % traceback.format_exc())
             rows = []
@@ -220,7 +236,10 @@ def panorama_request():
         # @modified 20191108 - Feature #3306: Record the end_timestamp of anomalies
         #                      Branch #3262: py3
         # query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies'
-        query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies'
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies'
+        query_string = text('select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies')
 
         needs_and = False
 
@@ -231,7 +250,7 @@ def panorama_request():
             # if metric and metric != 'all':
             if isinstance(metric, str) and metric != 'all':
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = "select id from metrics WHERE metric='%s'" % (metric)  # nosec
                 # try:
@@ -268,7 +287,7 @@ def panorama_request():
             # if metric_like and metric_like != 'all':
             if isinstance(metric_like, str) and metric_like != 'all':
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 rows_returned = None
                 # @modified 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = 'select id from metrics WHERE metric LIKE \'%s\'' % (str(metric_like))  # nosec
@@ -289,6 +308,14 @@ def panorama_request():
 
                 # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
                 metrics_like_str = str(metric_like)
+
+                # @added 20260311 - Task #2732: Prometheus to Skyline
+                # If the user passes labelled_metrics wildcard modify it
+                if metrics_like_str in ['labelled_metrics.%', 'labelled_metrics%']:
+                    logger.info('panorama_request :: metrics_like_str: %s' % metrics_like_str)
+                    metrics_like_str = '%_tenant_id%'
+                    logger.info('panorama_request :: converted to metrics_like_str: %s' % metrics_like_str)
+
                 db_metric_ids = None
                 try:
                     db_metric_ids = metric_ids_from_metric_like(skyline_app, metrics_like_str)
@@ -333,7 +360,10 @@ def panorama_request():
                 search_request = False
                 count_request = True
                 # query_string = 'SELECT metric_id, COUNT(*) FROM anomalies GROUP BY metric_id ORDER BY COUNT(*) DESC'
-                query_string = 'SELECT metric_id, COUNT(*) FROM anomalies'
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query_string = 'SELECT metric_id, COUNT(*) FROM anomalies'
+                query_string = text('SELECT metric_id, COUNT(*) FROM anomalies')
                 needs_and = False
 
         if 'from_timestamp' in request.args:
@@ -403,7 +433,7 @@ def panorama_request():
                     for_app = 'none'
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20210504  - Task #4030: refactoring
                 #                       Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = 'select id from apps WHERE app=\'%s\'' % (str(app))  # nosec
@@ -454,7 +484,7 @@ def panorama_request():
                     for_source = 'none'
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20210504  - Task #4030: refactoring
                 #                       Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = 'select id from sources WHERE source=\'%s\'' % (str(source))  # nosec
@@ -513,7 +543,7 @@ def panorama_request():
                     for_algorithm = 'none'
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20210504  - Task #4030: refactoring
                 #                       Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = 'select id from algorithms WHERE algorithm LIKE \'%s\'' % (str(algorithm))  # nosec
@@ -521,7 +551,12 @@ def panorama_request():
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # query = 'select id from algorithms WHERE algorithm LIKE \'%s\'' % (str(for_algorithm))
-                query = text("""SELECT id FROM algorithms WHERE algorithm LIKE :like_string""")
+                # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query = text("""SELECT id FROM algorithms WHERE algorithm LIKE :like_string""")
+                metrics_like_text = f"SELECT id FROM algorithms WHERE algorithm LIKE '{for_algorithm}'"
+                query = text(metrics_like_text)
+
                 if not engine:
                     try:
                         engine, fail_msg, trace = get_engine(skyline_app)
@@ -538,11 +573,21 @@ def panorama_request():
                     # Use sqlalchemy rather than string-based query construction
                     # rows = mysql_select(skyline_app, query)
                     rows = []
-                    connection = engine.connect()
-                    results = connection.execute(query, like_string=str(for_algorithm))
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #results = connection.execute(query, like_string=str(for_algorithm))
+                    with engine.connect() as connection:
+                        # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(query, like_string=str(for_algorithm))
+                        result = connection.execute(query)
+
+                        results = [dict(row._mapping) for row in result.fetchall()]
+
                     for row in results:
                         rows.append([row['id'], for_algorithm])
-                    connection.close()
+                    #connection.close()
                 except:
                     logger.error('error :: failed to get algorithm ids from db: %s' % traceback.format_exc())
                     rows = []
@@ -575,7 +620,7 @@ def panorama_request():
                     for_host = 'none'
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20210504  - Task #4030: refactoring
                 #                       Task #4022: Move mysql_select calls to SQLAlchemy
                 # query = 'select id from hosts WHERE host=\'%s\'' % (str(host))  # nosec
@@ -596,7 +641,7 @@ def panorama_request():
                 try:
                     found_id = hosts[for_host]
                 except:
-                    logger.error('error :: failed to get host id from hosts for %s' % for_host)
+                    logger.error('error :: backend.panorama_request -failed to get host id from hosts for %s' % for_host)
                     found_id = None
 
                 if found_id:
@@ -649,7 +694,14 @@ def panorama_request():
                     query_string, order, limit)
 
         try:
-            rows = mysql_select(skyline_app, search_query)
+            # @modified 20260228 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #rows = mysql_select(skyline_app, search_query)
+            stmt = text(search_query)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            rows = results
         except:
             logger.error('error :: failed to get anomalies from db: %s' % traceback.format_exc())
             rows = []
@@ -667,15 +719,39 @@ def panorama_request():
             logger.info('debug ::  panorama_json - %s' % str(panorama_json))
 
     for row in rows:
+
         if search_request:
-            anomaly_id = str(row[0])
-            metric_id = str(row[1])
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #anomaly_id = str(row[0])
+            #metric_id = str(row[1])
+            # @modified 20260228 - Task #5176: Migrate to sqlalchemy v2 API
+            # With the changes, in some instances the response returns rows as
+            # dicts at other times rows as tuples, determine which
+            if not isinstance(row, dict):
+                anomaly_id = str(row[0])
+                metric_id = str(row[1])
+            else:
+                anomaly_id = str(row['id'])
+                metric_id = str(row['metric_id'])
+
         if count_request:
-            metric_id = str(row[0])
-            anomaly_count = str(row[1])
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #metric_id = str(row[0])
+            #anomaly_count = str(row[1])
+            #metric_id = str(row['metric_id'])
+            #anomaly_count = str(row['count'])
+            # @modified 20260228 - Task #5176: Migrate to sqlalchemy v2 API
+            if not isinstance(row, dict):
+                metric_id = str(row[1])
+                anomaly_count = str(row[1])
+            else:
+                metric_id = str(row['metric_id'])
+                anomaly_count = str(row['count'])
 
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
@@ -695,16 +771,32 @@ def panorama_request():
             metric = None
 
         if search_request:
-            anomalous_datapoint = str(row[2])
-            anomaly_timestamp = str(row[3])
-            anomaly_timestamp = str(row[3])
-            full_duration = str(row[4])
-            created_timestamp = str(row[5])
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            # @modified 20260228 - Task #5176: Migrate to sqlalchemy v2 API
+            if not isinstance(row, dict):
+                anomalous_datapoint = str(row[2])
+                anomaly_timestamp = str(row[3])
+                anomaly_timestamp = str(row[3])
+                full_duration = str(row[4])
+                created_timestamp = str(row[5])
+            else:
+                anomalous_datapoint = str(float(row['anomalous_datapoint']))
+                anomaly_timestamp = str(row['anomaly_timestamp'])
+                full_duration = str(row['full_duration'])
+                created_timestamp = str(row['created_timestamp'])
+
             # @modified 20191108 - Feature #3306: Record the anomaly_end_timestamp
             #                      Branch #3262: py3
             # anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp)
             # anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp])
-            anomaly_end_timestamp = str(row[6])
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            if not isinstance(row, dict):
+                anomaly_end_timestamp = str(row[6])
+            else:
+                anomaly_end_timestamp = str(row['anomaly_end_timestamp'])
+
             # anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp)
             anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp])
             anomalous_metrics.append(str(metric))
@@ -748,7 +840,7 @@ def panorama_request():
 #     """
 #     table = '%ss' % thing
 #     # @modified 20170913 - Task #2160: Test skyline with bandit
-#     # Added nosec to exclude from bandit tests
+#     # Added "nosec" to exclude from bandit tests
 #     query = 'select %s from %s' % (thing, table)  # nosec
 #
 #     # @modified 20220802 - Task #2732: Prometheus to Skyline
@@ -1095,7 +1187,7 @@ def panorama_anomaly_details(anomaly_id):
         logger.error(traceback.format_exc())
         logger.error('error :: panorama_anomaly_details :: anomalies_table_meta - %s' % str(err))
 
-    # Added nosec to exclude from bandit tests
+    # Added "nosec" to exclude from bandit tests
     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
     #                      Task #4778: v4.0.0 - update dependencies
     # Use sqlalchemy rather than string-based query construction
@@ -1109,19 +1201,24 @@ def panorama_anomaly_details(anomaly_id):
     #     return False
     try:
         stmt = select(anomalies_table.c.metric_id).where(anomalies_table.c.id == int(anomaly_id))
-        connection = engine.connect()
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             metric_id = row['metric_id']
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error('error :: panorama_anomaly_details :: failed to get metric_id from anomalies table for anomaly_id: %s - %s' % (
             str(anomaly_id, err)))
 
     if metric_id > 0:
         logger.info('panorama_anomaly_details - getting metric for metric_id - %s' % str(metric_id))
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
@@ -1161,10 +1258,18 @@ def panorama_anomaly_details(anomaly_id):
 
     rows = []
     try:
-        stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_timestamp, anomalies_table.c.full_duration, anomalies_table.c.created_timestamp, anomalies_table.c.anomaly_end_timestamp]).\
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_timestamp, anomalies_table.c.full_duration, anomalies_table.c.created_timestamp, anomalies_table.c.anomaly_end_timestamp]).\
+        stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_timestamp, anomalies_table.c.full_duration, anomalies_table.c.created_timestamp, anomalies_table.c.anomaly_end_timestamp).\
             where(anomalies_table.c.id == int(anomaly_id))
-        connection = engine.connect()
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             anomalous_datapoint = float(row['anomalous_datapoint'])
             anomaly_timestamp = int(row['anomaly_timestamp'])
@@ -1176,7 +1281,7 @@ def panorama_anomaly_details(anomaly_id):
                 anomaly_end_timestamp = None
             anomaly_data = [int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp]
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error('error :: panorama_anomaly_details :: failed to get anomaly from the db - %s' % err)
         # @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
@@ -1291,6 +1396,13 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             post_data = endpoint_params['post_data']
             logger.info('get_cluster_data :: post_data was passed')
 
+    # @added 20251022 - Feature #4376: webapp - update_external_settings
+    # The manage_external_settings function uses a timeout of 30 but when this
+    # endpoint call is made in a cluster_call it use the get_cluster_call
+    # timeout of 10 seconds, so increasing here as well
+    if api_endpoint == 'update_external_settings':
+        use_timeout = (int(connect_timeout), 30)
+
     for item in settings.REMOTE_SKYLINE_INSTANCES:
         r = None
         user = None
@@ -1349,6 +1461,13 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             if method == 'POST':
                 connect_timeout = 5
                 read_timeout = 10
+                # @added 20251023 - Feature #4376: webapp - update_external_settings
+                # The manage_external_settings function uses a timeout of 30 but when this
+                # endpoint call is made in a cluster_call it use the get_cluster_call
+                # timeout of 10 seconds, so increasing here as well
+                if api_endpoint == 'update_external_settings':
+                    read_timeout = 30
+
                 use_timeout = (int(connect_timeout), int(read_timeout))
                 if use_auth:
                     r = requests.post(url, auth=(user, password), json=post_data, timeout=use_timeout, verify=settings.VERIFY_SSL)
@@ -1880,12 +1999,20 @@ def get_yhat_values(
                 #         a_end_timestamp = 0
                 #     anomalies_at.append([a_timestamp, a_value, a_end_timestamp])
 
-                stmt = select([anomalies_table.c.anomaly_timestamp, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_end_timestamp]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.anomaly_timestamp, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_end_timestamp]).\
+                stmt = select(anomalies_table.c.anomaly_timestamp, anomalies_table.c.anomalous_datapoint, anomalies_table.c.anomaly_end_timestamp).\
                     where(anomalies_table.c.metric_id == int(metric_id)).\
                     where(anomalies_table.c.anomaly_timestamp >= from_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp <= until_timestamp)
-                connection = engine.connect()
-                results = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #results = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
                     a_timestamp = row['anomaly_timestamp']
                     a_value = float(row['anomalous_datapoint'])
@@ -1894,7 +2021,7 @@ def get_yhat_values(
                     except:
                         a_end_timestamp = 0
                     anomalies_at.append([a_timestamp, a_value, a_end_timestamp])
-                connection.close()
+                #connection.close()
             except Exception as err:
                 logger.error('error :: get_yhat_values :: failed to get anomalies from db - %s' % err)
                 # rows = []
@@ -2859,6 +2986,11 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
         use_base_name = str(labelled_metric_name)
         data_source = 'victoriametrics'
 
+    # @added 20251111 - use 7 days of data for the plot
+    use_from_timestamp = until_timestamp - (86400 * 7)
+    if from_timestamp != use_from_timestamp:
+        from_timestamp = use_from_timestamp
+
     if data_source == 'graphite':
         try:
             timeseries = get_graphite_metric(
@@ -2956,7 +3088,7 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
             str(until_timestamp), sane_metricname)
         save_to_path = path.dirname(save_to_file)
         if plot_type == 'not_anomalous':
-            title = 'Not anomalous analysis\n%s' % metric
+            title = 'Not anomalous analysis (only events in the last 24 hours highlighted)\n%s' % metric
         if plot_type == 'anomalies':
             title = 'Anomalies\n%s' % metric
 
@@ -2972,7 +3104,7 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
                 if plot_type == 'not_anomalous':
                     plot(
                         df, anomaly=plot_df, anomaly_color='green', title=title,
-                        ts_markersize=1, anomaly_alpha=0.4, legend=False,
+                        ts_markersize=1, anomaly_alpha=0.3, legend=False,
                         save_to_file=save_to_file)
                 if plot_type == 'anomalies':
                     plot(

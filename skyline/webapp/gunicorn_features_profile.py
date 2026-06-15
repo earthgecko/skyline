@@ -35,6 +35,10 @@ threads = 2
 timeout = 120
 backlog = 10
 
+# @added 20260221 - Task #5711: Test Ubuntu 24.04
+#                   Task #5628: Build v5.0.0 and test
+control_socket = '%s/webapp_features_profile.gunicorn.ctl' % settings.SKYLINE_TMP_DIR
+
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)

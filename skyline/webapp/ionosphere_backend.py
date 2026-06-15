@@ -49,7 +49,9 @@ from skyline_functions import (
     get_redis_conn_decoded,
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
-    mysql_select,
+    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+    # Removed mysql_select
+    #mysql_select,
     nonNegativeDerivative,
 )
 
@@ -124,13 +126,22 @@ from functions.plots.vortex_training_data_graphs import get_vortex_training_data
 #                   Branch #4300: prometheus
 from create_matplotlib_graph import create_matplotlib_graph
 
-# @added 20240425 - Feature #5318: motif_annihilation
+# @added 20240425 - Feature #5318: common_motifs
 from functions.database.queries.get_fps_for_metric import get_fps_for_metric
 from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
 
 # @added 20241023 - Feature #5512: labelled_anomalies - info message
 #                   Ideas #2476: Label and relate anomalies
 from thunder.thunder_alerters import thunder_alert
+
+# @added 20241213 - Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
+#                   Bug #5522: Handle duplicate metric names
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
+# @added 20241213 - Feature #5572: get_all_fps
+from functions.database.queries.get_all_fps import get_all_fps
+
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
 
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
@@ -274,6 +285,12 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
                     data_file = False
                 if re.search('mirage.redis.json', file):
                     data_file = False
+
+                # @added 20260224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                if file.endswith('.custom_algorithms_results.json'):
+                    data_file = False
+
                 if re.search(requested_timestamp, root) and data_file:
                     metric_name = file.replace('.json', '')
                     add_metric = True
@@ -451,6 +468,18 @@ def ionosphere_data(
                 #                   Feature #3566: custom_algorithms
                 if file.endswith('.custom_algorithms_results.json'):
                     data_file = False
+
+                # @modified 20260506 - Feature #5318: common_motifs
+                # Remove common_motifs.matched_motifs and common_motifs.pw5_timeseries
+                # related labelled_metrics dirs
+                if 'common_motifs.matched_motifs' in file:
+                    continue
+                if 'common_motifs.matched_motifs' in root:
+                    continue
+                if 'common_motifs.pw5_timeseries' in file:
+                    continue
+                if 'common_motifs.pw5_timeseries' in root:
+                    continue
 
                 if re.search('\\d{10}', root) and data_file:
                     metric_name = file.replace('.json', '')
@@ -921,9 +950,12 @@ def ionosphere_metric_data(
             if i_file.endswith('.mirage.analysed.downsampled.png'):
                 append_image = False
 
-            # @added 20240405 - Feature #5318: motif_annihilation
+            # @added 20240405 - Feature #5318: common_motifs
             if i_file.endswith('.png'):
                 if 'motif_annihilation' in i_file:
+                    append_image = True
+            if i_file.endswith('.png'):
+                if 'common_motifs' in i_file:
                     append_image = True
 
             if append_image:
@@ -1033,6 +1065,14 @@ def ionosphere_metric_data(
             with open((ts_json_file), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: failed to replace nan with None, err: %s' % (
+                        err))
+
             ts_json = literal_eval(timeseries_array_str)
         except:
             ts_json_ok = False
@@ -1066,6 +1106,14 @@ def ionosphere_metric_data(
             with open((ionosphere_json_file), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: ionosphere_backend :: failed to replace nan with None, err: %s' % (
+                        err))
+
             anomalous_timeseries = literal_eval(timeseries_array_str)
             logger.info('ionosphere_backend :: anomalous_timeseries loaded data from ionosphere_json_file: %s' % ionosphere_json_file)
         except:
@@ -1081,6 +1129,14 @@ def ionosphere_metric_data(
             with open((ts_json_file), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: ionosphere_backend :: failed to replace nan with None, err: %s' % (
+                        err))
+
             anomalous_timeseries = literal_eval(timeseries_array_str)
             logger.info('ionosphere_backend :: anomalous_timeseries loaded data from ts_json_file: %s' % ts_json_file)
         except:
@@ -1103,6 +1159,14 @@ def ionosphere_metric_data(
                 with open((fallback_json_file), 'r') as f:
                     raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        logger.error('error :: ionosphere_backend :: failed to replace nan with None, err: %s' % (
+                            err))
+
                 anomalous_timeseries = literal_eval(timeseries_array_str)
                 logger.info('ionosphere_backend :: anomalous_timeseries loaded data from fallback_json_file - %s' % fallback_json_file)
             except:
@@ -1434,10 +1498,19 @@ def ionosphere_metric_data(
         # That is more than it looks...
 
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(fp_id))
-            result = connection.execute(stmt)
-            for row in result:
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(fp_id))
+            stmt = select(ionosphere_matched_table).where(ionosphere_matched_table.c.fp_id == int(fp_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 matched_timestamp = row['metric_timestamp']
                 matched_timestamps.append(int(matched_timestamp))
                 # @added 20210421 - Feature #4014: Ionosphere - inference
@@ -1449,7 +1522,7 @@ def ionosphere_metric_data(
                         matched_timestamps_motif_ids_dict[int(matched_timestamp)] = motifs_matched_id
                 except KeyError:
                     motifs_matched_id = 0
-            connection.close()
+            #connection.close()
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine timestamps from ionosphere_matched for fp_id %s' % str(fp_id))
@@ -1494,17 +1567,26 @@ def ionosphere_metric_data(
             raise  # to webapp to return in the UI
 
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
-            result = connection.execute(stmt)
-            for row in result:
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+            stmt = select(ionosphere_table).where(ionosphere_table.c.id == int(fp_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 fp_db_full_duration = int(row['full_duration'])
                 logger.info('found fp id full_duration from the DB - %s' % (str(fp_db_full_duration)))
                 # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
                 # For ionosphere_echo features profiles
                 fp_anomaly_timestamp = int(row['anomaly_timestamp'])
                 logger.info('found fp anomaly_timestamp from the DB - %s' % (str(fp_anomaly_timestamp)))
-            connection.close()
+            #connection.close()
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine full_duration from ionosphere for fp_id %s' % str(fp_id))
@@ -1600,15 +1682,24 @@ def ionosphere_metric_data(
 
         layers_id_matched = []
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.fp_id == int(fp_id))
-            result = connection.execute(stmt)
-            for row in result:
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.fp_id == int(fp_id))
+            stmt = select(ionosphere_layers_matched_table).where(ionosphere_layers_matched_table.c.fp_id == int(fp_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 matched_layers_id = row['layer_id']
                 matched_timestamp = row['anomaly_timestamp']
                 layers_id_matched.append([int(matched_timestamp), int(matched_layers_id)])
                 # logger.info('found matched_timestamp %s' % (str(matched_timestamp)))
-            connection.close()
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -1733,6 +1824,14 @@ def ionosphere_metric_data(
                     analyzer_redis_json_file, err))
             if raw_timeseries:
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        logger.error('error :: ionosphere_metric_data :: failed to replace nan with None, err: %s' % (
+                            err))
+
                 del raw_timeseries
                 timeseries = literal_eval(timeseries_array_str)
 
@@ -1797,6 +1896,14 @@ def ionosphere_metric_data(
                     mirage_analysed_downsampled_data_json_file, err))
             if raw_timeseries:
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        logger.error('error :: ionosphere_metric_data :: failed to replace nan with None, err: %s' % (
+                            err))
+
                 del raw_timeseries
                 timeseries = literal_eval(timeseries_array_str)
             if timeseries:
@@ -1911,13 +2018,23 @@ def features_profile_details(fp_id):
     logger.info('%s :: ionosphere_table OK' % function_str)
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+        stmt = select(ionosphere_table).where(ionosphere_table.c.id == int(fp_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         # fp_details_object = row
         fp_details_object = dict(row)
-        connection.close()
+        #connection.close()
         try:
             tsfresh_version = row['tsfresh_version']
         except:
@@ -2516,7 +2633,13 @@ def ionosphere_search(default_query, search_query):
             # metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
             # logger.info('executing metrics_like_query - %s' % metrics_like_query)
             # like_string_var = str(metric_like_str)
-            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+
+            # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
+            metrics_like_query = text(metrics_like_text)
+
             # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
             logger.info('metrics_like_query - "%s"' % metrics_like_query)
 
@@ -2525,19 +2648,32 @@ def ionosphere_search(default_query, search_query):
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('metrics_like_query running query')
 
-                connection = engine.connect()
+                #connection = engine.connect()
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
                 # results = connection.execute(metrics_like_query)
-                results = connection.execute(metrics_like_query, like_string=metric_like_str)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #results = connection.execute(metrics_like_query, like_string=metric_like_str)
+                with engine.connect() as connection:
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query, like_string=metric_like_str)
+                    result = connection.execute(metrics_like_query)
+
+                    results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
-                    metric_id = str(row[0])
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #metric_id = str(row[0])
+                    metric_id = str(row['id'])
+
                     if metric_ids == '':
                         metric_ids = '%s' % (metric_id)
                     else:
                         new_metric_ids = '%s, %s' % (metric_ids, metric_id)
                         metric_ids = new_metric_ids
-                connection.close()
+                #connection.close()
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('metrics_like_query done')
 
@@ -2616,16 +2752,38 @@ def ionosphere_search(default_query, search_query):
     duplicate_metrics = {}
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.id != 0)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.id != 0)
+        stmt = select(metrics_table).where(metrics_table.c.id != 0)
         # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
         logger.info('selecting all metrics with id > 0')
+
+        # @added 20260114 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        if 'WHERE metric_id IN (' in query_string:
+            metric_ids_list = metric_ids.split(',')
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id.in_(metric_ids_list))
+            stmt = select(metrics_table).where(metrics_table.c.id.in_(metric_ids_list))
+            logger.info('selecting all metrics with metric_id in metric_ids_list')
+
         if default_ionosphere_search:
-            stmt = select([metrics_table]).where(metrics_table.c.id == 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id == 0)
+            stmt = select(metrics_table).where(metrics_table.c.id == 0)
             logger.info('defult Ionosphere search so not selecting all metrics')
 
-        result = connection.execute(stmt)
-        for row in result:
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             metric_id = int(row['id'])
             metric_name = str(row['metric'])
             # @added 20241120 - Bug #5522: Handle duplicate metric names
@@ -2636,7 +2794,7 @@ def ionosphere_search(default_query, search_query):
             # @added 20241120 - Bug #5522: Handle duplicate metric names
             duplicate_metrics[metric_name] = [metric_id]
 
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -2703,34 +2861,64 @@ def ionosphere_search(default_query, search_query):
 
     all_fps = []
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # @modified 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
         # apply_metric_id if known
         if not apply_metric_id:
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.id != 0)
             # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
             logger.info('selecting all features profiles with id > 0')
+
+            # @added 20260114 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            if 'WHERE metric_id IN (' in query_string:
+                metric_ids_list = metric_ids.split(',')
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id.in_(metric_ids_list))
+                stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id.in_(metric_ids_list))
+                logger.info('selecting all features profiles with where metric_id in metric_ids_list')
+
             if default_ionosphere_search:
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.id == 0)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == 0)
+                stmt = select(ionosphere_table).where(ionosphere_table.c.id == 0)
                 logger.info('default Ionosphere search so not selecting all features profiles')
         else:
             # @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
             logger.info('optimised - selecting all features profiles with metric_id == %s' % str(apply_metric_id))
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == apply_metric_id)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == apply_metric_id)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == apply_metric_id)
         # @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
         if find_unvalidated:
             logger.info('optimised - selecting all features profiles with validated == 0')
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.validated == 0)
 
         # @added 20241021 - Feature #5479: ionosphere.alias_features_profile
         #                   Feature #5481: ionosphere.copy_features_profile
         # Allow to select alias features profiles only
         if alias_query:
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.alias_id >= 1)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.alias_id >= 1)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.alias_id >= 1)
             logger.info('selecting only features profiles with alias_id')
-
-        result = connection.execute(stmt)
-        for row in result:
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             try:
                 fp_id = int(row['id'])
                 fp_metric_id = int(row['metric_id'])
@@ -2799,7 +2987,7 @@ def ionosphere_search(default_query, search_query):
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
                 logger.error('error :: bad row data')
-        connection.close()
+        #connection.close()
         all_fps.sort(key=operator.itemgetter(int(0)))
     except:
         trace = traceback.format_exc()
@@ -2832,18 +3020,32 @@ def ionosphere_search(default_query, search_query):
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('count_by_metric and search_query running query - "%s"' % query_string)
 
-                stmt = query_string
-                connection = engine.connect()
-                # for row in engine.execute(stmt):
-                for row in connection.execute(stmt):
-                    fp_count = int(row[0])
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = query_string
+                stmt = text(query_string)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                ## for row in engine.execute(stmt):
+                #for row in connection.execute(stmt):
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #fp_count = int(row[0])
+                    fp_count = int(row['COUNT(*)'])
+
                     fp_metric_id = int(row['metric_id'])
                     for metric_obj in metrics:
                         if fp_metric_id == metric_obj[0]:
                             fp_metric = metric_obj[1]
                             break
                     features_profiles_count.append([fp_count, fp_metric_id, str(fp_metric)])
-                connection.close()
+                #connection.close()
                 logger.info('%s :: features_profiles_count %s' % (function_str, str(len(features_profiles_count))))
             except:
                 trace = traceback.format_exc()
@@ -2861,10 +3063,20 @@ def ionosphere_search(default_query, search_query):
                 try:
                     # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                     logger.info('count_request and search_query -  running query - "%s"' % query_string)
-                    stmt = query_string
-                    connection = engine.connect()
-                    # for row in engine.execute(stmt):
-                    for row in connection.execute(stmt):
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = query_string
+                    stmt = text(query_string)
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    ## for row in engine.execute(stmt):
+                    #for row in connection.execute(stmt):
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         item_count = int(row[0])
                         item_id = int(row[1])
                         if count_by_matched or count_by_checked:
@@ -2878,7 +3090,7 @@ def ionosphere_search(default_query, search_query):
                             checked_count.append([item_count, item_id, metric_name])
                         if count_by_generation:
                             generation_count.append([item_count, item_id])
-                    connection.close()
+                    #connection.close()
                 except:
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
@@ -2916,13 +3128,19 @@ def ionosphere_search(default_query, search_query):
 
     if engine_needed and engine and search_query:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if get_metric_profiles:
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('engine_needed and engine and search_query - get_metric_profiles - running query')
 
-                # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metrics_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
+                # stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == int(metric_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metrics_id))
+                stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == int(metrics_id))
                 logger.debug('debug :: stmt - is abstracted - for metric_id: %s' % str(int(metrics_id)))
             else:
 
@@ -2931,11 +3149,22 @@ def ionosphere_search(default_query, search_query):
                 # search, instead of raising all the metrics in the metrics query
                 # further above, just inefficient
                 if default_ionosphere_search:
-                    stmt = query_string
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = query_string
+                    stmt = text(query_string)
+
                     logger.debug('debug :: stmt - %s' % stmt)
                     default_search_metric_ids = []
                     try:
-                        result = connection.execute(stmt)
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(stmt):
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        result = results
+
                     except:
                         trace = traceback.format_exc()
                         logger.error('%s' % trace)
@@ -2974,7 +3203,11 @@ def ionosphere_search(default_query, search_query):
                     #                      Task #4778: v4.0.0 - update dependencies
                     # Use sqlalchemy rather than string-based query construction
                     # select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id in (%s)' % select_metric_ids
-                    select_metric_ids_stmt = select([metrics_table], metrics_table.c.id.in_(select_metric_ids_list))
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #select_metric_ids_stmt = select([metrics_table], metrics_table.c.id.in_(select_metric_ids_list))
+                    select_metric_ids_stmt = select(metrics_table).\
+                            where(metrics_table.c.id.in_(select_metric_ids_list))
 
                     # @modified 20201122 - Bug #3844: Handle no features profile in webapp
                     # When there are no features profiles in the ionosphere
@@ -2985,9 +3218,19 @@ def ionosphere_search(default_query, search_query):
                     if select_metric_ids == '':
                         select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id=0'
                         logger.info('warning :: determined 0 metrics with features profiles for the default Ionosphere search')
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        select_metric_ids_stmt = text(select_metric_ids_stmt)
 
                     try:
-                        metrics_result = connection.execute(select_metric_ids_stmt)
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #metrics_result = connection.execute(select_metric_ids_stmt)
+                        with engine.connect() as connection:
+                            result = connection.execute(select_metric_ids_stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        metrics_result = results
+
                         for row in metrics_result:
                             metric_id = int(row['id'])
                             metric_name = str(row['metric'])
@@ -3015,14 +3258,26 @@ def ionosphere_search(default_query, search_query):
 
                 stmt = query_string
                 logger.debug('debug :: stmt - %s' % stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                stmt = text(query_string)
 
             # @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
             if find_unvalidated:
                 logger.info('optimised - selecting all features profiles with validated == 0')
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+                stmt = select(ionosphere_table).where(ionosphere_table.c.validated == 0)
 
             try:
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
@@ -3122,7 +3377,7 @@ def ionosphere_search(default_query, search_query):
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
                     logger.error('error :: bad row data')
-            connection.close()
+            #connection.close()
             features_profiles.sort(key=operator.itemgetter(int(0)))
             logger.debug('debug :: features_profiles length - %s' % str(len(features_profiles)))
             # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
@@ -3155,19 +3410,33 @@ def ionosphere_search(default_query, search_query):
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if get_metric_profiles:
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('features_profiles and layers_present - get_metric_profiles - running query')
-                stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == int(metrics_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == int(metrics_id))
+                stmt = select(ionosphere_layers_table).where(ionosphere_layers_table.c.metric_id == int(metrics_id))
                 # logger.debug('debug :: stmt - is abstracted')
             else:
                 layers_query_string = 'SELECT * FROM ionosphere_layers'
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('features_profiles and layers_present - not get_metric_profiles - running query - "%s"' % layers_query_string)
                 stmt = layers_query_string
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                stmt = text(layers_query_string)
+
                 # logger.debug('debug :: stmt - %s' % stmt)
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 try:
                     layer_id = int(row['id'])
@@ -3194,7 +3463,7 @@ def ionosphere_search(default_query, search_query):
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
                     logger.error('error :: bad row data')
-            connection.close()
+            #connection.close()
             features_profiles_layers.sort(key=operator.itemgetter(int(0)))
             logger.debug('debug :: features_profiles and layers_present - features_profiles length - %s' % str(len(features_profiles)))
         except:
@@ -3277,19 +3546,31 @@ def ionosphere_search(default_query, search_query):
 #            required_option = 'full_duration'
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)  # nosec
                 if required_option == 'full_duration':
-                    stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.enabled == 1)
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.enabled == 1)
+                    stmt = select(ionosphere_table.c.full_duration).where(ionosphere_table.c.enabled == 1)
                 if required_option == 'enabled':
-                    stmt = select([ionosphere_table.c.enabled]).where(ionosphere_table.c.enabled == 1)
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.enabled]).where(ionosphere_table.c.enabled == 1)
+                    stmt = select(ionosphere_table.c.enabled).where(ionosphere_table.c.enabled == 1)
                 if required_option == 'tsfresh_version':
-                    stmt = select([ionosphere_table.c.tsfresh_version]).where(ionosphere_table.c.enabled == 1)
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.tsfresh_version]).where(ionosphere_table.c.enabled == 1)
+                    stmt = select(ionosphere_table.c.tsfresh_version).where(ionosphere_table.c.enabled == 1)
                 if required_option == 'generation':
-                    stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.enabled == 1)
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.enabled == 1)
+                    stmt = select(ionosphere_table.c.generation).where(ionosphere_table.c.enabled == 1)
 
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -3297,12 +3578,18 @@ def ionosphere_search(default_query, search_query):
                 # Do not log SQL
                 # logger.info('engine_needed and engine and default_query - running query - "%s"' % stmt)
                 logger.info('engine_needed and engine and default_query - running query')
-                connection = engine.connect()
-                # for row in engine.execute(stmt):
-                for row in connection.execute(stmt):
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                ## for row in engine.execute(stmt):
+                #for row in connection.execute(stmt):
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     value = row[str(required_option)]
                     all_list.append(value)
-                connection.close()
+                #connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
@@ -3603,12 +3890,22 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
 
     metrics_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             metrics_id = int(row['id'])
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3633,12 +3930,22 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
 
     layer_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.fp_id == fp_id)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.fp_id == fp_id)
+        stmt = select(ionosphere_layers_table).where(ionosphere_layers_table.c.fp_id == fp_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             layer_id = int(row['id'])
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3650,14 +3957,31 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     if layer_id > 0:
         return layer_id, True, None, None, fail_msg, trace
 
+    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+    tenant_id = 0
+    try:
+        tenant_id = get_tenant_id(skyline_app, metric_id=int(metrics_id), base_name=None, log=False)
+    except Exception as err:
+        logger.error('error :: layers :: get_tenant_id failed, err: %s' % (
+            err))
+        tenant_id = 0
+
     new_layer_id = False
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = ionosphere_layers_table.insert().values(
-            fp_id=fp_id, metric_id=int(metrics_id), enabled=1, label=label)
-        result = connection.execute(ins)
-        new_layer_id = result.inserted_primary_key[0]
-        connection.close()
+            fp_id=fp_id, metric_id=int(metrics_id), enabled=1, label=label,
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id=tenant_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #new_layer_id = result.inserted_primary_key[0]
+        #connection.close()
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_layer_id = result.inserted_primary_key[0]
+
         logger.info('new ionosphere layer_id: %s' % str(new_layer_id))
     except:
         trace = traceback.format_exc()
@@ -3686,7 +4010,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     layers_added = []
     # D layer
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = layers_algorithms_table.insert().values(
             layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
             layer='D', type='value', condition=d_condition,
@@ -3696,9 +4020,15 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             # @modified 20160315 - Feature #1972: ionosphere_layers - use D layer boundary for upper limit
             # Added d_boundary_times
             times_in_row=int(d_boundary_times))
-        result = connection.execute(ins)
-        new_layer_algorithm_id = result.inserted_primary_key[0]
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #new_layer_algorithm_id = result.inserted_primary_key[0]
+        #connection.close()
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_layer_algorithm_id = result.inserted_primary_key[0]
+
         logger.info('new ionosphere_algorithms D layer id: %s' % str(new_layer_algorithm_id))
         new_layer_algorithm_ids.append(new_layer_algorithm_id)
         layers_added.append('D')
@@ -3713,7 +4043,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
 
     # E layer
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = layers_algorithms_table.insert().values(
             layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
             layer='E', type='value', condition=e_condition,
@@ -3721,9 +4051,15 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             # layer_boundary=int(e_boundary_limit),
             layer_boundary=str(e_boundary_limit),
             times_in_row=int(e_boundary_times))
-        result = connection.execute(ins)
-        new_layer_algorithm_id = result.inserted_primary_key[0]
-        connection.close()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #new_layer_algorithm_id = result.inserted_primary_key[0]
+        #connection.close()
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_layer_algorithm_id = result.inserted_primary_key[0]
+
         logger.info('new ionosphere_algorithms E layer id: %s' % str(new_layer_algorithm_id))
         new_layer_algorithm_ids.append(new_layer_algorithm_id)
         layers_added.append('E')
@@ -3741,15 +4077,21 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     # D is [0], E is [1], so D1 has to be [2]
     if d1_condition:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             ins = layers_algorithms_table.insert().values(
                 layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
                 layer='D1', type='value', condition=d1_condition,
                 layer_boundary=str(d1_boundary_limit),
                 times_in_row=int(d1_boundary_times))
-            result = connection.execute(ins)
-            new_layer_algorithm_id = result.inserted_primary_key[0]
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #new_layer_algorithm_id = result.inserted_primary_key[0]
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_layer_algorithm_id = result.inserted_primary_key[0]
+
             logger.info('new ionosphere_algorithms D1 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('D1')
@@ -3765,13 +4107,19 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     # Es layer
     if es_layer:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             ins = layers_algorithms_table.insert().values(
                 layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
                 layer='Es', type='day', condition='in', layer_boundary=es_day)
-            result = connection.execute(ins)
-            new_layer_algorithm_id = result.inserted_primary_key[0]
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #new_layer_algorithm_id = result.inserted_primary_key[0]
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_layer_algorithm_id = result.inserted_primary_key[0]
+
             logger.info('new ionosphere_algorithms Es layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('Es')
@@ -3787,14 +4135,20 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     # F1 layer
     if f1_layer:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             ins = layers_algorithms_table.insert().values(
                 layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
                 layer='F1', type='time', condition='>',
                 layer_boundary=str(from_time))
-            result = connection.execute(ins)
-            new_layer_algorithm_id = result.inserted_primary_key[0]
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #new_layer_algorithm_id = result.inserted_primary_key[0]
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_layer_algorithm_id = result.inserted_primary_key[0]
+
             logger.info('new ionosphere_algorithms F1 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('F1')
@@ -3810,14 +4164,20 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     # F2 layer
     if f2_layer:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             ins = layers_algorithms_table.insert().values(
                 layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
                 layer='F2', type='time', condition='<',
                 layer_boundary=str(until_time))
-            result = connection.execute(ins)
-            new_layer_algorithm_id = result.inserted_primary_key[0]
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #new_layer_algorithm_id = result.inserted_primary_key[0]
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_layer_algorithm_id = result.inserted_primary_key[0]
+
             logger.info('new ionosphere_algorithms F2 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('F2')
@@ -3845,12 +4205,19 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
     logger.info('%s :: ionosphere_table OK' % function_str)
 
     try:
-        connection = engine.connect()
-        connection.execute(
-            ionosphere_table.update(
-                ionosphere_table.c.id == fp_id).
-            values(layers_id=new_layer_id))
-        connection.close()
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #connection.execute(
+        #    ionosphere_table.update(
+        #        ionosphere_table.c.id == fp_id).
+        #    values(layers_id=new_layer_id))
+        stmt = ionosphere_table.update().\
+            where(ionosphere_table.c.id == fp_id).values(layers_id=new_layer_id)
+        with engine.begin() as connection:
+            connection.execute(stmt)
+        #connection.close()
         logger.info('updated layers_id for %s' % str(fp_id))
     except:
         trace = traceback.format_exc()
@@ -3928,12 +4295,22 @@ def feature_profile_layers_detail(fp_layers_id):
     logger.info('%s :: ionosphere_layers_table OK' % function_str)
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(fp_layers_id))
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(fp_layers_id))
+        stmt = select(ionosphere_layers_table).where(ionosphere_layers_table.c.id == int(fp_layers_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         layer_details_object = dict(row)
-        connection.close()
+        #connection.close()
         feature_profile_id = row['fp_id']
         metric_id = row['metric_id']
         enabled = row['enabled']
@@ -4049,9 +4426,19 @@ def feature_profile_layer_alogrithms(fp_layers_id):
     d1_boundary_times = 'none'
 
     try:
-        connection = engine.connect()
-        stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == int(fp_layers_id))
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == int(fp_layers_id))
+        stmt = select(layers_algorithms_table).where(layers_algorithms_table.c.layer_id == int(fp_layers_id))
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         layer_active = '[\'ACTIVE\']'
         # @modified 20230113 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
@@ -4091,7 +4478,7 @@ def feature_profile_layer_alogrithms(fp_layers_id):
             if layer == 'F2':
                 f2_until_time = row['layer_boundary']
                 f2_layer = layer_active
-        connection.close()
+        #connection.close()
 
         layer_algorithms_details = '''
 D layer  :: if value %s %s                    :: [do not check]  ::  ['ACTIVE']
@@ -4179,15 +4566,25 @@ def metric_layers_alogrithms(base_name):
 
     metric_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             metric_id = int(row['id'])
             # @added 20241120 - Bug #5522: Handle duplicate metric names
             break
 
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -4226,9 +4623,19 @@ def metric_layers_alogrithms(base_name):
     metric_layers_count = 0
     metric_layers_matched_count = 0
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == metric_id)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == metric_id)
+        stmt = select(ionosphere_layers_table).where(ionosphere_layers_table.c.metric_id == metric_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             try:
                 l_id = row['id']
@@ -4243,7 +4650,7 @@ def metric_layers_alogrithms(base_name):
                 logger.info('%s :: added layer id %s to layer count' % (function_str, str(l_id)))
             except:
                 metric_layers_count += 0
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -4269,9 +4676,20 @@ def metric_layers_alogrithms(base_name):
     metric_layers_algorithm_details = []
     logger.info('%s :: layers_algorithms_table OK' % function_str)
     try:
-        connection = engine.connect()
-        stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.metric_id == metric_id)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.metric_id == metric_id)
+        stmt = select(layers_algorithms_table).where(layers_algorithms_table.c.metric_id == metric_id)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             la_id = row['id']
             la_layer_id = row['layer_id']
@@ -4283,7 +4701,7 @@ def metric_layers_alogrithms(base_name):
             la_layer_boundary = str(row['layer_boundary'])
             la_times_in_a_row = row['times_in_row']
             metric_layers_algorithm_details.append([la_id, la_layer_id, la_fp_id, la_metric_id, la_layer, la_type, la_condition, la_layer_boundary, la_times_in_a_row])
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -4520,12 +4938,18 @@ def edit_ionosphere_layers(layers_id):
     if update_label:
         # Update layers_id label
         try:
-            connection = engine.connect()
-            connection.execute(
-                ionosphere_layers_table.update(
-                    ionosphere_layers_table.c.id == layers_id).
-                values(label=update_label))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    ionosphere_layers_table.update(
+            #        ionosphere_layers_table.c.id == layers_id).
+            #    values(label=update_label))
+            stmt = ionosphere_layers_table.update().\
+                where(ionosphere_layers_table.c.id == layers_id).values(label=update_label)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated label for %s - %s' % (str(layers_id), str(update_label)))
         except:
             trace = traceback.format_exc()
@@ -4538,14 +4962,24 @@ def edit_ionosphere_layers(layers_id):
 
     layers_algorithms = []
     try:
-        connection = engine.connect()
-        stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == layers_id)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == layers_id)
+        stmt = select(layers_algorithms_table).where(layers_algorithms_table.c.layer_id == layers_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             la_id = row['id']
             la_layer = str(row['layer'])
             layers_algorithms.append([la_id, la_layer])
-        connection.close()
+        #connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -4560,13 +4994,21 @@ def edit_ionosphere_layers(layers_id):
         # D layer
         if layer_name == 'D':
             try:
-                connection = engine.connect()
-                connection.execute(
-                    layers_algorithms_table.update(
-                        layers_algorithms_table.c.id == algorithm_id).values(
-                            condition=d_condition, layer_boundary=d_boundary_limit,
-                            times_in_row=d_boundary_times))
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(
+                #    layers_algorithms_table.update(
+                #        layers_algorithms_table.c.id == algorithm_id).values(
+                #            condition=d_condition, layer_boundary=d_boundary_limit,
+                #            times_in_row=d_boundary_times))
+                stmt = layers_algorithms_table.update().\
+                    where(layers_algorithms_table.c.id == algorithm_id).values(
+                        condition=d_condition, layer_boundary=d_boundary_limit,
+                        times_in_row=d_boundary_times)
+                with engine.begin() as connection:
+                    connection.execute(stmt)
+                #connection.close()
                 logger.info('updated D layer for %s - %s, %s, %s' % (
                     str(layers_id), str(d_condition), str(d_boundary_limit),
                     str(d_boundary_times)))
@@ -4582,13 +5024,21 @@ def edit_ionosphere_layers(layers_id):
         # @added 20170616 - Feature #2048: D1 ionosphere layer
         if d1_condition and layer_name == 'D1':
             try:
-                connection = engine.connect()
-                connection.execute(
-                    layers_algorithms_table.update(
-                        layers_algorithms_table.c.id == algorithm_id).values(
-                            condition=d1_condition, layer_boundary=d1_boundary_limit,
-                            times_in_row=d1_boundary_times))
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(
+                #    layers_algorithms_table.update(
+                #        layers_algorithms_table.c.id == algorithm_id).values(
+                #            condition=d1_condition, layer_boundary=d1_boundary_limit,
+                #            times_in_row=d1_boundary_times))
+                stmt = layers_algorithms_table.update().\
+                    where(layers_algorithms_table.c.id == algorithm_id).values(
+                        condition=d1_condition, layer_boundary=d1_boundary_limit,
+                        times_in_row=d1_boundary_times)
+                with engine.begin() as connection:
+                    connection.execute(stmt)
+                #connection.close()
                 logger.info('updated D1 layer for %s - %s, %s, %s' % (
                     str(layers_id), str(d1_condition), str(d1_boundary_limit),
                     str(d1_boundary_times)))
@@ -4604,13 +5054,21 @@ def edit_ionosphere_layers(layers_id):
         # E layer
         if layer_name == 'E':
             try:
-                connection = engine.connect()
-                connection.execute(
-                    layers_algorithms_table.update(
-                        layers_algorithms_table.c.id == algorithm_id).values(
-                            condition=e_condition, layer_boundary=e_boundary_limit,
-                            times_in_row=e_boundary_times))
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(
+                #    layers_algorithms_table.update(
+                #        layers_algorithms_table.c.id == algorithm_id).values(
+                #            condition=e_condition, layer_boundary=e_boundary_limit,
+                #            times_in_row=e_boundary_times))
+                stmt = layers_algorithms_table.update().\
+                    where(layers_algorithms_table.c.id == algorithm_id).values(
+                        condition=e_condition, layer_boundary=e_boundary_limit,
+                        times_in_row=e_boundary_times)
+                with engine.begin() as connection:
+                    connection.execute(stmt)
+                #connection.close()
                 logger.info('updated E layer for %s - %s, %s, %s' % (
                     str(layers_id), str(e_condition), str(e_boundary_limit),
                     str(e_boundary_times)))
@@ -4708,10 +5166,10 @@ def validate_fp(update_id, id_column_name, user_id):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
-    # @added 20240425 - Feature #5318: motif_annihilation
+    # @added 20240425 - Feature #5318: common_motifs
     # Add echo fp creation
     metric_id = int(update_id)
-    motif_annihilation_validation = {}
+    common_motifs_validation = {}
     if id_column_name == 'id':
         # Determine the metric_id
         fp_id_row = {}
@@ -4725,8 +5183,11 @@ def validate_fp(update_id, id_column_name, user_id):
                 logger.info('ionosphere_backend ::  %s :: determined metric_id as %s' % (function_str, str(metric_id)))
             except Exception as err:
                 logger.err('error :: ionosphere_backend ::  %s :: failed to determine metric_id from fp_id_row, err: %s' % (function_str, err))
-            if fp_id_row['label'] == 'LEARNT - motif_annihilation':
-                motif_annihilation_validation = {fp_id: fp_id_row}
+            if fp_id_row['label'] == 'LEARNT - common_motifs':
+                common_motifs_validation = {fp_id: fp_id_row}
+                logger.info('ionosphere_backend ::  %s :: added fp_id: %s to common_motifs_validation' % (
+                    function_str, str(fp_id)))
+
     if id_column_name == 'metric_id':
         fps_dict = {}
         try:
@@ -4736,11 +5197,11 @@ def validate_fp(update_id, id_column_name, user_id):
                 function_str, str(err)))
         if fps_dict:
             for key, item in fps_dict.items():
-                if item['enabled'] and item['validated'] == 0 and item['label'] == 'LEARNT - motif_annihilation':
-                    motif_annihilation_validation[key] = item
+                if item['enabled'] and item['validated'] == 0 and item['label'] == 'LEARNT - common_motifs':
+                    common_motifs_validation[key] = item
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
         # fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
         # @modified 20190919 - Feature #3230: users DB table
@@ -4748,18 +5209,32 @@ def validate_fp(update_id, id_column_name, user_id):
         #                      Feature #2516: Add label to features profile
         # Added user_id
         if id_column_name == 'id':
-            connection.execute(
-                ionosphere_table.update(
-                    ionosphere_table.c.id == int(fp_id)).
-                values(validated=1, user_id=user_id))
+            logger.info('ionosphere_backend ::  %s :: setting fp_id: %s to validated=1 in the DB' % (
+                function_str, str(fp_id)))
+
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection.execute(
+            #    ionosphere_table.update(
+            #        ionosphere_table.c.id == int(fp_id)).
+            #    values(validated=1, user_id=user_id))
+            stmt = ionosphere_table.update().\
+                where(ionosphere_table.c.id == int(fp_id)).values(
+                    validated=1, user_id=user_id)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+
         if id_column_name == 'metric_id':
             stmt = ionosphere_table.update().\
                 values(validated=1, user_id=user_id).\
                 where(ionosphere_table.c.metric_id == int(update_id)).\
                 where(ionosphere_table.c.validated == 0).\
                 where(ionosphere_table.c.enabled == 1)
-            connection.execute(stmt)
-        connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            with engine.begin() as connection:
+                connection.execute(stmt)
+        #connection.close()
         if id_column_name == 'id':
             logger.info('updated validated for %s' % (str(fp_id)))
         if id_column_name == 'metric_id':
@@ -4782,16 +5257,16 @@ def validate_fp(update_id, id_column_name, user_id):
     if engine:
         engine_disposal(engine)
 
-    # @added 20240425 - Feature #5318: motif_annihilation
+    # @added 20240425 - Feature #5318: common_motifs
     # Add echo fp creation
-    if motif_annihilation_validation:
+    if common_motifs_validation:
         try:
             redis_conn_decoded = get_redis_conn_decoded(skyline_app)
         except Exception as err:
-            logger.error('error :: %s :: get_redis_conn_decoded failed for adding ionosphere.echo.work motif_annihilation work, err: %s' % (
+            logger.error('error :: %s :: get_redis_conn_decoded failed for adding ionosphere.echo.work common_motifs work, err: %s' % (
                 function_str, err))
-        ionosphere_job = 'echo_motif_annihilation'
-        for key, item in motif_annihilation_validation.items():
+        ionosphere_job = 'echo_common_motifs'
+        for key, item in common_motifs_validation.items():
             try:
                 new_fp_id = int(key)
                 metric_id = item['metric_id']
@@ -4800,11 +5275,11 @@ def validate_fp(update_id, id_column_name, user_id):
                 ts_full_duration = item['full_duration']
                 use_base_name = get_base_name_from_metric_id(skyline_app, metric_id)
                 redis_conn_decoded.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), use_base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
-                logger.info('%s :: added item to ionosphere.echo.work motif_annihilation for %s' % (
+                logger.info('%s :: added item to ionosphere.echo.work common_motifs for %s' % (
                     function_str, str(item)))
             except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: %s :: failed to add item to ionosphere.echo.work motif_annihilation for %s, err: %s' % (
+                logger.error('error :: %s :: failed to add item to ionosphere.echo.work common_motifs for %s, err: %s' % (
                     function_str, str(item), err))
 
     if id_column_name == 'id':
@@ -5058,15 +5533,25 @@ def features_profile_family_tree(fp_id):
     row = current_fp_id
     while row:
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.parent_id == current_fp_id)
-            result = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.parent_id == current_fp_id)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.parent_id == current_fp_id)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             row = None
             for row in result:
                 progeny_id = row['id']
                 family_tree_fp_ids.append(int(progeny_id))
                 current_fp_id = progeny_id
-            connection.close()
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -5180,15 +5665,25 @@ def disable_features_profile_family_tree(fp_ids):
         layers_disabled = 0
         layer_ids = []
         try:
-            connection = engine.connect()
-            stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.fp_id == int(fp_id))
-            result = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.fp_id == int(fp_id))
+            stmt = select(ionosphere_layers_table).where(ionosphere_layers_table.c.fp_id == int(fp_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 layer_id = int(row['id'])
                 layer_ids.append(layer_id)
                 logger.info('disable_features_profile_family_tree :: found layer id %s for fp id %s to disabled' % (
                     str(layer_id), str(fp_id)))
-            connection.close()
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -5199,12 +5694,18 @@ def disable_features_profile_family_tree(fp_ids):
             raise
 
         try:
-            connection = engine.connect()
-            connection.execute(
-                ionosphere_table.update(
-                    ionosphere_table.c.id == int(fp_id)).
-                values(enabled=0))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    ionosphere_table.update(
+            #        ionosphere_table.c.id == int(fp_id)).
+            #    values(enabled=0))
+            stmt = ionosphere_table.update().\
+                where(ionosphere_table.c.id == int(fp_id)).values(enabled=0)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated enabled for %s to 0' % (str(fp_id)))
         except:
             trace = traceback.format_exc()
@@ -5220,12 +5721,19 @@ def disable_features_profile_family_tree(fp_ids):
         if layer_ids:
             for layer_id in layer_ids:
                 try:
-                    connection = engine.connect()
-                    connection.execute(
-                        ionosphere_layers_table.update(
-                            ionosphere_layers_table.c.id == int(layer_id)).
-                        values(enabled=0))
-                    connection.close()
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #connection.execute(
+                    #    ionosphere_layers_table.update(
+                    #        ionosphere_layers_table.c.id == int(layer_id)).
+                    #    values(enabled=0))
+                    stmt = ionosphere_layers_table.update().\
+                        where(ionosphere_layers_table.c.id == int(layer_id)).values(
+                            enabled=0)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
+                    #connection.close()
                     logger.info('updated enabled for layer id %s to 0' % (str(layer_id)))
                     layers_disabled += 1
                 except:
@@ -5245,15 +5753,25 @@ def disable_features_profile_family_tree(fp_ids):
             fp_metric_id = 0
             fp_anomaly_timestamp = 0
             try:
-                connection = engine.connect()
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
-                result = connection.execute(stmt)
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+                stmt = select(ionosphere_table).where(ionosphere_table.c.id == int(fp_id))
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     fp_metric_id = int(row['metric_id'])
                     fp_anomaly_timestamp = int(row['anomaly_timestamp'])
                     logger.info('disable_features_profile_family_tree :: found fp metric_id %s and anomaly_timestamp %s from the DB to message disabled to slack' % (
                         str(fp_metric_id), str(fp_anomaly_timestamp)))
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: disable_features_profile_family_tree :: could not determine metric_id and anomaly_timestamp from ionosphere for fp_id %s to message disabled to slack' % str(fp_id))
@@ -5261,12 +5779,22 @@ def disable_features_profile_family_tree(fp_ids):
             if fp_metric_id and fp_anomaly_timestamp:
                 base_name = None
                 try:
-                    connection = engine.connect()
-                    stmt = select([metrics_table]).where(metrics_table.c.id == fp_metric_id)
-                    result = connection.execute(stmt)
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([metrics_table]).where(metrics_table.c.id == fp_metric_id)
+                    stmt = select(metrics_table).where(metrics_table.c.id == fp_metric_id)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                     for row in result:
                         base_name = row['metric']
-                    connection.close()
+                    #connection.close()
                 except:
                     trace = traceback.format_exc()
                     logger.error(trace)
@@ -5325,16 +5853,26 @@ def disable_features_profile_family_tree(fp_ids):
                     anomaly_id = None
                     slack_thread_ts = 0
                     try:
-                        connection = engine.connect()
-                        stmt = select([anomalies_table]).\
+                        #connection = engine.connect()
+                        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #stmt = select([anomalies_table]).\
+                        stmt = select(anomalies_table).\
                             where(anomalies_table.c.metric_id == fp_metric_id).\
                             where(anomalies_table.c.anomaly_timestamp == int(fp_anomaly_timestamp))
-                        result = connection.execute(stmt)
+                        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                        #                      Task #5628: Build v5.0.0 and test
+                        #result = connection.execute(stmt)
+                        with engine.connect() as connection:
+                            result = connection.execute(stmt)
+                            results = [dict(row._mapping) for row in result.fetchall()]
+                        result = results
+
                         for row in result:
                             anomaly_id = row['id']
                             slack_thread_ts = row['slack_thread_ts']
                             break
-                        connection.close()
+                        #connection.close()
                         logger.info('disable_features_profile_family_tree :: determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
                             str(anomaly_id), str(fp_metric_id),
                             str(fp_anomaly_timestamp), str(slack_thread_ts)))
@@ -5527,7 +6065,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         if engine:
             engine_disposal(engine)
         raise  # to webapp to return in the UI
-    query_stmt = select([ionosphere_matched_table])
+    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #query_stmt = select([ionosphere_matched_table])
+    query_stmt = select(ionosphere_matched_table)
     query_stmt_table = ionosphere_matched_table
     query_table = 'ionosphere_matched'
 
@@ -5579,14 +6120,24 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         #                      Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
         # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
-        fp_ids_stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metric_id)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #fp_ids_stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metric_id)
+        fp_ids_stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metric_id)
         fp_ids_list = []
 
         fp_ids = ''
         try:
             logger.info('get_fp_matches :: determining fp ids from ionosphere table for metric_id: %s' % str(metric_id))
-            connection = engine.connect()
-            results = connection.execute(fp_ids_stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #results = connection.execute(fp_ids_stmt)
+            with engine.connect() as connection:
+                result = connection.execute(fp_ids_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in results:
                 fp_id = str(row[0])
                 if fp_ids == '':
@@ -5602,7 +6153,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 #                   Branch #4300: prometheus
                 # Handle labelled_metric name
                 fp_metric_ids[int(fp_id)] = int(metric_id)
-            connection.close()
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -5622,7 +6173,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                   Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
-        query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+        query_stmt = select(ionosphere_matched_table).\
+                where(ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
         query_stmt_table = ionosphere_matched_table
         query_table = 'ionosphere_matched'
 
@@ -5653,22 +6208,40 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             #                      Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
             # metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
-            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{python_escaped_metric_like}'"
+            metrics_like_query = text(metrics_like_text)
+
             metric_ids_list = []
 
             logger.info('executing metrics_like_query - %s, (like_string: %s)' % (
                 str(metrics_like_query), str(python_escaped_metric_like)))
             metric_ids = ''
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # results = connection.execute(metrics_like_query)
-                results = connection.execute(metrics_like_query, like_string=str(python_escaped_metric_like))
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #results = connection.execute(metrics_like_query, like_string=str(python_escaped_metric_like))
+                with engine.connect() as connection:
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query, like_string=str(python_escaped_metric_like))
+                    result = connection.execute(metrics_like_query)
+
+                    results = [dict(row._mapping) for row in result.fetchall()]
 
                 for row in results:
-                    metric_id = str(row[0])
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #metric_id = str(row[0])
+                    metric_id = str(row['id'])
+
                     if metric_ids == '':
                         metric_ids = '%s' % (metric_id)
                     else:
@@ -5678,7 +6251,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     #                   Task #4778: v4.0.0 - update dependencies
                     # Use sqlalchemy rather than string-based query construction
                     metric_ids_list.append(row['id'])
-                connection.close()
+                #connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -5693,15 +6266,26 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             #                      Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
             # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
-            fp_ids_stmt = select([ionosphere_table], ionosphere_table.c.metric_id.in_(metric_ids_list))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #fp_ids_stmt = select([ionosphere_table], ionosphere_table.c.metric_id.in_(metric_ids_list))
+            fp_ids_stmt = select(ionosphere_table).\
+                    where(ionosphere_table.c.metric_id.in_(metric_ids_list))
             fp_ids_list = []
 
             fp_ids = ''
             try:
-                connection = engine.connect()
-                results = connection.execute(fp_ids_stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #results = connection.execute(fp_ids_stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(fp_ids_stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 for row in results:
-                    fp_id = str(row[0])
+                    #fp_id = str(row[0])
+                    fp_id = str(row['id'])
                     if fp_ids == '':
                         fp_ids = '%s' % (fp_id)
                     else:
@@ -5712,7 +6296,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     # Use sqlalchemy rather than string-based query construction
                     fp_ids_list.append(row['id'])
 
-                connection.close()
+                #connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -5733,7 +6317,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
-            query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+            query_stmt = select(ionosphere_matched_table).\
+                    where(ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
             query_stmt_table = ionosphere_matched_table
             query_table = 'ionosphere_matched'
 
@@ -5743,7 +6331,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     #                   Task #4778: v4.0.0 - update dependencies
     # Use sqlalchemy rather than string-based query construction
     layers_matched_query_stmt = None
-    layers_matched_query_stmt = select([ionosphere_layers_matched_table])
+    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #layers_matched_query_stmt = select([ionosphere_layers_matched_table])
+    layers_matched_query_stmt = select(ionosphere_layers_matched_table)
 
     # @added 20170917 - Feature #1996: Ionosphere - matches page
     # Added by fp_id or layer_id as well
@@ -5763,11 +6354,17 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                   Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
-                query_stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(get_fp_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query_stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(get_fp_id))
+                query_stmt = select(ionosphere_matched_table).where(ionosphere_matched_table.c.fp_id == int(get_fp_id))
                 query_stmt_table = ionosphere_matched_table
                 query_table = 'ionosphere_matched'
                 if get_layers_matched:
-                    layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.fp_id == int(get_fp_id))
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.fp_id == int(get_fp_id))
+                    layers_matched_query_stmt = select(ionosphere_layers_matched_table).where(ionosphere_layers_matched_table.c.fp_id == int(get_fp_id))
 
         if get_layer_id:
             logger.info('get_layer_id set to %s' % str(get_layer_id))
@@ -5783,26 +6380,42 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                   Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
-                query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+                query_stmt = select(ionosphere_layers_matched_table).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
                 query_stmt_table = ionosphere_layers_matched_table
                 query_table = 'ionosphere_layers_matched'
                 if get_layers_matched:
-                    layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+                    layers_matched_query_stmt = select(ionosphere_layers_matched_table).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
 
                 # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # fp_id_query_string = 'SELECT fp_id FROM ionosphere_layers WHERE id=%s' % str(get_layer_id)
-                fp_id_query_string = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(get_layer_id))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #fp_id_query_string = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(get_layer_id))
+                fp_id_query_string = select(ionosphere_layers_table).where(ionosphere_layers_table.c.id == int(get_layer_id))
 
                 fp_id = None
                 try:
-                    connection = engine.connect()
-                    result = connection.execute(fp_id_query_string)
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #result = connection.execute(fp_id_query_string)
+                    with engine.connect() as connection:
+                        result = connection.execute(fp_id_query_string)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    result = results
+
                     for row in result:
                         if not fp_id:
                             fp_id = int(row[0])
-                    connection.close()
+                    #connection.close()
                 except:
                     trace = traceback.format_exc()
                     logger.error(trace)
@@ -6008,7 +6621,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
-            query_stmt = select([ionosphere_matched_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #query_stmt = select([ionosphere_matched_table]).\
+            query_stmt = select(ionosphere_matched_table).\
                 where(ionosphere_matched_table.c.metric_timestamp > int(related_from_timestamp)).\
                 where(ionosphere_matched_table.c.metric_timestamp <= int(related_until_timestamp))
             query_stmt_table = ionosphere_matched_table
@@ -6059,7 +6675,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             logger.info('failed to get ionosphere_summary_list from memcache, will query DB')
         try:
             memcache_client.close()
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
 
@@ -6123,9 +6739,16 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         logger.info('get_fp_matches :: creating ionosphere_summary_list from DB query')
         stmt = "SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id"
         try:
-            connection = engine.connect()
-            results = connection.execute(stmt)
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #results = connection.execute(stmt)
+            #connection.close()
+            stmt = text(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -6158,7 +6781,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     logger.error('error :: failed to get ionosphere_summary_list from memcache')
                 try:
                     memcache_client.close()
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 except:  # nosec
                     pass
         logger.info('get_fp_matches :: created ionosphere_summary_list from DB query')
@@ -6204,13 +6827,23 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     if settings.IONOSPHERE_ECHO_ENABLED and len(echo_fp_ids) == 0:
         logger.info('get_fp_matches :: gettting echo_fp_ids from DB')
         echo_fp_ids_stmt = 'SELECT id FROM ionosphere WHERE echo_fp=1'
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        echo_fp_ids_stmt = text(echo_fp_ids_stmt)
+
         try:
-            connection = engine.connect()
-            results = connection.execute(echo_fp_ids_stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #results = connection.execute(echo_fp_ids_stmt)
+            with engine.connect() as connection:
+                result = connection.execute(echo_fp_ids_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 fp_id = int(row[0])
                 echo_fp_ids.append(fp_id)
-            connection.close()
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -6271,7 +6904,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         # WHERE ionosphere_matched.metric_timestamp > :metric_timestamp_1 AND ionosphere_matched.metric_timestamp <= :metric_timestamp_2
 
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             stmt = query_string
             # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
@@ -6310,20 +6943,39 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # ids: 0.17673611640930176 seconds
             # rows: 0.004385948181152344 seconds
             if get_related_matches:
-                query_stmt = select([ionosphere_matched_table.c.id]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query_stmt = select([ionosphere_matched_table.c.id]).\
+                query_stmt = select(ionosphere_matched_table.c.id).\
                     where(ionosphere_matched_table.c.metric_timestamp > int(related_from_timestamp)).\
                     where(ionosphere_matched_table.c.metric_timestamp <= int(related_until_timestamp))
-                results = connection.execute(query_stmt)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #results = connection.execute(query_stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(query_stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 # @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches
                 # @modified 20240203 - Task #5250: Optimise ionosphere_backend.get_fp_matches
                 #                      Task #5178: Build and test skyline v4.1.0
                 # use_fp_ids_list = [row['fp_id'] for row in results]
                 use_fp_ids_list = [row['id'] for row in results]
                 logger.info('get_fp_matches :: determining %s matched features profiles in defined period' % str(len(use_fp_ids_list)))
-                query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(use_fp_ids_list))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(use_fp_ids_list))
+                query_stmt = select(ionosphere_matched_table).\
+                        where(ionosphere_matched_table.c.fp_id.in_(use_fp_ids_list))
 
-            results = connection.execute(query_stmt)
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(query_stmt)
+            with engine.connect() as connection:
+                result = connection.execute(query_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(traceback.format_exc())
@@ -6417,7 +7069,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         query_string = new_query_string
 
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             stmt = query_string
             # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
@@ -6425,8 +7077,15 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # results = connection.execute(stmt)
             # logger.info('executing %s' % stmt)
             # logger.info('executing layers_matched_query_stmt: %s' % str(layers_matched_query_stmt))
-            results = connection.execute(layers_matched_query_stmt)
-            connection.close()
+
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(layers_matched_query_stmt)
+            #connection.close()
+            with engine.connect() as connection:
+                result = connection.execute(layers_matched_query_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(traceback.format_exc())
@@ -6729,20 +7388,40 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
     logger.info('%s :: %s table OK' % (function_str, use_table))
 
     if matched_by == 'features_profile':
-        stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
+        stmt = select(ionosphere_matched_table).where(ionosphere_matched_table.c.id == int(matched_id))
     if matched_by == 'layers':
-        stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.id == int(matched_id))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.id == int(matched_id))
+        stmt = select(ionosphere_layers_matched_table).where(ionosphere_layers_matched_table.c.id == int(matched_id))
 
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     if matched_by == 'motif':
-        stmt = select([motifs_matched_table]).where(motifs_matched_table.c.id == int(matched_id))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([motifs_matched_table]).where(motifs_matched_table.c.id == int(matched_id))
+        stmt = select(motifs_matched_table).where(motifs_matched_table.c.id == int(matched_id))
 
     try:
-        connection = engine.connect()
-        # stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        ## stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
+        # stmt = select(ionosphere_matched_table).where(ionosphere_matched_table.c.id == int(matched_id))
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         # @modified 20210415 - Feature #4014: Ionosphere - inference
         # TypeError: 'RowProxy' object does not support item assignment
         # Convert RowProxy to dict to enable adding elements to the
@@ -6766,7 +7445,7 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -6838,16 +7517,29 @@ minmax_anomalous_features_sum :: %s  | minmax_anomalous_features_count :: %s
         #                      Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
         # full_duration_stmt = 'SELECT full_duration FROM ionosphere WHERE id=%s' % str(fp_id)
-        full_duration_stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #full_duration_stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
+        full_duration_stmt = select(ionosphere_table.c.full_duration).where(ionosphere_table.c.id == int(fp_id))
 
         full_duration = None
         try:
-            connection = engine.connect()
-            result = connection.execute(full_duration_stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #result = connection.execute(full_duration_stmt)
+            with engine.connect() as connection:
+                result = connection.execute(full_duration_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 if not full_duration:
-                    full_duration = int(row[0])
-            connection.close()
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #full_duration = int(row[0])
+                    full_duration = int(row['full_duration'])
+            #connection.close()
             logger.info('full_duration for matched resource determined as %s' % (str(full_duration)))
         except Exception as err:
             trace = traceback.format_exc()
@@ -6949,12 +7641,22 @@ metric_timestamp    :: %s     | human_date :: %s
             # results = mysql_select(skyline_app, query)
             # for result in results:
             #     generation = int(result[0])
-            stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
-            connection = engine.connect()
-            result = connection.execute(stmt)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
+            stmt = select(ionosphere_table.c.generation).where(ionosphere_table.c.id == int(fp_id))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 generation = row['generation']
-            connection.close()
+            #connection.close()
             logger.info('generation for matched resource determined as %s' % (str(generation)))
         except Exception as err:
             logger.error('error :: get_matched_id_resources :: failed to get generation from the database for fp_id %s from ionoshere table - %s' % (
@@ -7126,13 +7828,23 @@ human_date          :: %s
                 # results = mysql_select(skyline_app, query)
                 # for result in results:
                 #     not_anomalous_motif_sequence.append([int(result[0]), result[1]])
-                stmt = select([not_anomalous_motifs_table.c.timestamp, not_anomalous_motifs_table.c.value]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([not_anomalous_motifs_table.c.timestamp, not_anomalous_motifs_table.c.value]).\
+                stmt = select(not_anomalous_motifs_table.c.timestamp, not_anomalous_motifs_table.c.value).\
                     where(not_anomalous_motifs_table.c.motif_id == int(motif_id))
-                connection = engine.connect()
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     not_anomalous_motif_sequence.append([row['timestamp'], row['value']])
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error('error :: get_matched_id_resources :: failed to get motif sequence from not_anomalous_motifs for motif_id %s - %s' % (
                     str(motif_id), e))
@@ -7167,12 +7879,22 @@ human_date          :: %s
                 # results = mysql_select(skyline_app, query)
                 # for result in results:
                 #     full_duration = int(result[0])
-                stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
-                connection = engine.connect()
-                result = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
+                stmt = select(ionosphere_table.c.full_duration).where(ionosphere_table.c.id == int(fp_id))
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     full_duration = row['full_duration']
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error('error :: get_matched_id_resources :: failed to get full_duration of fp id %s via mysql_select - %s' % (str(fp_id), e))
             if full_duration == settings.FULL_DURATION:
@@ -7185,6 +7907,14 @@ human_date          :: %s
                     with open((timeseries_json_file), 'r') as f:
                         raw_timeseries = f.read()
                     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                    if 'nan' in timeseries_array_str:
+                        try:
+                            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                        except Exception as err:
+                            logger.error('error :: get_matched_id_resources :: failed to replace nan with None, err: %s' % (
+                                err))
+
                     del raw_timeseries
                     timeseries = literal_eval(timeseries_array_str)
                     del timeseries_array_str
@@ -7976,15 +8706,25 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
 
         metric_id = None
         try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-            result = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 metric_id = int(row['id'])
                 # @added 20241120 - Bug #5522: Handle duplicate metric names
                 break
 
-            connection.close()
+            #connection.close()
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: webapp_update_slack_thread :: could not determine metric id from metrics table')
@@ -8006,16 +8746,27 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         anomaly_id = None
         slack_thread_ts = 0
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_table]).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table]).\
+            stmt = select(anomalies_table).\
                 where(anomalies_table.c.metric_id == metric_id).\
                 where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 anomaly_id = row['id']
                 slack_thread_ts = row['slack_thread_ts']
                 break
-            connection.close()
+            #connection.close()
             logger.info('determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
                 str(anomaly_id), str(metric_id),
                 str(use_anomaly_timestamp), str(slack_thread_ts)))
@@ -8044,15 +8795,26 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         # The hacky bit
         snab_id = base_name
         try:
-            connection = engine.connect()
-            stmt = select([snab_table]).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
                 where(snab_table.c.id == snab_id)
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 slack_thread_ts = row['slack_thread_ts']
                 anomaly_id = row['anomaly_id']
                 break
-            connection.close()
+            #connection.close()
             logger.info('determined slack_thread_ts %s for snab id %s' % (
                 str(slack_thread_ts), str(snab_id)))
         except:
@@ -8079,14 +8841,24 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
                     engine_disposal(engine)
                 raise  # to webapp to return in the UI
             try:
-                connection = engine.connect()
-                stmt = select([anomalies_table]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table]).\
+                stmt = select(anomalies_table).\
                     where(anomalies_table.c.id == anomaly_id)
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     slack_thread_ts = row['slack_thread_ts']
                     break
-                connection.close()
+                #connection.close()
                 logger.info('determined slack_thread_ts %s for anomaly_id %s' % (
                     str(slack_thread_ts), str(anomaly_id)))
             except:
@@ -8258,16 +9030,23 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             # @modified 20190919 - Feature #3230: users DB table
             #                      Ideas #2476: Label and relate anomalies
             #                      Feature #2516: Add label to features profile
             # Added user_id
-            connection.execute(
-                ionosphere_matched_table.update(
-                    ionosphere_matched_table.c.id == match_id).
-                values(validated=match_validated, user_id=user_id))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection.execute(
+            #    ionosphere_matched_table.update(
+            #        ionosphere_matched_table.c.id == match_id).
+            #    values(validated=match_validated, user_id=user_id))
+            stmt = ionosphere_matched_table.update().\
+                where(ionosphere_matched_table.c.id == match_id).values(
+                    validated=match_validated, user_id=user_id)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated validated for %s by user id %s' % (str(match_id), user_id))
         except:
             trace = traceback.format_exc()
@@ -8291,12 +9070,19 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
-            connection.execute(
-                ionosphere_layers_matched_table.update(
-                    ionosphere_layers_matched_table.c.id == match_id).
-                values(validated=match_validated))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    ionosphere_layers_matched_table.update(
+            #        ionosphere_layers_matched_table.c.id == match_id).
+            #    values(validated=match_validated))
+            stmt = ionosphere_layers_matched_table.update().\
+                where(ionosphere_layers_matched_table.c.id == match_id).values(
+                    validated=match_validated)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated validated for %s' % str(match_id))
         except:
             trace = traceback.format_exc()
@@ -8321,12 +9107,19 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
-            connection.execute(
-                motifs_matched_table.update(
-                    motifs_matched_table.c.id == match_id).
-                values(validated=match_validated, user_id=user_id))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    motifs_matched_table.update(
+            #        motifs_matched_table.c.id == match_id).
+            #    values(validated=match_validated, user_id=user_id))
+            stmt = motifs_matched_table.update().\
+                where(motifs_matched_table.c.id == match_id).values(
+                    validated=match_validated, user_id=user_id)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated validated in the motifs_matched for id %s' % str(match_id))
         except:
             trace = traceback.format_exc()
@@ -8347,12 +9140,19 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
-            connection = engine.connect()
-            connection.execute(
-                ionosphere_matched_table.update(
-                    ionosphere_matched_table.c.motifs_matched_id == int(match_id)).
-                values(validated=match_validated, user_id=user_id))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    ionosphere_matched_table.update(
+            #        ionosphere_matched_table.c.motifs_matched_id == int(match_id)).
+            #    values(validated=match_validated, user_id=user_id))
+            stmt = ionosphere_matched_table.update().\
+                where(ionosphere_matched_table.c.motifs_matched_id == int(match_id)).\
+                values(validated=match_validated, user_id=user_id)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
             logger.info('updated validated for match with motifs_matched_id %s by user id %s in the ionosphere_matched table' % (
                 str(match_id), user_id))
         except:
@@ -8445,13 +9245,23 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                     metric, err))
 
         try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == str(use_metric))
-            result = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == str(use_metric))
+            stmt = select(metrics_table).where(metrics_table.c.metric == str(use_metric))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 metric_id = row['id']
                 metric_ids.append(int(metric_id))
-            connection.close()
+            #connection.close()
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine metric id from metrics for metric %s' % str(use_metric))
@@ -8465,7 +9275,10 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     logger.info('label_anomalies :: %s namespaces passed' % str(len(namespaces)))
 
     if namespaces:
-        metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+        # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+
         for namespace in namespaces:
             try:
                 # @added 20200425 - Ideas #2476: Label and relate anomalies
@@ -8480,15 +9293,34 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                 else:
                     namespace_like = namespace_str
 
-                connection = engine.connect()
+                # @added 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                #                   Task #5628: Build v5.0.0 and test
+                #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+                metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{namespace_like}'"
+                metrics_like_query = text(metrics_like_text)
+
+                #connection = engine.connect()
                 # @modified 20200425 - Ideas #2476: Label and relate anomalies
                 # Use namespace_like
                 # results = connection.execute(metrics_like_query, like_string=str(namespace))
-                results = connection.execute(metrics_like_query, like_string=str(namespace_like))
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #results = connection.execute(metrics_like_query, like_string=str(namespace_like))
+                with engine.connect() as connection:
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query, like_string=str(namespace_like))
+                    result = connection.execute(metrics_like_query)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 for row in results:
-                    metric_id = str(row[0])
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #metric_id = str(row[0])
+                    metric_id = str(row['id'])
+
                     metric_ids.append(int(metric_id))
-                connection.close()
+                #connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -8514,18 +9346,28 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     anomaly_ids_to_label = []
     all_anomalies = []
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).\
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).\
+        stmt = select(anomalies_table).\
             where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
             where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
-        result = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             anomaly_id = row['id']
             metric_id = row['metric_id']
             all_anomalies.append(int(anomaly_id))
             if int(metric_id) in metric_ids:
                 anomaly_ids_to_label.append(int(anomaly_id))
-        connection.close()
+        #connection.close()
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: could not determine anomaly ids')
@@ -8539,12 +9381,18 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     # Label anomalies
     for anomaly_id in anomaly_ids_to_label:
         try:
-            connection = engine.connect()
-            connection.execute(
-                anomalies_table.update(
-                    anomalies_table.c.id == int(anomaly_id)).
-                values(label=label))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #connection.execute(
+            #    anomalies_table.update(
+            #        anomalies_table.c.id == int(anomaly_id)).
+            #    values(label=label))
+            stmt = anomalies_table.update().\
+                where(anomalies_table.c.id == int(anomaly_id)).values(label=label)
+            with engine.begin() as connection:
+                connection.execute(stmt)
+            #connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -8559,17 +9407,27 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     if update_slack_thread:
         for anomaly_id in anomaly_ids_to_label:
             try:
-                connection = engine.connect()
-                stmt = select([anomalies_table.c.slack_thread_ts]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.slack_thread_ts]).\
+                stmt = select(anomalies_table.c.slack_thread_ts).\
                     where(anomalies_table.c.id == anomaly_id)
-                result = connection.execute(stmt)
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                result = results
+
                 for row in result:
                     slack_thread_ts = row['slack_thread_ts']
                     break
                 if slack_thread_ts > 0:
                     message = '*LABELLED* - %s' % str(label)
                     slack_threads_to_update_with_label[slack_thread_ts] = message
-                connection.close()
+                #connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -8641,6 +9499,7 @@ def expected_features_profiles_dirs():
 
     """
 
+    engine = None
     try:
         engine, fail_msg, trace = get_an_engine()
         logger.info(fail_msg)
@@ -8660,22 +9519,37 @@ def expected_features_profiles_dirs():
         logger.info(log_msg)
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: failed to get ionosphere_table meta for features_profiles_dirs')
+        logger.error('error :: failed to get ionosphere_table meta for expected_features_profiles_dirs')
         if engine:
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
     last_fp_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0).order_by(ionosphere_table.c.id.desc()).limit(1)
-        result = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        ##stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0).order_by(ionosphere_table.c.id.desc()).limit(1)
+        #stmt = select(ionosphere_table).where(ionosphere_table.c.id > 0).order_by(ionosphere_table.c.id.desc()).limit(1)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table.c.id]).order_by(ionosphere_table.c.id.desc()).limit(1)
+        stmt = select(ionosphere_table.c.id).order_by(ionosphere_table.c.id.desc()).limit(1)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        result = results
+
         for row in result:
             last_fp_id = int(row['id'])
-        connection.close()
+            break
+        #connection.close()
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: could not determine details of features profiles from ionosphere table for features_profiles_dirs')
+        logger.error('error :: could not determine details of features profiles from ionosphere table for expected_features_profiles_dirs')
         if engine:
             engine_disposal(engine)
         raise
@@ -8686,7 +9560,7 @@ def expected_features_profiles_dirs():
         redis_conn_decoded = get_redis_conn_decoded(skyline_app)
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: get_redis_conn_decoded failed for features_profiles_dirs')
+        logger.error('error :: get_redis_conn_decoded failed for expected_features_profiles_dirs')
 
     features_profile_dirs_dict = {}
     if redis_conn_decoded:
@@ -8694,12 +9568,12 @@ def expected_features_profiles_dirs():
             features_profile_dirs_dict = redis_conn_decoded.hgetall('analyzer.metrics_manager.local_features_profile_dirs')
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: failed to get Redis hash key analyzer.metrics_manager.local_features_profile_dirs for features_profiles_dirs')
+            logger.error('error :: failed to get Redis hash key analyzer.metrics_manager.local_features_profile_dirs for expected_features_profiles_dirs')
             features_profile_dirs_dict = {}
     if not features_profile_dirs_dict:
-        logger.info('no features_profile_dirs_dict found for features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs')
+        logger.info('no features_profile_dirs_dict found for expected_features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs')
     else:
-        logger.info('features_profile_dirs_dict found with %s features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs' % str(len(features_profile_dirs_dict)))
+        logger.info('features_profile_dirs_dict found with %s expected_features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs' % str(len(features_profile_dirs_dict)))
 
     last_fp_dir = None
     if last_fp_id and features_profile_dirs_dict:
@@ -8708,58 +9582,122 @@ def expected_features_profiles_dirs():
         except:
             last_fp_dir = None
     if last_fp_dir:
-        logger.info('features_profiles_dirs - no new features profile ids, all known return %s items' % str(len(features_profile_dirs_dict)))
+        logger.info('expected_features_profiles_dirs - no new features profile ids, all known return %s items' % str(len(features_profile_dirs_dict)))
         return features_profile_dirs_dict
-    logger.info('features_profiles_dirs - new features profile ids found determing new dirs, %s currently known dirs' % str(len(features_profile_dirs_dict)))
+    logger.info('expected_features_profiles_dirs - new features profile ids found determing new dirs, %s currently known dirs' % str(len(features_profile_dirs_dict)))
 
     fps = {}
+    # @modified 20241213 - Feature #5572: get_all_fps
+    #                      Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
+    #                      Feature #3890: metrics_manager - sync_cluster_files
+    #                      Bug #5522: Handle duplicate metric names
+    # Use get_all_fps functions which is optimised with Redis data and DB
+    query_fps_from_db = False
+    if query_fps_from_db:
+        try:
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0)
+            stmt = select(ionosphere_table).where(ionosphere_table.c.id > 0)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
+            for row in result:
+                fp_id = int(row['id'])
+                fp_metric_id = int(row['metric_id'])
+                fp_anomaly_timestamp = int(row['anomaly_timestamp'])
+                fps[fp_id] = {}
+                fps[fp_id]['metric_id'] = fp_metric_id
+                fps[fp_id]['anomaly_timestamp'] = fp_anomaly_timestamp
+            #connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: expected_features_profiles_dirs - could not determine details of features profiles from ionosphere table for features_profiles_dirs')
+            if engine:
+                engine_disposal(engine)
+            raise
+        logger.info('expected_features_profiles_dirs - db responded with %s fps' % str(len(fps)))
+    # @added 20241213 - Feature #5572: get_all_fps
+    # Use get_all_fps functions which is optimised with Redis data and DB
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0)
-        result = connection.execute(stmt)
-        for row in result:
-            fp_id = int(row['id'])
-            fp_metric_id = int(row['metric_id'])
-            fp_anomaly_timestamp = int(row['anomaly_timestamp'])
-            fps[fp_id] = {}
-            fps[fp_id]['metric_id'] = fp_metric_id
-            fps[fp_id]['anomaly_timestamp'] = fp_anomaly_timestamp
-        connection.close()
-    except:
+        fps = get_all_fps(skyline_app)
+    except Exception as err:
         logger.error(traceback.format_exc())
-        logger.error('error :: could not determine details of features profiles from ionosphere table for features_profiles_dirs')
-        if engine:
-            engine_disposal(engine)
-        raise
-    logger.info('features_profiles_dirs - db responded with %s fps' % str(len(fps)))
+        logger.error('error :: expected_features_profiles_dirs - get_all_fps failed, err: %s' % (
+            err))
+
+    # @modified 20241213 - Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
+    #                      Bug #5522: Handle duplicate metric names
+    # Changes made to get_all_db_metric_names for #5522 now make it a much more
+    # efficient method to get all metric names and ids.  #5571 demonstrated that
+    # the aborted_clients connection IDs were related to select metrics table
+    # request.  Do not query DB
+    query_metrics_from_db = False
+    if query_metrics_from_db:
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: features_profiles_dirs failed to get metrics_table meta for expected_features_profiles_dirs')
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        metrics = {}
+        try:
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+            stmt = select(metrics_table).where(metrics_table.c.id > 0)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
+            for row in result:
+                metric_id = row['id']
+                metric_name = row['metric']
+                metrics[metric_id] = {}
+                metrics[metric_id]['metric'] = metric_name
+            #connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: features_profiles_dirs could not determine metric ids from metrics for expected_features_profiles_dirs')
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    # @added 20241213 - Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
+    #                   Bug #5522: Handle duplicate metric names
+    # Changed to use get_all_db_metric_names function.  #5571 demonstrated that
+    # the aborted_clients connection IDs were related to select metrics table
+    # request.  Do not query DB.
+    all_db_metric_names = []
+    all_db_metric_names_with_ids = {}
     try:
-        metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-        logger.info(log_msg)
-        logger.info('metrics_table OK')
-    except:
+        with_ids = True
+        all_db_metric_names, all_db_metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+    except Exception as err:
         logger.error(traceback.format_exc())
-        logger.error('error :: failed to get metrics_table meta for features_profiles_dirs')
-        if engine:
-            engine_disposal(engine)
-        raise  # to webapp to return in the UI
-    metrics = {}
-    try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-        result = connection.execute(stmt)
-        for row in result:
-            metric_id = row['id']
-            metric_name = row['metric']
-            metrics[metric_id] = {}
-            metrics[metric_id]['metric'] = metric_name
-        connection.close()
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: could not determine metric ids from metrics for features_profiles_dirs')
-        if engine:
-            engine_disposal(engine)
-        raise
-    logger.info('features_profiles_dirs - db responded with %s metrics' % str(len(metrics)))
+        logger.error('error :: expected_features_profiles_dirs :: failed to get_all_db_metric_names - %s' % (
+            err))
+    # @modified 20241218 - Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
+    #metrics = {int(mid): {'metric':metric_name} for metric_name, mid in all_db_metric_names_with_ids.items()}
+    metrics = {int(mid): {'metric':metric_name} for metric_name, mid in all_db_metric_names_with_ids.items()}
+    logger.info('expected_features_profiles_dirs - db responded with %s metrics' % str(len(metrics)))
+    if engine:
+        engine_disposal(engine)
 
     # features_profiles_dirs_error_logged = False
     added_fps = 0
@@ -8779,7 +9717,30 @@ def expected_features_profiles_dirs():
             if not fp_dir:
                 try:
                     metric_id = fps[fp_id]['metric_id']
-                    metric = metrics[metric_id]['metric']
+                    # @modified 20250109 - Bug #5522: Handle duplicate metric names
+                    # If the metric_id is not present get the metric name from
+                    # the DB
+                    #metric = metrics[metric_id]['metric']
+                    try:
+                        metric = metrics[metric_id]['metric']
+                    except KeyError:
+                        metric = None
+                    # @modified 20260211 - Bug #5707: create_features_profile - no metric id from DB
+                    #if not metric:
+                    if not metric and metric_id:
+                        try:
+                            metric = get_base_name_from_metric_id(skyline_app, metric_id)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: expected_features_profiles_dirs :: failed to get_base_name_from_metric_id for metric_id: %s, err: %s' % (
+                                str(metric_id), err))
+
+                    # @added 20260211 - Bug #5707: create_features_profile - no metric id from DB
+                    if not metric:
+                        logger.warning('warning :: expected_features_profiles_dirs :: failed to determine base_name metric_id: %s, fp_id: %s' % (
+                            str(metric_id), str(fp_id)))
+                        continue
+
                     timestamp = fps[fp_id]['anomaly_timestamp']
                     metric_timeseries_dir = metric.replace('.', '/')
 
@@ -8800,8 +9761,8 @@ def expected_features_profiles_dirs():
                     added_fps += 1
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: features_profiles_dirs failed to fp_dir to features_profile_dirs_dict')
-    logger.info('added %s new items to features_profiles_dirs, returning %s items' % (
+                    logger.error('error :: expected_features_profiles_dirs failed to fp_dir to features_profile_dirs_dict')
+    logger.info('expected_features_profiles_dirs - added %s new items to features_profiles_dirs, returning %s items' % (
         str(added_fps), str(len(features_profile_dirs_dict))))
     return features_profile_dirs_dict
 
@@ -8875,7 +9836,10 @@ def get_matched_motifs(
         if engine:
             engine_disposal(engine)
         raise  # to webapp to return in the UI
-    query_stmt = select([motifs_matched_table])
+    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #query_stmt = select([motifs_matched_table])
+    query_stmt = select(motifs_matched_table)
 
     query_string = 'SELECT * FROM motifs_matched'
     needs_and = False
@@ -8899,14 +9863,23 @@ def get_matched_motifs(
 
         fp_ids = ''
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
 
             # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
-            fp_ids_stmt = select([ionosphere_table.c.id]).where(ionosphere_table.c.metric_id == int(metric_id))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #fp_ids_stmt = select([ionosphere_table.c.id]).where(ionosphere_table.c.metric_id == int(metric_id))
+            fp_ids_stmt = select(ionosphere_table.c.id).where(ionosphere_table.c.metric_id == int(metric_id))
 
-            results = connection.execute(fp_ids_stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(fp_ids_stmt)
+            with engine.connect() as connection:
+                result = connection.execute(fp_ids_stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 fp_id = str(row[0])
                 if fp_ids == '':
@@ -8919,7 +9892,7 @@ def get_matched_motifs(
                 # Use sqlalchemy rather than string-based query construction
                 fp_ids_list.append(row['id'])
 
-            connection.close()
+            #connection.close()
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -8941,7 +9914,11 @@ def get_matched_motifs(
         # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                   Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
-        query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
+        query_stmt = select(motifs_matched_table).\
+                where(motifs_matched_table.c.fp_id.in_(fp_ids_list))
 
     if metric_like:
         if metric_like and metric_like != 'all':
@@ -8990,10 +9967,20 @@ def get_matched_motifs(
                 # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                   Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
-                fp_ids_stmt = select([ionosphere_table.c.id], ionosphere_table.c.metric_id.in_(metric_ids_list))
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #fp_ids_stmt = select([ionosphere_table.c.id], ionosphere_table.c.metric_id.in_(metric_ids_list))
+                fp_ids_stmt = select(ionosphere_table.c.id).\
+                        where(ionosphere_table.c.metric_id.in_(metric_ids_list))
 
-                connection = engine.connect()
-                results = connection.execute(fp_ids_stmt)
+                #connection = engine.connect()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(fp_ids_stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 for row in results:
                     fp_id = str(row[0])
                     if fp_ids == '':
@@ -9006,7 +9993,7 @@ def get_matched_motifs(
                     # Use sqlalchemy rather than string-based query construction
                     fp_ids_list.append(row['id'])
 
-                connection.close()
+                #connection.close()
             except Exception as err:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -9027,7 +10014,11 @@ def get_matched_motifs(
             # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
-            query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
+            query_stmt = select(motifs_matched_table).\
+                    where(motifs_matched_table.c.fp_id.in_(fp_ids_list))
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
@@ -9318,10 +10309,20 @@ def get_matched_motifs(
 
     if not ionosphere_summary_list:
         stmt = "SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id"
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        stmt = text(stmt)
+
         try:
-            connection = engine.connect()
-            results = connection.execute(stmt)
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #results = connection.execute(stmt)
+            #connection.close()
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
         except Exception as e:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -9368,7 +10369,7 @@ def get_matched_motifs(
     get_motifs_matched = True
     if get_motifs_matched:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             stmt = query_string
 
             # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -9378,8 +10379,16 @@ def get_matched_motifs(
             stmt = query_stmt
             # logger.info('%s :: executing query_stmt: %s' % (function_str, str(query_stmt)))
 
-            results = connection.execute(stmt)
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            #connection.close()
+            if isinstance(stmt, str):
+                stmt = text(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
         except Exception as e:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -9513,17 +10522,26 @@ def get_matched_motif_id(fp_id, timestamp, index, size):
         # for result in results:
         #     matched_motif_id = int(result[0])
         #     motif_validated = int(result[1])
-        query = select([motifs_matched_table.c.id, motifs_matched_table.c.validated]).\
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #query = select([motifs_matched_table.c.id, motifs_matched_table.c.validated]).\
+        query = select(motifs_matched_table.c.id, motifs_matched_table.c.validated).\
             where(motifs_matched_table.c.fp_id == int(fp_id)).\
             where(motifs_matched_table.c.metric_timestamp == int(timestamp)).\
             where(motifs_matched_table.c.index == int(index)).\
             where(motifs_matched_table.c.size == int(size))
-        connection = engine.connect()
-        results = connection.execute(query)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #results = connection.execute(query)
+        with engine.connect() as connection:
+            result = connection.execute(query)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             matched_motif_id = row['id']
             motif_validated = row['validated']
-        connection.close()
+        #connection.close()
         logger.info('%s :: matched_motif_id: %s, motif_validated: %s' % (
             function_str, str(matched_motif_id), str(motif_validated)))
 
@@ -9540,15 +10558,24 @@ def get_matched_motif_id(fp_id, timestamp, index, size):
             # results = mysql_select(skyline_app, query)
             # for result in results:
             #     ionosphere_matched_id = int(result[0])
-            query = select([ionosphere_matched_table.c.id]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #query = select([ionosphere_matched_table.c.id]).\
+            query = select(ionosphere_matched_table.c.id).\
                 where(ionosphere_matched_table.c.fp_id == int(fp_id)).\
                 where(ionosphere_matched_table.c.metric_timestamp == int(timestamp)).\
                 where(ionosphere_matched_table.c.motifs_matched_id == int(matched_motif_id))
-            connection = engine.connect()
-            results = connection.execute(query)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #results = connection.execute(query)
+            with engine.connect() as connection:
+                result = connection.execute(query)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 ionosphere_matched_id = row['id']
-            connection.close()
+            #connection.close()
             logger.info('%s :: ionosphere_matched_id: %s' % (
                 function_str, str(ionosphere_matched_id)))
 

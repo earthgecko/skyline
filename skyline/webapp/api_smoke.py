@@ -28,20 +28,32 @@ from functions.metrics.get_authoritative_node import get_authoritative_node
 # Added namespaces
 def get_api_smoke(
         current_skyline_app, from_timestamp=None, cluster_data=False,
-        max_items=50, namespaces=[]):
+        max_items=50, namespaces=[],
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances and added
+        # until_timestamp
+        do_not_train=False, until_timestamp=None,
+        # @added 20260228
+        llm_output=False):
     """
     Return the training_data_dict to populate the smoke table.
 
     :param current_skyline_app: the app calling the function
     :param from_timestamp: the from_timestamp to return entries from
+    :param until_timestamp: the until_timestamp to return entries from
     :param cluster_data: the cluster_data parameter from the request
     :param max_items: the maximum number of items to return
     :param namespaces: a list of namespaces to match
+    :param do_not_train: a boolean whether to include do_not_train instances in
+        the returned training data
     :type current_skyline_app: str
     :type from_timestamp: int
+    :type until_timestamp: int
     :type cluster_data: bool
     :type max_items: int
     :type namespaces: list
+    :type do_not_train: bool
+
     :return: training_data_dict
     :rtype: dict
 
@@ -61,9 +73,9 @@ def get_api_smoke(
             function_str, err))
         raise
 
-    current_logger.info('%s :: from_timestamp: %s, cluster_data: %s, max_items: %s, namespaces: %s' % (
-        function_str, str(from_timestamp), str(cluster_data), str(max_items),
-        str(namespaces)))
+    current_logger.info('%s :: from_timestamp: %s, until_timestamp: %s, cluster_data: %s, max_items: %s, namespaces: %s' % (
+        function_str, str(from_timestamp), str(until_timestamp),
+        str(cluster_data), str(max_items), str(namespaces)))
 
     if not from_timestamp:
         from_timestamp = int(time()) - 86400
@@ -105,13 +117,26 @@ def get_api_smoke(
         current_logger.error('error :: api_smoke failed to get ionosphere.unique_metrics - %s' % err)
         raise
 
+    # @added 20250329 - Feature #5611: custom_algorithm_only
+    # Allow smoke to include training for do_not_train instances
+    redis_ionosphere_training_data_set = 'ionosphere.training_data'
+    if do_not_train:
+        redis_ionosphere_training_data_set = 'ionosphere.training_data_with_do_not_train'
+
     training_data_raw = []
     try:
-        training_data_raw = list(redis_conn_decoded.smembers('ionosphere.training_data'))
+        # @modified 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        #training_data_raw = list(redis_conn_decoded.smembers('ionosphere.training_data'))
+        training_data_raw = list(redis_conn_decoded.smembers(redis_ionosphere_training_data_set))
     except Exception as err:
-        current_logger.error('error :: api_smoke failed to get ionosphere.training_data - %s' % err)
+        #current_logger.error('error :: api_smoke failed to get ionosphere.training_data - %s' % err)
+        current_logger.error('error :: api_smoke failed to get %s, err: %s' % (
+            redis_ionosphere_training_data_set, err))
         raise
-    current_logger.info('api_smoke got %s entries from ionosphere.training_data' % str(len(training_data_raw)))
+    #current_logger.info('api_smoke got %s entries from ionosphere.training_data' % str(len(training_data_raw)))
+    current_logger.info('api_smoke got %s entries from %s' % (
+        str(len(training_data_raw)), redis_ionosphere_training_data_set))
     training_data = []
     for training_data_str in training_data_raw:
         try:
@@ -188,6 +213,13 @@ def get_api_smoke(
         if added_events > 10:
             if ts < from_timestamp:
                 continue
+
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Added until_timestamp
+            if until_timestamp:
+                if ts > until_timestamp:
+                    continue
+
         if len(training_data_dict) >= max_items:
              break
         labelled_metric_name = None
@@ -287,11 +319,26 @@ def get_api_smoke(
 
                 timeseries_json = '%s.json' % use_base_name
 
+                # @added 20250329 - Feature #5611: custom_algorithm_only
+                # Allow to show short_period 
+                short_period_image = None
+
+                # @added 20250223 - Feature #5270: webapp - panorama smoke
+                #                   Feature #5712: skyline.dawn
+                # Added the learnt variable
+                learnt = False
+
                 for path, folders, files in os.walk(training_data_dir):
                     if files:
                         for file in files:
                             if file.endswith('h.png'):
                                 if 'mirage.graphite' in str(file):
+                                    # @added 20250329 - Feature #5611: custom_algorithm_only
+                                    # Allow to show short_period 
+                                    if file.endswith('0_75h.png'):
+                                        short_period_image = '%s/%s' % (training_data_dir, file)
+                                        continue
+
                                     image = '%s/%s' % (training_data_dir, file)
                                     current_logger.debug('debug :: api_smoke image: %s' % image)
                                     training_data_dict[ts][base_name]['image'] = image
@@ -323,14 +370,30 @@ def get_api_smoke(
 
                             if file == trained_txt_file:
                                 trained = True
+                                # @added 20250223 - Feature #5270: webapp - panorama smoke
+                                #                   Feature #5712: skyline.dawn
+                                # Added the learnt variable
+                                features_profile_created_file = '%s/%s' % (training_data_dir, trained_txt_file)
+                                try:
+                                    with open(features_profile_created_file, 'r') as f:
+                                        fp_created_str = f.read()
+                                    fp_created_array = literal_eval(fp_created_str)
+                                    generation = fp_created_array[8]
+                                    if generation > 1:
+                                        learnt = True
+                                except Exception as err:
+                                    current_logger.error(
+                                        'error :: api_smoke failed to read from %s, err: %s' % (
+                                            features_profile_created_file, err))
+
                             if file.endswith('profile_id_matched.fp_id'):
                                 matched = True
                         # @added 20240514 - Feature #5270: webapp - panorama smoke
                         # Handle Analyzer only anomalies if the mirage image is
                         # not available
-                        if 'image_url' not in training_data_dict[ts][base_name]:
+                        if not training_data_dict[ts][base_name]['image_url']:
                             for file in files:
-                                if 'analyzer.graphite' in file and file.endswith('h.png'):
+                                if 'analyzer.graphite' in str(file) and file.endswith('h.png'):
                                     image = '%s/%s' % (training_data_dir, file)
                                     training_data_dict[ts][base_name]['image'] = image
                                     image_url = '%s/ionosphere_images?image=%s' % (
@@ -339,11 +402,11 @@ def get_api_smoke(
                                     break
                         # @added 20241108 - Feature #5270: webapp - panorama smoke
                         # Handle new VictoriaMetrics metrics
-                        if 'image_url' not in training_data_dict[ts][base_name]:
+                        if not training_data_dict[ts][base_name]['image_url']:
                             for file in files:
-                                if 'mirage.redis.plot.24h' in file and file.endswith('.png'):
-                                    current_logger.debug('debug :: no image_url in training_data_dict keys: %s' % (
-                                        str(training_data_dict[ts][base_name].keys())))
+                                if 'mirage.redis.plot.24h' in str(file) and file.endswith('.png'):
+                                    #current_logger.debug('debug :: no image_url in training_data_dict keys: %s' % (
+                                    #    str(training_data_dict[ts][base_name].keys())))
                                     current_logger.debug('debug :: api_smoke image: %s' % image)
                                     image = '%s/%s' % (training_data_dir, file)
                                     training_data_dict[ts][base_name]['image'] = image
@@ -353,9 +416,9 @@ def get_api_smoke(
                                     current_logger.debug('debug :: training_data_dict image_url: %s' % training_data_dict[ts][base_name]['image_url'])
                                     break
                         # Handle metrics submitted via vortex
-                        if 'image_url' not in training_data_dict[ts][base_name]:
+                        if not training_data_dict[ts][base_name]['image_url']:
                             for file in files:
-                                if 'vortex.analysed' in file and file.endswith('h.png'):
+                                if 'vortex.analysed' in str(file) and file.endswith('h.png'):
                                     image = '%s/%s' % (training_data_dir, file)
                                     training_data_dict[ts][base_name]['image'] = image
                                     image_url = '%s/ionosphere_images?image=%s' % (
@@ -363,8 +426,22 @@ def get_api_smoke(
                                     training_data_dict[ts][base_name]['image_url'] = image_url
                                     break
 
+                        # @added 20250329 - Feature #5611: custom_algorithm_only
+                        # Allow to show short_period 
+                        training_data_dict[ts][base_name]['short_period_image'] = short_period_image
+                        short_period_image_url = None
+                        if short_period_image:
+                            short_period_image_url = '%s/ionosphere_images?image=%s' % (
+                                settings.SKYLINE_URL, short_period_image)
+                        training_data_dict[ts][base_name]['short_period_image_url'] = short_period_image_url
+
             training_data_dict[ts][base_name]['trained'] = trained
             training_data_dict[ts][base_name]['untrainable'] = untrainable
+
+            # @added 20250223 - Feature #5270: webapp - panorama smoke
+            #                   Feature #5712: skyline.dawn
+            # Added the learnt variable
+            training_data_dict[ts][base_name]['learnt'] = learnt
 
             data_dir = '%s/%s/%s' % (settings.IONOSPHERE_PROFILES_FOLDER, timestamp, timeseries_dir)
             if os.path.exists(data_dir):
@@ -377,13 +454,18 @@ def get_api_smoke(
                 training_data_dict[ts][base_name]['image_url'] = None
 
         except Exception as err:
-            current_logger.error('error :: api_smoke failed to evaluate training_data item - %s' % err)
+            current_logger.error('error :: api_smoke failed to evaluate training_data item, err: %s' % err)
     # current_logger.debug('debug :: api_smoke training_data_dict: %s' % str(training_data_dict))
 
     # @added 20231227 - Feature #5270: webapp - panorama smoke
     # Add anomalies as well to display boundary anomalies too
     dict_timestamps = list(training_data_dict.keys())
-    until_timestamp = int(time())
+
+    # @added 20250329 - Feature #5611: custom_algorithm_only
+    # Added until_timestamp as an argument so only use current if not set
+    if not until_timestamp:
+        until_timestamp = int(time())
+
     metric_ids = []
     try:
         anomalies = get_anomalies_for_period(current_skyline_app, metric_ids, from_timestamp, until_timestamp)
@@ -465,6 +547,13 @@ def get_api_smoke(
             continue
         if ts < from_timestamp:
             continue
+
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Added until_timestamp
+        if until_timestamp:
+            if ts > until_timestamp:
+                continue
+
         thunder_alert = None
         try:
             thunder_alert_str = redis_conn_decoded.get(thunder_alert_key)
@@ -508,7 +597,10 @@ def get_api_smoke(
     remote_training_data = []
     if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
         current_logger.info('%s :: calling /smoke on other cluster nodes' % function_str)
-        api_uri = 'smoke=true&from_timestamp=%s&cluster_data=false&cluster_call=true' % str(from_timestamp)
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Added until_timestamp
+        api_uri = 'smoke=true&from_timestamp=%s&until_timestamp=%s&cluster_data=false&cluster_call=true' % (
+            str(from_timestamp), str(until_timestamp))
 
         # @added 20240212 - Feature #5270: webapp - panorama smoke
         # Allow max_items and namespaces to be passed
@@ -517,6 +609,11 @@ def get_api_smoke(
         if namespaces:
             namespaces_str = ','.join(namespaces)
             api_uri = '%s&namespaces=%s' % (api_uri, str(namespaces_str))
+
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        if do_not_train:
+            api_uri = '%s&do_not_train=true' % api_uri
 
         try:
             remote_training_data = get_cluster_data(api_uri, 'training_data')
@@ -545,5 +642,36 @@ def get_api_smoke(
 
     if sorted_training_data_dict:
         training_data_dict = dict(sorted_training_data_dict)
+
+    # @added 20260228
+    if llm_output:
+        remove_keys = [
+            'training_data_dir', 'data_dir', 'image', 'image_url', 'host',
+            'added_to_smoke_by', 'training_data_uri', 'short_period_image',
+            'short_period_image_url'
+        ]
+        keep_details_keys = [
+            #"value", "metric_timestamp", "added_by"
+            "value", "metric_timestamp", "added_by"
+        ]
+#"details": {"metric": "victronenergy.vebus.Ac.Out.L2.P", "value": 1161.375, "from_timestamp": 1771701600, "metric_timestamp": 1772305772, "algorithms": ["histogram_bins", "first_hour_average", "stddev_from_average", "grubbs", "ks_test", "mean_subtraction_cumulation", "median_absolute_deviation", "stddev_from_moving_average", "least_squares"], "triggered_algorithms": ["mirage_nirvana"], "graphite_metric": false, "run_crucible_tests": false, "added_by": "ionosphere", "added_at": 1772305893, "full_duration": 604800, "algorithms_run": ["mirage_nirvana"], "base_name": "victronenergy.vebus.Ac.Out.L2.P"},
+        timestamps = list(training_data_dict.keys())
+        for ts in timestamps:
+            ts_items = list(training_data_dict[ts].keys())
+            for metric in ts_items:
+                for key in remove_keys:
+                    try:
+                        del training_data_dict[ts][metric][key]
+                    except:
+                        pass
+                if 'details' in training_data_dict[ts][metric]:
+                    for key in list(training_data_dict[ts][metric]['details'].keys()):
+                        if key not in keep_details_keys:
+                            try:
+                                del training_data_dict[ts][metric]['details'][key]
+                            except:
+                                pass
+                
+
 
     return training_data_dict

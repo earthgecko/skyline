@@ -96,6 +96,11 @@ try:
 except:
     backlog = 2048
 
+# @added 20260221 - Task #5711: Test Ubuntu 24.04
+#                   Task #5628: Build v5.0.0 and test
+control_socket = '%s/webapp.gunicorn.ctl' % settings.SKYLINE_TMP_DIR
+timeout = 120
+
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)

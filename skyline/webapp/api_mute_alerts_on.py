@@ -83,7 +83,9 @@ def api_mute_alerts_on(current_skyline_app, cluster_data, namespace, metric_patt
                 except Exception as err:
                     match_errs.append(['matched_or_regexed_in_list error', base_name], err)
             timestamp = int(muted_metrics[metric])
-            until = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #until = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            until = datetime.datetime.fromtimestamp(int(timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             muted_metrics_dict[metric] = {'timestamp': timestamp, 'until': until}
         if muted_metrics_dict:
             muted_metrics = muted_metrics_dict.copy()
@@ -230,7 +232,10 @@ def api_mute_alerts_on(current_skyline_app, cluster_data, namespace, metric_patt
         if metric.startswith('labelled_metrics.'):
             continue
         timestamp = int(muted_metrics[metric])
-        until = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #until = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        until = datetime.datetime.fromtimestamp(int(timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+
         muted_metrics_dict[metric] = {'timestamp': timestamp, 'until': until}
     if muted_metrics_dict:
         muted_metrics = muted_metrics_dict.copy()

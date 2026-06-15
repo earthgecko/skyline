@@ -139,6 +139,8 @@ function fetchDataAndUpdateTable() {
                               message = `${item.date} - <strong>${app}</strong> - <code>${base_name}</code> (<a target='_blank' href="${training_data_uri}">${metric_name}</a>) was ${item.details.value}<br>`;
                           }
                           const imageUrl = image_url + item.image;
+                          const short_period_imageUrl = image_url + item.short_period_image;
+
                           const trained = item.trained;
                           const matched = item.matched;
                           const untrainable = item.untrainable;
@@ -167,6 +169,15 @@ function fetchDataAndUpdateTable() {
     //                          cell2.appendChild(image);
                             cell1.appendChild(image);
                           }
+                          if (item.short_period_image != null) {
+                            const short_period_image = document.createElement('img');
+                            short_period_image.loading = 'lazy';
+                            short_period_image.src = short_period_imageUrl;
+                            short_period_image.width = 580; // Set the width of the image
+                            short_period_image.height = 260; // Set the height of the image
+                            cell1.appendChild(short_period_image);
+                          }
+
           //                  console.log('imageUrl:', imageUrl);
           //              break; // Break after processing the first (most recent) item
                           // Create and append a button

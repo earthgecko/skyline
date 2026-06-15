@@ -154,46 +154,62 @@ def get_snab_results(filter_on):
     # Determine start and end anomaly_ids
     start_anomaly_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp >= int(from_timestamp)).order_by(anomalies_table.c.id.asc()).limit(1)
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp >= int(from_timestamp)).order_by(anomalies_table.c.id.asc()).limit(1)
+        stmt = select(anomalies_table).where(anomalies_table.c.anomaly_timestamp >= int(from_timestamp)).order_by(anomalies_table.c.id.asc()).limit(1)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             start_anomaly_id = row['id']
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
         fail_msg = 'error :: get_snab_results :: failed to determine start_anomaly_id - %s' % str(err)
         logger.error('%s' % fail_msg)
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     logger.info('get_snab_results :: starting from anomaly_id: %s' % str(start_anomaly_id))
 
     end_anomaly_id = 0
     try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp <= int(until_timestamp)).order_by(anomalies_table.c.id.desc()).limit(1)
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp <= int(until_timestamp)).order_by(anomalies_table.c.id.desc()).limit(1)
+        stmt = select(anomalies_table).where(anomalies_table.c.anomaly_timestamp <= int(until_timestamp)).order_by(anomalies_table.c.id.desc()).limit(1)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             end_anomaly_id = row['id']
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
         fail_msg = 'error :: get_snab_results :: failed to determine end_anomaly_id - %s' % str(err)
         logger.error('%s' % fail_msg)
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     logger.info('get_snab_results :: ending with anomaly_id: %s' % str(end_anomaly_id))
@@ -211,41 +227,58 @@ def get_snab_results(filter_on):
 
     all_results = {}
     try:
-        connection = engine.connect()
-        stmt = select([snab_table]).\
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([snab_table]).\
+        stmt = select(snab_table).\
             where(snab_table.c.anomaly_id >= start_anomaly_id).\
             where(snab_table.c.anomaly_id <= end_anomaly_id)
         if from_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
                 where(snab_table.c.anomaly_id >= start_anomaly_id).\
                 where(snab_table.c.anomaly_id <= end_anomaly_id).\
                 where(snab_table.c.snab_timestamp >= int(from_timestamp))
         if until_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
                 where(snab_table.c.anomaly_id >= start_anomaly_id).\
                 where(snab_table.c.anomaly_id <= end_anomaly_id).\
                 where(snab_table.c.snab_timestamp <= int(until_timestamp))
         if from_timestamp and until_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
                 where(snab_table.c.anomaly_id >= start_anomaly_id).\
                 where(snab_table.c.anomaly_id <= end_anomaly_id).\
                 where(snab_table.c.snab_timestamp >= int(from_timestamp)).\
                 where(snab_table.c.snab_timestamp <= int(until_timestamp))
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             snab_id = row['id']
             all_results[snab_id] = dict(row)
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
         fail_msg = 'error :: get_snab_results :: could not determine all_results - %s' % str(err)
         logger.error(fail_msg)
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise
     logger.info('get_snab_results :: determined %s SNAB results before filtering' % (
@@ -330,26 +363,36 @@ def get_snab_results(filter_on):
             check_anomaly_ids.append(all_results[snab_id]['anomaly_id'])
         check_metric_ids = []
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_table], anomalies_table.c.id.in_(check_anomaly_ids))
-            results = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table], anomalies_table.c.id.in_(check_anomaly_ids))
+            stmt = select(anomalies_table).\
+                    where(anomalies_table.c.id.in_(check_anomaly_ids))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 anomaly_id = row['id']
                 metric_id = row['metric_id']
                 check_metric_ids.append(metric_id)
                 anomaly_ids.append(anomaly_id)
                 anomalies[anomaly_id] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
             fail_msg = 'error :: get_snab_results :: failed to build anomaly_ids - %s' % str(err)
             logger.error('%s' % fail_msg)
             if engine:
-                try:
-                    connection.close()
-                except:
-                    pass
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
                 snab_engine_disposal(engine)
             raise  # to webapp to return in the UI
         for metric_id in check_metric_ids:
@@ -366,24 +409,33 @@ def get_snab_results(filter_on):
     metric_ids = list(filtered_metrics.keys())
     if metric_ids and not anomalies:
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_table], anomalies_table.c.metric_id.in_(metric_ids))
-            results = connection.execute(stmt)
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table], anomalies_table.c.metric_id.in_(metric_ids))
+            stmt = select(anomalies_table).\
+                    where(anomalies_table.c.metric_id.in_(metric_ids))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
             for row in results:
                 anomaly_id = row['id']
                 anomaly_ids.append(anomaly_id)
                 anomalies[anomaly_id] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
             fail_msg = 'error :: get_snab_results :: failed to build anomaly_ids - %s' % str(err)
             logger.error('%s' % fail_msg)
             if engine:
-                try:
-                    connection.close()
-                except:
-                    pass
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
                 snab_engine_disposal(engine)
             raise  # to webapp to return in the UI
     if anomaly_ids:
@@ -435,13 +487,30 @@ def get_snab_results(filter_on):
         logger.error(traceback.format_exc())
         logger.error('error :: get_snab_results :: get_redis_conn_decoded failed - %s' % (
             err))
+
     training_data_raw = []
+    # @added 20250329 - Feature #5611: custom_algorithm_only
+    # Also sync training for do_not_train instances
+    training_data_raw_with_do_not_train = []
     try:
-        training_data_raw = list(redis_conn_decoded.smembers('ionosphere.training_data'))
+        training_data_raw_with_do_not_train = list(redis_conn_decoded.smembers('ionosphere.training_data_with_do_not_train'))
     except Exception as err:
-        logger.error(traceback.format_exc())
-        logger.error('error :: get_snab_results :: smembers failed on ionosphere.training_data - %s' % (
-            err))
+        logger.error('error :: get_snab_results :: failed to generate a list from ionosphere.training_data_with_do_not_train Redis set, err: %s' % err)
+        training_data_raw_with_do_not_train = []
+    if training_data_raw_with_do_not_train:
+        training_data_raw = training_data_raw_with_do_not_train
+
+    # @modified 20250329 - Feature #5611: custom_algorithm_only
+    # Only check if the do_not_train set has not been used to populate the
+    # training_data_raw list
+    if not training_data_raw:
+        try:
+            training_data_raw = list(redis_conn_decoded.smembers('ionosphere.training_data'))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_snab_results :: smembers failed on ionosphere.training_data - %s' % (
+                err))
+
     ionosphere_training_data_dict = {}
     for training_data_str in training_data_raw:
         try:
@@ -472,20 +541,27 @@ def get_snab_results(filter_on):
         logger.error('error :: get_snab_results :: failed to get algorithm_groups - %s' % str(err))
     try:
         use_table_meta = MetaData()
-        apps_table = Table('apps', use_table_meta, autoload=True, autoload_with=engine)
+        apps_table = Table('apps', use_table_meta, autoload_with=engine)
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: get_snab_results :: use_table Table failed on apps table - %s' % (
             err))
     apps = {}
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         stmt = select(apps_table)
-        result = connection.execute(stmt)
-        for row in result:
+        #result = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             app_id = row['id']
             apps[app_id] = row['app']
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: get_snab_results :: failed to build apps - %s' % str(err))
@@ -629,11 +705,11 @@ def get_snab_results(filter_on):
         if output_file:
             results_data[snab_id]['plot'] = output_file
 
-    if connection:
-        try:
-            connection.close()
-        except:
-            pass
+    #if connection:
+    #    try:
+    #        connection.close()
+    #    except:
+    #        pass
 
     if engine:
         snab_engine_disposal(engine)

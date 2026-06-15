@@ -228,32 +228,66 @@ def get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp):
         raise
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         if use_filter_by_metrics:
-            stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids))
+            stmt = select(cloudburst_table).\
+                    where(cloudburst_table.c.metric_id.in_(metric_ids))
             if from_timestamp > 0 and until_timestamp == 0:
-                stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                stmt = select(cloudburst_table).\
+                    where(cloudburst_table.c.metric_id.in_(metric_ids)).\
                     where(cloudburst_table.c.timestamp >= from_timestamp)
             if from_timestamp == 0 and until_timestamp > 0:
-                stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                stmt = select(cloudburst_table).\
+                    where(cloudburst_table.c.metric_id.in_(metric_ids)).\
                     where(cloudburst_table.c.timestamp <= until_timestamp)
             if from_timestamp > 0 and until_timestamp > 0:
-                stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table], cloudburst_table.c.metric_id.in_(metric_ids)).\
+                stmt = select(cloudburst_table).\
+                    where(cloudburst_table.c.metric_id.in_(metric_ids)).\
                     where(cloudburst_table.c.timestamp >= from_timestamp).\
                     where(cloudburst_table.c.timestamp <= until_timestamp)
         else:
-            stmt = select([cloudburst_table])
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([cloudburst_table])
+            stmt = select(cloudburst_table)
             if from_timestamp > 0 and until_timestamp == 0:
-                stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table]).\
+                stmt = select(cloudburst_table).\
                     where(cloudburst_table.c.timestamp >= from_timestamp)
             if from_timestamp == 0 and until_timestamp > 0:
-                stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table]).\
+                stmt = select(cloudburst_table).\
                     where(cloudburst_table.c.timestamp <= until_timestamp)
             if from_timestamp > 0 and until_timestamp > 0:
-                stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table]).\
+                stmt = select(cloudburst_table).\
                     where(cloudburst_table.c.timestamp >= from_timestamp).\
                     where(cloudburst_table.c.timestamp <= until_timestamp)
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             # @modified 20230126
             # Wrapped in try except
@@ -271,7 +305,7 @@ def get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp):
             except Exception as err:
                 logger.error('error :: %s :: failed to iterate row from cloudburst_table - %s' % (
                     function_str, err))
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: %s :: failed to get cloudburst_table - %s' % (

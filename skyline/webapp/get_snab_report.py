@@ -1,3 +1,4 @@
+import copy
 import logging
 import traceback
 
@@ -5,6 +6,8 @@ import settings
 import skyline_version
 
 from sqlalchemy.sql import select
+# @added 20250117 - Feature #5588: snab.process_algorithm
+from sqlalchemy import or_
 
 from database import get_engine, snab_table_meta
 
@@ -87,7 +90,8 @@ def get_snab_report(filter_on):
     algorithm_id = 0
     if filter_on['algorithm']:
         algorithm = filter_on['algorithm']
-        algorithm_id = filter_on['algorithms'][algorithm]
+        if algorithm != 'all':
+            algorithm_id = filter_on['algorithms'][algorithm]
     report_data['algorithm'] = algorithm
 
     algorithms_by_name = filter_on['algorithms']
@@ -119,6 +123,27 @@ def get_snab_report(filter_on):
     # Added the ability to exclude algorithms
     exclude_algorithms = filter_on['exclude_algorithms']
 
+    # @added 20250115 - Feature #5588: snab.process_algorithm
+    # Disable algorithms_report and consensuses_report by default
+    algorithm_only = True
+    if 'algorithm_only' in filter_on:
+        algorithm_only = filter_on['algorithm_only']
+    algorithms_report = False
+    if 'algorithms_report' in filter_on:
+        algorithms_report = filter_on['algorithms_report']
+    consensuses_report = False
+    if 'consensuses_report' in filter_on:
+        consensuses_report = filter_on['consensuses_report']
+    compare_algorithm_group = None
+    if 'compare_algorithm_group' in filter_on:
+        compare_algorithm_group = filter_on['compare_algorithm_group']
+
+    if algorithm == 'all':
+        algorithm_only = False
+        algorithms_report = False
+        consensuses_report = False
+        compare_algorithm_group = False
+
     logger.info('get_snab_report :: getting report on algorithm: %s, algorithm_id: %s, with filter_on: %s' % (
         algorithm, str(algorithm_id), str(filter_on)))
 
@@ -144,41 +169,76 @@ def get_snab_report(filter_on):
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # For performance reasons first get all the anomaly ids that the algorithm
+    # has processed
     anomaly_ids = []
     algorithm_results = {}
     try:
-        connection = engine.connect()
-        stmt = select([snab_table]).\
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([snab_table]).\
+        stmt = select(snab_table).\
             where(snab_table.c.algorithm_id == algorithm_id)
         if from_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
             where(snab_table.c.algorithm_id == algorithm_id).\
                 where(snab_table.c.snab_timestamp >= int(from_timestamp))
         if until_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
             where(snab_table.c.algorithm_id == algorithm_id).\
                 where(snab_table.c.snab_timestamp <= int(until_timestamp))
         if from_timestamp and until_timestamp:
-            stmt = select([snab_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
             where(snab_table.c.algorithm_id == algorithm_id).\
                 where(snab_table.c.snab_timestamp >= int(from_timestamp)).\
                 where(snab_table.c.snab_timestamp <= int(until_timestamp))
-        results = connection.execute(stmt)
+        if algorithm == 'all':
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_table]).\
+            stmt = select(snab_table).\
+                where(
+                    or_(
+                        snab_table.c.tP.isnot(None),
+                        snab_table.c.fP.isnot(None),
+                        snab_table.c.tN.isnot(None),
+                        snab_table.c.fN.isnot(None)
+                    )
+                )
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             snab_id = row['id']
             algorithm_results[snab_id] = dict(row)
             anomaly_ids.append(row['anomaly_id'])
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
         fail_msg = 'error :: get_snab_report :: could not determine algorithm_results - %s' % str(err)
         logger.error(fail_msg)
         if engine:
-            try:
-                connection.close()
-            except:
-                pass
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #try:
+            #    connection.close()
+            #except:
+            #    pass
             snab_engine_disposal(engine)
         raise
     logger.info('get_snab_report :: determined %s SNAB results for %s' % (
@@ -190,43 +250,62 @@ def get_snab_report(filter_on):
     algorithm_groups = []
 
     all_sql_results = {}
-    try:
-        connection = engine.connect()
-        # @modified 20230922 - 
-        # Improve query performance because the WHERE IN query is inefficient
-        if not anomaly_ids:
-            stmt = select([snab_table], snab_table.c.anomaly_id.in_(anomaly_ids))
-        else:
-            stmt = select([snab_table]).\
-                where(snab_table.c.anomaly_id >= min(anomaly_ids)).\
-                where(snab_table.c.anomaly_id <= max(anomaly_ids))
-        logger.info('get_snab_report :: querying snab table for %s anomaly_ids' % (
-            str(len(anomaly_ids))))
-        results = connection.execute(stmt)
-        logger.info('get_snab_report :: queried snab table for anomaly_ids')
-        for row in results:
-            # @added 20230922 - 
+
+    if algorithm == 'all':
+        all_sql_results = algorithm_results
+    
+    if not all_sql_results:
+        try:
+            #connection = engine.connect()
+            # @modified 20230922 - 
             # Improve query performance because the WHERE IN query is inefficient
-            all_sql_results[row['id']] = dict(row)
-            continue
-            snab_id = row['id']
-            algorithm_group_id = row['algorithm_group_id']
-            algorithm_groups.append(algorithm_group_id)
-            snab_records[snab_id] = dict(row)
-        connection.close()
-        logger.info('get_snab_report :: created all_sql_results dict with %s items' % str(len(all_sql_results)))
-    except Exception as err:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: get_snab_report :: could not determine snab_records - %s' % str(err)
-        logger.error(fail_msg)
-        if engine:
-            try:
-                connection.close()
-            except:
-                pass
-            snab_engine_disposal(engine)
-        raise
+            if anomaly_ids:
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([snab_table], snab_table.c.anomaly_id.in_(anomaly_ids))
+                stmt = select(snab_table).\
+                        where(snab_table.c.anomaly_id.in_(anomaly_ids))
+            else:
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([snab_table]).\
+                stmt = select(snab_table).\
+                    where(snab_table.c.anomaly_id >= min(anomaly_ids)).\
+                    where(snab_table.c.anomaly_id <= max(anomaly_ids))
+            logger.info('get_snab_report :: querying snab table for %s anomaly_ids' % (
+                str(len(anomaly_ids))))
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            logger.info('get_snab_report :: queried snab table for anomaly_ids')
+            for row in results:
+                # @added 20230922 - 
+                # Improve query performance because the WHERE IN query is inefficient
+                all_sql_results[row['id']] = dict(row)
+                continue
+                snab_id = row['id']
+                algorithm_group_id = row['algorithm_group_id']
+                algorithm_groups.append(algorithm_group_id)
+                snab_records[snab_id] = dict(row)
+            #connection.close()
+            logger.info('get_snab_report :: created all_sql_results dict with %s items' % str(len(all_sql_results)))
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: get_snab_report :: could not determine snab_records - %s' % str(err)
+            logger.error(fail_msg)
+            if engine:
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
+                snab_engine_disposal(engine)
+            raise
 
     # @added 20230922 - 
     # Improve query performance because the WHERE IN query is inefficient
@@ -258,6 +337,18 @@ def get_snab_report(filter_on):
         'tP_rate', 'tN_rate', 'auc_roc',
     ]
 
+    compare_algorithm_group_name = None
+    if compare_algorithm_group:
+        try:
+            compare_algorithm_group_name = algorithm_groups_by_id[compare_algorithm_group]
+        except:
+            compare_algorithm_group_name = None
+        if not compare_algorithm_group_name:
+            logger.error('error :: get_snab_report :: failed to determine compare_algorithm_group_name for compare_algorithm_group with algorithm_group_id: %s' % (
+                str(compare_algorithm_group)))
+
+    report_data['use_algorithm_headers'] = algorithm
+
     report_data['results'] = {}
     report_data['algorithms'] = []
     snab_ids = list(snab_records.keys())
@@ -283,6 +374,25 @@ def get_snab_report(filter_on):
                     i_algorithm = algorithm_group_name
                     i_algorithm_id = None
                 break
+
+            if algorithm_only:
+                if i_algorithm_id != algorithm_id:
+                    continue
+            if algorithm != 'all':
+                if not algorithms_report:
+                    if i_algorithm_id != algorithm_id:
+                        if compare_algorithm_group:
+                            if compare_algorithm_group != algorithm_group_id:
+                                continue
+                        else:
+                            continue
+                if not consensuses_report:
+                    if i_algorithm_id != algorithm_id:
+                        if compare_algorithm_group:
+                            if compare_algorithm_group != algorithm_group_id:
+                                continue
+                        else:
+                            continue
 
             # @added 20230919 - Feature #5008: webapp - snab report page
             # Added the ability to exclude algorithms
@@ -316,8 +426,10 @@ def get_snab_report(filter_on):
                 # @added 20230802 - Feature #5038: snab_results_algorithms
                 #                   Feature #5008: webapp - snab report page
                 snab_checked_snab_ids.append(int(snab_id))
-
-                runtimes.append(snab_records[snab_id]['runtime'])
+                try:
+                    runtimes.append(float(snab_records[snab_id]['runtime']))
+                except:
+                    pass
                 total += 1
                 if snab_records[snab_id]['fP']:
                     total_fP += 1
@@ -397,11 +509,15 @@ def get_snab_report(filter_on):
                 # Added auc_roc
                 'tP_rate': None, 'tN_rate': None, 'auc_roc': None,
             }
-            if i_algorithm == report_data['algorithm']:
+            #if i_algorithm == report_data['algorithm']:
+            if i_algorithm == report_data['algorithm'] or algorithm == 'all':
                 try:
                     ad_metrics = anomaly_detection_metrics(skyline_app, algorithm=i_algorithm, tP=total_tP, fP=total_fP, 
                                                         tN=total_tN, fN=total_fN,
                                                         evaluated=(total_evaluated - total_unsure))
+                    if algorithm == 'all':
+                        report_data['results'][i_algorithm]['anomaly_detection_metrics'] = ad_metrics
+
                 except Exception as err:
                     trace = traceback.format_exc()
                     logger.error(trace)
@@ -409,10 +525,10 @@ def get_snab_report(filter_on):
                         i_algorithm, str(err))
                     logger.error(fail_msg)
                     if engine:
-                        try:
-                            connection.close()
-                        except:
-                            pass
+                        #try:
+                        #    connection.close()
+                        #except:
+                        #    pass
                         snab_engine_disposal(engine)
                     raise
             if ad_metrics:
@@ -438,15 +554,32 @@ def get_snab_report(filter_on):
             fail_msg = 'error :: get_snab_report :: could not determine report_data - %s' % str(err)
             logger.error(fail_msg)
             if engine:
-                try:
-                    connection.close()
-                except:
-                    pass
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
                 snab_engine_disposal(engine)
             raise
 
     if len(report_data['algorithms']) > 1:
         report_data['algorithms'] = list(set(report_data['algorithms']))
+    if algorithm == 'all':
+        report_data['use_algorithm_headers'] = list(report_data['results'].keys())[0]
+        logger.info('get_snab_report :: sorting results by fN penalty, current order: %s' % (
+            str(list(report_data['results'].keys()))))
+        algos_fN_penalty = []
+        for algo, algo_results in report_data['results'].items():
+            algos_fN_penalty.append([algo, algo_results['fN penalty accuracy % ((tP+tN)/(evaluated-unsure)*100)-fN%']])
+        sorted_results = {}
+        sorted_algos_fN_penalty = sorted(algos_fN_penalty, key=lambda x: x[1], reverse=True)
+        for algo, fN_penalty in sorted_algos_fN_penalty:
+            sorted_results[algo] = copy.deepcopy(report_data['results'][algo])
+            if 'anomaly_detection_metrics' in sorted_results[algo]:
+                del sorted_results[algo]['anomaly_detection_metrics']
+        report_data['results'] = sorted_results
+        logger.info('get_snab_report :: sorted results by fN penalty to: %s' % (
+            str(list(report_data['results'].keys()))))
+        report_data['algorithms'] = list(sorted_results.keys())
 
     # @added 20230802 - Feature #5038: snab_results_algorithms
     #                   Feature #5008: webapp - snab report page
@@ -462,7 +595,8 @@ def get_snab_report(filter_on):
 
     remove_algo_keys = []
 
-    if snab_checked_snab_ids:
+    #if snab_checked_snab_ids:
+    if snab_checked_snab_ids and algorithm != 'all':
         try:
             algorithms_results = get_snab_algorithms_results(skyline_app, snab_id=0, snab_ids=snab_checked_snab_ids)
             logger.info('get_snab_report :: get_snab_algorithms_results got %s algorithms_results' % str(len(algorithms_results)))
@@ -472,10 +606,10 @@ def get_snab_report(filter_on):
             fail_msg = 'error :: get_snab_report :: get_snab_algorithms_results failed - %s' % str(err)
             logger.error(fail_msg)
             if engine:
-                try:
-                    connection.close()
-                except:
-                    pass
+                #try:
+                #    connection.close()
+                #except:
+                #    pass
                 snab_engine_disposal(engine)
             raise
 
@@ -664,10 +798,10 @@ def get_snab_report(filter_on):
                         consensus, str(err))
                     logger.error(fail_msg)
                     if engine:
-                        try:
-                            connection.close()
-                        except:
-                            pass
+                        #try:
+                        #    connection.close()
+                        #except:
+                        #    pass
                         snab_engine_disposal(engine)
                     raise
                 if ad_metrics:
@@ -740,18 +874,20 @@ def get_snab_report(filter_on):
                         algorithm, str(err))
                     logger.error(fail_msg)
                     if engine:
-                        try:
-                            connection.close()
-                        except:
-                            pass
+                        #try:
+                        #    connection.close()
+                        #except:
+                        #    pass
                         snab_engine_disposal(engine)
                     raise
                 # @modified 20230920
                 # Now evaluated == 0 are being removed only add if the consensus
                 # has not been removed
                 # if ad_metrics:
-                if ad_metrics and consensus in list(consensuses.keys()):
-                    consensuses[consensus]['anomaly_detection_metrics'] = ad_metrics
+                #if ad_metrics and consensus in list(consensuses.keys()):
+                #    consensuses[consensus]['anomaly_detection_metrics'] = ad_metrics
+                if ad_metrics and consensus_achieved_str in list(consensuses.keys()):
+                    consensuses[consensus_achieved_str]['anomaly_detection_metrics'] = ad_metrics
                     # algorithm_results[algorithm]
                 if ad_metrics:
                     for ad_key in ad_metric_keys:
@@ -852,7 +988,6 @@ def get_snab_report(filter_on):
                         colour = '#ffa500'
                     else:
                         colour = '#FF0000'
-
                 report_data['results'][algo][h_key] = colour
     if 'algorithm_results' in list(report_data.keys()):
         for algo in list(report_data['algorithm_results']['results'].keys()):
@@ -963,13 +1098,15 @@ def get_snab_report(filter_on):
                             colour = '#FF0000'
                     report_data['consensuses']['results'][consensus][h_key] = colour
 
-    if connection:
-        try:
-            connection.close()
-        except:
-            pass
+    #if connection:
+    #    try:
+    #        connection.close()
+    #    except:
+    #        pass
 
     if engine:
         snab_engine_disposal(engine)
+
+    logger.info('get_snab_report :: final report_data: %s' % str(report_data))
 
     return report_data

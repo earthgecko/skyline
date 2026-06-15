@@ -4,6 +4,9 @@ api_alias_features_profile.py
 import copy
 import logging
 
+# @added 20250130 - Feature #5479: ionosphere.alias_features_profile
+from ast import literal_eval
+
 from flask import request
 
 from functions.database.queries.create_alias_fps_for_metrics import create_alias_fps_for_metrics
@@ -166,12 +169,20 @@ def api_alias_features_profile(current_skyline_app, user=None, user_id=0):
         try:
             exclude_patterns_str = request.form['exclude_patterns']
             exclude_patterns = []
+            # @added 20250130 - Feature #5479: ionosphere.alias_features_profile
             if isinstance(exclude_patterns_str, str):
+                if exclude_patterns_str.startswith('['):
+                    try:
+                        exclude_patterns = literal_eval(exclude_patterns_str)
+                    except Exception as err:
+                        current_logger.error('api_alias_features_profile literal_eval failed on exclude_patterns_str: %s, err: %s' % (
+                            exclude_patterns_str, err))
+            if not exclude_patterns and isinstance(exclude_patterns_str, str):
                 if ',' in exclude_patterns_str:
                     exclude_patterns = exclude_patterns_str.split(',')
                 else:
                     exclude_patterns = [exclude_patterns_str]
-            if isinstance(exclude_patterns_str, str):
+            if not exclude_patterns and isinstance(exclude_patterns_str, str):
                 if exclude_patterns_str == '':
                     exclude_patterns = []
         except KeyError:
@@ -375,6 +386,9 @@ def api_alias_features_profile(current_skyline_app, user=None, user_id=0):
             alias_features_profile_response_dict['error'] = 'get_candidate_metrics failed'
             return alias_features_profile_response_dict
 
+        current_logger.info('api_alias_features_profile - determined %s candidate_metrics from metric_pattern: %s' % (
+            str(len(candidate_metrics)), metric_pattern))
+
         candidate_metric_names_and_ids = {}
         candidate_metric_ids = []
         for metric_id in list(candidate_metrics.keys()):
@@ -393,6 +407,25 @@ def api_alias_features_profile(current_skyline_app, user=None, user_id=0):
         for candidate_metric in candidate_metrics_list:
             alias_metric_id = 0
             target_metric = candidate_metric.replace(metric_pattern, replace_pattern)
+            # @added 20250130 - Feature #5479: ionosphere.alias_features_profile
+            # Handle wildcard pattern
+            if target_metric == candidate_metric and '*' in replace_pattern:
+                target_metric = None
+                for index, i in enumerate(replace_pattern.split('.')):
+                    if '*' in i:
+                        continue
+                    metric_pattern_element = ''
+                    try:
+                        metric_pattern_element = metric_pattern.split('.')[index]
+                    except:
+                        metric_pattern_element = ''
+                    if len(metric_pattern_element) == 0:
+                        continue
+                    if target_metric:
+                        target_metric = target_metric.replace(metric_pattern_element, i)
+                    else:
+                        target_metric = candidate_metric.replace(metric_pattern_element, i)
+
             if target_metric in metric_names_with_ids:
                 alias_metric = str(target_metric)
                 alias_metric_id = metric_names_with_ids[alias_metric]
@@ -419,6 +452,25 @@ def api_alias_features_profile(current_skyline_app, user=None, user_id=0):
             alias_metric = None
             alias_metric_id = 0
             target_metric = candidate_metric.replace(metric_pattern, replace_pattern)
+            # @added 20250130 - Feature #5479: ionosphere.alias_features_profile
+            # Handle wildcard pattern
+            if target_metric == candidate_metric and '*' in replace_pattern:
+                target_metric = None
+                for index, i in enumerate(replace_pattern.split('.')):
+                    if '*' in i:
+                        continue
+                    metric_pattern_element = ''
+                    try:
+                        metric_pattern_element = metric_pattern.split('.')[index]
+                    except:
+                        metric_pattern_element = ''
+                    if len(metric_pattern_element) == 0:
+                        continue
+                    if target_metric:
+                        target_metric = target_metric.replace(metric_pattern_element, i)
+                    else:
+                        target_metric = candidate_metric.replace(metric_pattern_element, i)
+
             if target_metric in metric_names_with_ids:
                 alias_metric = str(target_metric)
                 alias_metric_id = metric_names_with_ids[alias_metric]
@@ -511,7 +563,8 @@ def api_alias_features_profile(current_skyline_app, user=None, user_id=0):
             except:
                 pass
         alias_features_profile_response_dict['candidate_metrics_list'] = list(set(candidate_metrics_list))
-
+        current_logger.info('api_alias_features_profile :: %s metrics in candidate_metrics_list' % (
+            str(len(alias_features_profile_response_dict['candidate_metrics_list']))))
         return alias_features_profile_response_dict
 
     current_logger.info('%s :: %s alias_features_profile returned' % (

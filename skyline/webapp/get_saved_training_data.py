@@ -15,6 +15,9 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 #                   Branch #4300: prometheus
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+# @added 20251025 - Feature #4206: webapp - saved_training_data page
+# Optimise determining DB metrics names
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 
 
 # @added 20210727 - Feature #4206: webapp - saved_training_data page
@@ -53,6 +56,29 @@ def get_saved_training_data(
 
     saved_training_data_dir = '%s_saved' % settings.IONOSPHERE_DATA_FOLDER
 
+    # @added 20251025 - Feature #4206: webapp - saved_training_data page
+    # Optimise determining DB metrics names. Now there is a lot of saved training
+    # data with possible SNAB additions, it is taking 89 seconds for the
+    # /ionosphere?ionosphere_saved_training@ page to build.  Use the single
+    # get_all_db_metric_names function to get all DB metric names once, rather
+    # than calling metric_id_from_base_name for every metric.
+    start = time.time()
+    current_logger.info('%s :: %s :: fetching all metric names with get_all_db_metric_names' % (
+        current_skyline_app, function_str))
+    metric_names_with_ids = {}
+    ids_with_metric_names = {}
+    with_ids = True
+    metric_names = []
+    try:
+        metric_names, metric_names_with_ids = get_all_db_metric_names(current_skyline_app, with_ids)
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to get_all_active_db_metric_names - %s' % (
+            function_str, err))
+    current_logger.info('%s :: %s :: fetched %s metric names with get_all_db_metric_names' % (
+        current_skyline_app, function_str, str(len(metric_names))))
+    lookup_errors = []
+
     for root, dirs, files in walk(saved_training_data_dir):
         for file in files:
             if file.endswith('.saved_training_data_label.txt'):
@@ -88,12 +114,26 @@ def get_saved_training_data(
                 saved_training_data_dict[metric][timestamp]['metric'] = use_base_name
 
                 metric_id = 0
+
+                # @added 20251025 - Feature #4206: webapp - saved_training_data page
+                # Optimised to use the metric_names_with_ids from the single call
+                # function get_all_db_metric_names
                 try:
-                    metric_id = get_metric_id_from_base_name(current_skyline_app, use_base_name)
+                    metric_id = metric_names_with_ids[use_base_name]
                 except Exception as err:
-                    current_logger.error('%s :: error :: get_metric_id_from_base_name failed for %s - %s' % (
-                        function_str, use_base_name, err))
-                    metric_id = 0
+                    lookup_errors.append(['not found in metric_names_with_ids', use_base_name, err])
+
+                # @modified 20251025 - Feature #4206: webapp - saved_training_data page
+                # Only use get_metric_id_from_base_name if not determined from
+                # the newly added optimisation that uses metric_names_with_ids
+                # from the use of get_all_db_metric_names
+                if not metric_id:
+                    try:
+                        metric_id = get_metric_id_from_base_name(current_skyline_app, use_base_name)
+                    except Exception as err:
+                        current_logger.error('%s :: error :: get_metric_id_from_base_name failed for %s - %s' % (
+                            function_str, use_base_name, err))
+                        metric_id = 0
                 saved_training_data_dict[metric][timestamp]['metric_id'] = metric_id
 
                 details_file = '%s/%s' % (root, file)
@@ -130,6 +170,16 @@ def get_saved_training_data(
                 if label and saved_date:
                     saved_training_data_dict[metric][timestamp]['label'] = label
                     saved_training_data_dict[metric][timestamp]['date'] = saved_date
+
+    # @added 20251025 - Feature #4206: webapp - saved_training_data page
+    # Optimised to use the metric_names_with_ids from the single call
+    # function get_all_db_metric_names
+    if lookup_errors:
+        current_logger.error('%s :: error :: some metric ids failed to be looked up from metric_names_with_ids, last 3 errors: %s' % (
+            function_str, str(lookup_errors[-3:])))
+    built = (time.time() - start)
+    current_logger.info('%s :: %s :: saved_training_data_dict built in %s seconds' % (
+        current_skyline_app, function_str, str(built)))
 
     if webapp_endpoint == 'api':
         return saved_training_data_dict

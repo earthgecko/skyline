@@ -421,6 +421,9 @@ def determine_pearson_closest(current_skyline_app):
     if max_pearson_correlations:
         pearson_correlations = copy.deepcopy(max_pearson_correlations)
 
+    current_logger.info('%s :: %s correlations determined' % (
+        function_str, str(len(pearson_correlations))))
+
     if pearson_correlations and plot_graphs:
         output_dir = '%s/%s/%s/pearson_correlation_graphs' % (
             settings.SKYLINE_TMP_DIR, str(until_timestamp),

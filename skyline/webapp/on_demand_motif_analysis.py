@@ -29,7 +29,10 @@ import settings
 import skyline_version
 from skyline_functions import (
     mkdir_p, write_data_to_file,
-    mysql_select,
+    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    # Removed mysql_select
+    #mysql_select,
     mirage_load_metric_vars,
 )
 
@@ -211,7 +214,7 @@ def on_demand_motif_analysis(
 
     try:
         ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
-    except:
+    except Exception as err:
         logger.error(traceback.format_exc())
         fail_msg = 'error :: %s :: failed to get ionosphere_table meta - %s' % (function_str, err)
         logger.error(fail_msg)
@@ -237,16 +240,26 @@ def on_demand_motif_analysis(
             # results = mysql_select(skyline_app, query)
             # for row in results:
             #     fp_ids.append(int(row[0]))
-            stmt = select([ionosphere_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([ionosphere_table]).\
+            stmt = select(ionosphere_table).\
                 where(ionosphere_table.c.metric_id == int(metric_id)).\
                 where(ionosphere_table.c.full_duration == int(full_duration)).\
                 where(ionosphere_table.c.enabled == 1).\
                 order_by(ionosphere_table.c.last_matched.desc())
-            connection = engine.connect()
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 fp_ids.append(row['id'])
-            connection.close()
+            #connection.close()
 
         except Exception as err:
             logger.error('error :: %s :: failed to get fp ids for %s - %s' % (
@@ -267,6 +280,14 @@ def on_demand_motif_analysis(
             with open((timeseries_json_file), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: %s :: failed to replace nan with None, err: %s' % (
+                        function_str, err))
+
             del raw_timeseries
             timeseries = literal_eval(timeseries_array_str)
             del timeseries_array_str
@@ -376,7 +397,7 @@ def on_demand_motif_analysis(
                 # Handle top_matches being greater than possible kth that can be found
                 # best_indices, best_dists = mts.mass2_batch(relate_dataset, anomalous_ts, batch_size=int(batch_size), top_matches=int(top_matches))
 
-                # @modified 20240324 - Ideas #5316: motif_annihilation learning
+                # @modified 20240324 - Ideas #5316: common_motifs learning
                 #                      Feature #4014: Ionosphere - inference
                 # Added this comment because I can never remember what
                 # index is returned the starting index or the end index.
@@ -669,15 +690,19 @@ def on_demand_motif_analysis(
                     try:
                         batch_size_dataset = [float(item[1]) for item in motif_sequence]
                         y_motif = np.array(batch_size_dataset)
-                        motif_area = np.trapz(y_motif, dx=1)
+                        # @modified 20260429 - Task #5730: numpy - trapz to trapezoid
+                        #motif_area = np.trapz(y_motif, dx=1)
+                        motif_area = np.trapezoid(y_motif, dx=1)
                     except Exception as e:
-                        logger.error('error :: %s :: failed to get motif_area with np.trapz - %s' % (
+                        logger.error('error :: %s :: failed to get motif_area with np.trapezoid - %s' % (
                             function_str, e))
                     try:
                         y_fp_motif = np.array(relate_dataset)
-                        fp_motif_area = np.trapz(y_fp_motif, dx=1)
+                        # @modified 20260429 - Task #5730: numpy - trapz to trapezoid
+                        #fp_motif_area = np.trapz(y_fp_motif, dx=1)
+                        fp_motif_area = np.trapezoid(y_fp_motif, dx=1)
                     except Exception as e:
-                        logger.error('error :: %s :: failed to get fp_motif_area with np.trapz - %s' % (
+                        logger.error('error :: %s :: failed to get fp_motif_area with np.trapezoid - %s' % (
                             function_str, e))
                     # Determine the percentage difference (as a
                     # positive value) of the areas under the
@@ -690,7 +715,7 @@ def on_demand_motif_analysis(
                                     function_str))
                                 add_match = False
                             # BUT ...
-                            # @modified 20240326 - Ideas #5316: motif_annihilation learning
+                            # @modified 20240326 - Ideas #5316: common_motifs learning
                             #                      Feature #4014: Ionosphere - inference
                             # Do not do this on very short motifs as it does not
                             # have the desired effect because the range and area
