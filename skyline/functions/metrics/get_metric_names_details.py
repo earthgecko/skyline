@@ -9,7 +9,12 @@ from settings import FULL_NAMESPACE
 # @added 20220823 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
 # Return namespaces, labels, values and elements with the response
-from prometheus_client.parser import _parse_labels as parse_labels
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+# _parse_labels changed to parse_labels in v0.22.0
+try:
+    from prometheus_client.parser import _parse_labels as parse_labels
+except:
+    from prometheus_client.parser import parse_labels
 
 
 from matched_or_regexed_in_list import matched_or_regexed_in_list
