@@ -66,7 +66,10 @@ from flask import (
     # @added 20241025 - Task #5521: webapp - update to bootstrap-5.3.3
     g, make_response
     )
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
@@ -144,7 +147,12 @@ from markupsafe import escape as flask_escape
 # @added 20220823 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
 # Return namespaces, labels, values and elements with the response
-from prometheus_client.parser import _parse_labels as parse_labels
+# @modified 20250617 - Task #5627: v5.0.0 update dependencies
+# _parse_labels changed to parse_labels in v0.22.0
+try:
+    from prometheus_client.parser import _parse_labels as parse_labels
+except:
+    from prometheus_client.parser import parse_labels
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -167,7 +175,7 @@ if True:
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         get_redis_conn, get_redis_conn_decoded,
         # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
         historical_data_dir_exists,
@@ -487,8 +495,8 @@ if True:
     #                   Feature #5026: luminosity - pearson_closest
     from functions.plots.get_pearson_correlation_graphs import get_pearson_correlation_graphs
 
-    # @added 20240425 - Feature #5318: motif_annihilation
-    from motif_annihilations_to_validate import get_motif_annihilations_to_validate
+    # @added 20240425 - Feature #5318: common_motifs
+    from common_motifs_to_validate import get_common_motifs_to_validate
 
     # @added 20240515 - Feature #5352: vista - bigquery
     from add_bq_backfill_job import add_bq_backfill_job
@@ -517,6 +525,34 @@ if True:
     # @added 20241025 - Feature #5519: functions.skyline.coerce_to_valid_json
     #                   Bug #5518: custom_algorithms_results - invalid JSON
     from functions.skyline.coerce_to_valid_json import coerce_to_valid_json
+    # @added 20250404 - Feature #5619: thunder_sms
+    from api_thunder_sms import api_thunder_sms
+    # @added 20250410 - Feature #5611: custom_algorithm_only
+    from functions.cluster.shard_host import shard_host
+    # @added 20250522 - Feature #5626: skylark.echo
+    from api_echo import api_echo
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
+    # @added 20260221 - Feature #5712: skyline.dawn
+    from get_dawn_status import dawn_status
+    # @added 20260228 - Task #5709: POC LLM integration
+    LLM_CHAT_ENABLED = False
+    try:
+        LLM_CHAT_ENABLED = settings.LLM_CHAT_ENABLED
+    except:
+        LLM_CHAT_ENABLED = False
+    from flask import session, g
+    from flask_session import Session
+    if LLM_CHAT_ENABLED:
+        from llm.chat import run_chat_turn, configure_litellm
+        # @added 20260308 - Task #5709: POC LLM integration
+        from llm.load_llm_results import load_llm_results
+    else:
+        from contextlib import nullcontext
+        run_chat_turn = nullcontext()
+        configure_litellm = nullcontext()
+        load_llm_results = nullcontext()
 
 # @added 20231210 - Task #5168: v4.1.0 - update dependencies
 #                   Task #5176: Migrate to sqlalchemy v2 API
@@ -580,7 +616,10 @@ except:
 # conditional.  This was original conditional above to reduce the number of
 # imports required to reduce the footprint of webapp, but at this point an
 # additional 2 imports are not going to matter...
-from snab_backend import update_snab_result, get_snab_algorithms
+# @modified 20250108 - Feature #5588: snab.process_algorithm
+# Added algorithm_group_validations
+from snab_backend import (
+    update_snab_result, get_snab_algorithms, algorithm_group_validations)
 
 # @added 20241025 - Task #5521: webapp - update to bootstrap-5.3.3
 from werkzeug.datastructures import ImmutableMultiDict
@@ -615,6 +654,11 @@ try:
 except:
     LUMINOSITY_CLASSIFY_ANOMALIES = False
 
+# @added 20250313 - Feature #5605: Limit unauthenticated API requests for certain requests
+try:
+    WEBAPP_API_UNAUTHENICATED_ALLOWED = settings.WEBAPP_API_UNAUTHENICATED_ALLOWED
+except:
+    WEBAPP_API_UNAUTHENICATED_ALLOWED = {}
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -639,13 +683,13 @@ python_version = int(version_info[0])
 #    # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
 #    #                      Branch #3262: py3
 #    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-#    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 #    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
 #    #                   Branch #3262: py3
 #    # REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
 # else:
 #    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-#    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 #    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
 #    #                   Branch #3262: py3
 #    # REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
@@ -672,7 +716,7 @@ if OTEL_ENABLED:
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
-# charset='utf-8', decode_responses=True arguments required in py3
+# encoding='utf-8', decode_responses=True arguments required in py3
 REDIS_CONN_UNDECODE = get_redis_conn(skyline_app)
 REDIS_CONN = get_redis_conn_decoded(skyline_app)
 
@@ -788,6 +832,35 @@ try:
 except:
     DEVELOPMENT_VERSION = 'Skyline (master v4.1.0a release)'
 DEV_VER = str(DEVELOPMENT_VERSION)
+
+# @added 20260221 - Feature #5712: skyline.dawn
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
+# @added 20260228 - Task #5709: POC LLM integration
+# Session key used to store conversation history
+SESSION_KEY_HISTORY = 'llm_chat_history'
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = REDIS_CONN_UNDECODE
+app.config['SESSION_KEY_PREFIX'] = 'skyline_llm_session:'
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours, adjust to taste
+Session(app)
+# Call configure_litellm once when the module is loaded so LiteLLM is ready.
+if LLM_CHAT_ENABLED:
+    try:
+        configure_litellm(settings)
+    except Exception as err:
+        logger.error('error :: llm_chat configure_litellm failed: %s' % str(err))
+# @added 20260308 - Task #5709: POC LLM integration
+LLM_MODELS_AVAILABLE = {}
+try:
+    LLM_MODELS_AVAILABLE = settings.LLM_MODELS_AVAILABLE
+except:
+    LLM_MODELS_AVAILABLE = {}
+
 
 @app.before_request
 # def setup_logging():
@@ -1078,9 +1151,27 @@ def a_500():
 @requires_auth
 def now():
     start = time.time()
+
+    # @added 20260221 - Feature #5712: skyline.dawn
+    panorama_dawn_expiry_date = None
+    dawn_expiry_date = None
+    if SKYLINE_DAWN_ENABLED:
+        try:
+            panorama_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.panorama')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in now on skyline.dawn.panorama, err: %s' % err)
+        try:
+            dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.analyzer')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in now, err: %s' % err)
+    logger.info('now page - dawn_expiry_date: %s' % str(dawn_expiry_date))
+
     try:
         return render_template(
             'now.html', version=g.skyline_version, dev_ver=DEV_VER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            dawn_expiry_date=dawn_expiry_date,
             serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
@@ -1199,6 +1290,44 @@ def api():
     request_id = hashlib.sha256(request_id_str.encode('utf-8')).hexdigest()
     logger.info('starting request_id: %s for %s' % (str(request_id), str(request.url)))
 
+    # @added 20250313 - Feature #5605: Limit unauthenticated API requests for certain requests
+    if WEBAPP_API_UNAUTHENICATED_ALLOWED:
+        c_auth = None
+        c_user = None
+        if settings.WEBAPP_AUTH_ENABLED:
+            try:
+                c_auth = request.authorization
+                c_user = c_auth.username
+            except:
+                c_auth = None
+                c_user = None
+        if not c_user:
+            authorised = True
+            if request.headers.getlist('X-Forwarded-For'):
+                requesting_ip = str(request.headers.getlist('X-Forwarded-For')[0])
+            else:
+                requesting_ip = str(request.remote_addr)
+            logger.info('request_id: %s handling unauthenticated API request for %s for %s' % (
+                str(request_id), requesting_ip, str(request.url)))
+            if requesting_ip in WEBAPP_API_UNAUTHENICATED_ALLOWED.keys():
+                authorised = False
+                authorised_api_methods = list(WEBAPP_API_UNAUTHENICATED_ALLOWED[requesting_ip].keys())
+                for authorised_api_method in authorised_api_methods:
+                    if authorised_api_method in request.args:
+                        authorised_user_agents = WEBAPP_API_UNAUTHENICATED_ALLOWED[requesting_ip][authorised_api_method]['allowed_user_agents']
+                        request_user_agent = request.headers.get('User-Agent')
+                        for user_agent in authorised_user_agents:
+                            if re.search(user_agent, request_user_agent):
+                                authorised = True
+                                logger.info('request_id: %s unauthenticated API authorised on %s for ip: %s and user-agent: %s' % (
+                                    str(request_id), str(authorised_api_method),
+                                    str(requesting_ip), str(request_user_agent)))
+                                break
+            logger.info('request_id: %s unauthenticated API authorised: %s' % (
+                str(request_id), str(authorised)))
+            if not authorised:
+                return 'Unauthorized', 401
+
     # @added 20201110 - Feature #3824: get_cluster_data
     # Allow for the cluster_data argument to be added to certain api requests
     # to allow for data from all remote Skyline instances to be concatenated
@@ -1237,6 +1366,54 @@ def api():
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
 
+    # @added 20250522 - Feature #5626: skylark.echo
+    if 'echo' in request.args:
+        echo_response_dict = {}
+        try:
+            echo_response_dict = api_echo(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: api_echo failed, err: %s' % err)
+            return 'Internal Server Error', 500
+        took = time.time() - start
+        response_code = 200
+        metric_count = 0
+        try:
+            metric_count = len(echo_response_dict)
+        except:
+            response_code = 500
+        response_dict = {'metrics': echo_response_dict, 'metric_count': metric_count}
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": took, "response": response_code}, "data": response_dict}
+        logger.info('request_id: %s - api_echo responding with %s metrics, completed in %s seconds' % (
+            request_id, str(metric_count), str(took)))
+        logger.debug('debug ::  request_id: %s - api_echo responding: %s' % (
+            request_id, str(response_dict)))
+        return jsonify(data_dict), response_code
+
+    # @added 20250404 - Feature #5619: thunder_sms
+    if 'thunder_sms' in request.args:
+#        if request.method != 'POST':
+#            logger.error('error :: not a POST requests, returning 405')
+#            return 'Method Not Allowed', 405
+        thunder_sms_response_dict = {}
+        try:
+            thunder_sms_response_dict = api_thunder_sms(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: api_thunder_sms failed, err: %s' % err)
+            return 'Internal Server Error', 500
+        took = time.time() - start
+        try:
+            response_code = thunder_sms_response_dict['status_code']
+        except:
+            response_code = 500
+        response_dict = {'thunder_sms_response_dict': thunder_sms_response_dict}
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": took, "response": response_code}, "data": response_dict}
+        logger.info('request_id: %s - thunder_sms responding, completed in %s seconds' % (
+            request_id, str(took)))
+        logger.debug('debug ::  request_id: %s - thunder_sms responding: %s' % (
+            request_id, str(response_dict)))
+        return jsonify(data_dict), response_code
 
     # @added 20241008 - Feature #5479: ionosphere.alias_features_profile
     if 'alias_features_profile' in request.args:
@@ -1275,8 +1452,12 @@ def api():
         response_code = 200
         response_dict = {'alias_features_profile': alias_features_profile_dict}
         data_dict = {"status": {"cluster_data": cluster_data, "request_time": took, "response": response_code}, "data": response_dict}
-        logger.info('request_id: %s - alias_features_profile responding with %s alias_features_profile, completed in %s seconds' % (
-            request_id, str(len(alias_features_profile_dict)), str(took)))
+        if 'candidate_metrics_list' in alias_features_profile_dict:
+            logger.info('request_id: %s - alias_features_profile responding with %s alias_features_profile, completed in %s seconds' % (
+                request_id, str(len(alias_features_profile_dict['candidate_metrics_list'])), str(took)))
+        else:
+            logger.info('request_id: %s - alias_features_profile responding with alias_features_profile, completed in %s seconds' % (
+                request_id, str(took)))
         logger.debug('debug ::  request_id: %s - alias_features_profile responding: %s' % (
             request_id, str(alias_features_profile_dict)))
 
@@ -1408,6 +1589,19 @@ def api():
         except Exception as err:
             logger.error('error :: smoke from_timestamp failed, err: %s' % err)
             from_timestamp = int(time.time()) - 86400
+
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Added until_timestamp
+        until_timestamp = int(time.time())
+        if 'until_timestamp' in request.args:
+            try:
+                until_timestamp_str = request.args.get('until_timestamp')
+                if until_timestamp_str:
+                    until_timestamp = int(until_timestamp_str)
+            except Exception as err:
+                logger.error('error :: smoke until_timestamp failed, err: %s' % err)
+                until_timestamp = int(time.time())
+
         # @added 20240212 - Feature #5270: webapp - panorama smoke
         # Allow for max_items and namespaces to be passed
         max_items = 50
@@ -1427,16 +1621,39 @@ def api():
             logger.error('error :: smoke namespaces failed, err: %s' % err)
             namespaces = []
         use_cluster_data = cluster_data
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        do_not_train = False
+        do_not_train_str = 'false'
+        try:
+            do_not_train_str = request.args.get('do_not_train', 'false')
+            if do_not_train_str == 'true':
+                do_not_train = True
+        except Exception as err:
+            logger.error('error :: smoke do_not_train failed, err: %s' % err)
+            do_not_train = False
+
         if request.referrer:
             if 'panorama?smoke' in request.referrer:
                 try:
                     smoke_args = {
                         'from_timestamp': from_timestamp, 'max_items': max_items,
                         'namespaces': namespaces, 'cluster_data': cluster_data,
+                        # @added 20250329 - Feature #5611: custom_algorithm_only
+                        # Allow smoke to include training for do_not_train
+                        # instances and added until_timestamp
+                        'do_not_train': do_not_train_str,
+                        'until_timestamp': until_timestamp,
                     }
                     smoke_args = REDIS_CONN.hgetall('panorama.smoke.request_args')
                     if smoke_args:
                         from_timestamp = int(smoke_args['from_timestamp'])
+                        # @added 20250329 - Feature #5611: custom_algorithm_only
+                        # Added until_timestamp
+                        try:
+                            until_timestamp = int(smoke_args['until_timestamp'])
+                        except:
+                            pass
                         max_items = int(smoke_args['max_items'])
                         try:
                             namespaces_str = smoke_args['namespaces']
@@ -1447,6 +1664,17 @@ def api():
                         use_cluster_data_str = smoke_args['cluster_data']
                         if use_cluster_data_str == 'true':
                             use_cluster_data = True
+                        # @added 20250329 - Feature #5611: custom_algorithm_only
+                        # Allow smoke to include training for do_not_train instances
+                        do_not_train = False
+                        do_not_train_str = 'false'
+                        try:
+                            do_not_train_str = smoke_args['do_not_train']
+                        except KeyError:
+                            do_not_train_str = 'false'
+                        if do_not_train_str == 'true':
+                            do_not_train = True
+
                         logger.info('smoke :: parameters from redis')
                 except Exception as err:
                     logger.error('error :: smoke hgetall failed on panorama.smoke.request_args, err: %s' % err)
@@ -1456,15 +1684,30 @@ def api():
                     logger.info('smoke :: setting use_cluster_data: %s for panorama smoke request on the cluster' % (
                         str(use_cluster_data)))
 
-        logger.info('smoke :: from_timestamp: %s, cluster_data: %s, max_items: %s, namespaces: %s' % (
+        # @added 20260228 - Task #5709: POC LLM integration
+        llm_output = False
+        try:
+            llm_output_str = request.args.get('llm_output')
+            if llm_output_str == 'true':
+                llm_output = True
+        except Exception as err:
+            logger.error('error :: smoke llm_output failed, err: %s' % err)
+
+        logger.info('smoke :: from_timestamp: %s, cluster_data: %s, max_items: %s, namespaces: %s, do_not_train: %s' % (
             str(from_timestamp), str(use_cluster_data), str(max_items),
-            str(namespaces)))
+            str(namespaces), str(do_not_train)))
 
         data = {}
         try:
             data = get_api_smoke(
                 skyline_app, from_timestamp=from_timestamp, cluster_data=use_cluster_data,
-                max_items=max_items, namespaces=namespaces)            
+                max_items=max_items, namespaces=namespaces,
+                # @added 20250329 - Feature #5611: custom_algorithm_only
+                # Allow smoke to include training for do_not_train instances
+                do_not_train=do_not_train,
+                # @added 20260228 - Task #5709: POC LLM integration
+                llm_output=llm_output,
+                )
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: get_api_smoke failed - %s' % err)
@@ -2051,7 +2294,7 @@ def api():
                 test_alert_added = True
             except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to save test alert file - %s' % alert_test_file)
+                logger.error('error :: failed to save test alert file - %s, err: %s' % (alert_test_file, err))
                 return 'Internal Server Error', 500
         data = {'test alert added': test_alert_added, 'metric': metric, 'app': alerter_app, "alerter": alerter, "trigger_anomaly": trigger_anomaly}
         if alerter_id:
@@ -4123,8 +4366,42 @@ def api():
             metric_filter = request.args.get('metric', None)
         if 'timestamp' in request.args:
             timestamp_filter = request.args.get('timestamp', 0)
+
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        training_data_raw = []
+        do_not_train = False
+        do_not_train_str = 'false'
+        try:
+            do_not_train_str = request.args.get('do_not_train', 'false')
+            logger.info('do_not_train_str: %s' % str(do_not_train_str))
+            if do_not_train_str == 'true' or do_not_train_str is True:
+                do_not_train = True
+        except Exception as err:
+            logger.error('error :: panorama smoke do_not_train failed, err: %s' % err)
+            do_not_train = False
+        if do_not_train:
+            try:
+                training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data_with_do_not_train'))
+                if training_data_raw:
+                    logger.info('using data from ionosphere.training_data_with_do_not_train Redis set')
+            except Exception as err:
+                logger.error('error :: smembers failed on ionosphere.training_data_with_do_not_train, err: %s' % err)
+                training_data_raw = []
+
         training_data = []
-        training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data'))
+
+        # @modified 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        #training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data'))
+        if not training_data_raw:
+            try:
+                training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data'))
+                if training_data_raw:
+                    logger.info('using data from ionosphere.training_data Redis set')
+            except Exception as err:
+                logger.error('error :: smembers failed on ionosphere.training_data, err: %s' % err)
+                training_data_raw = []
 
         # @added 20230921 - Task #5078: Optimise cluster api training_data requests for labelled_metrics
         ids_with_metrics = {}
@@ -4323,6 +4600,12 @@ def api():
                 training_data_uri = 'training_data&metric=%s&cluster_call=true' % metric_filter
             if timestamp_filter:
                 training_data_uri = '%s&timestamp=%s&cluster_call=true' % (training_data_uri, timestamp_filter)
+
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Allow smoke to include training for do_not_train instances
+            if do_not_train:
+                training_data_uri = '%s&do_not_train=true' % training_data_uri
+
             try:
                 remote_training_data = get_cluster_data(training_data_uri, 'metrics')
             except:
@@ -4947,8 +5230,8 @@ def api():
                 unique_metrics = list(set(unique_metrics + list(inactive_labelled_metrics.keys())))
 
         # @added 20201112 - Feature #3824: get_cluster_data
+        remote_unique_metrics = None
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
-            remote_unique_metrics = None
             try:
                 if details:
                     # @modified 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
@@ -5470,7 +5753,7 @@ def api():
                 raw_series = REDIS_CONN_UNDECODE.get(metric_name)
         except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not get raw data from Redis for %s' % metric)
+            logger.error('error :: could not get raw data from Redis for %s, err: %s' % (metric, err))
 
         if raw_series:
             try:
@@ -6011,6 +6294,27 @@ def panorama():
     start = time.time()
     logger.info('request.url: %s' % str(request.url))
 
+    # @added 20260221 - Feature #5712: skyline.dawn
+    analyzer_dawn_expiry_date = None
+    mirage_dawn_expiry_date = None
+    if SKYLINE_DAWN_ENABLED:
+        # First check to the Panorama and Mirage expiries
+        try:
+            panorama_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.panorama')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in panorama on skyline.dawn.panorama, err: %s' % err)
+        try:
+            mirage_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.mirage')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in panorama on skyline.dawn.mirage, err: %s' % err)
+        if mirage_dawn_expiry_date:
+            try:
+                analyzer_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.analyzer')
+            except Exception as err:
+                logger.error('error :: dawn_status failed in panorama on skyline.dawn.analyzer, err: %s' % err)
+    logger.info('panorama - analyzer_dawn_expiry_date: %s' % str(analyzer_dawn_expiry_date))
+    logger.info('panorama - mirage_dawn_expiry_date: %s' % str(mirage_dawn_expiry_date))
+
     # @added 20231225 - Feature #5270: webapp - panorama smoke
     smoke = False
     if 'smoke' in request.args:
@@ -6025,6 +6329,18 @@ def panorama():
                 from_timestamp = int(from_timestamp_str)
         except Exception as err:
             logger.error('error :: panorama smoke from_timestamp failed, err: %s' % err)
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Added until_timestamp
+        until_timestamp = int(time.time())
+        if 'until_timestamp' in request.args:
+            try:
+                until_timestamp_str = request.args.get('until_timestamp')
+                if until_timestamp_str:
+                    until_timestamp = int(until_timestamp_str)
+            except Exception as err:
+                logger.error('error :: panorama smoke until_timestamp failed, err: %s' % err)
+                until_timestamp = int(time.time())
+
         max_items = 50
         try:
             max_items_str = request.args.get('max_items')
@@ -6050,13 +6366,30 @@ def panorama():
         except Exception as err:
             logger.error('error :: panorama smoke namespaces failed, err: %s' % err)
             cluster_data = False
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Allow smoke to include training for do_not_train instances
+        do_not_train = False
+        try:
+            do_not_train_str = request.args.get('do_not_train')
+            if do_not_train_str == 'true':
+                do_not_train = True
+        except Exception as err:
+            logger.error('error :: panorama smoke do_not_train failed, err: %s' % err)
+            do_not_train = False
+
         try:
             smoke_args = {
                 'from_timestamp': from_timestamp, 'max_items': max_items,
                 'cluster_data': str(cluster_data),
+                'until_timestamp': until_timestamp,
             }
             if namespaces:
                 smoke_args['namespaces'] = namespaces_str
+            # @added 20250329 - Feature #5611: custom_algorithm_only
+            # Allow smoke to include training for do_not_train instances
+            if do_not_train:
+                smoke_args['do_not_train'] = 'true'
+
             REDIS_CONN.hset('panorama.smoke.request_args', mapping=smoke_args)
             REDIS_CONN.expire('panorama.smoke.request_args', 10)
         except Exception as err:
@@ -6067,6 +6400,10 @@ def panorama():
             smoke=smoke,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+            mirage_dawn_expiry_date=mirage_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies
@@ -6301,6 +6638,10 @@ def panorama():
             smoke=smoke,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+            mirage_dawn_expiry_date=mirage_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210326 - Feature #3994: Panorama - mirage not anomalous
@@ -6360,6 +6701,10 @@ def panorama():
             anomalies_metrics_dict=anomalies_metrics_dict,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+            mirage_dawn_expiry_date=mirage_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
@@ -6549,6 +6894,10 @@ def panorama():
             labelled_metric_base_name=labelled_metric_base_name,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+            mirage_dawn_expiry_date=mirage_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -6641,6 +6990,10 @@ def panorama():
             metrics=metrics_list, namespaces=namespaces_list, label=label,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+            analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+            mirage_dawn_expiry_date=mirage_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20160803 - Sanitize request.args
@@ -6869,8 +7222,17 @@ def panorama():
                 if value == 'all':
                     metric_namespace_pattern = value.replace('all', '')
 
-                metric_namespace_pattern = value.replace('%', '')
-                if metric_namespace_pattern != '' and value != 'all':
+                # @added 20260311 - Task #2732: Prometheus to Skyline
+                # If the user passes labelled_metrics wildcard modify it
+                use_value = str(value)
+                if value == 'labelled_metrics.%' or value == 'labelled_metrics%':
+                    use_value = '%_tenant_id%'
+
+                # @modified 20260311 - Task #2732: Prometheus to Skyline
+                #metric_namespace_pattern = value.replace('%', '')
+                #if metric_namespace_pattern != '' and value != 'all':
+                metric_namespace_pattern = use_value.replace('%', '')
+                if metric_namespace_pattern != '' and use_value != 'all':
                     try:
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                     except:
@@ -6883,9 +7245,11 @@ def panorama():
                     try:
                         active_labelled_metrics_with_id = REDIS_CONN.hgetall('aet.metrics_manager.active_labelled_metrics_with_id')
                         if active_labelled_metrics_with_id:
+                            unique_labelled_metrics = list(active_labelled_metrics_with_id.keys())
                             unique_metrics = unique_metrics + list(active_labelled_metrics_with_id.keys())
                         del active_labelled_metrics_with_id
                         logger.info('adding %s unique_labelled_metrics to unique_metrics' % str(len(unique_labelled_metrics)))
+                        del unique_labelled_metrics
                     except:
                         logger.error('error :: Webapp could not get aet.metrics_manager.active_labelled_metrics_with_id from Redis')
                         logger.info(traceback.format_exc())
@@ -7049,7 +7413,12 @@ def panorama():
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results='Latest anomalies',
                 version=g.skyline_version, dev_ver=DEV_VER,
-                serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
+                serve_jaeger=WEBAPP_SERVE_JAEGER,
+                # @added 20260221 - Feature #5712: skyline.dawn
+                panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+                analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+                mirage_dawn_expiry_date=mirage_dawn_expiry_date,
+                duration=(time.time() - start)), 200
         except:
             logger.error('error :: failed to get panorama: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -7083,7 +7452,12 @@ def panorama():
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results=results_string, count_request=count_request,
                 version=g.skyline_version, dev_ver=DEV_VER,
-                serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
+                serve_jaeger=WEBAPP_SERVE_JAEGER,
+                # @added 20260221 - Feature #5712: skyline.dawn
+                panorama_dawn_expiry_date=panorama_dawn_expiry_date,
+                analyzer_dawn_expiry_date=analyzer_dawn_expiry_date,
+                mirage_dawn_expiry_date=mirage_dawn_expiry_date,                
+                duration=(time.time() - start)), 200
         except:
             logger.error('error :: failed to render panorama.html: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -7577,8 +7951,34 @@ def ionosphere():
     # logger.info('starting ionosphere request_id: %s' % str(request_id))
     logger.info('starting ionosphere request_id: %s for %s' % (str(request_id), str(request.url)))
 
+
     logger.info('request.url: %s' % str(request.url))
     # logger.debug('request.args: %s' % str(request.args))
+
+    # @added 20260221 - Feature #5712: skyline.dawn
+    ionosphere_dawn_expiry_date = None
+    ionosphere_learn_dawn_expiry_date = None
+    ionosphere_learn_repetitive_patterns_dawn_expiry_date = None
+    if SKYLINE_DAWN_ENABLED:
+        try:
+            ionosphere_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.ionosphere')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in ionosphere, err: %s' % err)
+        if ionosphere_dawn_expiry_date:
+            logger.info('ionosphere - dawn_expiry_date: %s' % str(ionosphere_dawn_expiry_date))
+        try:
+            ionosphere_learn_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.ionosphere.learn')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in ionosphere, err: %s' % err)
+        if ionosphere_learn_dawn_expiry_date:
+            logger.info('ionosphere.learn - dawn_expiry_date: %s' % str(ionosphere_learn_dawn_expiry_date))
+        try:
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date = dawn_status('webapp', 'skyline.dawn.ionosphere.learn_repetitive_patterns')
+        except Exception as err:
+            logger.error('error :: dawn_status failed in ionosphere, err: %s' % err)
+        if ionosphere_learn_repetitive_patterns_dawn_expiry_date:
+            logger.info('ionosphere.learn_repetitive_patterns - dawn_expiry_date: %s' % (
+                str(ionosphere_learn_repetitive_patterns_dawn_expiry_date)))
 
     request_args_present = False
     try:
@@ -7641,6 +8041,8 @@ def ionosphere():
 
     # @added 20221018 - Feature #4650: ionosphere.bulk.training
     bulk_training = False
+
+    remote_unique_metrics = None
 
     # @added 20220729 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -7728,6 +8130,10 @@ def ionosphere():
             trained=trained,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # This allows to plot best first, just makes an ordered list of the motif_id
@@ -8028,16 +8434,20 @@ def ionosphere():
             matched_from_datetime=matched_from_datetime,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
-    # @added 20240425 - Feature #5318: motif_annihilation
-    validate_motif_annihilation_fps = False
-    motif_annihilation_fps = {}
-    if 'validate_motif_annihilations' in request.args:
-        validate_motif_annihilation = True
-        validate_motif_annihilation_fps_req = request.args.get(str('validate_motif_annihilations'), 'false')
-        if validate_motif_annihilation_fps_req == 'true':
-            validate_motif_annihilation_fps = True
+    # @added 20240425 - Feature #5318: common_motifs
+    validate_common_motifs_fps = False
+    common_motifs_fps = {}
+    if 'validate_common_motifs' in request.args:
+        validate_common_motifs = True
+        validate_common_motifs_fps_req = request.args.get(str('validate_common_motifs'), 'false')
+        if validate_common_motifs_fps_req == 'true':
+            validate_common_motifs_fps = True
         limit_to = 15
         if 'limit' in request.args:
            limit_to = int(request.args.get(str('limit'), 15))
@@ -8050,7 +8460,17 @@ def ionosphere():
         state = request.args.get('state', 'unvalidated')
         from_timestamp = request.args.get('from_timestamp', 'all')
         if ":" in from_timestamp:
-            new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+            # @modified 20260221 - Task #5711: Test Ubuntu 24.04
+            #                      Task #5628: Build v5.0.0 and test
+            # Wrapped in except and respond with 400
+            try:
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+            except ValueError as err_msg:
+                #ValueError: time data '2026010100:00 ' does not match format '%Y%m%d %H:%M'
+                resp = json.dumps(
+                    {'400 Bad Request': str(err_msg)})
+                return flask_escape(resp), 400
+
             from_timestamp = int(new_from_timestamp)
         elif from_timestamp == 'all':
             from_timestamp = 0
@@ -8058,49 +8478,63 @@ def ionosphere():
             from_timestamp = int(from_timestamp)
         until_timestamp = request.args.get('until_timestamp', 'all')
         if ":" in until_timestamp:
-            new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+            # @modified 20260221 - Task #5711: Test Ubuntu 24.04
+            #                      Task #5628: Build v5.0.0 and test
+            # Wrapped in except and respond with 400
+            try:
+                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+            except ValueError as err_msg:
+                #ValueError: time data '2026010100:00 ' does not match format '%Y%m%d %H:%M'
+                resp = json.dumps(
+                    {'400 Bad Request': str(err_msg)})
+                return flask_escape(resp), 400
+
             until_timestamp = int(new_until_timestamp)
         elif until_timestamp == 'all':
             until_timestamp = int(time.time())
         else:
             until_timestamp = int(until_timestamp)
-    if validate_motif_annihilation_fps:
-        logger.info('validate_motif_annihilation_fps request with limit: %s, namespace: %s' % (
+    if validate_common_motifs_fps:
+        logger.info('validate_common_motifs_fps request with limit: %s, namespace: %s' % (
             str(limit_to), str(namespace)))
         try:
-            motif_annihilation_fps = get_motif_annihilations_to_validate(from_timestamp, until_timestamp, state=state, namespace=use_namespace)
+            common_motifs_fps = get_common_motifs_to_validate(from_timestamp, until_timestamp, state=state, namespace=use_namespace)
         except Exception as err:
             trace = traceback.format_exc()
-            fail_msg = 'error :: get_motif_annihilations_to_validate falied, err: %s' % err
+            fail_msg = 'error :: get_common_motifs_to_validate falied, err: %s' % err
             logger.error(trace)
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
-        logger.info('determined %s %s motif_annihilations features profiles' % (
-            str(len(motif_annihilation_fps)), state))
-        logger.info('completed validate_motif_annihilations ionosphere request_id: %s, took: %s seconds' % (
+        logger.info('determined %s %s common_motifs features profiles' % (
+            str(len(common_motifs_fps)), state))
+        logger.info('completed validate_common_motifs ionosphere request_id: %s, took: %s seconds' % (
             str(request_id), str((time.time() - start))))
         if 'format' in request.args:
             response_format = request.args.get(str('format'), 'html')
             if response_format == 'json':
-                data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"motif_annihilation_fps": motif_annihilation_fps}}
+                data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"common_motifs_fps": common_motifs_fps}}
                 return jsonify(data_dict), 200
-        limited_motif_annihilation_fps = copy.deepcopy(motif_annihilation_fps)
+        limited_common_motifs_fps = copy.deepcopy(common_motifs_fps)
         if limit_to:
-            limited_motif_annihilation_fps = {}
+            limited_common_motifs_fps = {}
             count = 0
-            for key, item in motif_annihilation_fps.items():
+            for key, item in common_motifs_fps.items():
                 if count == limit_to:
                     break
                 count += 1
-                limited_motif_annihilation_fps[key] = dict(item)
+                limited_common_motifs_fps[key] = dict(item)
         return render_template(
-            'ionosphere.html', motif_annihilation_fps=motif_annihilation_fps,
-            limited_motif_annihilation_fps=limited_motif_annihilation_fps,
+            'ionosphere.html', common_motifs_fps=common_motifs_fps,
+            limited_common_motifs_fps=limited_common_motifs_fps,
             namespace=namespace, limit_to=limit_to, show_graphs=show_graphs,
-            state=state, validate_motif_annihilation_fps=validate_motif_annihilation_fps,
-            motif_annihilation_fps_count=len(motif_annihilation_fps),
+            state=state, validate_common_motifs_fps=validate_common_motifs_fps,
+            common_motifs_fps_count=len(common_motifs_fps),
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -8367,6 +8801,10 @@ def ionosphere():
                 # Handle labelled_metrics
                 labelled_metric_name=labelled_metric_name,
                 labelled_metric_base_name=labelled_metric_base_name,
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210727 - Feature #4206: webapp - saved_training_data page
@@ -8474,6 +8912,10 @@ def ionosphere():
             saved_training_data_metrics=saved_training_data_metrics,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             print_debug=False), 200
 
     # @added 20210107 - Feature #3934: ionosphere_performance
@@ -8623,6 +9065,12 @@ def ionosphere():
         except:
             pass
 
+        # @added 20250103 - Feature #3934: ionosphere_performance
+        if 'venus' in request.headers.get('Host'):
+            min_full_duration = int(settings.FULL_DURATION * 2)
+            logger.info('ionosphere performance set min_full_duration: %s' % (
+                str(min_full_duration)))
+
         ionosphere_performance_data = {}
         if performance_data_request:
             try:
@@ -8741,7 +9189,12 @@ def ionosphere():
             pytz_timezones=pytz_timezones,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
-            duration=(time.time() - start), print_debug=False), 200
+            duration=(time.time() - start),
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
+            print_debug=False), 200
 
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
     # Ionosphere features profiles by generations
@@ -8959,8 +9412,8 @@ def ionosphere():
                 #                   Feature #3820: HORIZON_SHARDS
                 # Change from the deprecated OTHER_SKYLINE_REDIS_INSTANCES
                 # to use the REMOTE_SKYLINE_INSTANCES and get_cluster_data
+                remote_unique_metrics = None
                 if settings.REMOTE_SKYLINE_INSTANCES:
-                    remote_unique_metrics = None
                     try:
                         remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
                     except:
@@ -9062,6 +9515,10 @@ def ionosphere():
                 generation_count=gc, matched_from_datetime=matched_from_datetime,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER,
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 duration=(time.time() - start), print_debug=False), 200
 
         # @added 20180917 - Feature #2602: Graphs in search_features_profiles
@@ -9193,6 +9650,10 @@ def ionosphere():
                 labelled_metric_base_name=labelled_metric_base_name,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 print_debug=False), 200
 
     # @added 20170916 - Feature #1996: Ionosphere - matches page
@@ -9298,6 +9759,10 @@ def ionosphere():
             matched_from_datetime=matched_from_datetime,
             version=g.skyline_version, dev_ver=DEV_VER,
             serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             print_debug=False), 200
 
     # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
@@ -9467,6 +9932,18 @@ def ionosphere():
     alias_fp_original_metric = None
     alias_fp_original_metric_id = 0
     alias_fp_original_fp_id = 0
+
+    # @added 20250410 - Feature #5611: custom_algorithm_only
+    # Adding the shard host to the output to make it easy to identify
+    # which cluster node a metric belongs to, if a cluster.
+    shost = None
+    if HORIZON_SHARDS:
+        try:
+            shost = shard_host(base_name, return_fqdn=False)
+            logger.info('shost: %s' % str(shost))
+        except Exception as err:
+            logger.error('error :: shard_host failed on %s, err: %s' % (
+                base_name, err))
 
     try:
 
@@ -9697,6 +10174,10 @@ def ionosphere():
                                     fp_view=True,
                                     version=g.skyline_version, dev_ver=DEV_VER,
                                     serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                                    # @added 20260221 - Feature #5712: skyline.dawn
+                                    ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                                    ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                                    ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                                     print_debug=True), 200
                             except:
                                 message = 'Uh oh ... a Skyline 500 :('
@@ -10104,10 +10585,10 @@ def ionosphere():
                                         # not recommended, hence not adding to
                                         # settings, but sometimes necessary.
                                         if PASS_AUTH_ON_REDIRECT:
-                                            url_auth = '%s:\/\/%s:%s' % (url_protocol, str(auth.username), str(auth.password))
+                                            url_auth = '%s://%s:%s' % (url_protocol, str(auth.username), str(auth.password))
                                         else:
-                                            url_auth = '%s:\/\/' % (url_protocol)
-                                        replace_string = '%s:\/\/' % url_protocol
+                                            url_auth = '%s://' % (url_protocol)
+                                        replace_string = '%s://' % url_protocol
                                         url_with_auth = metric_assigned_to.replace(replace_string, url_auth)
                                         # alt_redirect_url = '%s/ionosphere?' % (str(metric_assigned_to))
                                         alt_redirect_url = '%s/ionosphere?' % (str(url_with_auth))
@@ -10160,6 +10641,10 @@ def ionosphere():
                                             version=g.skyline_version, dev_ver=DEV_VER,
                                             serve_jaeger=WEBAPP_SERVE_JAEGER,
                                             duration=(time.time() - start),
+                                            # @added 20260221 - Feature #5712: skyline.dawn
+                                            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                                            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                                            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                                             print_debug=True), 200
                                     except:
                                         message = 'Uh oh ... a Skyline 500 :('
@@ -10253,7 +10738,8 @@ def ionosphere():
                     #                   Feature #3820: HORIZON_SHARDS
                     # Change from the deprecated OTHER_SKYLINE_REDIS_INSTANCES
                     # to use the REMOTE_SKYLINE_INSTANCES and get_cluster_data
-                    if settings.REMOTE_SKYLINE_INSTANCES:
+                    # if settings.REMOTE_SKYLINE_INSTANCES:
+                    if settings.REMOTE_SKYLINE_INSTANCES and not remote_unique_metrics:
                         remote_unique_metrics = None
                         try:
                             remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
@@ -10468,7 +10954,7 @@ def ionosphere():
                                 if PASS_AUTH_ON_REDIRECT:
                                     url_auth = '%s://%s:%s@' % (url_protocol, str(auth.username), str(auth.password))
                                 else:
-                                    url_auth = '%s:\/\/' % (url_protocol)
+                                    url_auth = '%s://' % (url_protocol)
                                 replace_string = '%s://' % url_protocol
                                 url_with_auth = metric_assigned_to.replace(replace_string, url_auth)
                                 # alt_redirect_url = '%s/ionosphere?' % (str(metric_assigned_to))
@@ -10546,6 +11032,10 @@ def ionosphere():
                                         version=g.skyline_version, dev_ver=DEV_VER,
                                         serve_jaeger=WEBAPP_SERVE_JAEGER,
                                         duration=(time.time() - start),
+                                        # @added 20260221 - Feature #5712: skyline.dawn
+                                        ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                                        ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                                        ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                                         print_debug=True), 200
                                 except:
                                     message = 'Uh oh ... a Skyline 500 :('
@@ -10642,6 +11132,10 @@ def ionosphere():
                 labelled_metric_name=labelled_metric_name,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -10686,6 +11180,10 @@ def ionosphere():
                     version=g.skyline_version, dev_ver=DEV_VER,
                     serve_jaeger=WEBAPP_SERVE_JAEGER,
                     duration=(time.time() - start),
+                    # @added 20260221 - Feature #5712: skyline.dawn
+                    ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                    ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                    ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                     print_debug=debug_on), 200
             except:
                 message = 'Uh oh ... a Skyline 500 :('
@@ -10716,6 +11214,10 @@ def ionosphere():
                 labelled_metric_name=labelled_metric_name,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -10750,6 +11252,10 @@ def ionosphere():
                 labelled_metric_base_names=labelled_metric_base_names,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -11094,19 +11600,19 @@ def ionosphere():
                     trace = traceback.format_exc()
                     message = 'failed to validate features profile'
                     return internal_error(message, trace)
-                # @added 20240425 - Feature #5318: motif_annihilation
-                # Allow for the validation of motif_annihilation features profiles
+                # @added 20240425 - Feature #5318: common_motifs
+                # Allow for the validation of common_motifs features profiles
                 # with a json response rather than loading the entire fp page
                 validate_format_arg = request.args.get('format', 'html')
                 if validate_format_arg == 'json':
                     if validated_fp_success:
-                        data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"fp_id": fp_id, "validated": True, 'motif_annihilation': True}}
-                        logger.info('validated motif_annihilation features profile %s, completed ionosphere request_id: %s, took: %s seconds' % (
+                        data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"fp_id": fp_id, "validated": True, 'common_motifs': True}}
+                        logger.info('validated common_motifs features profile %s, completed ionosphere request_id: %s, took: %s seconds' % (
                             str(fp_id), str(request_id), str((time.time() - start))))
                         return jsonify(data_dict), 200
                     else:
                         trace = None
-                        message = 'failed to validate motif_annihilation features profile'
+                        message = 'failed to validate common_motifs features profile'
                         return internal_error(message, trace)
   
             # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
@@ -11135,6 +11641,7 @@ def ionosphere():
                 trace = traceback.format_exc()
                 fail_msg = 'error :: features_profile_details failed'
                 return internal_error(fail_msg, trace)
+
 
             # @added 20170305  - Feature #1960: ionosphere_layers
             fp_layers_id = None
@@ -12776,8 +13283,14 @@ def ionosphere():
                 alias_fp_original_metric=alias_fp_original_metric,
                 alias_fp_original_metric_id=alias_fp_original_metric_id,
                 alias_fp_original_fp_id=alias_fp_original_fp_id,
+                # @added 20250410 - Feature #5611: custom_algorithm_only
+                shost=shost,
                 version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                # @added 20260221 - Feature #5712: skyline.dawn
+                ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+                ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+                ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -12793,6 +13306,10 @@ def ionosphere():
         return render_template(
             'ionosphere.html', display_message=message,
             version=g.skyline_version, dev_ver=DEV_VER, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+            # @added 20260221 - Feature #5712: skyline.dawn
+            ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
+            ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
+            ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
             print_debug=debug_on), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
@@ -12858,6 +13375,10 @@ def ionosphere_images():
                         trace = traceback.format_exc()
                         return internal_error(message, trace)
 
+                # @added 20251002 - Feature #5653: SAB - Skyline Algorithm Benchmark
+                #                   Feature #5588: snab.process_algorithm
+                snab_datasets_dir = '%s/snab_datasets' % settings.SNAB_DATA_DIR
+
                 # @added 20201214 - Feature #3890: metrics_manager - sync_cluster_files
                 # Even though authenticated only allow specific paths
                 IONOSPHERE_IMAGE_ALLOWED_PATHS = [
@@ -12872,6 +13393,9 @@ def ionosphere_images():
                     luminosity_data_folder,
                     # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
                     settings.SKYLINE_TMP_DIR,
+                    # @added 20251002 - Feature #5653: SAB - Skyline Algorithm Benchmark
+                    #                   Feature #5588: snab.process_algorithm
+                    snab_datasets_dir,
                 ]
                 allowed_path = False
                 for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
@@ -13055,7 +13579,25 @@ def ionosphere_files():
             data_dict = {"status": {"response": 404}, "data": {"features_profiles dir": "not found"}}
             if source == 'training_data':
                 try:
-                    ionosphere_training_data = list(REDIS_CONN.smembers('ionosphere.training_data'))
+
+                    # @added 20250329 - Feature #5611: custom_algorithm_only
+                    # Allow training for do_not_train instances
+                    ionosphere_training_data = []
+                    ionosphere_training_data_do_not_train = []
+                    try:
+                        ionosphere_training_data_do_not_train = list(REDIS_CONN.smembers('ionosphere.training_data_with_do_not_train'))
+                        if ionosphere_training_data_do_not_train:
+                            ionosphere_training_data = ionosphere_training_data_do_not_train
+                    except Exception as err:
+                        logger.error('error :: ionosphere_files :: failed to generate a list from ionosphere.training_data_with_do_not_train Redis set, err: %s' % err)
+                        ionosphere_training_data = []
+
+                    # @modified 20250329 - Feature #5611: custom_algorithm_only
+                    # Only check if the do_not_train set has not been used to
+                    # populate the ionosphere_training_data list
+                    if not ionosphere_training_data:
+                        ionosphere_training_data = list(REDIS_CONN.smembers('ionosphere.training_data'))
+
                     training_data_removed = False
                     for training_data_item in ionosphere_training_data:
                         training_data = literal_eval(training_data_item)
@@ -13071,6 +13613,18 @@ def ionosphere_files():
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: ionosphere_files failed to remove item from ionosphere.training_data - %s' % str(training_data))
+                                # @added 20250329 - Feature #5611: custom_algorithm_only
+                                # Allow training for do_not_train instances
+                                if ionosphere_training_data_do_not_train:
+                                    try:
+                                        REDIS_CONN.srem('ionosphere.training_data_with_do_not_train', str(training_data))
+                                        logger.info('ionosphere_files removed item from ionosphere.training_data_with_do_not_train - %s' % str(training_data))
+                                        training_data_removed = True
+                                    except Exception as err:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: ionosphere_files failed to remove item from ionosphere.training_data - %s, err: %s' % (
+                                            str(training_data), err))
+
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: ionosphere_files failed to try and remove the unfound training data dir for %s from ionosphere.training_data' % required_dir)
@@ -15388,6 +15942,9 @@ def luminosity():
         classify_metric = False
         classification = False
         cloudbursts_request = False
+        # @added 20250408 - Feature #5342: utilities - pearson_closest
+        status_code = 500
+
         try:
             if 'metric' in request.args:
                 metric = request.args.get('metric')
@@ -15396,6 +15953,13 @@ def luminosity():
         start_pearson_correlations = time.time()
         try:
             pearson_correlations = determine_pearson_closest(skyline_app)
+            # @added 20250408 - Feature #5342: utilities - pearson_closest
+            if isinstance(pearson_correlations, int):
+                status_code = int(pearson_correlations)
+                pearson_correlations = {}
+            if isinstance(pearson_correlations, dict):
+                status_code = 200
+
         except Exception as err:
             trace = traceback.format_exc()
             message = 'determine_pearson_closest failed, err: %s' % err
@@ -15414,7 +15978,9 @@ def luminosity():
             use_format = request.args['format']
             if use_format == 'json':
                 data_dict = {
-                    "status": {"response": 200}, 
+                    # @modified 20250408 - Feature #5342: utilities - pearson_closest
+                    #"status": {"response": 200}, 
+                    "status": {"response": status_code}, 
                     "data": {
                         'metric': metric,
                         'abs_threshold': pearson_closest_threshold,
@@ -15423,7 +15989,9 @@ def luminosity():
                 }
                 logger.info('luminosity returned pearson_correlations json in %s seconds' % (
                     str(time.time() - start_pearson_correlations)))
-                return jsonify(data_dict), 200
+                # @modified 20250408 - Feature #5342: utilities - pearson_closest
+                #return jsonify(data_dict), 200
+                return jsonify(data_dict), status_code
 
     logger.info('/luminosity request_arguments: %s' % str(request_arguments))
 
@@ -15709,7 +16277,9 @@ def luminosity():
 
 # @added 20211102 - Branch #3068: SNAB
 #                   Bug #4308: matrixprofile - fN on big drops
-@app.route('/snab', methods=['GET'])
+# @added 20250108 - Feature #5588: snab.process_algorithm
+# Added POST
+@app.route('/snab', methods=['GET', 'POST'])
 def snab():
 
     logger.info('/snab request')
@@ -15734,11 +16304,21 @@ def snab():
     if 'format' in request.args:
         use_format = request.args.get('format', 'html')
 
+    # @added 20250108 - Feature #5588: snab.process_algorithm
+    process_algorithm = False
+    if 'process_algorithm' in request.args:
+        process_algorithm = True
+    if request.method == 'POST':
+        if 'process_algorithm' in request.form:
+            process_algorithm = True
+
     algorithms = {}
     try:
         # @modified 20230722 - Feature #5008: webapp - snab report page
         # algorithms = get_algorithms(skyline_app)
-        if not report:
+        # @modified 20250108 - Feature #5588: snab.process_algorithm
+        # if not report:
+        if not report and not process_algorithm:
             algorithms = get_algorithms(skyline_app)
         else:
             algorithms, all_algorithms_by_id = get_algorithms(skyline_app, return_all_algorithms_by_id=True)
@@ -15751,7 +16331,9 @@ def snab():
     try:
         # @modified 20230722 - Feature #5008: webapp - snab report page
         # algorithm_groups = get_algorithm_groups(skyline_app)
-        if not report:
+        # @modified 20250108 - Feature #5588: snab.process_algorithm
+        # if not report:
+        if not report and not process_algorithm:
             algorithm_groups = get_algorithm_groups(skyline_app)
         else:
             algorithm_groups, all_algorithm_groups_by_id = get_algorithm_groups(skyline_app, return_all_algorithm_groups_by_id=True)
@@ -15787,6 +16369,8 @@ def snab():
                 filter_on['algorithm_id'] = algorithm_id
                 filter_on['default'] = False
                 filter_on['algorithm'] = algorithm
+        else:
+            filter_on['algorithm'] = 'all'
     # @added 20241027 - Feature #5524: snab_report - cache
     snab_report_cache_key_list.append(algorithm)
     snab_report_cache_key_list.append(algorithm_id)
@@ -15864,11 +16448,57 @@ def snab():
 
     # @added 20230718 - Feature #5008: webapp - snab report page
     if 'report' in request.args:
+        logger.info('snab :: snab_report request.args: %s' % str(request.args))
+
         report = request.args.get('report', 'false')
         if report != 'true':
             message = 'bad request - invalid value sent for snab report parameter - %s' % str(report)
             trace = None
             return internal_error(message, trace)
+
+        # @added 20250115 - Feature #5588: snab.process_algorithm
+        # Disable algorithms_report and consensuses_report by default
+        algorithm_only = True
+        if 'algorithm_only' in request.args:
+            algorithm_only = request.args.get('algorithm_only')
+            if algorithm_only == 'true':
+                algorithm_only = True
+            if algorithm_only == 'false':
+                algorithm_only = False
+        filter_on['algorithm_only'] = algorithm_only
+        algorithms_report = False
+        if 'algorithms_report' in request.args:
+            algorithms_report = request.args.get('algorithms_report')
+            if algorithms_report == 'true':
+                algorithms_report = True
+            else:
+                algorithms_report = False
+        filter_on['algorithms_report'] = algorithms_report
+        consensuses_report = False
+        if 'consensuses_report' in request.args:
+            consensuses_report = request.args.get('consensuses_report')
+            if consensuses_report == 'true':
+                consensuses_report = True
+            else:
+                consensuses_report = False
+        filter_on['consensuses_report'] = consensuses_report
+        algorithm_groups_validated = {}
+        if all_algorithm_groups_by_id:
+            try:
+                algorithm_groups_validated = algorithm_group_validations(all_algorithm_groups_by_id)
+            except Exception as err:
+                message = 'Uh oh ... a Skyline 500 :(, err: %s' % err
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+        filter_on['algorithm_groups_validated'] = algorithm_groups_validated
+        compare_algorithm_group = None
+        if 'compare_algorithm_group' in request.args:
+            compare_algorithm_group = request.args.get('compare_algorithm_group')
+            if compare_algorithm_group == 'None':
+                compare_algorithm_group = None
+            if compare_algorithm_group:
+                compare_algorithm_group = int(compare_algorithm_group)
+        filter_on['compare_algorithm_group'] = compare_algorithm_group
 
         # @added 20230721 - Feature #5008: webapp - snab report page
         # Only list algorithms that have snab results
@@ -15939,6 +16569,14 @@ def snab():
                 logger.error('error :: snab :: failed to literal_eval %s data from Redis, err: %s' % (
                     snab_report_cache_key, err))
 
+        if snab_report_from_cache:
+            try:
+                if 'use_algorithm_headers' not in snab_report.keys():
+                    snab_report['use_algorithm_headers'] = str(snab_report['algorithm'])
+            except Exception as err:
+                logger.error('error :: snab :: failed to set use_algorithm_headers from %s data, err: %s' % (
+                    snab_report_cache_key, err))
+
         # @modified 20241027 - Feature #5524: snab_report - cache
         if filter_on['algorithm'] and not snab_report:
             try:
@@ -15949,6 +16587,9 @@ def snab():
                 fail_msg = 'error :: snab :: get_snab_report failed - %s' % str(err)
                 logger.error('%s' % fail_msg)
                 return internal_error(fail_msg, trace)
+
+        if snab_report:
+            snab_report['from_cache'] = snab_report_from_cache
 
         # @added 20241027 - Feature #5524: snab_report - cache
         if not snab_report_from_cache and snab_report and algorithm_id:
@@ -16003,6 +16644,94 @@ def snab():
                 # @added 20241027 - Feature #5524: snab_report - cache
                 snab_report_from_cache=snab_report_from_cache,
                 cached_snab_reports=cached_snab_reports,
+                # @added 20250115 - Feature #5588: snab.process_algorithm
+                algorithm_groups_validated=algorithm_groups_validated,
+                algorithm_only=algorithm_only,
+                algorithms_report=algorithms_report,
+                consensuses_report=consensuses_report,
+                serve_jaeger=WEBAPP_SERVE_JAEGER,
+                duration=(time.time() - start)), 200
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+    # @added 20250107 - Feature #5588: snab.process_algorithm
+    if process_algorithm:
+        logger.info('snab :: process_algorithm - %s' % str(dict(request.form)))
+        algorithm_groups_validated = {}
+        if all_algorithm_groups_by_id:
+            try:
+                algorithm_groups_validated = algorithm_group_validations(all_algorithm_groups_by_id)
+            except Exception as err:
+                message = 'Uh oh ... a Skyline 500 :(, err: %s' % err
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+        response = {}
+        if 'response' in request.form:
+            response = request.form['response']
+        algorithm = None
+        if 'run_algorithm' in request.form:
+            algorithm = request.form['run_algorithm']
+        algorithm_parameters = {}
+        if 'algorithm_parameters' in request.form:
+            algorithm_parameters = literal_eval(request.form['algorithm_parameters'])
+        snab_algorithm_group_id = None
+        if 'snab_algorithm_group_id' in request.form:
+            snab_algorithm_group_id = int(request.form['snab_algorithm_group_id'])
+        algorithm_source = 'default'
+        if 'algorithm_source' in request.form:
+            algorithm_source = request.form['algorithm_source']
+        limit = 0
+        if 'limit' in request.form:
+            limit = int(request.form['limit'])
+        # @added 20250128 - Feature #5588: snab.process_algorithm
+        data_only = False
+        if 'data_only' in request.form:
+            data_only = request.form['data_only']
+            if data_only == 'true':
+                data_only = True
+            else:
+                data_only = False
+        snab_dataset_id = None
+        if 'snab_dataset_id' in request.form:
+            snab_dataset_id = request.form['snab_dataset_id']
+            if snab_dataset_id == 'none':
+                snab_dataset_id = None
+
+        response = {}
+        data_dict = {
+            'algorithm': algorithm, 'algorithm_source': algorithm_source,
+            'algorithm_parameters': algorithm_parameters, 
+            'snab_algorithm_group_id': snab_algorithm_group_id,
+            'limit': limit, 'added_at': int(time.time()),
+            # @added 20250128 - Feature #5588: snab.process_algorithm
+            'data_only': data_only, 'snab_dataset_id': snab_dataset_id,
+        }
+        added_work = 0
+        if algorithm and snab_algorithm_group_id:
+            try:
+                added_work = REDIS_CONN.set('webapp.snab.process_algorithm.request', str(data_dict))
+            except Exception as err:
+                message = 'Uh oh ... a Skyline 500 :(, err: %s' % err
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+            if added_work:
+                data = 'added webapp.snab.process_algorithm.request with %s' % str(data_dict)
+            else:
+                data = 'failed to add webapp.snab.process_algorithm.request with %s' % str(data_dict)
+            data_dict['response'] = data
+            response = data_dict
+        
+        logger.info('snab :: process_algorithm - %s' % str(data_dict))
+        try:
+            return render_template(
+                'snab_process_algorithm.html',
+                vortex_algorithms=settings.VORTEX_ALGORITHMS,
+                algorithm_groups_validated=algorithm_groups_validated,
+                response=response, algorithm=algorithm,
+                snab_algorithm_group_id=snab_algorithm_group_id,
+                version=g.skyline_version, dev_ver=DEV_VER,
                 serve_jaeger=WEBAPP_SERVE_JAEGER,
                 duration=(time.time() - start)), 200
         except:
@@ -16320,6 +17049,292 @@ def tsdbs():
         trace = traceback.format_exc()
         return internal_error(message, trace)
 
+# @added 20260228 - Task #5709: POC LLM integration
+@app.route('/llm_chat')
+@requires_auth
+def llm_chat():
+    """
+    Render the LLM chat UI page.
+
+    Checks that LLM_CHAT_ENABLED is True in settings before rendering.
+    If not enabled, returns a 404-style disabled message.
+    """
+    start = time.time()
+
+    llm_chat_enabled = getattr(settings, 'LLM_CHAT_ENABLED', False)
+    if not LLM_CHAT_ENABLED:
+        return jsonify({'message': 'LLM chat is not enabled on this Skyline instance'}), 400
+
+    # @added 20260308 - Task #5709: POC LLM integration
+    if not getattr(settings, 'LLM_DBUSER', False):
+        return jsonify({'error': 'LLM_DBUSER is not set, check your settings.py', 'response': None}), 400
+    if not getattr(settings, 'LLM_DBUSERPASS', False):
+        return jsonify({'error': 'LLM_DBUSERPASS is not set, check your settings.py', 'response': None}), 400
+    llm_model = None
+    provider_llm_model = getattr(settings, 'LLM_MODEL', False)
+    default_model = None
+    available_models = []
+    if LLM_MODELS_AVAILABLE:
+        try:
+            provider_llm_model = LLM_MODELS_AVAILABLE['default_model']
+            default_model = str(provider_llm_model)
+        except Exception:
+            error_string = traceback.format_exc()
+            logger.error('error :: failed to render llm_chat.html: %s' % error_string)
+            return jsonify({'error': 'default_model is not defined in LLM_MODELS_AVAILABLE, check your settings.py', 'response': None}), 400
+        available_models = [m for m in list(LLM_MODELS_AVAILABLE.keys()) if m != 'default_model']
+    if provider_llm_model:
+        llm_model = provider_llm_model.split('/')[-1]
+
+    logger.info('/llm_chat request')
+    try:
+        return render_template(
+            'llm_chat.html',
+            llm_chat_enabled=llm_chat_enabled, llm_model=llm_model,
+            provider_llm_model=provider_llm_model,
+            available_models=available_models,
+            default_model=default_model,
+            version=g.skyline_version,
+            dev_ver=DEV_VER,           # TODO: real DEV_VER
+            serve_jaeger=False,        # TODO: real WEBAPP_SERVE_JAEGER
+            duration=(time.time() - start),
+        ), 200
+    except Exception:
+        error_string = traceback.format_exc()
+        logger.error('error :: failed to render llm_chat.html: %s' % error_string)
+        return 'Uh oh ... a Skyline 500 :(', 500
+
+# @added 20260228 - Task #5709: POC LLM integration
+@app.route('/llm_chat/query', methods=['POST'])
+@requires_auth
+def llm_chat_query():
+    """
+    Handle a chat query from the UI.
+
+    Expects JSON body:
+        {
+            "message": "<user message string>",
+            "reset": false        // optional, if true clears conversation history
+        }
+
+    Returns JSON:
+        {
+            "response": "<assistant response string>",
+            "tool_calls_made": ["tool_name", ...],
+            "error": null | "<error message>"
+        }
+    """
+    start = time.time()
+
+    # TODO: replace with real settings check
+    if not getattr(settings, 'LLM_CHAT_ENABLED', False):
+        return jsonify({'error': 'LLM chat is not enabled.', 'response': None}), 404
+
+    # @added 20260308 - Task #5709: POC LLM integration
+    llm_model = None
+    provider_llm_model = getattr(settings, 'LLM_MODEL', False)
+    if LLM_MODELS_AVAILABLE:
+        try:
+            provider_llm_model = LLM_MODELS_AVAILABLE['default_model']
+        except Exception:
+            error_string = traceback.format_exc()
+            logger.error('error :: failed to render llm_chat.html: %s' % error_string)
+            return jsonify({'error': 'default_model is not defined in LLM_MODELS_AVAILABLE, check your settings.py', 'response': None}), 400
+    if provider_llm_model:
+        llm_model = provider_llm_model.split('/')[-1]
+
+    try:
+        payload = request.get_json(silent=True) or {}
+        user_message = payload.get('message', '').strip()
+        reset_history = payload.get('reset', False)
+        # @added 20260308 - Task #5709: POC LLM integration
+        provider_llm_model = None
+        try:
+            provider_llm_model = payload.get('provider_llm_model')
+        except Exception:
+            logger.info(f"/llm_chat_query no provider_llm_model in payload using default_model: {provider_llm_model}")
+        llm_model = None
+        try:
+            llm_model = payload.get('llm_model')
+        except Exception:
+            logger.info(f"/llm_chat_query no llm_model in payload using default_model: {llm_model}")
+
+        # Fall back to default if nothing passed or models not configured
+        if not provider_llm_model:
+            llm_models = getattr(settings, 'LLM_MODELS_AVAILABLE', {})
+            if not llm_model or llm_model not in llm_models:
+                provider_llm_model = llm_models.get('default_model', getattr(settings, 'LLM_MODEL', None))
+        if not provider_llm_model:
+            provider_llm_model = getattr(settings, 'LLM_MODEL', None)
+
+        # Derive the llm_model from the provider_llm_model if not passed
+        if not llm_model and provider_llm_model:
+            llm_model = provider_llm_model.split('/')[-1]
+        if '/' in llm_model:
+            llm_model = provider_llm_model.split('/')[-1]
+
+        if not user_message:
+            return jsonify({'error': 'No message provided.', 'response': None}), 400
+
+        logger.info(f"/llm_chat_query request, user_message: {user_message}")
+
+        # Retrieve or initialise conversation history from session
+        if reset_history or SESSION_KEY_HISTORY not in session:
+            history = []
+        else:
+            history = session.get(SESSION_KEY_HISTORY, [])
+
+        logger.info(f"/llm_chat_query request, history: {str(history)}")
+
+        # Run the agentic turn
+        result = run_chat_turn(provider_llm_model, llm_model, user_message, history, settings)
+
+        logger.info(f"/llm_chat_query response, response: {result['response']}")
+
+        # Persist updated history back to session
+        session[SESSION_KEY_HISTORY] = result['updated_history']
+        session.modified = True
+
+        # @added 20260308 - Task #5709: POC LLM integration
+        llm_results = None
+        if 'results_csv' in result:
+            llm_results_csv = None
+            if isinstance(result['results_csv'], str):
+                llm_results_csv = result['results_csv']
+            if llm_results_csv:
+                try:
+                    llm_results = load_llm_results(llm_model, llm_results_csv)
+                    logger.info(f"/llm_chat_query loaded len(llm_results['rows']): {len(llm_results['rows'])} from {llm_results_csv}")
+                except Exception as err:
+                    logger.error(f"error :: load_llm_results failed to load {llm_results_csv}, err: {err}")
+        query_results = None
+        if 'query_results_csvs' in result:
+            for csv in list(result['query_results_csvs'].keys()):
+                query_result = None
+                try:
+                    query_result = load_llm_results(llm_model, csv)
+                    logger.info(f"/llm_chat_query loaded len(llm_results['rows']): {len(query_result['rows'])} from {csv}")
+                except Exception as err:
+                    logger.error(f"error :: load_llm_results failed to load {csv}, err: {err}")
+                result['query_results_csvs'][csv]['result'] = query_result
+            query_results = result['query_results_csvs']
+
+        return jsonify({
+            'response': result['response'],
+            'tool_calls_made': result['tool_calls_made'],
+            'error': result['error'],
+            'llm_results': llm_results,
+            'query_results': query_results,
+        }), 200
+
+    except Exception:
+        error_string = traceback.format_exc()
+        logger.error('error :: llm_chat_query failed: %s' % error_string)
+        return jsonify({
+            'error': 'Internal server error processing your query.',
+            'response': None,
+        }), 500
+
+# @added 20260228 - Task #5709: POC LLM integration
+@app.route('/llm_chat/history', methods=['GET'])
+@requires_auth
+def llm_chat_history():
+    history = session.get(SESSION_KEY_HISTORY, [])
+    # Only return user and assistant turns, not tool messages
+    visible = [m for m in history if m.get('role') in ('user', 'assistant')]
+    return jsonify({'history': visible}), 200
+
+# @added 20260228 - Task #5709: POC LLM integration
+@app.route('/llm_chat/clear', methods=['POST'])
+@requires_auth
+def llm_chat_clear():
+    """
+    Clear the conversation history for the current session.
+
+    Returns JSON: {"cleared": true}
+    """
+    try:
+        session.pop(SESSION_KEY_HISTORY, None)
+        session.modified = True
+        return jsonify({'cleared': True}), 200
+    except Exception:
+        error_string = traceback.format_exc()
+        logger.error('error :: llm_chat_clear failed: %s' % error_string)
+        return jsonify({'error': 'Failed to clear history.'}), 500
+
+# @added 20260309 - Task #5709: POC LLM integration
+@app.route('/llm_chat/save', methods=['POST'])
+@requires_auth
+def llm_chat_save():
+    try:
+        payload = request.get_json(silent=True) or {}
+        label = payload.get('label', '').strip()
+        if not label:
+            return jsonify({'error': 'No label provided.'}), 400
+
+        history = session.get(SESSION_KEY_HISTORY, [])
+        if not history:
+            return jsonify({'error': 'No conversation history to save.'}), 400
+
+        # Only save user/assistant turns, not tool messages
+        visible_history = [m for m in history if m.get('role') in ('user', 'assistant')]
+
+        redis_key = 'skyline.llm_chat.saved.%s' % label
+
+        # Convert to dict and save as string - can be literal_eval'd back
+        save_dict = {
+            'label': label,
+            'saved_at': int(time.time()),
+            'history': visible_history,
+        }
+
+        try:
+            REDIS_CONN.set(redis_key, str(save_dict))
+        except Exception as err:
+            logger.error('error :: llm_chat_save failed to save to Redis, err: %s' % str(err))
+            return jsonify({'error': 'Failed to save to Redis.'}), 500
+
+        logger.info('/llm_chat/save saved conversation to Redis key: %s' % redis_key)
+        return jsonify({'key': redis_key}), 200
+
+    except Exception:
+        error_string = traceback.format_exc()
+        logger.error('error :: llm_chat_save failed: %s' % error_string)
+        return jsonify({'error': 'Internal server error.'}), 500
+
+# @added 20260309 - Task #5709: POC LLM integration
+@app.route('/llm_chat/load', methods=['POST'])
+@requires_auth
+def llm_chat_load():
+    try:
+        payload = request.get_json(silent=True) or {}
+        label = payload.get('label', '').strip()
+        if not label:
+            return jsonify({'error': 'No label provided.'}), 400
+        redis_key = 'skyline.llm_chat.saved.%s' % label
+        try:
+            raw = REDIS_CONN.get(redis_key)
+        except Exception as err:
+            logger.error('error :: llm_chat_load failed to get from Redis, err: %s' % str(err))
+            return jsonify({'error': 'Failed to read from Redis.'}), 500
+        if not raw:
+            return jsonify({'error': 'No saved conversation found for label: %s' % label}), 404
+        save_dict = literal_eval(raw)
+        history = save_dict.get('history', [])
+        saved_at = save_dict.get('saved_at', None)
+        # Load into session
+        session[SESSION_KEY_HISTORY] = history
+        session.modified = True
+        logger.info('/llm_chat/load loaded conversation from Redis key: %s' % redis_key)
+        return jsonify({
+            'history': history,
+            'label': label,
+            'saved_at': saved_at,
+        }), 200
+    except Exception:
+        error_string = traceback.format_exc()
+        logger.error('error :: llm_chat_load failed: %s' % error_string)
+        return jsonify({'error': 'Internal server error.'}), 500
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
@@ -16437,7 +17452,7 @@ serverinfo_meta = {
 # def get_redis(host, port, db, password):
 def get_redis(host, port, db, password, decode):
     # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
-    # Added nosec B105 for bandit
+    # Added nosec "B105" for bandit
     # if password == "":
     if password == "":  # nosec B105
         # @modified 20190517 - Branch #3002: docker
@@ -16447,7 +17462,7 @@ def get_redis(host, port, db, password, decode):
             #                      Branch #3262: py3
             # return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
             if decode:
-                return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, charset='utf-8', decode_responses=True)
+                return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, encoding='utf-8', decode_responses=True)
             else:
                 return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
         else:
@@ -16455,7 +17470,7 @@ def get_redis(host, port, db, password, decode):
             #                      Branch #3262: py3
             # return redis.StrictRedis(host=host, port=port, db=db)
             if decode:
-                return redis.StrictRedis(host=host, port=port, db=db, charset='utf-8', decode_responses=True)
+                return redis.StrictRedis(host=host, port=port, db=db, encoding='utf-8', decode_responses=True)
             else:
                 return redis.StrictRedis(host=host, port=port, db=db)
     else:
@@ -16464,7 +17479,7 @@ def get_redis(host, port, db, password, decode):
             #                      Branch #3262: py3
             # return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
             if decode:
-                return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, charset='utf-8', decode_responses=True)
+                return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, encoding='utf-8', decode_responses=True)
             else:
                 return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
         else:
@@ -16472,7 +17487,7 @@ def get_redis(host, port, db, password, decode):
             #                      Branch #3262: py3
             # return redis.StrictRedis(host=host, port=port, db=db, password=password)
             if decode:
-                return redis.StrictRedis(host=host, port=port, db=db, password=password, charset='utf-8', decode_responses=True)
+                return redis.StrictRedis(host=host, port=port, db=db, password=password, encoding='utf-8', decode_responses=True)
             else:
                 return redis.StrictRedis(host=host, port=port, db=db, password=password)
 
@@ -16576,10 +17591,10 @@ def decode_token(client_id):
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
                 # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
             else:
                 # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
             key = 'rebrow.token.%s' % token
             client_token_data = redis_conn.get(key)
         except:
@@ -16627,10 +17642,10 @@ def decode_token(client_id):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                    redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
                 else:
                     # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                    redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
                 key = 'rebrow.token.%s' % token
                 redis_conn.delete(key)
                 # @modified 20210421 - Task #4030: refactoring
@@ -16753,12 +17768,12 @@ def rebrow():
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
                 # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
             else:
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
                 # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
             key = 'rebrow.token.%s' % client_token
             # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
@@ -17224,8 +18239,11 @@ def rebrow_key(host, port, db, key):
         type=t,
         size=size,
         ttl=ttl / 1000.0,
-        now=datetime.datetime.utcnow(),
-        expiration=datetime.datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #now=datetime.datetime.utcnow(),
+        #expiration=datetime.datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
+        now=datetime.datetime.now(tz=datetime.timezone.utc),
+        expiration=datetime.datetime.now(tz=datetime.timezone.utc) + timedelta(seconds=ttl / 1000.0),
         version=g.skyline_version, dev_ver=DEV_VER,
         serve_jaeger=WEBAPP_SERVE_JAEGER,
         duration=(time.time() - start),
