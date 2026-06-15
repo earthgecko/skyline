@@ -35,7 +35,10 @@ from sqlalchemy.sql import select
 #                      Task #4778: v4.0.0 - update dependencies
 # Use sqlalchemy rather than string-based query construction
 # Added Table and MetaData
-from sqlalchemy import select, Table, MetaData
+# @modified 20250403 - Bug #5522: Handle duplicate metric names
+# Added literal to handle utf8_general_ci collation being case-insensitive on
+# comparisons but case sensitive on insert
+from sqlalchemy import select, Table, MetaData, literal
 
 import settings
 
@@ -44,7 +47,7 @@ from skyline_functions import (
     # @added 20191031 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200413 - Feature #3486: analyzer_batch
     #                   Feature #3480: batch_processing
@@ -91,8 +94,17 @@ from functions.panorama.get_failed_checks_to_retry import get_failed_checks_to_r
 # @added 20240602 - Feature #5368: analyzer_batch - reprocess
 from functions.database.queries.query_anomalies import get_anomalies_for_period
 
+# @added 20250112 - Feature #5588: snab.process_algorithm
+from functions.database.queries.insert_new_algorithm import insert_new_algorithm
+
 # @added 20241203 - Bug #5522: Handle duplicate metric names
 from slack_functions import slack_post_message
+
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+
+# @added 20251009 - Bug #5522: Handle duplicate metric names
+from functions.database.queries.set_metric_ids_as_active import set_metric_ids_as_active
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -194,6 +206,26 @@ except:
 if SNAB_ENABLED:
     PANORAMA_CHECK_INTERVAL = 1
 
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_TTLS = settings.SKYLINE_DAWN_TTLS
+except:
+    SKYLINE_DAWN_TTLS = {
+        'panorama': 86400,                                # 24 hours
+        'analyzer': 86400,                                # 24 hours
+        'mirage': 432000,                                 # 5 days
+        'ionosphere': 604800,                             # 7 days
+        'ionosphere.learn': 2592000,                      # 30 days
+        'ionosphere.learn_repetitive_patterns': 3024000,  # 35 days
+    }
+
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -231,7 +263,7 @@ class Panorama(Thread):
         # @added 20191031 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -296,6 +328,15 @@ class Panorama(Thread):
 
         logger.info('insert_new_metric :: %s new metrics to insert into the metrics table' % (
             str(len(metrics_to_insert))))
+
+        metrics_to_insert_redis_key = 'panorama.insert_new_metric.metrics_to_insert.%s' % str(int(start))
+        try:
+            self.redis_conn_decoded.sadd(metrics_to_insert_redis_key, *set(metrics_to_insert))
+            self.redis_conn_decoded.expire(metrics_to_insert_redis_key, 120)
+        except Exception as err:
+            logger.error('error :: sadd failed on %s, err: %s' % (
+                metrics_to_insert_redis_key, err))
+
         try:
             engine, log_msg, trace = get_engine(skyline_app)
         except Exception as err:
@@ -319,6 +360,31 @@ class Panorama(Thread):
         # @added 20241203 - Bug #5522: Handle duplicate metric names
         duplicate_inserts = {}
 
+        # @added 20251009 - Bug #5522: Handle duplicate metric names
+        checked_count = 0
+        set_to_active_count = 0
+        metric_ids_to_reactivate = []
+        redis_panorama_not_inserted_duplicate_metrics = {}
+        panorama_not_inserted_duplicate_metrics = []
+        try:
+            redis_panorama_not_inserted_duplicate_metrics = self.redis_conn_decoded.hgetall('panorama.not_inserted_duplicate_metrics')
+            panorama_not_inserted_duplicate_metrics = set(list(redis_panorama_not_inserted_duplicate_metrics.values()))
+            logger.info('insert_new_metric :: %s metrics in panorama.not_inserted_duplicate_metrics' % (
+                str(len(panorama_not_inserted_duplicate_metrics))))
+        except Exception as err:
+            logger.error('error :: failed to hgetall panorama.not_inserted_duplicate_metrics, err: %s' % (
+                err))
+        if panorama_not_inserted_duplicate_metrics and metrics_to_insert:
+            original_metrics_to_insert_count = len(metrics_to_insert)
+            metrics_to_insert = [metric_name for metric_name in metrics_to_insert if metric_name not in panorama_not_inserted_duplicate_metrics]
+            new_metrics_to_insert_count = len(metrics_to_insert)
+            count_diff = original_metrics_to_insert_count - new_metrics_to_insert_count
+            if count_diff:
+                logger.info('insert_new_metric :: removed %s metrics from metrics_to_insert as they are in panorama.not_inserted_duplicate_metrics' % (
+                    str(count_diff)))
+                logger.info('insert_new_metric :: %s new metrics to insert into the metrics table' % (
+                    str(len(metrics_to_insert))))
+
         # @modified 20240119 - Task #5228: panorama - optimise insertions
         # Optimise the insertions of new metric by inserting multiple metrics at
         # once rather than one at a time
@@ -329,7 +395,10 @@ class Panorama(Thread):
                 logger.info('insert_new_metric :: inserted %s (of %s) new metrics, stopping after 10 seconds' % (
                     str(len(inserted_metric_ids)), str(len(metrics_to_insert))))
                 break
-                
+
+            # @added 20251009 - Bug #5522: Handle duplicate metric names
+            checked_count += 1
+
             # Set defaults
             learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
             valid_learning_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS)
@@ -418,22 +487,56 @@ class Panorama(Thread):
             # implications in some set ups.
             known_metric_id = 0
             try:
-                connection = engine.connect()
-                stmt = select([metrics_table.c.id]).where(metrics_table.c.metric == metric_name)
-                result = connection.execute(stmt)
+                #connection = engine.connect()
+                # @modified 20250403 - Bug #5522: Handle duplicate metric names
+                # Handle utf8_general_ci collation being case-insensitive on
+                # comparisons but case sensitive on insert
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ##stmt = select([metrics_table.c.id]).where(metrics_table.c.metric == metric_name)
+                #stmt = select(metrics_table.c.id).where(metrics_table.c.metric == metric_name)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table]).where(metrics_table.c.metric == literal(metric_name).collate('utf8mb4_bin'))
+                stmt = select(metrics_table).where(metrics_table.c.metric == literal(metric_name).collate('utf8mb4_bin'))
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 try:
-                    for row in result:
+                    for row in results:
                         known_metric_id = int(row['id'])
                         if known_metric_id:
                             duplicate_inserts[known_metric_id] = metric_name
+
+                            # @added 20251009 - Bug #5522: Handle duplicate metric names
+                            # Set as active if inactive
+                            if row['inactive']:
+                                logger.info('will update %s, metric id: %s to active as is set to inactive' % (
+                                    metric_name, str(known_metric_id)))
+                                metric_ids_to_reactivate.append(known_metric_id)
+
                             break
                 except:
                     pass
-                connection.close()
+                #connection.close()
             except Exception as err:
                 insert_errors.append(['duplicate metric check', metric_name, err])
             if known_metric_id:
                 continue
+
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id = 0
+            try:
+                tenant_id = get_tenant_id(skyline_app, metric_id=0, base_name=metric_name, new_metric=True, log=False)
+            except Exception as err:
+                logger.error('error :: get_tenant_id failed, err: %s' % (
+                    err))
+                tenant_id = 0
 
             try:
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -442,19 +545,35 @@ class Panorama(Thread):
                 # results = self.mysql_insert(insert_query)
                 insert_stmt = metrics_table.insert().values(
                     metric=metric_name,
+                    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                    tenant_id=tenant_id,
                     learn_full_duration_days=int(learn_full_duration_days),
                     learn_valid_ts_older_than=int(valid_learning_duration),
                     max_generations=int(max_generations),
                     max_percent_diff_from_origin=int(max_percent_diff_from_origin))
-                connection = engine.connect()
-                result = connection.execute(insert_stmt)
-                connection.close()
-                determined_id = result.inserted_primary_key[0]
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(insert_stmt)
+                #connection.close()
+                #determined_id = result.inserted_primary_key[0]
+                with engine.begin() as connection:
+                    result = connection.execute(insert_stmt)
+                    determined_id = result.inserted_primary_key[0]
+
             except Exception as err:
                 # @modified 20240119 - Task #5228: panorama - optimise insertions
                 # logger.error(traceback.format_exc())
                 # logger.error('error :: insert_new_metric :: failed to insert metric %s - %s' % (metric_name, err))
                 insert_errors.append([metric_name, err])
+
+            # @added 20241023 - Feature #5592: tenant_id column in DB tables
+            if determined_id and tenant_id:
+                try:
+                    self.redis_conn_decoded.hset('panorama.metric_ids_with_tenant_id', determined_id, tenant_id)
+                except Exception as err:
+                    logger.error('error :: hset on panorama.metric_ids_with_tenant_id failed, err: %s' % (
+                        err))
 
             # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
@@ -499,13 +618,31 @@ class Panorama(Thread):
             logger.error('error :: insert_new_metric :: engine.dispose() failed - %s' % (
                 err))
 
+        # @added 20251009 - Bug #5522: Handle duplicate metric names
+        # Set parent duplicate metrics as active if they were inactive
+        if metric_ids_to_reactivate:
+            logger.info('updating %s metric ids and setting as active' % (
+                str(len(metric_ids_to_reactivate))))
+            try:
+                set_metrics_as_active_count = set_metric_ids_as_active(skyline_app, metric_ids_to_reactivate)
+                set_to_active_count += set_metrics_as_active_count
+            except Exception as err:
+                logger.error('error :: set_metric_ids_as_active failed, err: %s' % (
+                    str(err)))
+        logger.info('insert_new_metric :: checked %s of %s new metrics, set %s metrics that were set to inactive as active again' % (
+            str(checked_count), str(len(metrics_to_insert)),
+            str(set_to_active_count)))
+
         # @added 20241203 - Bug #5522: Handle duplicate metric names
         duplicate_metrics_count = len(duplicate_inserts)
         if duplicate_metrics_count > 0:
             logger.info('insert_new_metric :: %s duplicate metrics identified and not inserted, recorded in Redis hash panorama.not_inserted_duplicate_metrics' % (
                 str(duplicate_metrics_count)))
             try:
-                self.redis_conn_decoded.delete('panorama.not_inserted_duplicate_metrics')
+                # @modified 20251009 - Bug #5522: Handle duplicate metric names
+                # Do not delete and recreate, just add, as this hash is now
+                # managed in metrics_manager.py
+                #self.redis_conn_decoded.delete('panorama.not_inserted_duplicate_metrics')
                 self.redis_conn_decoded.hset('panorama.not_inserted_duplicate_metrics', mapping=duplicate_inserts)
                 # Send a notification - thunder
             except Exception as err:
@@ -528,8 +665,8 @@ class Panorama(Thread):
                 slack_post = None
                 try:
                     alert_slack_channel = None
-                    slack_message = '*Skyline - NOTICE - panorama* - %s duplicate metrics were submitted to be inserted into the database, see Redis hash panorama.not_inserted_duplicate_metrics (which is replaced every time duplicate insertions are requested).  This notice has a 6 hour expiry, this notice Redis hash is panorama.not_inserted_duplicate_metrics.slack_alerted' % (
-                        str(duplicate_metrics_count))
+                    slack_message = '*Skyline - NOTICE - panorama* - %s duplicate metrics were submitted to be inserted into the database, see Redis hash panorama.not_inserted_duplicate_metrics (which is replaced every time duplicate insertions are requested).  This notice has a 6 hour expiry, this notice Redis hash is panorama.not_inserted_duplicate_metrics.slack_alerted - %s' % (
+                        str(duplicate_metrics_count), this_host)
                     slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
                     logger.info('posted notice to slack - %s' % (slack_message))
                 except Exception as err:
@@ -638,7 +775,9 @@ class Panorama(Thread):
         #                      Feature #1448: Crucible web UI
         #                      Branch #868: crucible
         # Added label to string_keys and user_id to int_keys
-        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source', 'label']
+        # @added 20250324 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source', 'label', 'custom_algorithm_only']
         float_keys = ['value']
         # @modified 20241120 - Feature #5064: mirage.inflection
         # Added anomaly_id
@@ -786,15 +925,29 @@ class Panorama(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
                 try:
-                    connection = engine.connect()
-                    # stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-                    stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
-                    result = connection.execute(stmt)
-                    for row in result:
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                    # stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
+                    stmt = select(metrics_table).where(metrics_table.c.metric == use_base_name)
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
+
                         metric_id = int(row['id'])
                         # @added 20241120 - Bug #5522: Handle duplicate metric names
                         break
-                    connection.close()
+                    #connection.close()
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
@@ -809,26 +962,44 @@ class Panorama(Thread):
             anomaly_id = None
             if metric_id:
                 try:
-                    connection = engine.connect()
-                    stmt = select([anomalies_table]).\
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table]).\
+                    stmt = select(anomalies_table).\
                         where(anomalies_table.c.metric_id == metric_id).\
                         where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
-                    result = connection.execute(stmt)
-                    for row in result:
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         anomaly_id = int(row['id'])
-                    connection.close()
+                    #connection.close()
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
                 logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
             if anomaly_id:
                 try:
-                    connection = engine.connect()
-                    connection.execute(
-                        anomalies_table.update(
-                            anomalies_table.c.id == anomaly_id).
-                        values(slack_thread_ts=slack_thread_ts))
-                    connection.close()
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #connection.execute(
+                    #    anomalies_table.update(
+                    #        anomalies_table.c.id == anomaly_id).
+                    #    values(slack_thread_ts=slack_thread_ts))
+                    stmt = anomalies_table.update().\
+                        where(anomalies_table.c.id == anomaly_id).values(
+                            slack_thread_ts=slack_thread_ts)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
+                    #connection.close()
                     logger.info('update_slack_thread_ts :: updated slack_thread_ts for anomaly id %s' % str(anomaly_id))
                     anomaly_record_updated = True
                 except:
@@ -865,12 +1036,16 @@ class Panorama(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_slack_thread_ts :: failed to get snab_table meta for %s' % str(snab_id))
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 stmt = snab_table.update().\
                     values(slack_thread_ts=slack_thread_ts).\
                     where(snab_table.c.id == int(snab_id))
-                connection.execute(stmt)
-                connection.close()
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                with engine.begin() as connection:
+                    connection.execute(stmt)
+                #connection.close()
                 logger.info('update_slack_thread_ts :: updated slack_thread_ts for snab id %s' % str(snab_id))
                 anomaly_record_updated = True
             except:
@@ -1002,7 +1177,7 @@ class Panorama(Thread):
                 str(anomaly_id), err))
 
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             # @modified 20240119 - Task #5228: panorama - optimise insertions
             # Update multiple
             # connection.execute(
@@ -1016,10 +1191,19 @@ class Panorama(Thread):
                         str(len(anomalies_to_update))))
                     break
                 try:
-                    connection.execute(
-                        anomalies_table.update(
-                            anomalies_table.c.id == anomaly_id).
-                            values(anomaly_end_timestamp=anomaly_end_timestamp))
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #connection = engine.connect()
+                    #connection.execute(
+                    #    anomalies_table.update(
+                    #        anomalies_table.c.id == anomaly_id).
+                    #        values(anomaly_end_timestamp=anomaly_end_timestamp))
+                    stmt = anomalies_table.update().\
+                        where(anomalies_table.c.id == anomaly_id).values(
+                            anomaly_end_timestamp=anomaly_end_timestamp)
+                    with engine.begin() as connection:
+                        connection.execute(stmt)
                     anomaly_end_timestamps_updated.append(anomaly_id)
                     logger.info('update_anomaly_end_timestamp :: updated anomaly_end_timestamp (%s) for anomaly id %s' % (
                         str(anomaly_end_timestamp), str(anomaly_id)))
@@ -1027,7 +1211,7 @@ class Panorama(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_anomaly_end_timestamp :: failed to update anomaly_end_timestamp for anomaly_id %s, err: %s' % (
                         str(anomaly_id), err))
-            connection.close()
+            #connection.close()
             # @modified 20240119 - Task #5228: panorama - optimise insertions
             # Update multiple
             # updated_anomaly_record = True
@@ -1126,14 +1310,24 @@ class Panorama(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_alert_ts :: failed to get metrics_table meta for %s' % base_name)
             try:
-                connection = engine.connect()
-                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-                result = connection.execute(stmt)
-                for row in result:
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     metric_id = int(row['id'])
                     # @added 20241120 - Bug #5522: Handle duplicate metric names
                     break
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_alert_ts :: could not determine metric id from metrics table')
@@ -1149,14 +1343,23 @@ class Panorama(Thread):
 
         anomaly_id = None
         try:
-            connection = engine.connect()
-            stmt = select([anomalies_table]).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([anomalies_table]).\
+            stmt = select(anomalies_table).\
                 where(anomalies_table.c.metric_id == metric_id).\
                 where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
-            result = connection.execute(stmt)
-            for row in result:
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 anomaly_id = int(row['id'])
-            connection.close()
+            #connection.close()
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: update_alert_ts :: could not determine anomaly id from anomaly table')
@@ -1164,12 +1367,19 @@ class Panorama(Thread):
         anomaly_record_updated = False
         if anomaly_id:
             try:
-                connection = engine.connect()
-                connection.execute(
-                    anomalies_table.update(
-                        anomalies_table.c.id == anomaly_id).
-                    values(alert=alerted_at))
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(
+                #    anomalies_table.update(
+                #        anomalies_table.c.id == anomaly_id).
+                #    values(alert=alerted_at))
+                stmt = anomalies_table.update().\
+                    where(anomalies_table.c.id == anomaly_id).values(
+                        alert=alerted_at)
+                with engine.begin() as connection:
+                    connection.execute(stmt)
+                #connection.close()
                 logger.info('update_alert_ts :: updated alert for anomaly id %s' % str(anomaly_id))
                 anomaly_record_updated = True
             except:
@@ -1264,10 +1474,19 @@ class Panorama(Thread):
         if 'sqlalchemy.sql.schema.Table' not in str(type(use_table)):
             try:
                 use_table_meta = MetaData()
-                use_table = Table(table, use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table(table, use_table_meta, autoload_with=engine)
             except Exception as err:
                 logger.error('error :: determine_db_id :: use_table Table failed on %s table - %s' % (
                     table, err))
+
+        # @added 20250112 - Feature #5588: snab.process_algorithm
+        # Ensure that an algorithm is assigned an algorithm_group_id when
+        # a new algorithm is inserted
+        handle_algorithm_group_id = False
+        if table == 'algorithms':
+            if isinstance(value, str):
+                if value.startswith('skyline_'):
+                    value = value.lstrip('skyline_')
 
         # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
@@ -1281,12 +1500,22 @@ class Panorama(Thread):
             #                      Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
             # results = self.mysql_select(query)
-            stmt = select([use_table.c.id]).where(use_table.c[key] == value)
-            connection = engine.connect()
-            for row in engine.execute(stmt):
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([use_table.c.id]).where(use_table.c[key] == value)
+            stmt = select(use_table.c.id).where(use_table.c[key] == value)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #for row in engine.execute(stmt):
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
+
                 determined_id = row['id']
                 break
-            connection.close()
+            #connection.close()
         except Exception as err:
             logger.error('error :: determine_db_id :: failed to determine results from - %s - %s' % (
                 str(stmt), err))
@@ -1388,31 +1617,47 @@ class Panorama(Thread):
         if log:
             logger.info('inserting %s into %s table' % (value, table))
 
-        try:
-            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
-            #                      Task #4778: v4.0.0 - update dependencies
-            # Use sqlalchemy rather than string-based query construction
-            # results = self.mysql_insert(insert_query)
-            connection = engine.connect()
-            result = connection.execute(insert_stmt)
-            connection.close()
-            determined_id = result.inserted_primary_key[0]
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: failed to determine the id of %s from the insert' % (value))
-            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
-            #                   Task #4778: v4.0.0 - update dependencies
-            # Use sqlalchemy rather than string-based query construction
-            # @modified 20240119 - Task #5228: panorama - optimise insertions
-            # Only dispose of the engine if called and not passed
-            if engine_called:
-                try:
-                    engine.dispose()
-                except Exception as err:
-                    logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
-                        err))
+        # @modified 20250112 - Feature #5588: snab.process_algorithm
+        # Handle the algorithms table with insert_new_algorithm
+        if table != 'algorithms':
+            try:
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # results = self.mysql_insert(insert_query)
 
-            raise
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                with engine.begin() as connection:
+                    result = connection.execute(insert_stmt)
+                    determined_id = result.inserted_primary_key[0]
+                #connection.close()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to determine the id of %s from the insert' % (value))
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # @modified 20240119 - Task #5228: panorama - optimise insertions
+                # Only dispose of the engine if called and not passed
+                if engine_called:
+                    try:
+                        engine.dispose()
+                    except Exception as err:
+                        logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
+                            err))
+                raise
+
+        # @added 20250112 - Feature #5588: snab.process_algorithm
+        # Ensure that an algorithm is assigned an algorithm_group_id when a new
+        # algorithm is inserted into the DB
+        if table == 'algorithms':
+            try:
+                determined_id, algorithm_group_id = insert_new_algorithm(skyline_app, value)
+            except Exception as err:
+                logger.error('error :: determine_db_id :: insert_new_algorithm failed on algorithm: %s, err: %s' % (
+                    value, err))
 
         # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
@@ -1585,14 +1830,24 @@ class Panorama(Thread):
             metric_id = None
             if base_name:
                 try:
-                    connection = engine.connect()
-                    stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-                    result = connection.execute(stmt)
-                    for row in result:
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                    stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         metric_id = int(row['id'])
                         # @added 20241120 - Bug #5522: Handle duplicate metric names
                         break
-                    connection.close()
+                    #connection.close()
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_snab :: could not determine metric id from metrics table')
@@ -1600,14 +1855,24 @@ class Panorama(Thread):
             anomaly_id = None
             if metric_id:
                 try:
-                    connection = engine.connect()
-                    stmt = select([anomalies_table]).\
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table]).\
+                    stmt = select(anomalies_table).\
                         where(anomalies_table.c.metric_id == metric_id).\
                         where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
-                    result = connection.execute(stmt)
-                    for row in result:
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         anomaly_id = int(row['id'])
-                    connection.close()
+                    #connection.close()
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: update_snab :: could not determine anomaly id from anomaly table')
@@ -1634,7 +1899,7 @@ class Panorama(Thread):
                         algorithm_id = None
                 new_snab_id = None
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     if algorithm_id:
                         ins = snab_table.insert().values(
                             anomaly_id=anomaly_id,
@@ -1656,9 +1921,15 @@ class Panorama(Thread):
                             algorithm_group_id=int(algorithm_group_id),
                             runtime=float(analysis_run_time),
                             snab_timestamp=int(added_at))
-                    result = connection.execute(ins)
-                    new_snab_id = result.inserted_primary_key[0]
-                    connection.close()
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(ins)
+                    #new_snab_id = result.inserted_primary_key[0]
+                    with engine.begin() as connection:
+                        result = connection.execute(ins)
+                        new_snab_id = result.inserted_primary_key[0]
+                    #connection.close()
                     logger.info('update_snab :: new snab id: %s' % str(new_snab_id))
                     remove_item = True
                 except:
@@ -1750,19 +2021,19 @@ class Panorama(Thread):
                 try:
                     use_table_meta = MetaData()
                     if i_table == 'hosts':
-                        hosts_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        hosts_table = Table(i_table, use_table_meta, autoload_with=engine)
                     if i_table == 'apps':
-                        apps_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        apps_table = Table(i_table, use_table_meta, autoload_with=engine)
                     if i_table == 'sources':
-                        sources_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        sources_table = Table(i_table, use_table_meta, autoload_with=engine)
                     if i_table == 'metrics':
-                        metrics_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        metrics_table = Table(i_table, use_table_meta, autoload_with=engine)
                     if i_table == 'algorithms':
-                        algorithms_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        algorithms_table = Table(i_table, use_table_meta, autoload_with=engine)
                     # @added 20240122 - Task #5228: panorama - optimise insertions
                     # Only get anomalies_table once
                     if i_table == 'anomalies':
-                        anomalies_table = Table(i_table, use_table_meta, autoload=True, autoload_with=engine)
+                        anomalies_table = Table(i_table, use_table_meta, autoload_with=engine)
                 except Exception as err:
                     logger.error('error :: spin_process :: use_table Table failed on %s table, err: %s' % (
                         i_table, err))
@@ -2142,11 +2413,29 @@ class Panorama(Thread):
                 if settings.ENABLE_PANORAMA_DEBUG:
                     logger.info('debug :: metric variable - user_id was not found - %s' % user_id)
 
+            # @added 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            custom_algorithm_only = None
+            try:
+                key = 'custom_algorithm_only'
+                value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+                custom_algorithm_only = str(value_list[0])
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: metric variable - custom_algorithm_only - %s' % custom_algorithm_only)
+            except:
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: metric variable - custom_algorithm_only was not found')
+
             record_anomaly = True
             cache_key = '%s.last_check.%s.%s' % (skyline_app, app, metric)
+
+            # @added 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
+                cache_key = cache_key + '.custom_algorithm_only'
+
             if settings.ENABLE_PANORAMA_DEBUG:
-                logger.info('debug :: cache_key - %s.last_check.%s.%s' % (
-                    skyline_app, app, metric))
+                logger.info('debug :: cache_key: %s' % cache_key)
             try:
                 # @modified 20200603 - Task #3562; Change panorama.last_check keys to timestamp value
                 #                      Feature #3486: analyzer_batch
@@ -2186,6 +2475,12 @@ class Panorama(Thread):
                 analyzer_batch_anomaly = None
                 analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
                     str(metric_timestamp), metric)
+
+                # @added 20250324 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    analyzer_batch_metric_anomaly_key = analyzer_batch_metric_anomaly_key + '.custom_algorithm_only'
+
                 try:
                     analyzer_batch_anomaly = self.redis_conn_decoded.get(analyzer_batch_metric_anomaly_key)
                 except Exception as e:
@@ -2255,6 +2550,11 @@ class Panorama(Thread):
                 set_anomaly_key = False
                 add_to_current_anomalies = False
             if batch_metric:
+                check_max_age = False
+            
+            # @added 20250327 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
                 check_max_age = False
 
             # @added 20160907 - Handle Panorama stampede on restart after not running #26
@@ -2429,6 +2729,18 @@ class Panorama(Thread):
             if '_tenant_id="' in metric:
                 labelled_metrics_name = 'labelled_metrics.%s' % str(metric_id)
 
+            # @added 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+            # Sanity check that the triggered_algorithms are in the algorithms
+            # as there can be a disconnect between the recorded algorithms
+            # when a mirage ionosphere waterfall event triggers
+            for triggered_algorithm in triggered_algorithms:
+                if triggered_algorithm not in algorithms:
+                    algorithms.append(triggered_algorithm)
+
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            skyline_dawn_init = False
+
             algorithms_ids_csv = ''
             for algorithm in algorithms:
                 # @added 20220822 - Task #2732: Prometheus to Skyline
@@ -2450,7 +2762,7 @@ class Panorama(Thread):
                 if not algorithm_id:
                     try:
                         # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
-                        #                     Task #4778: v4.0.0 - update dependencies
+                        #                      Task #4778: v4.0.0 - update dependencies
                         # Use sqlalchemy rather than string-based query construction
                         # Use self.determine_db_id instead, declare the function once
                         # algorithm_id = determine_id('algorithms', 'algorithm', algorithm)
@@ -2458,6 +2770,16 @@ class Panorama(Thread):
                         # Added engine and use_table
                         # algorithm_id = self.determine_db_id('algorithms', 'algorithm', algorithm)
                         algorithm_id = self.determine_db_id('algorithms', 'algorithm', algorithm, engine=engine, use_table=algorithms_table)
+                        # @added 20260220 - Task #5228: panorama - optimise insertions
+                        #                   Task #5628: Build v5.0.0 and test
+                        all_algorithms_by_name[algorithm] = algorithm_id
+
+                        # @added 20260221 - Feature #5712: skyline.dawn
+                        #                   Task #5628: Build v5.0.0 and test
+                        #2026-02-20 22:09:31 :: 46996 :: database.queries.insert_new_algorithm :: inserted new algorithm with id: 1, algorithm: histogram_bins, algorithm_group id: 3
+                        if algorithm_id == 1 and SKYLINE_DAWN_ENABLED:
+                            skyline_dawn_init = True
+
                     except Exception as err:
                         # logger.error('error :: failed to determine id of %s' % (algorithm))
                         logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (algorithm, err))
@@ -2471,6 +2793,32 @@ class Panorama(Thread):
                 else:
                     new_algorithms_ids_csv = '%s,%s' % (algorithms_ids_csv, str(algorithm_id))
                     algorithms_ids_csv = new_algorithms_ids_csv
+
+            # @added 20260614 - Feature #5712: skyline.dawn
+            # Mitigate a momentary partition from the DB.  If the get_algorithms
+            # fails and then the self.determine_db_id returns 1 as the DB is
+            # available again it does not signify that this is a new install.
+            # So verify that skyline_dawn_init should be enabled
+            if skyline_dawn_init:
+                # It should not be enabled after the dawn is over.
+                logger.info('verifying that skyline_dawn_init should set the dawn key')
+
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            # Added the skyline.dawn.panorama key
+            if skyline_dawn_init:
+                for key, ttl in SKYLINE_DAWN_TTLS.items():
+                    if key == 'panorama':
+                        dawn_app_key = 'skyline.dawn.%s' % key
+                        try:
+                            expiry_timestamp = int(int(time()) + ttl)
+                            self.redis_conn.setex(dawn_app_key, ttl, expiry_timestamp)
+                            logger.info('set skyline.dawn Redis key - %s with a TTL of %s which expires at %s' % (
+                                dawn_app_key, str(ttl), str(expiry_timestamp)))
+                        except Exception as err:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to setex skyline.dawn Redis key - %s, err: %s' % (
+                                dawn_app_key, err))
 
             triggered_algorithms_ids_csv = ''
             for triggered_algorithm in triggered_algorithms:
@@ -2502,6 +2850,10 @@ class Panorama(Thread):
                         # Added engine and use_table
                         # triggered_algorithm_id = self.determine_db_id('algorithms', 'algorithm', triggered_algorithm)
                         triggered_algorithm_id = self.determine_db_id('algorithms', 'algorithm', triggered_algorithm, engine=engine, use_table=algorithms_table)
+                        # @added 20251119 - Task #5228: panorama - optimise insertions
+                        #                   Feature #5665: custom_algorithm - mirage_nirvana
+                        if triggered_algorithm_id:
+                            all_algorithms_by_name[triggered_algorithm] = triggered_algorithm_id
                     except Exception as err:
                         # logger.error('error :: failed to determine id of %s' % (triggered_algorithm))
                         logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (triggered_algorithm, err))
@@ -2589,7 +2941,7 @@ class Panorama(Thread):
 
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
                 #                      Feature #1448: Crucible web UI
                 #                      Branch #868: crucible
@@ -2638,6 +2990,15 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: anomaly insert - %s' % str(query))
 
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id = 0
+            try:
+                tenant_id = get_tenant_id(skyline_app, metric_id=0, base_name=metric, log=False)
+            except Exception as err:
+                logger.error('error :: get_tenant_id failed, err: %s' % (
+                    err))
+                tenant_id = 0
+
             logger.info('executing inserting statement for anomaly on %s' % str(metric))
             anomaly_id = None
             try:
@@ -2647,6 +3008,8 @@ class Panorama(Thread):
                 # anomaly_id = self.mysql_insert(query)
                 insert_stmt = anomalies_table.insert().values(
                     metric_id=int(metric_id),
+                    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+                    tenant_id=tenant_id,
                     host_id=int(added_by_host_id),
                     app_id=int(app_id),
                     source_id=int(source_id),
@@ -2657,10 +3020,17 @@ class Panorama(Thread):
                     triggered_algorithms=str(triggered_algorithms_ids_csv),
                     label=str(label),
                     user_id=int(user_id))
-                connection = engine.connect()
-                result = connection.execute(insert_stmt)
-                connection.close()
-                anomaly_id = result.inserted_primary_key[0]
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(insert_stmt)
+                #anomaly_id = result.inserted_primary_key[0]
+                #connection.close()
+                with engine.begin() as connection:
+                    result = connection.execute(insert_stmt)
+                    anomaly_id = result.inserted_primary_key[0]
+
                 logger.info('anomaly id - %d - created for %s at %s' % (
                     anomaly_id, metric, str(metric_timestamp)))
 
@@ -2672,13 +3042,44 @@ class Panorama(Thread):
                 # Use sqlalchemy rather than string-based query construction
                 try:
                     engine.dispose()
-                except Exception as err:
-                    logger.error('error :: engine.dispose() failed - %s' % err)
+                except Exception as err2:
+                    logger.error('error :: engine.dispose() failed - %s' % err2)
 
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 # @modified 20240119 - Task #5228: panorama - optimise insertions
                 # return False
                 continue
+
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            # On the 10th anomaly added the skyline.dawn keys to self regulate
+            # the analysis stages of the apps on a new install.  This is to
+            # ensure that Skyline is not triggering lots of anomalies based on
+            # insufficient data for the task and giving the new user the
+            # impression that Skyline is noisy.  It is noisy until it has
+            # sufficient data.
+            if anomaly_id == 10 and SKYLINE_DAWN_ENABLED:
+                for key, ttl in SKYLINE_DAWN_TTLS.items():
+                    if key == 'panorama':
+                        dawn_app_key = 'skyline.dawn.%s' % key
+                        expiry_timestamp = int(time())
+                        try:
+                            self.redis_conn.setex(dawn_app_key, 1, expiry_timestamp)
+                            logger.info('set skyline.dawn Redis key to expire - %s' % dawn_app_key)
+                        except Exception as err:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to setex skyline.dawn Redis key - %s, err: %s' % (
+                                dawn_app_key, err))                    
+                    else:
+                        dawn_app_key = 'skyline.dawn.%s' % key
+                        expiry_timestamp = int(int(time()) + ttl)
+                        try:
+                            self.redis_conn.setex(dawn_app_key, ttl, expiry_timestamp)
+                            logger.info('set skyline.dawn Redis key - %s' % dawn_app_key)
+                        except Exception as err:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to setex skyline.dawn Redis key - %s, err: %s' % (
+                                dawn_app_key, err))
 
             # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                   Task #4778: v4.0.0 - update dependencies
@@ -2709,6 +3110,12 @@ class Panorama(Thread):
                 #                   Branch #4300: prometheus
                 if labelled_metrics_name:
                     anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (str(int(metric_timestamp)), labelled_metrics_name)
+
+                # @added 20250324 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    anomaly_id_redis_key = anomaly_id_redis_key + '.custom_algorithm_only'
+
                 try:
                     self.redis_conn.setex(anomaly_id_redis_key, 86400, int(anomaly_id))
                     logger.info('set Redis anomaly_key - %s' % (anomaly_id_redis_key))
@@ -2722,6 +3129,13 @@ class Panorama(Thread):
             if anomaly_id and app in ['mirage', 'ionosphere']:
                 if 'mmzrmp' not in triggered_algorithms:
                     mirage_inflection = True
+                    # @added 20250404 - Feature #5064: mirage.inflection
+                    try:
+                        settings_mirage_inflection = settings.MIRAGE_INFLECTION
+                    except:
+                        settings_mirage_inflection = False
+                    if not settings_mirage_inflection:
+                        mirage_inflection = False
             if mirage_inflection:
                 key_data = {
                     'anomaly_id': anomaly_id, 'app': app,
@@ -2741,6 +3155,16 @@ class Panorama(Thread):
                         'error :: hset failed on mirage.inflection for key %s, err: %s' % (
                             key_name, err))
 
+            # @added 20250407 - Feature #5611: custom_algorithm_only
+            # Calculate expire from metric timestamp
+            try:
+                expiry_to_use = int(settings.PANORAMA_EXPIRY_TIME - (int(time()) - int(metric_timestamp)))
+                if expiry_to_use < 1:
+                    expiry_to_use = 60
+            except Exception as err:
+                logger.error('error :: failed to determine expiry_to_use, err: %s' % err)
+            logger.info('expiry_to_use: %s' % str(expiry_to_use))
+
             # Set anomaly record cache key
             # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
             #                      Feature #1448: Crucible web UI
@@ -2757,7 +3181,9 @@ class Panorama(Thread):
                     # self.
                     if batch_metric:
                         self.redis_conn.setex(
-                            cache_key, settings.PANORAMA_EXPIRY_TIME,
+                            # @modified 20250407 - Feature #5611: custom_algorithm_only
+                            #cache_key, settings.PANORAMA_EXPIRY_TIME,
+                            cache_key, expiry_to_use,
                             int(metric_timestamp))
                     else:
                         self.redis_conn.setex(
@@ -2766,9 +3192,13 @@ class Panorama(Thread):
                             # As per above do not use msgpack with the value, set the
                             # value to the timestamp
                             # cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
-                            cache_key, settings.PANORAMA_EXPIRY_TIME, int(metric_timestamp))
+                            # @modified 20250407 - Feature #5611: custom_algorithm_only
+                            #cache_key, settings.PANORAMA_EXPIRY_TIME, int(metric_timestamp))
+                            cache_key, expiry_to_use, int(metric_timestamp))
                     logger.info('set cache_key - %s.last_check.%s.%s - %s' % (
-                        skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
+                        # @modified 20250407 - Feature #5611: custom_algorithm_only
+                        #skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
+                        skyline_app, app, metric, str(expiry_to_use)))
                 except Exception as e:
                     logger.error(
                         'error :: could not set cache_key - %s.last_check.%s.%s - %s' % (
@@ -2958,7 +3388,7 @@ class Panorama(Thread):
             # What is my host id in the Skyline panorama DB?
             host_id = False
             # @modified 20170913 - Task #2160: Test skyline with bandit
-            # Added nosec to exclude from bandit tests
+            # Added "nosec" to exclude from bandit tests
             # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
             #                      Task #4778: v4.0.0 - update dependencies
             # Use sqlalchemy rather than string-based query construction
@@ -2975,7 +3405,7 @@ class Panorama(Thread):
             # if not host_id:
             #     logger.info('inserting %s into hosts table' % this_host)
             #     # @modified 20170913 - Task #2160: Test skyline with bandit
-            #     # Added nosec to exclude from bandit tests
+            #     # Added "nosec" to exclude from bandit tests
             #     query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
             #     host_id = self.mysql_insert(query)
             #     if host_id:
@@ -3294,6 +3724,19 @@ class Panorama(Thread):
                                 data_dict = {}
                                 inserted_labelled_metrics = []
                                 for metric_id in inserted_metric_ids:
+
+                                    # @added 20260506 - Task #5176: Migrate to sqlalchemy v2 API
+                                    # Validate the metric_id is an int
+                                    metric_id_int = None
+                                    try:
+                                        metric_id_int = int(metric_id)
+                                    except Exception as err:
+                                        logger.error('error :: metric_id is not an int, metric_id: %s , err: %s' % (
+                                            str(metric_id), str(err)))
+                                        metric_id_int = None
+                                    if not metric_id_int:
+                                        continue
+
                                     data_dict[str(metric_id)] = now_ts
                                     labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
                                     inserted_labelled_metrics.append(labelled_metric_name)
