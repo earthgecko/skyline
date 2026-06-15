@@ -56,6 +56,22 @@ def zero_fill_metrics(self, external_settings, unique_base_names):
             zero_fill_metrics_list.append(i_base_name)
         del metric_matched_by
 
+    # @added 20251027 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+    # Add flux.zero_fill_metrics to the list as well because flux only fills
+    # Graphite with 0 not Redis metric data, that is done in analyzer with
+    # full_duration_timeseries_fill
+    logger.info('metrics_manager :: determined %s zero_fill_metrics from ZERO_FILL_NAMESPACES and external_settings' % (
+        str(len(zero_fill_metrics_list))))
+    flux_zero_fill_metrics = []
+    try:
+        flux_zero_fill_metrics = self.redis_conn_decoded.smembers('flux.zero_fill_metrics')
+    except Exception as err:
+        logger.error('error :: metrics_manager :: smembers failed on flux.zero_fill_metrics, err: %s' % err)
+    if flux_zero_fill_metrics:
+        logger.info('metrics_manager :: determined %s zero_fill_metrics from flux.zero_fill_metrics' % (
+            str(len(flux_zero_fill_metrics))))
+        zero_fill_metrics_list = zero_fill_metrics_list + list(flux_zero_fill_metrics)
+
     zero_fill_metrics_list = list(set(zero_fill_metrics_list))
     logger.info('metrics_manager :: determined %s zero_fill_metrics' % str(len(zero_fill_metrics_list)))
 
