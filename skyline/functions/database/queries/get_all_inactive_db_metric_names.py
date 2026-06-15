@@ -11,7 +11,12 @@ def get_all_inactive_db_metric_names(current_skyline_app, with_ids=False):
     Return all inactive metric names from the database as a list and optionally
     with a dict of metric_names and ids
     """
-    metric_names = []
+
+    # @modified 20250304 - Bug #5522: Handle duplicate metric names
+    # Optimising just under this issue.  Use a set rather than a list
+    #metric_names = []
+    metric_names = set()
+
     metric_names_with_ids = {}
     function_str = 'database.queries.get_all_inactive_db_metric_names'
 
@@ -49,27 +54,43 @@ def get_all_inactive_db_metric_names(current_skyline_app, with_ids=False):
     duplicate_metrics_errors = []
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         if with_ids:
-            stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            stmt = select(metrics_table.c.id, metrics_table.c.metric).where(metrics_table.c.inactive == 1)
         else:
             # @modified 20241111 - Bug #5522: Handle duplicate metric names
             # The id column is now required to deduplicate metrics so actually
             # the with_ids conditional is no longer required but it makes no
             # different the to the iteration of rows
-            #stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
-            stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
-        result = connection.execute(stmt)
-        for row in result:
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ##stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            #stmt = select(metrics_table.c.metric).where(metrics_table.c.inactive == 1)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            stmt = select(metrics_table.c.id, metrics_table.c.metric).where(metrics_table.c.inactive == 1)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             base_name = row['metric']
 
             # @added 20241026 - Bug #5522: Handle duplicate metric names
+            i_metric_id = None
             if base_name in metric_names:
                 # @modified 20241111 - Bug #5522: Handle duplicate metric names
                 #duplicate_metrics[row['id']] = base_name
                 #continue
                 # Wrapped in try
-                i_metric_id = None
                 try:
                     i_metric_id = row['id']
                 except KeyError:
@@ -81,10 +102,21 @@ def get_all_inactive_db_metric_names(current_skyline_app, with_ids=False):
                     except Exception as err:
                         duplicate_metrics_errors.append(['duplicate_metrics dict err', err])
 
-            metric_names.append(base_name)
+            # @modified 20250304 - Bug #5522: Handle duplicate metric names
+            # Optimising just under this issue.  Use a set rather than a list
+            #metric_names.append(base_name)
+            if base_name in metric_names:
+                if not i_metric_id:
+                    try:
+                        i_metric_id = row['id']
+                    except KeyError:
+                        continue
+                    duplicate_metrics[i_metric_id] = base_name
+                    continue
+            metric_names.add(base_name)
             if with_ids:
                 metric_names_with_ids[base_name] = row['id']
-        connection.close()
+        #connection.close()
 
         # @added 20241111 - Bug #5522: Handle duplicate metric names
         if duplicate_metrics_errors:
@@ -119,7 +151,9 @@ def get_all_inactive_db_metric_names(current_skyline_app, with_ids=False):
             function_str))
 
     if metric_names:
-        metric_names = list(set(metric_names))
+        # @modified 20250304 - Bug #5522: Handle duplicate metric names
+        #metric_names = list(set(metric_names))
+        metric_names = list(metric_names)
 
     if with_ids:
         return metric_names, metric_names_with_ids
