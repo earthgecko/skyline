@@ -110,8 +110,8 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
             If ``True``, returns the addition data in the results dict.  Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'threshold': 0.95,
@@ -119,6 +119,7 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -140,7 +141,13 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    anomalies = {}
+    scores = []
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores, 'results': {}
+    }
 
     current_logger = None
 

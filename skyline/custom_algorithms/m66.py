@@ -85,8 +85,8 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'nth_median': 6,
@@ -95,7 +95,8 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 'debug_logging': True,
                 'return_results': True,
             }
-        
+
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -103,30 +104,31 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :return: anomalous, anomalyScore, results
     :rtype: tuple(bool, float, dict)
 
-    Example CUSTOM_ALGORITHMS configuration:
+    Example CUSTOM_ALGORITHMS configuration::
 
-    'm66': {
-        'namespaces': [
-            'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
-            'skyline.analyzer.exceptions'
-        ],
-        'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/m66.py',
-        'algorithm_parameters': {
-            'nth_median': 6, 'sigma': 6, 'window': 5, 'resolution': 60,
-            'minimum_sparsity': 0, 'determine_duration': False,
-            'return_anomalies': True, 'save_plots_to': False,
-            'save_plots_to_absolute_dir': False, 'filename_prefix': False,
-            'return_results': False, 'anomaly_window': 1,
+        'm66': {
+            'namespaces': [
+                'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
+                'skyline.analyzer.exceptions'
+            ],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/m66.py',
+            'algorithm_parameters': {
+                'nth_median': 6, 'sigma': 6, 'window': 5, 'resolution': 60,
+                'minimum_sparsity': 0, 'determine_duration': False,
+                'return_anomalies': True, 'save_plots_to': False,
+                'save_plots_to_absolute_dir': False, 'filename_prefix': False,
+                'return_results': False, 'anomaly_window': 1,
+            },
+            'max_execution_time': 1.0
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['m66'],
+            'run_3sigma_algorithms': False,
+            'run_before_3sigma': False,
+            'run_only_if_consensus': False,
+            'use_with': ['crucible', 'luminosity'],
+            'debug_logging': False,
         },
-        'max_execution_time': 1.0
-        'consensus': 1,
-        'algorithms_allowed_in_consensus': ['m66'],
-        'run_3sigma_algorithms': False,
-        'run_before_3sigma': False,
-        'run_only_if_consensus': False,
-        'use_with': ['crucible', 'luminosity'],
-        'debug_logging': False,
-    },
+
 
     The context that you wish to use the algorithm in determines whether
     you should set return_anomalies to True or return_results to True or
@@ -135,6 +137,7 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     anomalies if the return_anomalies was set to True, however for the
     inclusion as an algorithm that can be used in Vortex, it needed to
     be extended to be able to return a results dict.
+
     """
 
     # You MUST define the algorithm_name

@@ -76,7 +76,7 @@ def azure_ai_anomalydetector(current_skyline_app, parent_pid, timeseries, algori
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
+        Example usage::
         
             algorithm_parameters={
                 'anomaly_window': 1,
@@ -85,6 +85,7 @@ def azure_ai_anomalydetector(current_skyline_app, parent_pid, timeseries, algori
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int

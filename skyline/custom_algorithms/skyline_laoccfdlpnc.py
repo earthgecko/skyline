@@ -136,7 +136,11 @@ def skyline_laoccfdlpnc(current_skyline_app, parent_pid, timeseries, algorithm_p
     anomalyScore = None
     anomalies = {}
     scores = []
-    results = {'anomalous': False, 'anomalies': anomalies, 'scores': scores, 'results': {}}
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores, 'results': {}
+    }
 
     current_logger = None
 

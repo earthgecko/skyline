@@ -127,7 +127,7 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
                 If ``True``, enables debug printing  (for Jupyter testing).
                 Default is ``False``.
 
-        Example usage:
+        Example usage::
         
             algorithm_parameters={
                 'anomaly_window': 3,
@@ -136,6 +136,7 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type algorithm_parameters: dict
     :type current_skyline_app: str
@@ -301,10 +302,10 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
             current_logger.debug('debug :: running SpectralResidual on X with %s datapoints' % str(len(X)))
         start = timer()
         od = SpectralResidual(
-            threshold=threshold,             # threshold for outlier score
-            window_amp=20,                   # window for the average log amplitude
-            window_local=20,                 # window for the average saliency map
-            n_est_points=20,                 # nb of estimated points padded to the end of the sequence
+            threshold=threshold,                        # threshold for outlier score
+            window_amp=window_amp,                      # window for the average log amplitude
+            window_local=window_local,                  # window for the average saliency map
+            n_est_points=n_est_points,                  # nb of estimated points padded to the end of the sequence
             padding_amp_method=padding_amp_method,      # padding method to be used prior to each convolution over log amplitude.
             padding_local_method=padding_local_method,  # padding method to be used prior to each convolution over saliency map.
             padding_amp_side=padding_amp_side           # whether to pad the amplitudes on both sides or only on one side.

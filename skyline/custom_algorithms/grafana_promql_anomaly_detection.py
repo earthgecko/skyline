@@ -99,8 +99,8 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'min_anomaly_duration_seconds': 300,
@@ -113,6 +113,7 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -132,7 +133,14 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {'preprocessing': {}, 'timings': {}}
+    anomalies = {}
+    scores = []
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores,
+        'preprocessing': {}, 'timings': {}
+    }
 
     current_logger = None
 
@@ -332,6 +340,10 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
         T = '%sT' % str(data_points_per_period)
         # Just be opinionated and set
         T = '10T'
+        # @added 20260227 - Task #5628: Build v5.0.0 and test
+        # changed T to min as per warning in pandas 2.2.3
+        T = '10min'
+
         # Resampling is done on the median to ensure more robustness to
         # outliers, unless there is very little variance in the data and
         # then median can result in all values being 0, a check is done.
@@ -345,7 +357,18 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
             mean_resampled_df = df.resample(T, origin='end').mean().bfill()
             resampled_df = mean_resampled_df.copy()
             mean_resampled_values = mean_resampled_df['value'].to_numpy().tolist()
-            mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+            # @modified 20260224 - Task #5628: Build v5.0.0 and test
+            #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #                      Task #5526: Build v5.0.0 and upgrade deps
+            #                      Task #5627: v5.0.0 update dependencies
+            # Handle pandas deprecation which results in all timestamps being
+            # returned as 1.  From pandas changelog:
+            # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+            # Disallow passing a pandas type to Index.view() (GH 55709)
+            # https://github.com/pandas-dev/pandas/issues/55709
+            #mean_resampled_df['ts'] = mean_resampled_df.index.astype(np.int64) // 10**9
+            mean_resampled_df['ts'] = [int(ts.value // 10**9) for ts in mean_resampled_df.index]
+
             if print_debug:
                 print('resampled on mean because median resample was 0s or low_variance: %s' % str(normalised_var))
             if debug_logging:
@@ -353,7 +376,17 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
             mean_resampled_timestamps = mean_resampled_df['ts'].to_numpy().tolist()
             mean_resampled_timeseries = [[t, mean_resampled_values[index]] for index, t in enumerate(mean_resampled_timestamps)]
         resampled_ts_df = resampled_df.copy()
-        resampled_ts_df['ts'] = resampled_ts_df.index.astype(np.int64) // 10**9
+        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Task #5627: v5.0.0 update dependencies
+        # Handle pandas deprecation which results in all timestamps being
+        # returned as 1.  From pandas changelog:
+        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+        # Disallow passing a pandas type to Index.view() (GH 55709)
+        # https://github.com/pandas-dev/pandas/issues/55709
+        #resampled_ts_df['ts'] = resampled_ts_df.index.astype(np.int64) // 10**9
+        resampled_ts_df['ts'] = [int(ts.value // 10**9) for ts in resampled_ts_df.index]
 
         resampled_timestamps = resampled_ts_df['ts'].to_numpy().tolist()
         resampled_timeseries = [[t, resampled_values[index]] for index, t in enumerate(resampled_timestamps)]

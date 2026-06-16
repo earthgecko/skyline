@@ -79,8 +79,8 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'window': 3,
@@ -89,6 +89,7 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int

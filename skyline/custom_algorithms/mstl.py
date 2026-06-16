@@ -77,8 +77,8 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'level': 99,
@@ -87,6 +87,7 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -108,7 +109,13 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    anomalies = {}
+    scores = []
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores, 'results': {}
+    }
 
     current_logger = None
 
@@ -273,7 +280,7 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         # `df` argument to the corresponding method instead, e.g. fit/forecast.
         quick_sf = StatsForecast(
             # df=df[-60:],
-            df=df[-60:],
+            #df=df[-60:],
             models=models, 
             freq=freq_str, 
             n_jobs=2,
@@ -290,7 +297,11 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         quick_sf_df = df[-60:].copy()
         quick_sf.fit(df=quick_sf_df)
 
-        quick_fcst = quick_sf.forecast(h=horizon, level=levels, fitted=True)
+        # @modified 20251029 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        #quick_fcst = quick_sf.forecast(h=horizon, level=levels, fitted=True)
+        quick_fcst = quick_sf.forecast(df=quick_sf_df, h=horizon, level=levels, fitted=True)
+
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated quick_fcst for %s' % (base_name))
         # @modified 20241122 - Feature #4896: custom_algorithms - mstl
@@ -316,7 +327,10 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         sf_df = df.copy()
         sf.fit(df=sf_df)
 
-        fcst = sf.forecast(h=horizon, level=levels, fitted=True)
+        # @modified 20251029 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        #fcst = sf.forecast(h=horizon, level=levels, fitted=True)
+        fcst = sf.forecast(df=sf_df, h=horizon, level=levels, fitted=True)
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated fcst for %s' % (base_name))
 
@@ -328,15 +342,32 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         anomalies = insample_forecasts.loc[(insample_forecasts['y'] >= insample_forecasts[hi_column]) | (insample_forecasts['y'] <= insample_forecasts[lo_column])]
 
         aa_insample_forecasts = insample_forecasts.copy()
-        aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).astype(int) / 10**9
+        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Task #5627: v5.0.0 update dependencies
+        # Handle pandas deprecation which results in all timestamps being
+        # returned as 1.  From pandas changelog:
+        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+        # Disallow passing a pandas type to Index.view() (GH 55709)
+        # https://github.com/pandas-dev/pandas/issues/55709
+        #aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).astype(int) / 10**9
+        aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).map(lambda x: x.value / 10**9)
+
         aa_anomalies = anomalies.copy()
-        aa_anomalies['ds'] = pd.to_datetime(aa_anomalies['ds']).astype(int) / 10**9
+        # @modified 20260224 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #aa_anomalies['ds'] = pd.to_datetime(aa_anomalies['ds']).astype(int) / 10**9
+        aa_anomalies['ds'] = pd.to_datetime(aa_anomalies['ds']).map(lambda x: x.value / 10**9)
+
         timestamps = [int(t) for t in aa_insample_forecasts['ds'].tolist()]
         values = [float(v) for v in aa_insample_forecasts['y'].tolist()]
         anomaly_timestamps = [int(t) for t in aa_anomalies['ds'].tolist()]
         anomaly_values = aa_anomalies['y'].tolist()
         aa_insample_forecasts = insample_forecasts.copy()
-        aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).astype(int) / 10**9
+        # @modified 20260224 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).astype(int) / 10**9
+        aa_insample_forecasts['ds'] = pd.to_datetime(aa_insample_forecasts['ds']).map(lambda x: x.value / 10**9)
+
         aa_insample_forecasts_timestamps = [int(t) for t in aa_insample_forecasts['ds'].tolist()]
         values = [float(v) for v in aa_insample_forecasts['y'].tolist()]
         if debug_logging:
@@ -392,7 +423,7 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
         if return_results:
-            return (None, None, None)
+            return (None, None, results)
         return (None, None)
 
     if return_results:

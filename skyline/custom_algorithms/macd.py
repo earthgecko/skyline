@@ -71,8 +71,8 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'fast_window': 12,
@@ -82,6 +82,7 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -101,7 +102,13 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    anomalies = {}
+    scores = []
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores
+    }
 
     current_logger = None
 
