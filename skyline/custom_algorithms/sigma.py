@@ -14,6 +14,8 @@ from custom_algorithms import record_algorithm_error
 # requirement is not one that is provided by the Skyline requirements.txt you
 # must ensure it is installed in the Skyline virtualenv
 from custom_algorithm_sources.sigma.sigma import run_sigma_algorithms
+# @added 20260608 - Feature #4736: custom_algorithms - sigma
+from custom_algorithm_sources.sigma.sigma_oneshot import run_sigma_oneshot_algorithms
 
 # The name of the function MUST be the same as the name declared in
 # settings.CUSTOM_ALGORITHMS.
@@ -67,8 +69,8 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'sigma': 3,
@@ -76,6 +78,7 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -166,7 +169,24 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         return_anomalies = True
 
     try:
-        anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+
+        # @modified 20260608 - Feature #4736: custom_algorithms - sigma
+        # Added oneshot implementation that is used if the sigma anomaly_window
+        # is > 20
+        #anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+        if anomaly_window < 20:
+            anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+            if debug_print:
+                print('running run_sigma_algorithms not run_sigma_oneshot_algorithms')
+            if debug_logging:
+                current_logger.debug('debug :: sigma :: running run_sigma_algorithms not run_sigma_oneshot_algorithms')
+        else:
+            anomalous, anomalyScore, anomalies = run_sigma_oneshot_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+            if debug_print:
+                print('running run_sigma_oneshot_algorithms not run_sigma_algorithms')
+            if debug_logging:
+                current_logger.debug('debug :: sigma :: running run_sigma_oneshot_algorithms not run_sigma_algorithms')
+
         # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
         #                   Branch #5532: v5.0.0-alpha
         #                   Feature #4482: Test alerts
