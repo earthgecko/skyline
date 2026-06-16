@@ -15,7 +15,7 @@ RuntimeDirectoryMode=0755
 RuntimeDirectoryPreserve=yes
 ExecStart=/opt/skyline/github/skyline/bin/analyzer.d start
 ExecStop=/opt/skyline/github/skyline/bin/analyzer.d stop
-PIDFile=/var/run/skyline/analyzer.pid
+PIDFile=/run/skyline/analyzer.pid
 #TimeoutStartSec=180
 TimeoutStopSec=5
 

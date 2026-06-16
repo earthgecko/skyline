@@ -15,7 +15,7 @@ RuntimeDirectoryMode=0755
 RuntimeDirectoryPreserve=yes
 ExecStart=/opt/skyline/github/skyline/bin/boundary.d start
 ExecStop=/opt/skyline/github/skyline/bin/boundary.d stop
-PIDFile=/var/run/skyline/boundary.pid
+PIDFile=/run/skyline/boundary.pid
 #TimeoutStartSec=180
 TimeoutStopSec=5
 
