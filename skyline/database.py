@@ -161,7 +161,7 @@ def ionosphere_table_meta(current_skyline_app, engine):
     #        mysql_engine='MyISAM')
     #    ionosphere_table.create(engine, checkfirst=True)
     #    return ionosphere_table, 'ionosphere_table meta OK', 'none'
-        ionosphere_table = Table('ionosphere', ionosphere_meta, autoload=True, autoload_with=engine)
+        ionosphere_table = Table('ionosphere', ionosphere_meta, autoload_with=engine)
         return ionosphere_table, 'ionosphere_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -189,7 +189,10 @@ def metrics_table_meta(current_skyline_app, engine):
     # Create the metrics table MetaData
     try:
         metrics_meta = MetaData()
-        metrics_table = Table('metrics', metrics_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #metrics_table = Table('metrics', metrics_meta, autoload=True, autoload_with=engine)
+        metrics_table = Table('metrics', metrics_meta, autoload_with=engine)
         return metrics_table, 'metrics_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -217,7 +220,10 @@ def anomalies_table_meta(current_skyline_app, engine):
     # Create the anomalies table MetaData
     try:
         anomalies_meta = MetaData()
-        anomalies_table = Table('anomalies', anomalies_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #anomalies_table = Table('anomalies', anomalies_meta, autoload=True, autoload_with=engine)
+        anomalies_table = Table('anomalies', anomalies_meta, autoload_with=engine)
         return anomalies_table, 'anomalies_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -251,7 +257,10 @@ def ionosphere_matched_table_meta(current_skyline_app, engine):
     # Create the ionosphere_matched table MetaData
     try:
         ionosphere_matched_meta = MetaData()
-        ionosphere_matched_table = Table('ionosphere_matched', ionosphere_matched_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #ionosphere_matched_table = Table('ionosphere_matched', ionosphere_matched_meta, autoload=True, autoload_with=engine)
+        ionosphere_matched_table = Table('ionosphere_matched', ionosphere_matched_meta, autoload_with=engine)
         return ionosphere_matched_table, 'ionosphere_matched_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -280,7 +289,10 @@ def ionosphere_layers_table_meta(current_skyline_app, engine):
     # Create the ionosphere_layers table MetaData
     try:
         ionosphere_layers_meta = MetaData()
-        ionosphere_layers_table = Table('ionosphere_layers', ionosphere_layers_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #ionosphere_layers_table = Table('ionosphere_layers', ionosphere_layers_meta, autoload=True, autoload_with=engine)
+        ionosphere_layers_table = Table('ionosphere_layers', ionosphere_layers_meta, autoload_with=engine)
         return ionosphere_layers_table, 'ionosphere_layers_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -308,7 +320,10 @@ def layers_algorithms_table_meta(current_skyline_app, engine):
     # Create the layers_algorithms table MetaData
     try:
         layers_algorithms_meta = MetaData()
-        layers_algorithms_table = Table('layers_algorithms', layers_algorithms_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #layers_algorithms_table = Table('layers_algorithms', layers_algorithms_meta, autoload=True, autoload_with=engine)
+        layers_algorithms_table = Table('layers_algorithms', layers_algorithms_meta, autoload_with=engine)
         return layers_algorithms_table, 'layers_algorithms_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -336,7 +351,10 @@ def ionosphere_layers_matched_table_meta(current_skyline_app, engine):
     # Create the ionosphere_layers_matched table MetaData
     try:
         ionosphere_layers_matched_meta = MetaData()
-        ionosphere_layers_matched_table = Table('ionosphere_layers_matched', ionosphere_layers_matched_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #ionosphere_layers_matched_table = Table('ionosphere_layers_matched', ionosphere_layers_matched_meta, autoload=True, autoload_with=engine)
+        ionosphere_layers_matched_table = Table('ionosphere_layers_matched', ionosphere_layers_matched_meta, autoload_with=engine)
         return ionosphere_layers_matched_table, 'ionosphere_layers_matched_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -365,7 +383,10 @@ def luminosity_table_meta(current_skyline_app, engine):
     # Create the luminosity table MetaData
     try:
         luminosity_meta = MetaData()
-        luminosity_table = Table('luminosity', luminosity_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #luminosity_table = Table('luminosity', luminosity_meta, autoload=True, autoload_with=engine)
+        luminosity_table = Table('luminosity', luminosity_meta, autoload_with=engine)
         return luminosity_table, 'luminosity_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -395,7 +416,10 @@ def snab_table_meta(current_skyline_app, engine):
     # Create the snab table MetaData
     try:
         snab_meta = MetaData()
-        snab_table = Table('snab', snab_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #snab_table = Table('snab', snab_meta, autoload=True, autoload_with=engine)
+        snab_table = Table('snab', snab_meta, autoload_with=engine)
         return snab_table, 'snab_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -425,7 +449,10 @@ def motifs_matched_table_meta(current_skyline_app, engine):
     # Create the motifs_matched table MetaData
     try:
         motifs_matched_meta = MetaData()
-        motifs_matched_table = Table('motifs_matched', motifs_matched_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #motifs_matched_table = Table('motifs_matched', motifs_matched_meta, autoload=True, autoload_with=engine)
+        motifs_matched_table = Table('motifs_matched', motifs_matched_meta, autoload_with=engine)
         return motifs_matched_table, 'snab_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -455,7 +482,10 @@ def not_anomalous_motifs_table_meta(current_skyline_app, engine):
     # Create the not_anomalous_motifs table MetaData
     try:
         not_anomalous_motifs_meta = MetaData()
-        not_anomalous_motifs_table = Table('not_anomalous_motifs', not_anomalous_motifs_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #not_anomalous_motifs_table = Table('not_anomalous_motifs', not_anomalous_motifs_meta, autoload=True, autoload_with=engine)
+        not_anomalous_motifs_table = Table('not_anomalous_motifs', not_anomalous_motifs_meta, autoload_with=engine)
         return not_anomalous_motifs_table, 'not_anomalous_motifs meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -484,7 +514,10 @@ def cloudburst_table_meta(current_skyline_app, engine):
     # Create the cloudburst table MetaData
     try:
         cloudburst_meta = MetaData()
-        cloudburst_table = Table('cloudburst', cloudburst_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #cloudburst_table = Table('cloudburst', cloudburst_meta, autoload=True, autoload_with=engine)
+        cloudburst_table = Table('cloudburst', cloudburst_meta, autoload_with=engine)
         return cloudburst_table, 'cloudburst meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -513,7 +546,10 @@ def cloudbursts_table_meta(current_skyline_app, engine):
     # Create the cloudbursts table MetaData
     try:
         cloudbursts_meta = MetaData()
-        cloudbursts_table = Table('cloudbursts', cloudbursts_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #cloudbursts_table = Table('cloudbursts', cloudbursts_meta, autoload=True, autoload_with=engine)
+        cloudbursts_table = Table('cloudbursts', cloudbursts_meta, autoload_with=engine)
         return cloudbursts_table, 'cloudbursts meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -542,7 +578,10 @@ def metric_group_table_meta(current_skyline_app, engine):
     # Create the metric_group table MetaData
     try:
         metric_group_meta = MetaData()
-        metric_group_table = Table('metric_group', metric_group_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #metric_group_table = Table('metric_group', metric_group_meta, autoload=True, autoload_with=engine)
+        metric_group_table = Table('metric_group', metric_group_meta, autoload_with=engine)
         return metric_group_table, 'metric_group meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -571,7 +610,10 @@ def metric_group_info_table_meta(current_skyline_app, engine):
     # Create the metric_group_info table MetaData
     try:
         metric_group_info_meta = MetaData()
-        metric_group_info_table = Table('metric_group_info', metric_group_info_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #metric_group_info_table = Table('metric_group_info', metric_group_info_meta, autoload=True, autoload_with=engine)
+        metric_group_info_table = Table('metric_group_info', metric_group_info_meta, autoload_with=engine)
         return metric_group_info_table, 'metric_group_info meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -601,7 +643,10 @@ def ionosphere_minmax_table_meta(current_skyline_app, engine):
     # Create the ionosphere_minmax_info table MetaData
     try:
         ionosphere_minmax_meta = MetaData()
-        ionosphere_minmax_table = Table('ionosphere_minmax', ionosphere_minmax_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #ionosphere_minmax_table = Table('ionosphere_minmax', ionosphere_minmax_meta, autoload=True, autoload_with=engine)
+        ionosphere_minmax_table = Table('ionosphere_minmax', ionosphere_minmax_meta, autoload_with=engine)
         return ionosphere_minmax_table, 'ionosphere_minmax meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -630,7 +675,10 @@ def algorithms_table_meta(current_skyline_app, engine):
     # Create the algorithms table MetaData
     try:
         algorithms_meta = MetaData()
-        algorithms_table = Table('algorithms', algorithms_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #algorithms_table = Table('algorithms', algorithms_meta, autoload=True, autoload_with=engine)
+        algorithms_table = Table('algorithms', algorithms_meta, autoload_with=engine)
         return algorithms_table, 'algorithms_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -659,7 +707,10 @@ def snab_results_algorithms_table_meta(current_skyline_app, engine):
     # Create the snab_results_algorithms table MetaData
     try:
         snab_results_algorithms_meta = MetaData()
-        snab_results_algorithms_table = Table('snab_results_algorithms', snab_results_algorithms_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #snab_results_algorithms_table = Table('snab_results_algorithms', snab_results_algorithms_meta, autoload=True, autoload_with=engine)
+        snab_results_algorithms_table = Table('snab_results_algorithms', snab_results_algorithms_meta, autoload_with=engine)
         return snab_results_algorithms_table, 'snab_results_algorithms meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -687,7 +738,10 @@ def comments_table_meta(current_skyline_app, engine):
     # Create the comments table MetaData
     try:
         comments_meta = MetaData()
-        comments_table = Table('comments', comments_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #comments_table = Table('comments', comments_meta, autoload=True, autoload_with=engine)
+        comments_table = Table('comments', comments_meta, autoload_with=engine)
         return comments_table, 'comments meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -716,7 +770,10 @@ def anomalies_updated_table_meta(current_skyline_app, engine):
     # Create the anomalies_updated table MetaData
     try:
         anomalies_updated_meta = MetaData()
-        anomalies_updated_table = Table('anomalies_updated', anomalies_updated_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #anomalies_updated_table = Table('anomalies_updated', anomalies_updated_meta, autoload=True, autoload_with=engine)
+        anomalies_updated_table = Table('anomalies_updated', anomalies_updated_meta, autoload_with=engine)
         return anomalies_updated_table, 'anomalies_updated meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
@@ -744,11 +801,47 @@ def alias_features_profile_table_meta(current_skyline_app, engine):
     # Create the alias_features_profile table MetaData
     try:
         alias_features_profile_meta = MetaData()
-        alias_features_profile_table = Table('alias_features_profile', alias_features_profile_meta, autoload=True, autoload_with=engine)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #alias_features_profile_table = Table('alias_features_profile', alias_features_profile_meta, autoload=True, autoload_with=engine)
+        alias_features_profile_table = Table('alias_features_profile', alias_features_profile_meta, autoload_with=engine)
         return alias_features_profile_table, 'alias_features_profile meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to reflect the alias_features_profile table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+# @added 20250112 - Feature #5588: snab.process_algorithm
+#                   Feature #5038: snab_results_algorithms
+#                   Feature #4988: Allow snab to return and save results
+def algorithm_groups_table_meta(current_skyline_app, engine):
+    """
+    Autoload the algorithm_groups table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the algorithm_groups table MetaData
+    try:
+        algorithm_groups_meta = MetaData()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #algorithm_groups_table = Table('algorithm_groups', algorithm_groups_meta, autoload=True, autoload_with=engine)
+        algorithm_groups_table = Table('algorithm_groups', algorithm_groups_meta, autoload_with=engine)
+        return algorithm_groups_table, 'algorithm_groups_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the algorithm_groups table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace

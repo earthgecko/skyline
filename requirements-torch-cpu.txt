@@ -1,6 +1,12 @@
+# @modified 20260616 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5532: v5.0.0-alpha
+#--extra-index-url https://download.pytorch.org/whl/cpu
+#torch==2.5.1+cpu
+## @added 20241203 - GraphSubDetector
+#torch_geometric==2.6.1
+## @added 20241208 - Feature #: custom_algorithms - GNNSubDetector
+#pytorch-tcn==1.2.1
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.5.1+cpu
-# @added 20241203 - GraphSubDetector
-torch_geometric==2.6.1
-# @added 20241208 - Feature #: custom_algorithms - GNNSubDetector
-pytorch-tcn==1.2.1
+torch==2.12.0
+torch_geometric==2.8.0
+pytorch-tcn==1.2.3

@@ -29,7 +29,7 @@ import requests
 # @added 20191114 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
-# charset='utf-8', decode_responses=True arguments required in py3
+# encoding='utf-8', decode_responses=True arguments required in py3
 from redis import StrictRedis
 
 # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -129,7 +129,7 @@ config = {'user': settings.PANORAMA_DBUSER,
 # @added 20191025 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
-# charset='utf-8', decode_responses=True arguments required in py3
+# encoding='utf-8', decode_responses=True arguments required in py3
 def get_redis_conn(current_skyline_app):
     """
     Get a Redis connection
@@ -241,14 +241,14 @@ def get_redis_conn_decoded(current_skyline_app):
                 REDIS_CONN_DECODED = StrictRedis(
                     password=settings.REDIS_PASSWORD,
                     unix_socket_path=settings.REDIS_SOCKET_PATH,
-                    charset='utf-8', decode_responses=True)
+                    encoding='utf-8', decode_responses=True)
         else:
             if python_version == 2:
                 REDIS_CONN_DECODED = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
             else:
                 REDIS_CONN_DECODED = StrictRedis(
                     unix_socket_path=settings.REDIS_SOCKET_PATH,
-                    charset='utf-8', decode_responses=True)
+                    encoding='utf-8', decode_responses=True)
     except Exception as err:
         current_logger.error('error :: %s - get_redis_conn_decoded failed - %s' % (current_skyline_app, err))
     if not REDIS_CONN_DECODED:
@@ -262,14 +262,14 @@ def get_redis_conn_decoded(current_skyline_app):
                     REDIS_CONN_DECODED = StrictRedis(
                         password=settings.REDIS_PASSWORD,
                         unix_socket_path=settings.REDIS_SOCKET_PATH,
-                        charset='utf-8', decode_responses=True)
+                        encoding='utf-8', decode_responses=True)
             else:
                 if python_version == 2:
                     REDIS_CONN_DECODED = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 else:
                     REDIS_CONN_DECODED = StrictRedis(
                         unix_socket_path=settings.REDIS_SOCKET_PATH,
-                        charset='utf-8', decode_responses=True)
+                        encoding='utf-8', decode_responses=True)
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s - get_redis_conn_decoded failed' % current_skyline_app)
@@ -405,7 +405,10 @@ def mkdir_p(make_path):
             if os.path.isdir(check_path):
                 continue
             else:
-                os.mkdir(check_path, mode=0o755)
+                try:
+                    os.mkdir(check_path, mode=0o755)
+                except FileExistsError:
+                    continue
 
         return True
     # Python >2.5
@@ -800,6 +803,15 @@ def get_graphite_metric(
     if write_to_log:
         current_logger.info('get_graphite_metric :: graphite_until - %s' % str(graphite_until))
 
+    # @added 20250121 - Feature #5588: snab.process_algorithm
+    if current_skyline_app == 'snab':
+        graphite_from = str(from_timestamp)
+        if write_to_log:
+            current_logger.info('get_graphite_metric :: graphite_from - %s' % str(graphite_from))
+        graphite_until = str(until_timestamp)
+        if write_to_log:
+            current_logger.info('get_graphite_metric :: graphite_until - %s' % str(graphite_until))
+
     output_format = data_type
 
     # @modified 20170603 - Feature #2034: analyse_derivatives
@@ -893,7 +905,9 @@ def get_graphite_metric(
 
     # @added 20240625 - Feature #5372: vista - bq_update
     # Replace the old above direct Redis connect method for cluster nodes
-    if not metric_found_in_redis and settings.REMOTE_SKYLINE_INSTANCES:
+    # @modified 20250326 - Feature #5611: custom_algorithm_only
+    # Added and check_for_derivative
+    if not metric_found_in_redis and settings.REMOTE_SKYLINE_INSTANCES and check_for_derivative:
         remote_derivative_metrics = []
         r = None
         try:
@@ -970,6 +984,11 @@ def get_graphite_metric(
     # Unset the graphite_port if normal https
     if settings.GRAPHITE_PORT == '443' and settings.GRAPHITE_PROTOCOL == 'https':
         graphite_port = ''
+
+    # @added 20241227 - Feature #5585: boundary - functions - tsdb_function
+    # Unescape functions
+    target_metric = target_metric.replace('\\(', '(')
+    target_metric = target_metric.replace('\\)', ')')
 
     # @modified 20190520 - Branch #3002: docker
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
@@ -1050,23 +1069,23 @@ def get_graphite_metric(
                 if matched_graph:
                     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(until_timestamp)))
                     if 'matched.fp_id' in output_object:
-                        tail_piece = re.sub('.*\.fp_id-', '', output_object)
-                        matched_fp_id = re.sub('\..*', '', tail_piece)
+                        tail_piece = re.sub('.*\\.fp_id-', '', output_object)
+                        matched_fp_id = re.sub('\\..*', '', tail_piece)
                         unencoded_graph_title = 'fp_id %s matched - %s at %s hours' % (
                             str(matched_fp_id), str(human_date),
                             str(int_hours))
                         # @added 20210421 - Feature #4014: Ionosphere - inference
                         # Add motif_id to Graph title
                         if 'motif_id-' in output_object:
-                            tail_piece = re.sub('.*\.motif_id-', '', output_object)
-                            motif_id = re.sub('\..*', '', tail_piece)
+                            tail_piece = re.sub('.*\\.motif_id-', '', output_object)
+                            motif_id = re.sub('\\..*', '', tail_piece)
                             unencoded_graph_title = 'fp_id %s (motif_id %s) matched - %s for the trailing period' % (
                                 str(matched_fp_id), str(motif_id), str(human_date))
 
                     if 'matched.layers.fp_id' in output_object:
                         # layers_id
-                        tail_piece = re.sub('.*\.layers_id-', '', output_object)
-                        matched_layers_id = re.sub('\..*', '', tail_piece)
+                        tail_piece = re.sub('.*\\.layers_id-', '', output_object)
+                        matched_layers_id = re.sub('\\..*', '', tail_piece)
                         unencoded_graph_title = 'layers_id %s matched - %s at %s hours' % (
                             str(matched_layers_id), str(human_date),
                             str(int_hours))
@@ -1090,7 +1109,7 @@ def get_graphite_metric(
         # Use urlretrieve
         # try:
         #     # @modified 20170913 - Task #2160: Test skyline with bandit
-        #     # Added nosec to exclude from bandit tests
+        #     # Added "nosec" to exclude from bandit tests
         #     image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
         #     current_logger.info('url OK - %s' % (image_url))
         # except urllib2.URLError:
@@ -1200,7 +1219,7 @@ def get_graphite_metric(
                 new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                 converted.append(new_datapoint)
             # @modified 20170913 - Task #2160: Test skyline with bandit
-            # Added nosec to exclude from bandit tests
+            # Added "nosec" to exclude from bandit tests
             except:  # nosec
                 continue
 
@@ -1221,7 +1240,7 @@ def get_graphite_metric(
                     current_logger.error(traceback.format_exc())
                     current_logger.error(
                         'error :: failed to create output_object_path - %s - %s' %
-                        str(output_object_path))
+                        str(output_object_path), err)
                     return False
 
             with open(output_object, 'w') as f:
@@ -1801,7 +1820,7 @@ def get_memcache_metric_object(current_skyline_app, base_name):
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
 
@@ -1830,7 +1849,7 @@ def get_memcache_metric_object(current_skyline_app, base_name):
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
 
@@ -1898,7 +1917,7 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
 
@@ -1912,7 +1931,7 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
 
@@ -2146,20 +2165,20 @@ def set_metric_as_derivative(current_skyline_app, base_name):
 
     # @modified 20191025 - Bug #3266: py3 Redis binary objects not strings
     #                      Branch #3262: py3
-    # Added, charset='utf-8', decode_responses=True to REDIS_CONN
+    # Added, encoding='utf-8', decode_responses=True to REDIS_CONN
     try:
         if settings.REDIS_PASSWORD:
-            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         else:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
     except:
         from redis import StrictRedis
     if not REDIS_CONN:
         try:
             if settings.REDIS_PASSWORD:
-                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
             else:
-                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         except:
             current_logger.error('error :: set_metric_as_derivative - Redis connection failed')
     if not REDIS_CONN:
@@ -2292,7 +2311,10 @@ def get_user_details(current_skyline_app, desired_value, key, value):
         current_logger.error('error :: get_user_details :: could not get a MySQL engine - %s' % err)
     try:
         users_table_meta = MetaData()
-        users_table = Table('users', users_table_meta, autoload=True, autoload_with=engine)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #users_table = Table('users', users_table_meta, autoload=True, autoload_with=engine)
+        users_table = Table('users', users_table_meta, autoload_with=engine)
     except Exception as err:
         current_logger.error('error :: get_user_details :: Table failed on user table - %s' % (
             err))
@@ -2305,13 +2327,28 @@ def get_user_details(current_skyline_app, desired_value, key, value):
         # results = mysql_select(str(current_skyline_app), query)
         # result = results[0][0]
         if key == 'id':
-            stmt = select([users_table.c.user]).where(users_table.c.id == int(value))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([users_table.c.user]).where(users_table.c.id == int(value))
+            stmt = select(users_table.c.user).where(users_table.c.id == int(value))
         if key == 'username':
-            stmt = select([users_table.c.id]).where(users_table.c.user == value)
-        connection = engine.connect()
-        for row in connection.execute(stmt):
-            result = row[0]
-        connection.close()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([users_table.c.id]).where(users_table.c.user == value)
+            stmt = select(users_table.c.id).where(users_table.c.user == value)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #for row in connection.execute(stmt):
+        #    result = row[0]
+        #connection.close()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
+            #result = row[0]
+            result = row['id']
 
     except Exception as err:
         trace = traceback.format_exc()
@@ -2390,7 +2427,7 @@ def get_graphite_custom_headers(current_skyline_app):
     try:
         headers = settings.GRAPHITE_CUSTOM_HEADERS
     except:
-        current_logger.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
+        current_logger.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \\{\\}')
         headers = dict()
     return headers
 
@@ -2943,7 +2980,10 @@ def get_anomaly_type(current_skyline_app, anomaly_id):
         current_logger.error('error :: get_anomaly_type :: could not get a MySQL engine - %s' % err)
     try:
         anomalies_type_table_meta = MetaData()
-        anomalies_type_table = Table('anomalies_type', anomalies_type_table_meta, autoload=True, autoload_with=engine)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #anomalies_type_table = Table('anomalies_type', anomalies_type_table_meta, autoload=True, autoload_with=engine)
+        anomalies_type_table = Table('anomalies_type', anomalies_type_table_meta, autoload_with=engine)
     except Exception as err:
         current_logger.error('error :: get_anomaly_type :: Table failed on anomalies_type table - %s' % (
             err))
@@ -2960,11 +3000,22 @@ def get_anomaly_type(current_skyline_app, anomaly_id):
         # result = mysql_select(current_skyline_app, query)
         # if result:
         #     anomaly_type_ids = str(result[0][0])
-        stmt = select([anomalies_type_table.c.type]).where(anomalies_type_table.c.id == int(anomaly_id))
-        connection = engine.connect()
-        for row in connection.execute(stmt):
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_type_table.c.type]).where(anomalies_type_table.c.id == int(anomaly_id))
+        stmt = select(anomalies_type_table.c.type).where(anomalies_type_table.c.id == int(anomaly_id))
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #for row in connection.execute(stmt):
+        #    anomaly_type_ids = row['type']
+        #connection.close()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             anomaly_type_ids = row['type']
-        connection.close()
 
     except Exception as err:
         current_logger.error('error :: get_anomaly_type :: failed to get anomaly type for anomaly id %s from the db - %s' % (
