@@ -15,7 +15,7 @@ RuntimeDirectoryMode=0755
 RuntimeDirectoryPreserve=yes
 ExecStart=/opt/skyline/github/skyline/bin/crucible.d start
 ExecStop=/opt/skyline/github/skyline/bin/crucible.d stop
-PIDFile=/var/run/skyline/crucible.pid
+PIDFile=/run/skyline/crucible.pid
 #TimeoutStartSec=180
 TimeoutStopSec=5
 
