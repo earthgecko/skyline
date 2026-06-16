@@ -79,7 +79,7 @@ def spectral_entropy(current_skyline_app, parent_pid, timeseries, algorithm_para
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
+        Example usage::
         
             algorithm_parameters={
                 'anomaly_window': 1,
@@ -89,6 +89,7 @@ def spectral_entropy(current_skyline_app, parent_pid, timeseries, algorithm_para
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int

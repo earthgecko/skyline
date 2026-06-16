@@ -116,7 +116,11 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             np_max = np.amax(np_values)
             np_min = np.amin(np_values)
             norm_np_values = (np_values - np_min) / (np_max - np_min)
-            normalised_var = round(np.var(norm_np_values), 4)
+            # @modified 20251019 - Feature #5519: functions.skyline.coerce_to_valid_json
+            #                      Bug #5518: custom_algorithms_results - invalid JSON
+            # Wrapped in float to prevent
+            #'normalised_var_7d': np.float64(0.0058), 'normalised_var_30d': np.float64(0.0687)
+            normalised_var = float(round(np.var(norm_np_values), 4))
         except:
             normalised_var = np.nan
         return normalised_var
@@ -262,7 +266,10 @@ def irregular_unstable(current_skyline_app, parent_pid, timeseries, algorithm_pa
             np_timestamps = np.array(timestamps)
             ts_diffs = np.diff(np_timestamps)
             resolution_counts = np.unique(ts_diffs, return_counts=True)
-            resolution = resolution_counts[0][np.argmax(resolution_counts[1])]
+            # @modified 20251019 - Feature #5519: functions.skyline.coerce_to_valid_json
+            #                      Bug #5518: custom_algorithms_results - invalid JSON
+            # Wrapped in float to prevent
+            resolution = float(resolution_counts[0][np.argmax(resolution_counts[1])])
             if resolution > 900:
                 # Not suited to low resolution data
 

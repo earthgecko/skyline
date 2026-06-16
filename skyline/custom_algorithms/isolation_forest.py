@@ -30,7 +30,11 @@ from sklearn.ensemble import IsolationForest
 def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     """
-    Outlier detector based on Isolation Forest.
+    Outlier detector based on scikit-learn Isolation Forest.
+
+    See sklearn.ensemble.IsolationForest for full implementation details and
+    in-depth details regarding the parameters -
+    https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -53,7 +57,6 @@ def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_para
             when determining if the metric is anomalous. Only the last
             ``anomaly_window`` data points in the time series will be used to
             determine if the metric is anomalous.  Default is ``1``.
-        - ``'contamination'`` (float):
         - ``'contamination'`` (float or "auto"):
             The proportion of the dataset that is expected to be anomalies or
             outliers. This can be either:
@@ -65,7 +68,8 @@ def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_para
             - The string ``"auto"``: This option allows the algorithm to 
                 automatically determine an appropriate contamination level based
                 on the characteristics of the data. Useful when the proportion
-                of outliers is unknown.
+                of outliers is unknown.  The threshold is determined as in the
+                original paper [1]_.
             Default is ``"auto"``.
          - ``'return_results'`` (bool): Optional.
             If ``True``, returns the results dict in addition to anomalous and
@@ -76,14 +80,36 @@ def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_para
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        References:
+
+        .. [1] F. T. Liu, K. M. Ting and Z. -H. Zhou.
+            :doi:`"Isolation forest." <10.1109/ICDM.2008.17>`
+            2008 Eighth IEEE International Conference on Data Mining (ICDM),
+            2008, pp. 413-422.
+
+        Example usage::
+
+            # Setting contamination to classify 1% of the data outliers/anomalies
+            # a making a decision based on the last data point, anomaly_window 1
+            # Running in a realtime in Mirage you want to set the anomaly_window
+            # to 1 and contamination to either 0.01 or "auto".
             algorithm_parameters={
                 'anomaly_window': 1,
-                'contamination': 0.01,,
+                'contamination': 0.01,
                 'debug_logging': True,
                 'return_results': True,
             }
+
+            # Setting contamination to auto and determine any anomalies in the
+            # last 1008 data points.  This suits adhoc analysis on an entire
+            # data via Vortex 
+            algorithm_parameters={
+                'anomaly_window': 1008,
+                'contamination': 'auto',
+                'debug_logging': True,
+                'return_results': True,
+            }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -103,7 +129,13 @@ def isolation_forest(current_skyline_app, parent_pid, timeseries, algorithm_para
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    anomalies = {}
+    scores = []
+    anomalyScore_list = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores
+    }
 
     current_logger = None
 

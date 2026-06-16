@@ -450,11 +450,17 @@ def anomalous_daily_peak(current_skyline_app, parent_pid, timeseries, algorithm_
 
         # Determine the mean and stdDev of the sums of each peak period (excl
         # the anomalous peak period)
-        peak_values_mean = np.mean(peak_values)
-        peak_values_stdDev = np.std(peak_values)
+        # @modified 20260430 - Feature #5519: functions.skyline.coerce_to_valid_json
+        #                      Bug #5518: custom_algorithms_results - invalid JSON
+        # Wrapped in float to coerce np.float64
+        peak_values_mean = float(np.mean(peak_values))
+        peak_values_stdDev = float(np.std(peak_values))
 
-        peak_difference = anomaly_peak_values_sum - peak_values_mean
-        threesigma3_peak_values_stdDev = 3 * peak_values_stdDev
+        # @modified 20260430 - Feature #5519: functions.skyline.coerce_to_valid_json
+        #                      Bug #5518: custom_algorithms_results - invalid JSON
+        # Wrapped in float to coerce np.float64
+        peak_difference = float(anomaly_peak_values_sum - peak_values_mean)
+        threesigma3_peak_values_stdDev = float(3 * peak_values_stdDev)
 
         if anomaly_peak_values_sum == 0:
             debug_dict = {
@@ -487,6 +493,17 @@ def anomalous_daily_peak(current_skyline_app, parent_pid, timeseries, algorithm_
         # the overhead of importing numpy here just to load the type
         if type(anomalous) is not None and type(anomalous).__name__ == 'bool_':
             anomalous = bool(anomalous)
+
+        # @added 20260430 - Feature #5519: functions.skyline.coerce_to_valid_json
+        #                   Bug #5518: custom_algorithms_results - invalid JSON
+        # Coerce np.bool
+        # Handle np.True_ and np.False_ which evaluate to True and False when
+        # evaluated as a str
+        anomalous_str = str(anomalous)
+        if anomalous_str == 'True':
+            anomalous = True
+        if anomalous_str == 'False':
+            anomalous = False
 
         percent_different = 0
         if within_percent_of_normal_peaks and anomalous:

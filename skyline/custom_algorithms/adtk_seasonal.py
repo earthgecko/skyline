@@ -56,12 +56,15 @@ def adtk_seasonal(current_skyline_app, parent_pid, timeseries, algorithm_paramet
         [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
         custom_algorithm and algorithm itself.  For the matrixprofile custom
-        algorithm the following parameters are required, example:
-        ``algorithm_parameters={
-            'c': 9.0,
-            'run_every': 5,
-            'side': 'both',
-        }``
+        algorithm the following parameters are required, example::
+
+            algorithm_parameters={
+                'c': 9.0,
+                'run_every': 5,
+                'side': 'both',
+            }
+
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -125,24 +128,25 @@ def adtk_seasonal(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     values appropriate for metric resolution.
 
     :
-    Example CUSTOM_ALGORITHMS configuration:
+    Example CUSTOM_ALGORITHMS configuration::
 
-    'adtk_seasonal': {
-        'namespaces': [
-            'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
-            'skyline.analyzer.exceptions'
-        ],
-        'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/adtk_seasonal.py',
-        'algorithm_parameters': {'c': 9.0, 'run_every': 5, 'side': 'both'},
-        'max_execution_time': 0.5,
-        'consensus': 1,
-        'algorithms_allowed_in_consensus': ['adtk_seasonal'],
-        'run_3sigma_algorithms': True,
-        'run_before_3sigma': True,
-        'run_only_if_consensus': False,
-        'use_with': ["analyzer", "mirage"],
-        'debug_logging': False,
-    },
+        'adtk_seasonal': {
+            'namespaces': [
+                'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
+                'skyline.analyzer.exceptions'
+            ],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/adtk_seasonal.py',
+            'algorithm_parameters': {'c': 9.0, 'run_every': 5, 'side': 'both'},
+            'max_execution_time': 0.5,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['adtk_seasonal'],
+            'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'use_with': ["analyzer", "mirage"],
+            'debug_logging': False,
+        },
+
 
     """
 
@@ -733,7 +737,18 @@ def adtk_seasonal(current_skyline_app, parent_pid, timeseries, algorithm_paramet
                     algorithm_name, str(len(anomalies))))
 
             if len(anomalies) > 0:
-                anomaly_timestamps = list(anomalies.index.astype(np.int64) // 10**9)
+                # @modified 20260224 - Task #5628: Build v5.0.0 and test
+                #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                #                      Task #5526: Build v5.0.0 and upgrade deps
+                #                      Task #5627: v5.0.0 update dependencies
+                # Handle pandas deprecation which results in all timestamps being
+                # returned as 1.  From pandas changelog:
+                # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+                # Disallow passing a pandas type to Index.view() (GH 55709)
+                # https://github.com/pandas-dev/pandas/issues/55709
+                #anomaly_timestamps = list(anomalies.index.astype(np.int64) // 10**9)
+                anomaly_timestamps = [int(ts.value // 10**9) for ts in anomalies.index]
+
                 if realtime_analysis:
                     last_window_timestamps = [int(item[0]) for item in timeseries[-window:]]
                     # if timeseries[-1][0] in anomaly_timestamps:

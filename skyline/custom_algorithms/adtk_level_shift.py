@@ -57,7 +57,7 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     :param algorithm_parameters: a dictionary of any required parameters for the
         custom_algorithm and algorithm itself.  For the matrixprofile custom
         algorithm the following parameters are required, example:
-        Example usage:
+        Example usage::
         
             algorithm_parameters={
                 'anomaly_window': 1,
@@ -68,6 +68,7 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -100,44 +101,45 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
 
     UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
     is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
-    is!
+    is!::
 
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - histogram_bins run 567 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - histogram_bins has 567 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - histogram_bins - total: 1.051136 - median: 0.001430
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - first_hour_average run 567 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - first_hour_average has 567 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - first_hour_average - total: 1.322432 - median: 0.001835
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - stddev_from_average run 567 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - stddev_from_average has 567 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - stddev_from_average - total: 1.097290 - median: 0.001641
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - grubbs run 567 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - grubbs has 567 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - grubbs - total: 1.742929 - median: 0.002438
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - ks_test run 147 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - ks_test has 147 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - ks_test - total: 0.127648 - median: 0.000529
-    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - mean_subtraction_cumulation run 40 times
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - mean_subtraction_cumulation has 40 timings
-    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - mean_subtraction_cumulation - total: 0.152515 - median: 0.003152
-    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - median_absolute_deviation run 35 times
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - median_absolute_deviation has 35 timings
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - median_absolute_deviation - total: 0.143770 - median: 0.003248
-    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - stddev_from_moving_average run 30 times
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - stddev_from_moving_average has 30 timings
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - stddev_from_moving_average - total: 0.125173 - median: 0.003092
-    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - least_squares run 16 times
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - least_squares has 16 timings
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - least_squares - total: 0.089108 - median: 0.005538
-    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - abs_stddev_from_median run 1 times
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - abs_stddev_from_median has 1 timings
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - abs_stddev_from_median - total: 0.036797 - median: 0.036797
-    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - adtk_level_shift run 271 times
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - adtk_level_shift has 271 timings
-    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - adtk_level_shift - total: 13.729565 - median: 0.035791
-    ...
-    ...
-    2021-03-06 10:46:39 :: 1582754 :: seconds to run     :: 27.93  # THE TOTAL ANALYZER RUNTIME
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - histogram_bins run 567 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - histogram_bins has 567 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - histogram_bins - total: 1.051136 - median: 0.001430
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - first_hour_average run 567 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - first_hour_average has 567 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - first_hour_average - total: 1.322432 - median: 0.001835
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - stddev_from_average run 567 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - stddev_from_average has 567 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - stddev_from_average - total: 1.097290 - median: 0.001641
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - grubbs run 567 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - grubbs has 567 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - grubbs - total: 1.742929 - median: 0.002438
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - ks_test run 147 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - ks_test has 147 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - ks_test - total: 0.127648 - median: 0.000529
+        2021-03-06 10:46:38 :: 1582754 :: algorithm run count - mean_subtraction_cumulation run 40 times
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - mean_subtraction_cumulation has 40 timings
+        2021-03-06 10:46:38 :: 1582754 :: algorithm timing - mean_subtraction_cumulation - total: 0.152515 - median: 0.003152
+        2021-03-06 10:46:39 :: 1582754 :: algorithm run count - median_absolute_deviation run 35 times
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - median_absolute_deviation has 35 timings
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timing - median_absolute_deviation - total: 0.143770 - median: 0.003248
+        2021-03-06 10:46:39 :: 1582754 :: algorithm run count - stddev_from_moving_average run 30 times
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - stddev_from_moving_average has 30 timings
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timing - stddev_from_moving_average - total: 0.125173 - median: 0.003092
+        2021-03-06 10:46:39 :: 1582754 :: algorithm run count - least_squares run 16 times
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - least_squares has 16 timings
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timing - least_squares - total: 0.089108 - median: 0.005538
+        2021-03-06 10:46:39 :: 1582754 :: algorithm run count - abs_stddev_from_median run 1 times
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - abs_stddev_from_median has 1 timings
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timing - abs_stddev_from_median - total: 0.036797 - median: 0.036797
+        2021-03-06 10:46:39 :: 1582754 :: algorithm run count - adtk_level_shift run 271 times
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - adtk_level_shift has 271 timings
+        2021-03-06 10:46:39 :: 1582754 :: algorithm timing - adtk_level_shift - total: 13.729565 - median: 0.035791
+        ...
+        ...
+        2021-03-06 10:46:39 :: 1582754 :: seconds to run     :: 27.93  # THE TOTAL ANALYZER RUNTIME
+
 
     Therefore the analysis methodology implemented for the adtk_level_shift
     custom_algorithm is as folows:
@@ -176,22 +178,23 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
 
     Example CUSTOM_ALGORITHMS configuration::
 
-    'adtk_level_shift': {
-        'namespaces': [
-            'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
-            'skyline.analyzer.exceptions'
-        ],
-        'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/adtk_level_shift.py',
-        'algorithm_parameters': {'c': 9.0, 'run_every': 5, 'side': 'both', 'window': 5},
-        'max_execution_time': 0.5,
-        'consensus': 1,
-        'algorithms_allowed_in_consensus': ['adtk_level_shift'],
-        'run_3sigma_algorithms': True,
-        'run_before_3sigma': True,
-        'run_only_if_consensus': False,
-        'use_with': ["analyzer", "mirage"],
-        'debug_logging': False,
-    },
+        'adtk_level_shift': {
+            'namespaces': [
+                'skyline.analyzer.run_time', 'skyline.analyzer.total_metrics',
+                'skyline.analyzer.exceptions'
+            ],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/adtk_level_shift.py',
+            'algorithm_parameters': {'c': 9.0, 'run_every': 5, 'side': 'both', 'window': 5},
+            'max_execution_time': 0.5,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['adtk_level_shift'],
+            'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'use_with': ["analyzer", "mirage"],
+            'debug_logging': False,
+        },
+
 
     """
 
@@ -773,7 +776,18 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     algorithm_name, str(len(anomalies))))
 
             if len(anomalies) > 0:
-                anomaly_timestamps = list(anomalies.index.astype(np.int64) // 10**9)
+                # @modified 20260224 - Task #5628: Build v5.0.0 and test
+                #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                #                      Task #5526: Build v5.0.0 and upgrade deps
+                #                      Task #5627: v5.0.0 update dependencies
+                # Handle pandas deprecation which results in all timestamps being
+                # returned as 1.  From pandas changelog:
+                # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+                # Disallow passing a pandas type to Index.view() (GH 55709)
+                # https://github.com/pandas-dev/pandas/issues/55709
+                #anomaly_timestamps = list(anomalies.index.astype(np.int64) // 10**9)
+                anomaly_timestamps = [int(ts.value // 10**9) for ts in anomalies.index]
+
                 if realtime_analysis:
                     last_window_timestamps = [int(item[0]) for item in timeseries[-window:]]
                     # if timeseries[-1][0] in anomaly_timestamps:
@@ -932,7 +946,18 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                         current_logger.info('%s :: %s anomalies found with PersistAD on %s' % (
                             algorithm_name, str(len(persist_ad_anomalies)),
                             base_name))
-                        persist_ad_anomaly_timestamps = list(persist_ad_anomalies.index.astype(np.int64) // 10**9)
+                        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+                        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                        #                      Task #5526: Build v5.0.0 and upgrade deps
+                        #                      Task #5627: v5.0.0 update dependencies
+                        # Handle pandas deprecation which results in all timestamps being
+                        # returned as 1.  From pandas changelog:
+                        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+                        # Disallow passing a pandas type to Index.view() (GH 55709)
+                        # https://github.com/pandas-dev/pandas/issues/55709
+                        #persist_ad_anomaly_timestamps = list(persist_ad_anomalies.index.astype(np.int64) // 10**9)
+                        persist_ad_anomaly_timestamps = [int(ts.value // 10**9) for ts in persist_ad_anomalies.index]
+
                         # Convert persist_ad_anomalies dataframe to persist_ad_anomalies_list
                         persist_ad_anomalies_list = []
                         persist_ad_anomalies_dict = {}

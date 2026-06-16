@@ -146,7 +146,7 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
             the :mod:`settings.FLUX_SELF_API_KEY` or a key from
             :mod:`settings.FLUX_API_KEYS`.  Required only if tornado is being
             used.  Default is ``None``.
-        Example usage:
+        Example usage::
 
             algorithm_parameters={
                 'anomaly_window': 3,
@@ -158,6 +158,8 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
                 'debug_logging': True,
                 'return_results': True,
             }
+
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -181,8 +183,14 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {'anomalous': False, 'anomalies': [], 'matrixprofile_scores': []}
-
+    anomalyScore_list = []
+    scores = []
+    anomalies = {}
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores,
+        'matrixprofile_scores': [], 'results': {}
+    }
     current_logger = None
 
     # If you wanted to log, you can but this should only be done during
@@ -359,6 +367,14 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
         except:
             # Default to discovering 20 discords
             k_discords = 20
+
+    # @added 20250110 - Feature #4734: mirage_vortex
+    # Allow mirage_vortex to pass downsample parameter
+    downsample = True
+    try:
+        downsample = algorithm_parameters['downsample']
+    except:
+        downsample = True
 
     # @added 20240129 - Feature #5198: flux - tornado
     # Do not use flux tornado for skyline_matrixprofile if required
@@ -539,6 +555,15 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
                     current_logger.error('error :: debug_logging :: %s :: resolution failed - %s' % (
                         func_name, err))
 
+        # @added 20250110 - Feature #4734: mirage_vortex
+        # Allow mirage_vortex to pass downsample parameter
+        if not downsample:
+            if downsample_data:
+                downsample_data = False
+                if debug_logging:
+                    current_logger.debug('debug :: %s :: downsample parameter passed as False not downsampling' % (
+                        func_name))
+
         downsampled_timeseries = []
         if downsample_data:
             original_timeseries = list(timeseries)
@@ -612,6 +637,16 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
 
             # Do not reverse - after the right yssiM
             # dataset = dataset[::-1]
+            # @added 20250203 - tonight it finally dawned on me why reversing
+            # the time series worked, but was not the correct way so it was
+            # reverted but it worked.  The trigger_override was not a great
+            # method but improved no trigger_override and the TSAID made it
+            # clear as to why all that was required.  And now as to why reversed
+            # worked in the anomaly detection context.  Because the final
+            # window was evaluated as the first and when reversed to determine
+            # the result would often flag the final data point as anomalous,
+            # which is run unreversed would not, which just occurred to me this
+            # evening :)
 
             ts = np.array(dataset)
         except Exception as err:

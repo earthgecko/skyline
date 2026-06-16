@@ -87,8 +87,8 @@ def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_param
                 If ``True``, enables debug printing  (for Jupyter testing).
                 Default is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 1,
                 'interval_width': 0.99,
@@ -100,6 +100,7 @@ def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_param
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int
@@ -150,7 +151,13 @@ def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_param
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {'anomalies': [], 'prophet_scores': []}
+    anomalyScore_list = []
+    scores = []
+    results = {
+        'anomalous': False, 'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list, 'scores': scores,
+        'prophet_scores': [], 'results': {}
+    }
 
     current_logger = None
 

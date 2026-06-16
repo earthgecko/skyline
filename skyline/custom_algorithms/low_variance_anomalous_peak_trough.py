@@ -78,14 +78,15 @@ def low_variance_anomalous_peak_trough(current_skyline_app, parent_pid, timeseri
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
 
-        Example usage:
-        
+        Example usage::
+
             algorithm_parameters={
                 'anomaly_window': 4,
                 'currently_anomalous': True,
                 'debug_logging': True,
                 'return_results': True,
             }
+
 
     :type current_skyline_app: str
     :type parent_pid: int

@@ -546,6 +546,12 @@ def ks_test(current_skyline_app, X, Y, timeseries, second_order_resolution_secon
         if reference.size < 20 or probe.size < 20:
             return False
 
+        # @added 20250623 - Bug #5635: statsmodels - adfuller handle constant
+        #                   Bug #5593: statsmodels adfuller error in Analyzer
+        # Handle ValueError: Invalid input, x is constant
+        if np.all(reference == reference[0]):
+            return False
+
         ks_d, ks_p_value = scipy.stats.ks_2samp(reference, probe)
 
         if ks_p_value < 0.05 and ks_d > 0.5:
