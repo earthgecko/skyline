@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-.. _Installation: ../html/installation.html
+.. _Installation: ../latest/installation.html
 
 See the `Installation`_ page **after** reviewing the below.
 
