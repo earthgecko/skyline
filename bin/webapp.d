@@ -422,7 +422,7 @@ stop () {
     if [[ -f "$PID_PATH/${SERVICE_NAME}.pid" && $PROCESS_COUNT -gt 0 ]]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: error - failed to stop all ${SERVICE_NAME} processes and pid file remains" >> "$LOG_PATH/${SERVICE_NAME}.log"
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: error - there maybe zombies or multiple instances running" >> "$LOG_PATH/${SERVICE_NAME}.log"
-      echo "$SERVICE_NAME.d falied to stop all $SERVICE_NAME processes, there maybe zombies or multiple instances running"
+      echo "$SERVICE_NAME.d failed to stop all $SERVICE_NAME processes, there maybe zombies or multiple instances running"
       RETVAL=1
     fi
 
