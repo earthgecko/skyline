@@ -79,7 +79,7 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error(
-                'error :: slack_post_message :: falied to connect slack, err: %s' % err)
+                'error :: slack_post_message :: failed to connect slack, err: %s' % err)
             slack_post['file_uploaded'] = False
             return slack_post
 
@@ -94,7 +94,7 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
-            'error :: slack_post_message :: falied to connect slack')
+            'error :: slack_post_message :: failed to connect slack')
         # @modified 20200826 - Bug #3710: Gracefully handle slack failures
         # return False
         return slack_post
@@ -365,7 +365,7 @@ def slack_file_upload(current_skyline_app, channel, thread_ts, message, image_fi
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
-            'error :: slack_file_upload :: falied to connect slack')
+            'error :: slack_file_upload :: failed to connect slack')
         return file_uploaded
 
     if thread_ts:
