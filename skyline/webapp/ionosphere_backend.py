@@ -456,9 +456,12 @@ def ionosphere_data(
                 if re.search('mirage.redis.json', file):
                     data_file = False
                 # @added 20230707 - Feature #4988: Allow snab to return and save results
-                if re.search('^snab\..*\.results\.json', file):
+                # @modified 20260707 - Feature #4988: Allow snab to return and save results
+                #if re.search('^snab\..*\.results\.json', file):
+                if re.search('^snab\\..*\\.results\\.json', file):
                     data_file = False
-                if re.search('^snab\..*\.results\.timeseries\.json', file):
+                #if re.search('^snab\..*\.results\.timeseries\.json', file):
+                if re.search('^snab\\..*\\.results\\.timeseries\\.json', file):
                     data_file = False
                 # @added 20230728 - Feature #4988: Allow snab to return and save results
                 if file.endswith('.downsampled.json'):
@@ -542,9 +545,10 @@ def ionosphere_data(
                         if re.search('mirage.redis.json', file):
                             data_file = False
                         # @added 20230707 - Feature #4988: Allow snab to return and save results
-                        if re.search('^snab\..*\.results\.json', file):
+                        # @modified 20260707 - Feature #4988: Allow snab to return and save results
+                        if re.search('^snab\\..*\\.results\\.json', file):
                             data_file = False
-                        if re.search('^snab\..*\.results\.timeseries\.json', file):
+                        if re.search('^snab\\..*\\.results\\.timeseries\\.json', file):
                             data_file = False
                         if re.search('\\d{10}', root) and data_file:
                             metric_name = file.replace('.json', '')
@@ -986,7 +990,8 @@ def ionosphere_metric_data(
             ionosphere_json_file = str(metric_file)
 
         # @added 20230707 - Feature #4988: Allow snab to return and save results
-        if re.search('^snab\..*\.results\.json', i_file):
+        # @modified 20260707 - Feature #4988: Allow snab to return and save results
+        if re.search('^snab\\..*\\.results\\.json', i_file):
             snab_results_file = str(metric_file)
 
             # @added 20231013 - Feature #5100: snab - allow for multiple checks
@@ -2637,8 +2642,10 @@ def ionosphere_search(default_query, search_query):
             # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
-            metrics_like_query = text(metrics_like_text)
+            # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+            #metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
+            #metrics_like_query = text(metrics_like_text)
+            metrics_like_query = text("SELECT id FROM metrics WHERE metric LIKE :like_string")
 
             # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
             logger.info('metrics_like_query - "%s"' % metrics_like_query)
@@ -2659,7 +2666,9 @@ def ionosphere_search(default_query, search_query):
                     # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                     #                      Task #5628: Build v5.0.0 and test
                     #result = connection.execute(metrics_like_query, like_string=metric_like_str)
-                    result = connection.execute(metrics_like_query)
+                    # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                    #result = connection.execute(metrics_like_query)
+                    result = connection.execute(metrics_like_query, {"like_string": metric_like_str})
 
                     results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
@@ -2963,6 +2972,16 @@ def ionosphere_search(default_query, search_query):
                 fp_generation = int(row['generation'])
                 # @added 20170402 - Feature #2000: Ionosphere - validated
                 fp_validated = int(row['validated'])
+
+                # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+                # Added the fp_layers_id to align with the features_profile
+                # object created via the get_metric_profiles query and populated
+                # the enabled_list
+                fp_layers_id = int(row['layers_id'])
+                features_profile_enabled = int(row['enabled'])
+                if features_profile_enabled == 1:
+                    enabled_list.append(fp_id)
+
                 # @added 20210415 - Feature #4014: Ionosphere - inference
                 #                   Branch #3590: inference
                 motif_matched_count = int(row['motif_matched_count'])
@@ -2981,7 +3000,9 @@ def ionosphere_search(default_query, search_query):
                 # @modifed 20210415 - Feature #4014: Ionosphere - inference
                 #                     Branch #3590: inference
                 # all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated])
-                all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, motif_matched_count, motif_last_matched_human_date, motif_last_checked_human_date, motif_checked_count])
+                # @modified 20260710 - Feature #5644: ionosphere.learn_self_validation
+                # Added fp_layers_id after fp_validated
+                all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, motif_matched_count, motif_last_matched_human_date, motif_last_checked_human_date, motif_checked_count])
                 # logger.info('%s :: %s feature profiles found' % (function_str, str(len(all_fps))))
             except:
                 trace = traceback.format_exc()
@@ -2989,6 +3010,9 @@ def ionosphere_search(default_query, search_query):
                 logger.error('error :: bad row data')
         #connection.close()
         all_fps.sort(key=operator.itemgetter(int(0)))
+        logger.info('all_fps contains %s fps and of which %s are enabled' % (
+            str(len(all_fps)), str(len(enabled_list))))
+
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -3125,6 +3149,12 @@ def ionosphere_search(default_query, search_query):
     # @added 20170322 - Feature #1960: ionosphere_layers
     # Added layers information to the features_profiles items
     layers_present = False
+
+    # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+    if all_fps and apply_metric_id:
+        features_profiles = [item for item in all_fps if item[17] == 0]
+        engine_needed = False    
+        logger.info('using optimised all_fps with validated=0, %s unvalidated fps determined' % str(len(features_profiles)))
 
     if engine_needed and engine and search_query:
         try:
@@ -3475,6 +3505,10 @@ def ionosphere_search(default_query, search_query):
                 engine_disposal(engine)
             raise
 
+    # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+    if all_fps and apply_metric_id:
+        logger.info('still using optimised all_fps with validated=0, before add layer info - len(features_profiles): %s' % str(len(features_profiles)))
+
     # Add the layers information to the features_profiles list
     features_profiles_and_layers = []
     if features_profiles:
@@ -3508,6 +3542,11 @@ def ionosphere_search(default_query, search_query):
 
         # old_features_profile_list = features_profiles
         features_profiles = features_profiles_and_layers
+
+        # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+        if all_fps and apply_metric_id:
+            logger.info('after adding layers info - len(features_profiles): %s, len(features_profiles_and_layers): %s' % (
+                str(len(features_profiles)), str(len(features_profiles_and_layers))))
 
         full_duration_list = None
         # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
@@ -5097,7 +5136,11 @@ def edit_ionosphere_layers(layers_id):
 #                      Feature #2516: Add label to features profile
 # Added user
 # def validate_fp(update_id, id_column_name):
-def validate_fp(update_id, id_column_name, user_id):
+# @modified 202600705 - Feature #5644: ionosphere.learn_self_validation
+#                       Feature #5318: common_motifs
+# Added self_validated
+#def validate_fp(update_id, id_column_name, user_id):
+def validate_fp(update_id, id_column_name, user_id, self_validated=False):
     """
     Validate a single features profile or validate all enabled, unvalidated
     features profiles for a metric_id.
@@ -5106,9 +5149,11 @@ def validate_fp(update_id, id_column_name, user_id):
     :type update_id: int
     :param id_column_name: the column name to select where on, e.g. id or metric_id
     :param user_id: the user id of the user that is validating
+    :param self_validated: if this is a self validation
     :type update_id: int
     :type id_column_name: str
     :type user_id: int
+    :type self_validated: bool
     :return: tuple
     :rtype:  (boolean, str, str)
 
@@ -5220,13 +5265,22 @@ def validate_fp(update_id, id_column_name, user_id):
             #    values(validated=1, user_id=user_id))
             stmt = ionosphere_table.update().\
                 where(ionosphere_table.c.id == int(fp_id)).values(
-                    validated=1, user_id=user_id)
+                    validated=1, user_id=user_id,
+                    # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+                    #                   Feature #5318: common_motifs
+                    # Added self_validated_only
+                    self_validated=self_validated)
             with engine.begin() as connection:
                 connection.execute(stmt)
 
         if id_column_name == 'metric_id':
+
+            # @modified 20260705 - Feature #5644: ionosphere.learn_self_validation
+            #                      Feature #5318: common_motifs
+            # Added self_validated_only
+            #    values(validated=1, user_id=user_id).\
             stmt = ionosphere_table.update().\
-                values(validated=1, user_id=user_id).\
+                values(validated=1, user_id=user_id, self_validated=self_validated).\
                 where(ionosphere_table.c.metric_id == int(update_id)).\
                 where(ionosphere_table.c.validated == 0).\
                 where(ionosphere_table.c.enabled == 1)
@@ -5716,6 +5770,24 @@ def disable_features_profile_family_tree(fp_ids):
                 engine_disposal(engine)
             raise
 
+        # @added 20260708 - Feature #5572: get_all_fps
+        #                   Feature #5764: get_ionosphere_disabled_fp_ids
+        # When a fp is disabled update the ionosphere.fp_ids_with_enabled Redis
+        # hash
+        try:
+            try:
+                redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            except Exception as err:
+                logger.error('error :: %s :: get_redis_conn_decoded failed for updating ionosphere.fp_ids_with_enabled, err: %s' % (
+                    function_str, err))
+            redis_conn_decoded.hset('ionosphere.fp_ids_with_enabled', int(fp_id), 0)
+            logger.info('updated Redis has ionosphere.fp_ids_with_enabled for %s and set to 0' % (str(fp_id)))
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not update ionosphere.fp_ids_with_enabled for fp_id %s, err: %s' % (
+                str(fp_id), err))
+
         # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
         # Disable any related layers as well
         if layer_ids:
@@ -6139,7 +6211,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             result = results
 
             for row in results:
-                fp_id = str(row[0])
+                # @modified 20260607 - Task #5176: Migrate to sqlalchemy v2 API
+                #fp_id = str(row[0])
+                fp_id = str(row['id'])
                 if fp_ids == '':
                     fp_ids = '%s' % (fp_id)
                 else:
@@ -6211,8 +6285,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{python_escaped_metric_like}'"
-            metrics_like_query = text(metrics_like_text)
+            # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+            #metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{python_escaped_metric_like}'"
+            #metrics_like_query = text(metrics_like_text)
+            metrics_like_query = text("SELECT id FROM metrics WHERE metric LIKE :like_string")
 
             metric_ids_list = []
 
@@ -6232,7 +6308,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                     #                      Task #5628: Build v5.0.0 and test
                     #result = connection.execute(metrics_like_query, like_string=str(python_escaped_metric_like))
-                    result = connection.execute(metrics_like_query)
+                    # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                    #result = connection.execute(metrics_like_query)
+                    result = connection.execute(metrics_like_query, {"like_string": python_escaped_metric_like})
 
                     results = [dict(row._mapping) for row in result.fetchall()]
 
@@ -8069,14 +8147,19 @@ def get_features_profiles_to_validate(base_name):
         logger.info('fp object :: %s' % str(fps))
     except:
         trace = traceback.format_exc()
+        logger.error(trace)
         fail_msg = 'error :: %s :: error with search_ionosphere' % function_str
         logger.error(fail_msg)
         return (features_profiles_to_validate, fail_msg, trace)
     if not search_success:
         trace = traceback.format_exc()
+        logger.error(trace)
         fail_msg = 'error :: %s :: Webapp error with search_ionosphere' % function_str
         logger.error(fail_msg)
         return (features_profiles_to_validate, fail_msg, trace)
+
+    # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+    logger.info('len(enabled_list): %s' % str(len(enabled_list)))
 
     # Determine the minimum and maximum full durations from the returned fps so
     # this can be used later to determine what class of features profile is
@@ -8169,7 +8252,9 @@ def get_features_profiles_to_validate(base_name):
     # @modified 20210425 - Feature #4014: Ionosphere - inference
     # Added motif_matched_count, motif_last_matched, motif_last_checked, motif_checked_count
     for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label, motif_matched_count, motif_last_matched, motif_last_checked, motif_checked_count in fps:
-        if int(fp_parent_id) == 0:
+        # @modified 20260710 - Feature #5644: ionosphere.learn_self_validation
+        #if int(fp_parent_id) == 0:
+        if int(fp_parent_id) == 0 and int(fp_generation) == 0:
             continue
         if int(fp_validated) == 1:
             continue
@@ -8180,6 +8265,12 @@ def get_features_profiles_to_validate(base_name):
 
         parent_fp_details_object = None
         parent_parent_fp_id = None
+
+        # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+        # If this is a learnt fp use it's own id
+        if int(fp_parent_id) == 0 and int(fp_generation) > 0:
+            fp_parent_id = int(fp_id)
+
         try:
             parent_fp_details, success, fail_msg, trace, parent_fp_details_object = features_profile_details(fp_parent_id)
         except:
@@ -8216,7 +8307,6 @@ def get_features_profiles_to_validate(base_name):
             logger.error('error :: %s :: failed to get parent_parent_fp_id from parent_fp_details_object[\'parent_id\'] - %s' % (
                 function_str, err))
             parent_parent_fp_id = 0
-
         logger.debug('debug :: ionosphere_backend :: get_features_profiles_to_validate :: parent_parent_fp_id: %s' % str(parent_parent_fp_id))
 
         if int(parent_parent_fp_id) == 0:
@@ -8280,6 +8370,30 @@ def get_features_profiles_to_validate(base_name):
         fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
             str(fp_data_dir), base_name, get_hours)
 
+        # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+        image_file = '%s/%s.graphite_now.%sh.png' % (
+            str(fp_data_dir), base_name, get_hours)
+        if not path.isfile(image_file):
+            image_file = '%s/%s.mirage.graphite.%sh.png' % (
+                str(fp_data_dir), base_name, get_hours)
+            if path.isfile(image_file):
+                fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.mirage.graphite.%sh.png' % (
+                    str(fp_data_dir), base_name, get_hours)
+                fp_graph_uri = str(fp_learn_graph_uri)
+            else:
+                # Handle labelled_metrics
+                image_file = None
+                for root, dirs, files in walk(fp_data_dir):
+                    for i_file in files:
+                        if i_file.startswith('labelled_metrics.'):
+                            if i_file.endswith('.matplotlib.png'):
+                                image_file = str(i_file)
+                                break
+                if image_file:
+                    fp_learn_graph_uri = 'ionosphere_images?image=%s/%s' % (
+                        fp_data_dir, image_file)
+                    fp_graph_uri = str(fp_learn_graph_uri)
+
         # For this is a LEARNT feature profile at settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
         # the we want to compare the graph to the parent's parent graph at
         # settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
@@ -8330,6 +8444,30 @@ def get_features_profiles_to_validate(base_name):
             # str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
             str(parent_fp_data_dir), base_name, get_hours)
 
+        # @added 20260710 - Feature #5644: ionosphere.learn_self_validation
+        if fp_id == fp_parent_id:
+            learnt_image_file = '%s/%s.common_motifs.pw5_timeseries.png' % (
+                str(fp_data_dir), base_name)
+            if path.isfile(learnt_image_file):
+                parent_fp_learn_graph_uri = 'ionosphere_images?image=%s' % (
+                    learnt_image_file)
+                parent_fp_graph_uri = str(parent_fp_learn_graph_uri)
+                parent_full_duration = (86400 * 7) * 5
+            else:
+                learnt_image_file = None
+            if not learnt_image_file:
+                # Handle LEARNT - repetitive pattern
+                for root, dirs, files in walk(fp_data_dir):
+                    for i_file in files:
+                        if i_file.endswith('.graphite_now.720h.png'):
+                            learnt_image_file = str(i_file)
+                            break
+                if learnt_image_file:
+                    parent_fp_learn_graph_uri = 'ionosphere_images?image=%s/%s' % (
+                        fp_data_dir, learnt_image_file)
+                    parent_fp_graph_uri = str(parent_fp_learn_graph_uri)
+                    parent_full_duration = (86400 * 7) * 4
+
         # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
         # Added parent_fp_generation
         parent_fp_generation = parent_fp_details_object['generation']
@@ -8339,7 +8477,13 @@ def get_features_profiles_to_validate(base_name):
         # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
         # Added fp_generation and parent_fp_generation
         if fp_id in enabled_list:
-            features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration, fp_generation, parent_fp_generation])
+            features_profiles_to_validate.append([
+                fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,
+                fp_parent_id, parent_full_duration, parent_anomaly_timestamp,
+                fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri,
+                parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri,
+                minimum_full_duration, maximum_full_duration, fp_generation,
+                parent_fp_generation])
 
     logger.info('%s :: features_profiles_to_validate - %s' % (
         function_str, str(features_profiles_to_validate)))
@@ -9296,8 +9440,13 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                 # @added 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                 #                   Task #5628: Build v5.0.0 and test
                 #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-                metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{namespace_like}'"
-                metrics_like_query = text(metrics_like_text)
+                # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                #metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{namespace_like}'"
+                # @modified 20260622 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                #metrics_like_query = text(metrics_like_text)
+                metrics_like_query = text("SELECT id FROM metrics WHERE metric LIKE :like_string")
 
                 #connection = engine.connect()
                 # @modified 20200425 - Ideas #2476: Label and relate anomalies
@@ -9310,7 +9459,10 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                     # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                     #                      Task #5628: Build v5.0.0 and test
                     #result = connection.execute(metrics_like_query, like_string=str(namespace_like))
-                    result = connection.execute(metrics_like_query)
+                    # @modified 20260622 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query)
+                    result = connection.execute(metrics_like_query, {'like_string': namespace_like})
                     results = [dict(row._mapping) for row in result.fetchall()]
 
                 for row in results:
@@ -9725,6 +9877,22 @@ def expected_features_profiles_dirs():
                         metric = metrics[metric_id]['metric']
                     except KeyError:
                         metric = None
+
+                    # @added 20260708 - Bug #5707: create_features_profile - no metric id from DB
+                    fp_row = {}
+                    if not metric and metric_id == 0:
+                        try:
+                            fp_row = get_ionosphere_fp_db_row(skyline_app, fp_id)
+                        except Exception as err:
+                            logger.err('error :: expected_features_profiles_dirs :: get_ionosphere_fp_db_row failed, err: %s' % (err))
+                        if fp_row:
+                            try:
+                                metric_id = fp_row['metric_id']
+                                logger.info('expected_features_profiles_dirs :: determined metric_id from get_ionosphere_fp_db_row, metric_id: %s, fp_id: %s' % (
+                                    str(metric_id), str(fp_id)))
+                            except KeyError:
+                                metric_id = 0
+
                     # @modified 20260211 - Bug #5707: create_features_profile - no metric id from DB
                     #if not metric:
                     if not metric and metric_id:
@@ -9754,6 +9922,25 @@ def expected_features_profiles_dirs():
                     fp_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(timestamp))
+
+                    # @added 20260708 - Bug #5707: create_features_profile - no metric id from DB
+                    # Do not add the fp if there is no directory for the fp
+                    if not path.isdir(fp_dir):
+
+                        fp_enabled = fps[fp_id]['enabled']
+                        if fp_row:
+                            fp_enabled = fp_row['enabled']
+                        if fp_enabled == 0:
+                            logger.warning('warning :: expected_features_profiles_dirs :: fp_id: %s, fp_dir does not exist: %s' % (
+                                str(fp_id), str(fp_dir)))
+                            continue
+                        else:
+                            logger.debug('debug :: expected_features_profiles_dirs :: fp_id: %s, fp_dir does not exist: %s, fps[fp_id]["enabled"]: %s' % (
+                                str(fp_id), str(fp_dir), str(fps[fp_id]['enabled'])))
+                            if fp_row:
+                                logger.debug('debug :: expected_features_profiles_dirs :: fp_id: %s, fp_dir does not exist: %s, fp_row["enabled"]: %s' % (
+                                    str(fp_id), str(fp_dir), str(fp_row['enabled'])))
+
                     # @modified 20220503 - Feature #3890: metrics_manager - sync_cluster_files
                     # Use a str for jsonify
                     # features_profile_dirs_dict[fp_id] = fp_dir

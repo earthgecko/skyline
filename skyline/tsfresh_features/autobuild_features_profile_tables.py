@@ -32,7 +32,9 @@ import sqlalchemy
 from sqlalchemy import (
     create_engine, Column, Table, Integer, MetaData)
 from sqlalchemy.dialects.mysql import DOUBLE
-from sqlalchemy.sql import select
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added insert
+from sqlalchemy.sql import select, insert
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.join(os.path.dirname(os.path.realpath(current_dir)))
@@ -57,12 +59,24 @@ if __name__ == '__main__':
     tables_created = 0
 
     def get_engine():
+
+        # @added 20260628 - Feature #5757: DB TLS/SSL support
+        PANORAMA_DB_SSL = {}
+        if getattr(settings, 'PANORAMA_DB_SSL', {}):
+            PANORAMA_DB_SSL = getattr(settings, 'PANORAMA_DB_SSL', {})
+            if len(PANORAMA_DB_SSL) > 0:
+                if 'use_pure' not in PANORAMA_DB_SSL.keys():
+                    PANORAMA_DB_SSL['use_pure'] = True
+
         try:
             engine = create_engine(
                 'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (
                     settings.PANORAMA_DBUSER, settings.PANORAMA_DBUSERPASS,
                     settings.PANORAMA_DBHOST, str(settings.PANORAMA_DBPORT),
-                    settings.PANORAMA_DATABASE))
+                    settings.PANORAMA_DATABASE),
+                    # @added 20260621 - Feature #5757: DB TLS/SSL support
+                    connect_args=PANORAMA_DB_SSL,
+            )
             return engine, 'got MySQL engine', 'none'
         except:
             print('error :: DB engine not obtained')
@@ -85,10 +99,21 @@ if __name__ == '__main__':
     # get all fp ids and metric ids from ionosphere table
     fps_data = []
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id > 0)
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id > 0)
+        stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id > 0)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
+
             if row['enabled'] != 1:
                 continue
             if row['deleted'] == 1:
@@ -97,7 +122,7 @@ if __name__ == '__main__':
             metric_id = row['metric_id']
             anomaly_timestamp = row['anomaly_timestamp']
             fps_data.append([int(fp_id), int(metric_id), int(anomaly_timestamp)])
-        connection.close()
+        #connection.close()
     except:
         print('Failed to get ionosphere data from the database')
 
@@ -109,14 +134,24 @@ if __name__ == '__main__':
     # get all fp ids and metric ids from ionosphere table
     ionosphere_metrics_data = []
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.ionosphere_enabled > 0)
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.ionosphere_enabled > 0)
+        stmt = select(metrics_table).where(metrics_table.c.ionosphere_enabled > 0)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
+
             metric_id = row['id']
             metric = row['metric']
             ionosphere_metrics_data.append([int(metric_id), str(metric)])
-        connection.close()
+        #connection.close()
     except:
         print('Failed to get metrics data from the database')
 
@@ -223,9 +258,14 @@ if __name__ == '__main__':
                 continue
 
             try:
-                connection = engine.connect()
-                connection.execute(fp_metric_table.insert(), insert_statement)
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(fp_metric_table.insert(), insert_statement)
+                #connection.close()
+                with engine.begin() as connection:
+                    connection.execute(insert(fp_metric_table), insert_statement)
+
                 print('create_features_profile :: fp_id - %s - feature values inserted into %s' % (str(fp_id), fp_table_name))
             except:
                 print(traceback.format_exc())
@@ -284,7 +324,7 @@ if __name__ == '__main__':
                     new_datapoint = [str(int(datapoint[0])), float(datapoint[1])]
                     validated_timeseries.append(new_datapoint)
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 except:  # nosec
                     continue
 
@@ -292,9 +332,14 @@ if __name__ == '__main__':
             for ts, value in validated_timeseries:
                 insert_statement.append({'fp_id': fp_id, 'timestamp': ts, 'value': value},)
             try:
-                connection = engine.connect()
-                connection.execute(ts_metric_table.insert(), insert_statement)
-                connection.close()
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #connection.execute(ts_metric_table.insert(), insert_statement)
+                #connection.close()
+                with engine.begin() as connection:
+                    connection.execute(insert(ts_metric_table), insert_statement)
+
                 print('create_features_profile :: fp_id - %s - timeseries inserted into %s' % (str(fp_id), ts_table_name))
             except:
                 print(traceback.format_exc())

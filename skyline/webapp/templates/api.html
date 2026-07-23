@@ -23,6 +23,7 @@
     it is only referenced if Skyline is running in clustered mode, if not it is simply ignored.<br>
     If any below API methods do not have it specified it means that each individual node of the cluster has to be queried
     for that method.<br>
+	Not all API methods are documented here, this is only a selection of some methods.<br>
 
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?airgapped_metrics</span></span></h4>
   		  <table class="table table-hover">
@@ -2277,7 +2278,10 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		      <tr>
   		        <td>Description:</td>
   		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) as a json object.
-              Optionally you can filter on namepsace elements and remove the FULL_NAMESPACE</td>
+              Optionally you can filter on namepsace elements and remove the FULL_NAMESPACE.  Only Redis (dotted namespace)
+			  metrics are returned, RedisTimeseries (Prometheus/VictorMetrics/labelled_metrcis) are not returned by this
+			  method.
+				</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>

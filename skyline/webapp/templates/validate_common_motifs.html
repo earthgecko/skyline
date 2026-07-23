@@ -101,6 +101,13 @@
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
   		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">common_motifs features profiles to validate</span></span></h4>
+        <br>
+        Make sure that you periodically review the autonomously learnt and self validated features profiles by setting the <code>self_validated_only</code> to <code>true</code>
+        and setting the approriate dates since the last review in the search options.  Although very rare, incorrect patterns are learnt occassionally , whether that be contextually incorrect or
+        just plain incorrect, it does happen.
+        <br>
+        <center><strong><code>REVIEW AUTONOMOUSLY LEARNT AND SELF VALDIATED PATTERNS PERIODICALLY.</code></strong></center>
+        <br>
   {% if limited_common_motifs_fps|length > 0 %}
     {% if version == dev_ver %}
         <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#search_options">Show search options</button>
@@ -147,6 +154,13 @@
   		      <tr>
                 <td>limit</td>
                 <td><input type="number" name="limit" min="0" max="100" value="15" /> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+                <td>self_validated_only</td>
+                <td><select name="self_validated_only">
+                  <option value="false">false</option>
+                  <option value="true">true</option>
+                </select> return only self_validated fps <strong><code>REVIEW AUTONOMOUSLY LEARNT AND SELF VALDIATED PATTERNS PERIODICALLY.</code></strong></td>
   		      </tr>
   		      <tr>
   		        <td>Show graphs</td>
@@ -212,6 +226,12 @@
     {% else %}
       {% set use_metric = limited_common_motifs_fps[fp_id]['metric'] %}
     {% endif %}
+    {% if limited_common_motifs_fps[fp_id]['self_validated'] %}
+      {% set validated_button_label = 'SELF_VALIDATED' %}
+    {% else %}
+      {% set validated_button_label = 'VALIDATED' %}
+    {% endif %}
+
           <tr>
             <td onclick="window.location='?fp_view=true&fp_id={{ fp_id }}&metric={{ use_metric }}'">
               <a href="?fp_view=true&fp_id={{ fp_id }}&metric={{ use_metric }}">{{ fp_id }}</a>
@@ -234,7 +254,7 @@
               <button type="button">Validate</button></a>
             {% endif %}
             {% if state == 'validated' %}
-              <button type="button" disabled><span class="logo"><span class="sky"></span>VALIDATED</span></span></button></a>
+              <button type="button" disabled><span class="logo"><span class="sky"></span>{{ validated_button_label }}</span></span></button></a>
             {% endif %}
             {% if state == 'invalid' %}
             <button type="button" disabled><span class="logo"><span class="re"></span>INVALID</span></span></button></a>

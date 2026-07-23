@@ -197,8 +197,10 @@ def submit_crucible_job(
 
                 # @added 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                 #                      Task #5628: Build v5.0.0 and test
-                metrics_like_text = f"SELECT metric FROM metrics WHERE metric LIKE '{namespace}'"
-                metrics_like_query = text(metrics_like_text)
+                # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                #metrics_like_text = f"SELECT metric FROM metrics WHERE metric LIKE '{namespace}'"
+                #metrics_like_query = text(metrics_like_text)
+                metrics_like_query = text("""SELECT metric FROM metrics WHERE metric LIKE :like_string""")
 
                 # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
                 #                      Task #5628: Build v5.0.0 and test
@@ -209,7 +211,9 @@ def submit_crucible_job(
                     # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                     #                      Task #5628: Build v5.0.0 and test
                     #result = connection.execute(metrics_like_query, like_string=str(namespace))
-                    result = connection.execute(metrics_like_query)
+                    # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                    #result = connection.execute(metrics_like_query)
+                    result = connection.execute(metrics_like_query, {"like_string": namespace})
 
                     results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
