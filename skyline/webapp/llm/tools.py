@@ -23,6 +23,7 @@ import logging
 import os
 import time
 import traceback
+import builtins
 from datetime import datetime, timezone
 
 # @added 20260308
@@ -124,6 +125,14 @@ def tool_query_db(timestamp, llm_model, tool_call_id, sql):
         return {'error': 'Multiple statements are not permitted.'}
 
 
+    # @added 20260628 - Feature #5757: DB TLS/SSL support
+    PANORAMA_DB_SSL = {}
+    if getattr(settings, 'PANORAMA_DB_SSL', {}):
+        PANORAMA_DB_SSL = getattr(settings, 'PANORAMA_DB_SSL', {})
+        if len(PANORAMA_DB_SSL) > 0:
+            if 'use_pure' not in PANORAMA_DB_SSL.keys():
+                PANORAMA_DB_SSL['use_pure'] = True
+
     try:
         # @modified 20260308 -  - Task #5709: POC LLM integration
         # Use read-only user and engine
@@ -140,7 +149,10 @@ def tool_query_db(timestamp, llm_model, tool_call_id, sql):
                 'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (
                     settings.LLM_DBUSER, settings.LLM_DBUSERPASS,
                     settings.PANORAMA_DBHOST, str(settings.PANORAMA_DBPORT),
-                    settings.PANORAMA_DATABASE))
+                    settings.PANORAMA_DATABASE),
+                    # @added 20260628 - Feature #5757: DB TLS/SSL support
+                    connect_args=PANORAMA_DB_SSL,
+                )
             readonly_engine = engine.execution_options(isolation_level='AUTOCOMMIT')
         except Exception as err:
             trace = traceback.format_exc()
@@ -200,6 +212,8 @@ The last row is:
 {last_row}
 
 """
+
+        logger.info(f"tools.tool_query_db query - message: {message}")
         results = {
             'timestamp': timestamp,
             'tool': 'tool_query_db',
@@ -238,7 +252,7 @@ def tool_query_dataframes(
     :return: dict with 'columns' list and 'rows' list of dicts, or 'error'
     :rtype: dict
     """
-    logger.info('tools.tool_query_db called')
+    logger.info(f"tools.tool_query_dataframes called with dataframes_query: {dataframes_query}")
 
     # Blocklist dangerous builtins and OS access
     BLOCKED_TERMS = [
@@ -286,7 +300,7 @@ def tool_query_dataframes(
             return {'error': 'bad dataframes_query'}
         if not one_df_operation:
             if 'df2' not in str(dataframes_query):
-                logger.error('error :: tools.tool_query_dataframes - bad dataframes_query no df1 declared')
+                logger.error('error :: tools.tool_query_dataframes - bad dataframes_query no df2 declared')
                 return {'error': 'bad dataframes_query'}
 
         for term in BLOCKED_TERMS:
@@ -307,15 +321,25 @@ def tool_query_dataframes(
             except Exception as err:
                 logger.error(f"error :: tools.tool_query_dataframes - pandas failed to load {full_hashed_csv_file}, err: {err}")
         if not one_df_operation:
-            if len(dataframes) == 2:
+            #if len(dataframes) == 2:
+            if len(dataframes) != 2:
                 logger.error('error :: tools.tool_query_dataframes - 2 dataframes were not loaded')
                 return {'error': '2 dataframes were not loaded'}
+
+        SAFE_BUILTINS = {k: getattr(builtins, k) for k in [
+            'len', 'range', 'enumerate', 'zip', 'map', 'filter',
+            'min', 'max', 'sum', 'abs', 'round', 'sorted', 'list',
+            'dict', 'set', 'tuple', 'str', 'int', 'float', 'bool',
+            'isinstance', 'type', 'print', 'repr',
+        ]}
+        safe_globals = {'__builtins__': SAFE_BUILTINS}
+
 
         results = None
         try:
             # Only expose df1, df2 and pandas to the eval context
             # Nothing else from the environment is accessible
-            safe_globals = {'__builtins__': {}}
+            #safe_globals = {'__builtins__': {}}
             if one_df_operation:
                 safe_locals = {
                     'df1': df1,
@@ -332,15 +356,23 @@ def tool_query_dataframes(
             logger.error(f"error :: tools.tool_query_dataframes - dataframes_query failed, err: {err}")
             return {'error': 'dataframe_query failed: %s' % str(err)}
         if not isinstance(results, pd.DataFrame):
-            logger.error('error :: tools.tool_query_dataframes - result is not a DataFrame')
+            results_type = type(results)
+            logger.error('error :: tools.tool_query_dataframes - result is not a DataFrame, it is type: %s' % (
+                str(results_type)))
             return {'error': 'query must return a DataFrame'}
         MAX_RESULT_ROWS = 100000
         if len(results) > MAX_RESULT_ROWS:
             logger.warning('tools.tool_query_dataframes - truncating results from %s to %s rows' % (len(results), MAX_RESULT_ROWS))
             results = results.head(MAX_RESULT_ROWS)
 
+        if isinstance(results, pd.DataFrame):
+            df = results.map(lambda x: _safe_json(x) if isinstance(x, str) else x)
+        else:
+            json_safe_results = _safe_json(results)
+            df = pd.DataFrame(json_safe_results)
+
         json_safe_results = _safe_json(results)
-        df = pd.DataFrame(json_safe_results)
+
         results_csv_filename = '%s.%s.csv' % (str(timestamp), str(tool_call_id))
         secret_results_csv_filename = '%s.%s' % (
             str(SECRET_STRING), results_csv_filename)
@@ -382,8 +414,133 @@ The last row is:
         return results
 
     except Exception as err:
-        logger.error(f"error :: tools.tool_query_db, err: {err}")
+        logger.error(f"error :: tools.tool_query_dataframes, err: {err}")
         return {'error': 'DB query failed: %s' % str(err)}
+
+
+def tool_skyline_dirs_and_files(timestamp, llm_model, tool_call_id):
+
+    exclude_dirs = [
+        'fontawesome', 'bootstrap', 'webapp/static', '.bak', '__pycache__',
+        '_build', '_static'
+    ]
+    exclude_docs_dirs = exclude_dirs + [
+        'images', 'deprecated-docs', 'development', 'releases',
+        'thunder', 'upgrading'
+    ]
+
+    exclude_files = ['.bak', '.pyc', 'settings.py', 'settings']
+
+    baseline_dir = os.path.dirname(os.path.realpath(__file__))
+    webapp_dir = os.path.dirname(baseline_dir)
+    skyline_dir = os.path.dirname(webapp_dir)
+    skyline_docs_dir = f"{os.path.dirname(skyline_dir)}/docs"
+
+    dirs_tree = ''
+    for root, dirs, files in os.walk(skyline_docs_dir):
+        exclude = False
+        for exclude_dir in exclude_docs_dirs:
+            if exclude_dir in root:
+                exclude = True
+                break
+        if exclude:
+            continue
+        # Determine indentation level
+        #level = root.replace(skyline_dir, '').count(os.sep)
+        level = 1
+        indent = ' ' * 4 * level
+        if dirs_tree == '':
+            dirs_tree = f"{indent}{root}/"
+        else:
+            dirs_tree = f"{dirs_tree}\n{indent}{root}/"
+        sub_indent = ' ' * 4 * (level + 1)
+        for f in files:
+            exclude = False
+            for exclude_file in exclude_files:
+                if exclude_file in f:
+                    exclude = True
+                    break
+            # Exclude autoautomodule files
+            if f.startswith('skyline.'):
+                exclude = True
+            if not f.endswith('.rst'):
+                exclude = True
+            if exclude:
+                continue
+            dirs_tree = f"{dirs_tree}\n{sub_indent}{f}"
+
+    for root, dirs, files in os.walk(skyline_dir):
+        exclude = False
+        for exclude_dir in exclude_dirs:
+            if exclude_dir in root:
+                exclude = True
+                break
+        if exclude:
+            continue
+        # Determine indentation level
+        #level = root.replace(skyline_dir, '').count(os.sep)
+        level = 1
+        indent = ' ' * 4 * level
+        if dirs_tree == '':
+            dirs_tree = f"{indent}{root}/"
+        else:
+            dirs_tree = f"{dirs_tree}\n{indent}{root}/"
+        sub_indent = ' ' * 4 * (level + 1)
+        for f in files:
+            exclude = False
+            for exclude_file in exclude_files:
+                if exclude_file in f:
+                    exclude = True
+                    break
+            if exclude:
+                continue
+            dirs_tree = f"{dirs_tree}\n{sub_indent}{f}"
+    return {
+        'timestamp': timestamp,
+        'tool': 'tool_skyline_dirs_and_files',
+        'tool_call_id': tool_call_id,
+        'skyline_dir_tree': dirs_tree
+    }
+
+
+def tool_cat_file(file, timestamp, llm_model, tool_call_id):
+    """
+    Return the current unix timestamp and a human-readable UTC string.
+    No external dependencies - always safe to call.
+    """
+    text = None
+    baseline_dir = os.path.dirname(os.path.realpath(__file__))
+    webapp_dir = os.path.dirname(baseline_dir)
+    skyline_dir = os.path.dirname(webapp_dir)
+    skyline_docs_dir = f"{os.path.dirname(skyline_dir)}/docs"
+    allowed_dirs = [skyline_dir, skyline_docs_dir]
+
+    allowed_file = False
+    for allowed_dir in allowed_dirs:
+        if allowed_dir in str(file):
+            allowed_file = True
+    if not allowed_file:
+        return {
+            'timestamp': timestamp,
+            'tool': 'tool_cat_file',
+            'tool_call_id': tool_call_id,
+            'file': file,
+            'contents': None,
+            'reason': 'file not in Skyline path',
+        }
+
+    with open(file, 'r') as f:
+        text = f.read()
+
+    return {
+        'timestamp': timestamp,
+        'tool': 'tool_cat_file',
+        'tool_call_id': tool_call_id,
+        'file': file,
+        'contents': text,
+        'reason': 'file exists in Skyline path',
+    }
+
 
 # ---------------------------------------------------------------------------
 # Dispatch table - maps tool name strings to functions
@@ -403,6 +560,8 @@ TOOL_DISPATCH = {
 #    'get_ionosphere_matches':   lambda args: tool_get_ionosphere_matches(**args),
 #    'get_comments':             lambda args: tool_get_comments(**args),
 #    'get_related_metrics':      lambda args: tool_get_related_metrics(**args),
+    'cat_file':                  lambda args: tool_cat_file(**args),
+    'skyline_dirs_and_files':    lambda args: tool_skyline_dirs_and_files(**args),
 }
 
 

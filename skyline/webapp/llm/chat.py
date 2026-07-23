@@ -190,7 +190,7 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
     # Append the new user message
     history.append({'role': 'user', 'content': user_message})
 
-    logger.info(f"run_chat_turn :: history: {str(history)}")
+    #logger.info(f"run_chat_turn :: history: {str(history)}")
 
     tool_calls_made = []
     final_response = None
@@ -202,6 +202,9 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
     max_tool_iterations = getattr(settings, 'LLM_MAX_TOOL_ITERATIONS', 8)
     #max_tool_iterations = 4
 
+    # @added 20260628 - Task #5709: POC LLM integration
+    tools_reasoning_content = []
+
     final_call = False
     remaining_tool_calls = int(max_tool_iterations)
     try:
@@ -210,8 +213,8 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
             # Build the messages list: system prompt + conversation history
             messages = [{'role': 'system', 'content': SYSTEM_PROMPT}] + history
 
-            logger.info(f"run_chat_turn :: calling with max_tokens: {max_tokens}")
-            logger.info(f"run_chat_turn :: messages: {messages}")
+            logger.info(f"run_chat_turn :: making tool call number {iteration + 1} with max_tokens: {max_tokens}")
+            #logger.info(f"run_chat_turn :: messages: {messages}")
 
             # Call the LLM via LiteLLM
             response = litellm.completion(
@@ -237,6 +240,14 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
             # Convert to a plain dict for storage in history
             assistant_dict = {'role': 'assistant', 'content': assistant_message.content}
 
+            # @added 20260628 - Task #5709: POC LLM integration
+            # Add reasoning/thinking to the output to allow the user to review
+            # and validate the thinking and ensure no hallucinations or
+            # incorrect columns, etc are being used
+            reasoning_content = getattr(assistant_message, 'reasoning_content', None)
+            if reasoning_content:
+                tools_reasoning_content.append(reasoning_content)
+
             # Check if the LLM wants to call tools
             tool_calls = getattr(assistant_message, 'tool_calls', None)
 
@@ -255,11 +266,11 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
                         # prompt on the next turn, because the LLM will have no
                         # issue believing that it followed instructions and
                         # behaved as instructed, that is coherent.
-                        strict = "\n\nI can only answer questions about the data.  Do you have a question about the data?"
+                        strict = "\n\nI can only answer questions about the data and Skyline itself.  Do you have a question about the data or Skyline?"
                         strict_assistant_message_content = assistant_message.content + strict
                         assistant_dict = {'role': 'assistant', 'content': strict_assistant_message_content}
-                        #final_response = assistant_message.content or ''
-                        #final_response = final_response + f"\n{strict}" + f"\n\ntoken_usage: {total_usage}"
+                        final_response = assistant_message.content or ''
+                        final_response = final_response + f"\n{strict}" + f"\n\ntoken_usage: {total_usage}"
 
                 history.append(assistant_dict)
 
@@ -271,7 +282,7 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
                 final_response = final_response + f"\n\ntoken_usage: {total_usage}"
                 break
 
-            if iteration == max_tool_iterations:
+            if iteration == (max_tool_iterations - 1):
                 # Reached iteration limit - return whatever we have
                 final_call = True
                 if final_call:
@@ -354,7 +365,9 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
                 if remaining_tool_calls <= 2:
                     if 'message' in tool_result:
                         use_message = str(tool_result['message']) + f"\nThere are only {remaining_tool_calls} tool calls left to be made consider finalising with what you know."
-                        tool_result['message'] = use_message
+                    else:
+                        use_message = f"There are only {remaining_tool_calls} tool calls left to be made consider finalising with what you know."
+                    tool_result['message'] = use_message
 
                 # Append tool result to history in the format LiteLLM expects
                 history.append({
@@ -380,6 +393,14 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
         error = 'LLM chat failed: %s' % str(err)
         logger.error('error :: llm chat failed: %s' % traceback.format_exc())
 
+    if final_response is None:
+        try:
+            final_response = assistant_message.content
+            final_response = final_response + f"\n\ntoken_usage: {total_usage}"
+        except Exception as err:
+            error = 'LLM chat failed to interpolate a final response: %s' % str(err)
+            logger.error('error :: llm chat failed to interpolate a final response: %s' % traceback.format_exc())
+
     return {
         'response': final_response,
         'updated_history': history,
@@ -387,4 +408,10 @@ def run_chat_turn(provider_llm_model, llm_model, user_message, history, settings
         'error': error,
         'results_csv': results_csv,
         'query_results_csvs': query_results_csvs,
+        # @added 20260628 - Task #5709: POC LLM integration
+        # Add reasoning/thinking to the output to allow the user to review
+        # and validate the thinking and ensure no hallucinations or
+        # incorrect columns, etc are being used
+        'tools_reasoning_content': tools_reasoning_content,
+        'llm_model': llm_model,
     }
