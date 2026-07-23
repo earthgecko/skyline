@@ -12,6 +12,7 @@
 # @modified 20220422 - Task #4452: Update dependencies
 # @modified 20241105 - Task #5525: Python 3.10 - update dependencies
 # @modified 20260212 - Task #5627: v5.0.0 update dependencies
+# @modified 20260723 - Task #5627: v5.0.0 update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 
@@ -695,7 +696,9 @@ pyparsing==3.3.2
 #Pillow==11.3.0
 # @modified 20260616 - Task #5627: v5.0.0 update dependencies
 # Pillow==12.1.1
-Pillow==12.2.0
+# @modified 20260723 - Task #5627: v5.0.0 update dependencies
+#Pillow==12.2.0
+Pillow==12.3.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
