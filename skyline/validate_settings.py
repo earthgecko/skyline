@@ -284,7 +284,6 @@ def validate_settings_variables(current_skyline_app):
         'PICKLE_PORT': int,
         'PID_PATH': str,
         'PLOT_REDIS_DATA': bool,
-        'PROMETHEUS_SETTINGS': dict,
         'REDIS_PASSWORD': str,
         'REDIS_SOCKET_PATH': str,
         'REMOTE_SKYLINE_INSTANCES': list,
@@ -2721,18 +2720,6 @@ def validate_settings_variables(current_skyline_app):
         invalid_variables = True
     except Exception as e:
         print('error :: BATCH_METRICS_CUSTOM_FULL_DURATIONS is not defined in settings.py - %s' % e)
-        invalid_variables = True
-
-    settings_tested.append('PROMETHEUS_SETTINGS')
-    try:
-        if not isinstance(settings.PROMETHEUS_SETTINGS, dict):
-            print('error :: PROMETHEUS_SETTINGS in settings.py is not a dict')
-            invalid_variables = True
-    except AttributeError:
-        print('error :: PROMETHEUS_SETTINGS is not defined in settings.py')
-        invalid_variables = True
-    except Exception as e:
-        print('error :: PROMETHEUS_SETTINGS is not defined in settings.py - %s' % e)
         invalid_variables = True
 
     for setting in list(settings_types.keys()):

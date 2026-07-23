@@ -518,7 +518,7 @@ def get_external_alert_configs(current_skyline_app):
                 str(len(external_boundary_metrics)), redis_key))
         except Exception as err:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: get_external_alert_configs :: failed to set %s' % (
+            current_logger.error('error :: get_external_alert_configs :: failed to set %s, err: %s' % (
                 redis_key, err))
 
     return (external_alert_configs, external_from_cache, internal_alert_configs, internal_from_cache, all_alerts, all_from_cache)

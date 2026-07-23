@@ -267,6 +267,14 @@ if __name__ == '__main__':
 
             # Convert the timeseries to csv
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    print('error :: failed to replace nan with None, err: %s' % (
+                        err))
+
             timeseries = literal_eval(timeseries_array_str)
 
             datapoints = timeseries

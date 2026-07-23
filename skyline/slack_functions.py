@@ -6,6 +6,8 @@ These are shared slack functions that are required in multiple modules.
 import os
 import logging
 import traceback
+# @added 20250403 - Task #5344: Migrate slack files.upload method
+import re
 
 import settings
 
@@ -22,7 +24,10 @@ except:
 if slack_version == '1.3':
     from slackclient import SlackClient
 else:
-    from slack import WebClient
+    # @modified 20250305 - Task #5344: Migrate slack files.upload method
+    #from slack import WebClient
+    from slack_sdk import WebClient
+    from time import time, sleep
 
 token = settings.SLACK_OPTS['bot_user_oauth_access_token']
 try:
@@ -36,6 +41,17 @@ try:
     default_channel = settings.SLACK_OPTS['default_channel']
 except:
     default_channel = 'general'
+
+# @added 20250304 - Task #5344: Migrate slack files.upload method
+# The new slack_sdk files_upload_v2 method does not handle channel names,
+# channel ids must be used
+try:
+    default_channel = settings.SLACK_OPTS['default_channel']
+    default_channel_id = settings.SLACK_OPTS['default_channel_id']
+except:
+    default_channel = None
+    default_channel_id = None
+
 
 # @modified 20240729 - Feature #5418: slack_post_message - image_file parameter
 # Added image_file parameter
@@ -71,10 +87,18 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
             use_slack_file_upload = True
     if use_slack_file_upload:
         try:
-            uploaded = slack_file_upload(current_skyline_app, channel, thread_ts, message, image_file=image_file)
-            if uploaded:
+            # @modified 20250403 - Task #5344: Migrate slack files.upload method
+            # Made slack_file_upload return the slack_thread_ts instead of True
+            #uploaded = slack_file_upload(current_skyline_app, channel, thread_ts, message, image_file=image_file)
+            #if uploaded:
+            slack_thread_ts = slack_file_upload(current_skyline_app, channel, thread_ts, message, image_file=image_file)
+            if slack_thread_ts:
                 slack_post['ok'] = True
                 slack_post['file_uploaded'] = True
+                # @added 20250403 - Task #5344: Migrate slack files.upload method
+                # Return the slack_thread_ts
+                slack_post['slack_thread_ts'] = slack_thread_ts
+
                 return slack_post
         except Exception as err:
             current_logger.error(traceback.format_exc())
@@ -375,21 +399,115 @@ def slack_file_upload(current_skyline_app, channel, thread_ts, message, image_fi
     if not channel:
         channel = default_channel
 
+    # @added 20250304 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        default_channel = settings.SLACK_OPTS['default_channel']
+        default_channel_id = settings.SLACK_OPTS['default_channel_id']
+    except:
+        default_channel = None
+        default_channel_id = None
+    try:
+        channel_ids = settings.SLACK_OPTS['channel_ids']
+    except:
+        channel_ids = {}
+    if not channel_ids:
+        try:
+            conversations_channels = sc.conversations_list()
+            if conversations_channels['ok']:
+                for channel in conversations_channels['channels']:
+                    channel_ids[channel['name']] = channel['id']
+        except Exception as err:
+            current_logger.error('error :: slack_file_upload - failed to determine conversations_list for channel ids, err: %s' % err)
+    if default_channel_id:
+        channel_ids[default_channel] = default_channel_id
+    if channel == default_channel:
+        channel = default_channel_id
+
+    # @modified 20250403 - Task #5344: Migrate slack files.upload method
+    if default_channel_id:
+        channel = default_channel_id
+    slack_channel_id_pattern = r'^[CGDZ][A-Z0-9]{8,}$'
+    if channel:
+        try:
+            if not re.fullmatch(slack_channel_id_pattern, channel):
+                if default_channel_id:
+                    channel = default_channel_id
+        except Exception as err:
+            current_logger.error('error :: slack_file_upload - failed to regex channel: %s, err: %s' % (
+                str(channel), err))
+
     try:
         # slack does not allow embedded images, nor links behind authentication
         # or color text, so we have jump through all the API hoops to end up
         # having to upload an image with a very basic message.
         if os.path.isfile(image_file):
-            filename = os.path.basename(image_file)
-            slack_file_upload = sc.files_upload(
-                filename=filename, channels=channel,
-                initial_comment=message, file=open(image_file, 'rb'))
+            # @modified 20250305 - Task #5344: Migrate slack files.upload method
+            #filename = os.path.basename(image_file)
+            #slack_file_upload = sc.files_upload(
+            #    filename=filename, channels=channel,
+            #    initial_comment=message, file=open(image_file, 'rb'))
+            # @modified 20250403 - Task #5344: Migrate slack files.upload method
+            # Added thread_ts as per https://github.com/slackapi/python-slack-sdk/issues/1591
+            # and https://tools.slack.dev/python-slack-sdk/web/#files
+            if thread_ts:
+                slack_file_upload = sc.files_upload_v2(
+                    file=image_file,
+                    channel=channel,
+                    initial_comment=message,
+                    thread_ts=thread_ts,
+                )
+            else:
+                slack_file_upload = sc.files_upload_v2(
+                    file=image_file,
+                    channel=channel,
+                    initial_comment=message,
+                )
+
             if not slack_file_upload['ok']:
                 current_logger.error('error :: slack_file_upload :: failed to send slack message')
             else:
                 current_logger.info('slack_file_upload :: sent slack message')
                 file_uploaded = True
-                if slack_thread_updates:
+
+                # @added 20250305 - Task #5344: Migrate slack files.upload method
+                # The new files_upload_v2 method does not return the
+                # same response as the previous files_upload method as
+                # this new method can have multiple files uploads and
+                # each of them have their file info.
+                file_id = None
+                try:
+                    file_id = slack_file_upload['file']['id']
+                except Exception as err:
+                    current_logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                        err))
+                loop_start = time()
+                while True:
+                    now = time()
+                    if (now - loop_start) > 5:
+                        break
+                    try:
+                        file_info = sc.files_info(file=file_id)
+                        shares = file_info['file'].get('shares')
+                        if shares:
+                            for share_type in ['public', 'private']:
+                                if share_type in shares:
+                                    for channel_id, share_list in shares[share_type].items():
+                                        for share in share_list:
+                                            slack_thread_ts = share['ts']
+                                            break
+                    except Exception as err:
+                        current_logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                            err))
+                    sleep(1)
+                if slack_thread_ts:
+                    current_logger.info('alert_slack - the slack_thread_ts is %s' % (
+                        str(slack_thread_ts)))
+
+                # @modified 20250304 - Task #5344: Migrate slack files.upload method
+                #if slack_thread_updates:
+                if slack_thread_updates and not slack_thread_ts:
                     # The sc.api_call 'files.upload' response which generates
                     # slack_file_upload has a different structure depending
                     # on whether a channel is private or public.  That also
@@ -469,11 +587,18 @@ def slack_file_upload(current_skyline_app, channel, thread_ts, message, image_fi
                             slack_thread_ts = slack_group_list[0]['ts']
                             current_logger.info('slack_file_upload :: slack group is %s and the slack_thread_ts is %s' % (
                                 str(slack_group), str(slack_thread_ts)))
-                            return file_uploaded
+                            # @modified 20250403 - Task #5344: Migrate slack files.upload method
+                            #                      Feature #5318: motif_annihilation
+                            # Return the slack_thread_ts
+                            #return file_uploaded
+                            return slack_thread_ts
                         except:
                             current_logger.error(traceback.format_exc())
                             current_logger.info('slack_file_upload :: failed to determine slack_thread_ts')
-                            return file_uploaded
+                            # @modified 20250403 - Task #5344: Migrate slack files.upload method
+                            # Return the slack_thread_ts
+                            #return file_uploaded
+                            return slack_thread_ts
         else:
             send_text = message + '  ::  error :: there was no image to upload'
             send_message = sc.api_call(
