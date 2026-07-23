@@ -65,6 +65,31 @@
     margin-top: 4px;
     font-style: italic;
   }
+  .llm-reasoning {
+    margin-top: 6px;
+    font-size: 11px;
+  }
+  .llm-reasoning summary {
+    cursor: pointer;
+    color: #888;
+    font-style: italic;
+    outline: none;
+  }
+  .llm-reasoning summary:hover {
+    color: #555;
+  }
+  .llm-reasoning-body {
+    margin-top: 4px;
+    padding: 8px 10px;
+    background: #f7f7f7;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: Consolas, "courier new", monospace;
+    font-size: 11px;
+    color: #666;
+  }
   #llm-thinking {
     display: none;
     color: #888;
@@ -129,21 +154,27 @@
     <h3>
       <span class="logo"><span class="sky">Sky</span><span class="re">line</span> <span class="sky">LLM</span> <span class="re">chat</span></span>
       <br>
-      <small>Ask <strong>{{ llm_model }}</strong> questions about your metrics, anomalies, matches, events or database.</small>
+      <small>Ask questions about your metrics, anomalies, matches, events or database.</small>
     </h3>
     <br>
     <h4><center>This is a <strong>BETA</strong> feature and can results in <strong><code>HIGH TOKEN USAGE</code></strong> - watch your costs</center></h4>
     <br>
+    <br>
+    <h4><center>LLM models <strong>CAN AND DO</strong> in incorrect queries and hallucinated DB columns or values at times. <strong><code>CHECK AND VERIFY ALL OUTPUTS</code></strong></center></h4>
+    <br>
     Currently this only has access to query the DB tables.
     <br>
-    Skyline only sends {{ llm_model }} the first row and last row of returned query data so it can verify the
-    query had the desired result.  The actual full results themselves are not sent to {{ llm_model }} they are
-    rather saved to csv. {{ llm_model }} can query these csv files via pandas to determine anything that it
-    cannot determine via a single query.  This allows {{ llm_model }} to make multiple queries and then get
+    This <strong>can and does</strong> result in incorrect queries and hallucinated DB columns or values at times.
+    <strong>ALL</strong> output must be verified and double checked.
+    <br>
+    Skyline only sends the model the first row and last row of returned query data so it can verify the
+    query had the desired result.  The actual full results themselves are not sent to the model they are
+    rather saved to csv. The model can query these csv files via pandas to determine anything that it
+    cannot determine via a single query.  This allows the model to make multiple queries and then get
     Skyline to load the csv files as pandas DataFrames which it can then query via a pandas query.  Consider
     this as tokenminning rather than tokenmaxxing.
     <br>
-    This does mean that Skyline <strong>will send</strong> {{ llm_model }} a few of your metric names, timestamps and values.
+    This does mean that Skyline <strong>will send</strong> the model a few of your metric names, timestamps and values.
   </div>
 
   <!-- Suggested starter questions -->
@@ -170,7 +201,7 @@
   <!-- Message history display -->
   <div id="llm-messages">
     <div class="llm-message assistant">
-      <div class="llm-role">Skyline {{ llm_model }}</div>
+      <div class="llm-role">LLM Assistant</div>
       <div class="llm-body">Hello! I have access to your Skyline anomaly data, metrics, correlations and events. Ask me anything about what has been happening in your infrastructure.</div>
     </div>
   </div>
@@ -220,6 +251,14 @@
       Load
     </button>
   </div>
+
+  <!-- Where is history -->
+  <div class="saved-conversations-history">
+    The list of saved conversations and their labels can be viewed via rebrow under the
+    <code>skyline.llm_chat.saved.*</code> key search.  The label being the part
+    after the keyspace prefix of <code>skyline.llm_chat.saved.</code>
+  </div>
+
 {% else %}
   <div class="page-header">
     <h3>
@@ -269,7 +308,11 @@ function llmSuggest(text) {
   document.getElementById('llm-input').focus();
 }
 
-function llmAppendMessage(role, content, toolCallsMade) {
+function llmAppendMessage(role, content, toolCallsMade, reasoningContents, modelName) {
+  // Defensive default - never let content be null/undefined
+  if (content === null || content === undefined) {
+    content = '';
+  }
   var container = document.getElementById('llm-messages');
 
   var div = document.createElement('div');
@@ -278,14 +321,15 @@ function llmAppendMessage(role, content, toolCallsMade) {
   var roleLabel = document.createElement('div');
   roleLabel.className = 'llm-role';
   roleLabel.textContent = (role === 'user') ? 'You' :
-                           (role === 'assistant') ? '{{ llm_model }}' : 'Error';
+//                           (role === 'assistant') ? '{{ llm_model }}' : 'Error';
+                           (role === 'assistant') ? (modelName || 'LLM assistant') : 'Error';
   div.appendChild(roleLabel);
 
   var body = document.createElement('div');
   body.className = 'llm-body';
 //  body.textContent = content;
   // Render markdown for assistant, plain text for user/error
-  if (role === 'assistant') {
+  if (role === 'assistant' && content.length > 0) {
     body.innerHTML = marked.parse(content);
   } else {
     body.textContent = content;
@@ -297,6 +341,27 @@ function llmAppendMessage(role, content, toolCallsMade) {
     toolDiv.className = 'llm-tool-calls';
     toolDiv.textContent = 'Data lookups: ' + toolCallsMade.join(', ');
     div.appendChild(toolDiv);
+  }
+
+  // Reasoning content - collapsible, one block per entry
+  if (reasoningContents && reasoningContents.length > 0) {
+    reasoningContents.forEach(function(reasoning, idx) {
+      if (!reasoning) { return; }
+
+      var details = document.createElement('details');
+      details.className = 'llm-reasoning';
+
+      var summary = document.createElement('summary');
+      summary.textContent = 'Reasoning' + (reasoningContents.length > 1 ? ' (step ' + (idx + 1) + ') - expand to see the model reasoning' : '');
+      details.appendChild(summary);
+
+      var reasoningBody = document.createElement('div');
+      reasoningBody.className = 'llm-reasoning-body';
+      reasoningBody.textContent = reasoning;
+      details.appendChild(reasoningBody);
+
+      div.appendChild(details);
+    });
   }
 
   container.appendChild(div);
@@ -336,7 +401,7 @@ function llmRenderResults(results) {
       not_sent_note.style.fontSize = '11px';
       not_sent_note.style.color = '#888';
       not_sent_note.style.marginTop = '4px';
-      not_sent_note.textContent = 'Results from the query were saved to ' + results.csv + ' and not sent to {{ llm_model }}.  Only the first and last rows were sent to {{ llm_model }}.';
+      not_sent_note.textContent = 'Results from the query were saved to ' + results.csv + ' and not sent to the model.  Only the first and last rows were sent to the model.';
       body.appendChild(not_sent_note);
 
     }
@@ -463,7 +528,7 @@ function llmSend() {
       if (data.error) {
         llmAppendMessage('error', 'Error: ' + data.error, null);
       } else {
-        llmAppendMessage('assistant', data.response, data.tool_calls_made);
+        llmAppendMessage('assistant', data.response, data.tool_calls_made, data.reasoning_contents, data.llm_model);
         // Render results separately, never touches history
 //        if (data.llm_results) {
 //            llmRenderResults(data.llm_results);
@@ -560,7 +625,12 @@ function llmLoadConversation() {
             document.getElementById('llm-save-label').value = '';
             // Replay history into UI
             data.history.forEach(function(msg) {
-                llmAppendMessage(msg.role, msg.content, null);
+//                llmAppendMessage(msg.role, msg.content, null);
+                try {
+                    llmAppendMessage(msg.role, msg.content, null, null, null);
+                } catch (err) {
+                    console.error('Failed to render history message:', err, msg);
+                }
             });
         },
         error: function() {

@@ -32,7 +32,7 @@ SCHEMA_CONTEXT = """
   - anomaly_timestamp is a unix epoch integer.
   - Join to metrics on metric_id
 
-**ionosphere** (id, metric_id, anomaly_timestamp)
+**ionosphere** (id, metric_id, anomaly_timestamp, label)
   - Ionosphere features profiles (learned normal patterns for a metric).
   - A match means an anomaly was suppressed because it matched a known pattern.
   - Only request this data if the user requests information on features profiles, motif matches or matches performance in some way.
@@ -75,7 +75,7 @@ BEHAVIOUR_GUIDELINES = """
 You are an AI assistant embedded in Skyline, an open-source anomaly detection
 and metrics monitoring system.  You help operators and engineers understand
 what is happening in their infrastructure by answering questions about
-metrics, anomalies, correlations and events.
+metrics, anomalies, correlations, events and Skyline itself.
 
 Due to the nature of the data and size of the responses that DB queries can
 return, the query_db tool does not return the query data in the response to
@@ -96,18 +96,30 @@ You can make multiple query_db tool calls if required and then make a
 query_dataframes tool call to query one or two dataframes to generate the desired
 results in a resulting dataframe which are then saved to another results csv,
 until you have the desired result.  You MUST refer to the dataframes in your
-query as df1 and df2 and nothing else.  If you are only querying one dataframe
-then you must query it as df1 not just simply df.  Only single pandas statements
-can be made, not multi lined statements.
+query as df1 and df2 and nothing else, as first passed csv is loaded as df1 and
+if you pass two csv files the second is loaded as df2.  If you are only querying
+one dataframe then you must query it as df1 not just simply df.  Only single
+pandas statements can be made, not multi lined statements.
+
+You can use the cat_file tool to read the contents of Skyline code files if the
+user asks you to review any Skyline code files or if they ask you to explain
+something about Skyline that you may be able to determine from the code.
 
 You will be informed of how many tool calls can be made via the
 remaining_tool_calls count, keep track of this and ensure that you can respond
 with the information you have.
 
+Try and make as few tool calls as possible to determine only what is needed to
+answer the question.  Make no more than needed and bear in mind that each tool
+call and it's tokens have a cost to the user.
+
 ## How to answer questions
 
 - Always use the available tools to fetch real data before answering.  Do not
   guess or invent metric names, anomaly ids, timestamps or counts.
+- Do not use plausibly sounding filler text that confabulates things, for example:
+  "Learning runs in the Ionosphere process and typically consumes <5%% of a modern CPU.".
+  Ensure your answers are grounded determined facts.
 - Always use as few tools calls as possible to answer the question as simply as possible.
 - You can only make 8 tools calls.
 - Timestamps in the DB are unix epoch integers.  Convert to human-readable
@@ -272,8 +284,8 @@ TOOL_DEFINITIONS = [
                     }
                 },
                 "required": [
-                    "timestamp", "llm_model", "tool_call_id", "dataframe_files_dict",
-                    "dataframe_query"
+                    "timestamp", "llm_model", "tool_call_id", "dataframe_files",
+                    "dataframes_query"
                 ]
             }
         }
@@ -293,9 +305,51 @@ TOOL_DEFINITIONS = [
                 "required": []
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "cat_file",
+            "description": (
+                "Returns a dict with the file, contents and reason. "
+                "Use this when a user asks you to review a Skyline file or files to read the file/s. "
+                "This is restricted to return the contents of Skyline code files only."
+                "If there is no contents key or value in the dict, check the reason."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "The full path and file name of the file."                
+                    },
+                },
+                "required": ["file"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "skyline_dirs_and_files",
+            "description": (
+                "Returns a dict with the key skyline_dir_tree which lists the dirs and files of the local Skyline code. "
+                "Use this when a user asks you to review or explain some Skyline functionality you can use this to surface a list of local dirs and files. "
+                "This is restricted to return the contents of Skyline code directory only and excludes the settings file. "
+                "You can use the skyline_dir_tree to get an idea of where/what does something, the file naming convention and dirs structure are quite logical "
+                "and you can use these to infer what files you need to the cat_file tool with to explain the thing in question."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
     }
+
 ]
 
+# tool_skyline_dirs_and_files
 
 def build_system_prompt():
     """
