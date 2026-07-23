@@ -356,8 +356,10 @@ def get_ionosphere_performance(
             # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-            metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
-            metrics_like_query = text(metrics_like_text)
+            # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+            #metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_like_str}'"
+            #metrics_like_query = text(metrics_like_text)
+            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
 
             metric_like_wildcard = metric_like_str.replace('.%', '')
             # request_key = '%s.%s.%s.%s' % (metric_like_wildcard, begin_date, end_date, frequency)
@@ -374,7 +376,9 @@ def get_ionosphere_performance(
                     # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
                     #                      Task #5628: Build v5.0.0 and test
                     #result = connection.execute(metrics_like_query, like_string=metric_like_str)
-                    result = connection.execute(metrics_like_query)
+                    # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                    #result = connection.execute(metrics_like_query)
+                    result = connection.execute(metrics_like_query, {"like_string": metric_like_str})
 
                     results = [dict(row._mapping) for row in result.fetchall()]
                 result = results
@@ -402,8 +406,10 @@ def get_ionosphere_performance(
                 # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                 #                      Task #5628: Build v5.0.0 and test
                 #metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-                metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_label_like_str}'"
-                metrics_like_query = text(metrics_like_text)
+                # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                #metrics_like_text = f"SELECT id FROM metrics WHERE metric LIKE '{metric_label_like_str}'"
+                #metrics_like_query = text(metrics_like_text)
+                metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
 
                 try:
                     # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
@@ -415,7 +421,10 @@ def get_ionosphere_performance(
                         # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                         #                      Task #5628: Build v5.0.0 and test
                         #result = connection.execute(metrics_like_query, like_string=metric_label_like_str)
-                        result = connection.execute(metrics_like_query)
+                        # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                        #result = connection.execute(metrics_like_query)
+                        result = connection.execute(metrics_like_query, {"like_string": metric_label_like_str} )
+
                         results = [dict(row._mapping) for row in result.fetchall()]
                     result = results
 
