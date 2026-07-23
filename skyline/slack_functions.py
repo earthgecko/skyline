@@ -16,18 +16,29 @@ import settings
 #                      Task #3556: Update deps
 # from slackclient import SlackClient
 # slackclient v2 has a version function, < v2 does not
-try:
-    from slack import version as slackVersion
-    slack_version = slackVersion.__version__
-except:
-    slack_version = '1.3'
-if slack_version == '1.3':
-    from slackclient import SlackClient
-else:
-    # @modified 20250305 - Task #5344: Migrate slack files.upload method
-    #from slack import WebClient
-    from slack_sdk import WebClient
-    from time import time, sleep
+# @modified 20250826 - Task #5344: Migrate slack files.upload method
+# Use slack_sdk only now
+#try:
+#    from slack import version as slackVersion
+#    slack_version = slackVersion.__version__
+#except:
+#    slack_version = '1.3'
+#if slack_version == '1.3':
+#    from slackclient import SlackClient
+#else:
+#    # @modified 20250305 - Task #5344: Migrate slack files.upload method
+#    #from slack import WebClient
+#    from slack_sdk import WebClient
+#    from time import time, sleep
+# @added 20260224 - Task #5628: Build v5.0.0 and test
+#                   Task #5344: Migrate slack files.upload method
+slack_version = 0
+
+# @added 20250826 - Task #5344: Migrate slack files.upload method
+from slack_sdk import WebClient
+from time import time, sleep
+from slack_sdk import version as slackVersion
+slack_version = slackVersion.__version__
 
 token = settings.SLACK_OPTS['bot_user_oauth_access_token']
 try:
@@ -111,9 +122,12 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
         # @modified 20200701 - Task #3612: Upgrade to slack v2
         #                      Task #3608: Update Skyline to Python 3.8.3 and deps
         #                      Task #3556: Update deps
-        if slack_version == '1.3':
-            sc = SlackClient(token)
-        else:
+        # @modified 20260222 - Task #5344: Migrate slack files.upload method
+        # Fully deprecate slack and slackclient
+        #if slack_version == '1.3':
+        #    sc = SlackClient(token)
+        #else:
+        #    sc = WebClient(token, timeout=10)
             sc = WebClient(token, timeout=10)
     except:
         current_logger.error(traceback.format_exc())
@@ -588,7 +602,7 @@ def slack_file_upload(current_skyline_app, channel, thread_ts, message, image_fi
                             current_logger.info('slack_file_upload :: slack group is %s and the slack_thread_ts is %s' % (
                                 str(slack_group), str(slack_thread_ts)))
                             # @modified 20250403 - Task #5344: Migrate slack files.upload method
-                            #                      Feature #5318: motif_annihilation
+                            #                      Feature #5318: common_motifs
                             # Return the slack_thread_ts
                             #return file_uploaded
                             return slack_thread_ts
