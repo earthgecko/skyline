@@ -137,6 +137,21 @@ def run_custom_algorithm_on_timeseries(
         custom_algorithm_dict['algorithm_parameters']['return_anomalies'] = True
         custom_algorithm_dict['algorithm_parameters']['return_results'] = True
 
+    # @added 20250321 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    custom_algorithm_only = False
+    try:
+        custom_algorithm_only = custom_algorithm_dict['custom_algorithm_only']
+    except:
+        custom_algorithm_only = False
+    if not custom_algorithm_only:
+        try:
+            custom_algorithm_only = custom_algorithm_dict['algorithm_parameters']['custom_algorithm_only']
+        except:
+            custom_algorithm_only = False
+    if custom_algorithm_only:
+        custom_algorithm_dict['algorithm_parameters']['custom_algorithm_only'] = True
+
     def str_to_class(classname, current_logger):
         try:
             return getattr(sys.modules[classname], classname)
