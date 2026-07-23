@@ -9,6 +9,10 @@ from database import get_engine, engine_disposal, ionosphere_table_meta
 # @added 20241127 - Bug #5522: Handle duplicate metric names
 from skyline_functions import get_redis_conn_decoded
 
+# @added 20260708 - Feature #5764: get_ionosphere_disabled_fp_ids
+#                   Feature #5572: get_all_fps
+#                   Feature #3890: metrics_manager - sync_cluster_files
+from functions.database.queries.get_ionosphere_disabled_fp_ids import get_ionosphere_disabled_fp_ids
 
 # @added 20241213 - Feature #5572: get_all_fps
 #                   Bug #5571: v5.0.0-alplha - regression on cluster nodes - mysql.aborted_clients
@@ -35,6 +39,11 @@ def get_all_fps(current_skyline_app, enabled_only=False):
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20260708 - Feature #5764: get_ionosphere_disabled_fp_ids
+    #                   Feature #5572: get_all_fps
+    # Ensure disabled fp ids are current in the ionosphere.fp_ids_with_enabled
+    # Redis hash
+    disabled_fp_ids = []
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
     except Exception as err:
@@ -42,6 +51,37 @@ def get_all_fps(current_skyline_app, enabled_only=False):
         current_logger.error(trace)
         fail_msg = 'error :: %s :: get_redis_conn_decoded failed, err: %s' % (function_str, err)
         current_logger.error('%s' % fail_msg)
+    try:
+        disabled_fp_ids = list(redis_conn_decoded.smembers('latest.ionosphere.disabled.fp_ids'))
+    except Exception as err:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: %s :: smembers on latest.ionosphere.disabled.fp_ids failed, err: %s' % (function_str, err)
+        current_logger.error('%s' % fail_msg)
+    if disabled_fp_ids:
+        current_logger.info('%s :: got %s disabled fp ids from latest.ionosphere.disabled.fp_ids Redis set' % (
+            function_str, str(len(disabled_fp_ids))))
+
+    # Only fetch from the DB directly and set in the hash if the
+    # get_ionosphere_disabled_fp_ids Redis set latest.ionosphere.disabled.fp_ids
+    # has expired
+    if not disabled_fp_ids:
+        try:
+            disabled_fp_ids = get_ionosphere_disabled_fp_ids(current_skyline_app)
+        except Exception as err:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: %s :: get_ionosphere_disabled_fp_ids failed, err: %s' % (function_str, err)
+            current_logger.error('%s' % fail_msg)
+        if disabled_fp_ids:
+            disabled_fp_ids_dict = {fp_id: 0 for fp_id in disabled_fp_ids}
+            try:
+                redis_conn_decoded.hset('ionosphere.fp_ids_with_enabled', mapping=disabled_fp_ids_dict)
+                current_logger.info('%s :: added %s disabled fp ids to ionosphere.fp_ids_with_enabled' % (
+                    function_str, str(len(disabled_fp_ids_dict))))
+            except Exception as err:
+                current_logger.error('error :: %s :: failed to add %s fps ionosphere.fp_ids_with_enabled, err: %s' % (
+                    function_str, str(len(disabled_fp_ids_dict)), err))
 
     # To ensure that operations are fast instead of using a hash with dict
     # strings and literal_eval on each (slow), there is a hash for each
@@ -185,7 +225,7 @@ def get_all_fps(current_skyline_app, enabled_only=False):
             #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: failed to select fps > id: %s from the ionosphere table, err: %s' % (
+            current_logger.error('error :: %s :: failed to determine fps > id: %s from the ionosphere table, err: %s' % (
                 function_str, str(last_redis_fp_id), err))
     if fps_with_errors:
         current_logger.error('error :: %s :: fps_with_errors[-1]: %s' % (
@@ -228,7 +268,7 @@ def get_all_fps(current_skyline_app, enabled_only=False):
             #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: failed to select fps_to_update from the ionosphere table, err: %s' % (
+            current_logger.error('error :: %s :: failed to determine fps_to_update from the ionosphere table, err: %s' % (
                 function_str, err))
         current_logger.info('%s :: added %s fps_to_update to fps_to_add_to_redis' % (
             function_str, str(len(fps_to_update))))

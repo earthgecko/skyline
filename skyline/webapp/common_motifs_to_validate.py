@@ -18,13 +18,17 @@ logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 
 def get_common_motifs_to_validate(
-        from_timestamp, until_timestamp, state='unvalidated', namespace=None):
+        from_timestamp, until_timestamp, state='unvalidated', namespace=None,
+        # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+        #                   Feature #5318: common_motifs
+        # Added self_validated_only
+        self_validated_only=False):
     function_str = 'get_common_motifs_to_validate'
 
     common_motifs_fps = {}
 
-    logger.info('%s :: determining all %s common_motifs feature profiles for namespace %s' % (
-        function_str, state, str(namespace)))
+    logger.info('%s :: determining all %s common_motifs feature profiles for namespace %s, self_validated_only: %s' % (
+        function_str, state, str(namespace), str(self_validated_only)))
 
     try:
         engine, fail_msg, trace = get_engine(skyline_app)
@@ -53,6 +57,7 @@ def get_common_motifs_to_validate(
     try:
         #connection = engine.connect()
         if state == 'validated':
+            logger.info('%s :: stmt for %s' % (function_str, str(state)))
             # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #stmt = select([ionosphere_table]).\
@@ -63,6 +68,7 @@ def get_common_motifs_to_validate(
                 where(ionosphere_table.c.label == 'LEARNT - common_motifs').\
                 where(ionosphere_table.c.enabled == 1)
         elif state == 'invalid':
+            logger.info('%s :: stmt for %s' % (function_str, str(state)))
             # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #stmt = select([ionosphere_table]).\
@@ -71,7 +77,19 @@ def get_common_motifs_to_validate(
                 where(ionosphere_table.c.anomaly_timestamp <= until_timestamp).\
                 where(ionosphere_table.c.label == 'LEARNT - common_motifs').\
                 where(ionosphere_table.c.enabled == 0)
+        # @added 20260712 - Feature #5644: ionosphere.learn_self_validation
+        #                   Feature #5318: common_motifs
+        # With the addition of self_validated_only specifically check unvalidated
+        # as well
+        elif state == 'unvalidated':
+            logger.info('%s :: stmt for %s' % (function_str, str(state)))
+            stmt = select(ionosphere_table).\
+                where(ionosphere_table.c.anomaly_timestamp >= from_timestamp).\
+                where(ionosphere_table.c.anomaly_timestamp <= until_timestamp).\
+                where(ionosphere_table.c.label == 'LEARNT - common_motifs').\
+                where(ionosphere_table.c.validated == 0)
         else:
+            logger.info('%s :: stmt for %s' % (function_str, str(state)))
             # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
             #                      Task #5628: Build v5.0.0 and test
             #stmt = select([ionosphere_table]).\
@@ -81,15 +99,26 @@ def get_common_motifs_to_validate(
                 where(ionosphere_table.c.validated == 0).\
                 where(ionosphere_table.c.label == 'LEARNT - common_motifs').\
                 where(ionosphere_table.c.enabled == 1)
+
         # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
         #                      Task #5628: Build v5.0.0 and test
         #results = connection.execute(stmt)
         with engine.connect() as connection:
             result = connection.execute(stmt)
             results = [dict(row._mapping) for row in result.fetchall()]
+        logger.info('%s :: %s results determined' % (function_str, str(len(results))))
+
         for row in results:
             try:
                 fp_id = int(row['id'])
+
+                # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+                #                   Feature #5318: common_motifs
+                # Added self_validated_only
+                if self_validated_only:
+                    if row['self_validated'] != 1:
+                        continue
+
                 common_motifs_fps[fp_id] = dict(row)
                 # Coerce for json
                 for key, item in common_motifs_fps[fp_id].items():
@@ -102,6 +131,8 @@ def get_common_motifs_to_validate(
                 logger.error('error :: %s :: bad row data, row: %s, err: %s' % (
                     function_str, str(row), row_err))
         #connection.close()
+        logger.info('%s :: %s common_motifs_fps determined' % (function_str, str(len(common_motifs_fps))))
+
     except Exception as err:
         trace = traceback.format_exc()
         logger.error('%s' % trace)

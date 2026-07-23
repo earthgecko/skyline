@@ -6176,9 +6176,9 @@ def mock_api():
             'full_duration': 86400,
             'second_order_resolution_seconds': 604800,
             'learn_full_duration_seconds': 2592000,
-            'flux_token': None,
+            'flux_token': None,  # nosec
             "thunder_alert_endpoint": 'http://127.0.0.1:1500/mock_api?alert_reciever',
-            'thunder_alert_token': None,
+            'thunder_alert_token': None,  # nosec
             'alert_on_no_data': {
                 'enabled': True,
                 'stale_period': 300,
@@ -6297,6 +6297,7 @@ def panorama():
     # @added 20260221 - Feature #5712: skyline.dawn
     analyzer_dawn_expiry_date = None
     mirage_dawn_expiry_date = None
+    panorama_dawn_expiry_date = None
     if SKYLINE_DAWN_ENABLED:
         # First check to the Panorama and Mirage expiries
         try:
@@ -8458,6 +8459,15 @@ def ionosphere():
         else:
             use_namespace = str(namespace)
         state = request.args.get('state', 'unvalidated')
+
+        # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+        #                   Feature #5318: common_motifs
+        self_validated_only = request.args.get('self_validated_only', False)
+        if self_validated_only == 'true':
+            self_validated_only = True
+        if self_validated_only == 'false':
+            self_validated_only = False
+
         from_timestamp = request.args.get('from_timestamp', 'all')
         if ":" in from_timestamp:
             # @modified 20260221 - Task #5711: Test Ubuntu 24.04
@@ -8498,7 +8508,10 @@ def ionosphere():
         logger.info('validate_common_motifs_fps request with limit: %s, namespace: %s' % (
             str(limit_to), str(namespace)))
         try:
-            common_motifs_fps = get_common_motifs_to_validate(from_timestamp, until_timestamp, state=state, namespace=use_namespace)
+            # @modified 20260705 - Feature #5644: ionosphere.learn_self_validation
+            #                      Feature #5318: common_motifs
+            # Added self_validated_only
+            common_motifs_fps = get_common_motifs_to_validate(from_timestamp, until_timestamp, state=state, namespace=use_namespace, self_validated_only=self_validated_only)
         except Exception as err:
             trace = traceback.format_exc()
             fail_msg = 'error :: get_common_motifs_to_validate falied, err: %s' % err
@@ -8535,6 +8548,8 @@ def ionosphere():
             ionosphere_dawn_expiry_date=ionosphere_dawn_expiry_date,
             ionosphere_learn_dawn_expiry_date=ionosphere_learn_dawn_expiry_date,
             ionosphere_learn_repetitive_patterns_dawn_expiry_date=ionosphere_learn_repetitive_patterns_dawn_expiry_date,
+            # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+            self_validated_only=self_validated_only,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -8701,6 +8716,8 @@ def ionosphere():
 
             features_profiles_to_validate = []
             if metric_name != 'all':
+                logger.info('running get_features_profiles_to_validate for %s' % (
+                    base_name))
                 try:
                     features_profiles_to_validate, fail_msg, trace = get_features_profiles_to_validate(base_name)
                     # features_profiles_to_validate
@@ -11584,6 +11601,15 @@ def ionosphere():
                     validate = True
                     logger.info('validate - %s' % str(validate))
             if validate:
+
+                # @modified 202600705 - Feature #5644: ionosphere.learn_self_validation
+                #                       Feature #5318: common_motifs
+                # Added self_validated
+                self_validated = False
+                self_validated_arg = request.args.get('self_validated', False)
+                if self_validated_arg == 'true':
+                    self_validated = True
+
                 logger.info('validating - fp_ip %s' % str(fp_id))
                 try:
                     # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -11594,7 +11620,11 @@ def ionosphere():
                     #                      Feature #2516: Add label to features profile
                     # Added user_id
                     # validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id')
-                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id', user_id)
+                    # @modified 202600705 - Feature #5644: ionosphere.learn_self_validation
+                    #                       Feature #5318: common_motifs
+                    # Added self_validated
+                    #validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id', user_id)
+                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id', user_id, self_validated=self_validated)
                     logger.info('validated fp_id - %s' % str(fp_id))
                 except:
                     trace = traceback.format_exc()
@@ -17184,7 +17214,7 @@ def llm_chat_query():
         else:
             history = session.get(SESSION_KEY_HISTORY, [])
 
-        logger.info(f"/llm_chat_query request, history: {str(history)}")
+        #logger.info(f"/llm_chat_query request, history: {str(history)}")
 
         # Run the agentic turn
         result = run_chat_turn(provider_llm_model, llm_model, user_message, history, settings)
@@ -17219,12 +17249,22 @@ def llm_chat_query():
                 result['query_results_csvs'][csv]['result'] = query_result
             query_results = result['query_results_csvs']
 
+        # @added 20260628 - Task #5709: POC LLM integration
+        # Add reasoning/thinking to the output to allow the user to review
+        # and validate the thinking and ensure no hallucinations or
+        # incorrect columns, etc are being used
+        reasoning_contents = []
+        if 'tools_reasoning_content' in result:
+            reasoning_contents = result['tools_reasoning_content']
+
         return jsonify({
             'response': result['response'],
             'tool_calls_made': result['tool_calls_made'],
             'error': result['error'],
             'llm_results': llm_results,
             'query_results': query_results,
+            'reasoning_contents': reasoning_contents,
+            'llm_model': result['llm_model'],
         }), 200
 
     except Exception:
@@ -18285,7 +18325,7 @@ def urlsafe_base64_encode(s):
         s = decoded_s
         # logger.info('debug more :: rebrow :: %s urlsafe_b64encode decoded as %s' % (str(s_original), str(decoded_s)))
 
-    return Markup(s)
+    return Markup(s)  # nosec
 # END rebrow
 
 

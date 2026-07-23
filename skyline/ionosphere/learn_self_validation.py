@@ -704,7 +704,11 @@ def self_validation(last_self_validate_timestamp):
             if validate_fp:
                 logger.info('%s :: validating fp_id: %s, validation_method: %s' % (
                     function_str, str(fp_id), str(validation_method)))
-                validation_link = fp_data['validation_link']
+                # @modified 202600705 - Feature #5644: ionosphere.learn_self_validation
+                #                       Feature #5318: common_motifs
+                # Added self_validated
+                validation_link = fp_data['validation_link'] + '&self_validated=true'
+
                 rv = None
                 try:            
                     if user and password:
@@ -751,6 +755,11 @@ def self_validation(last_self_validate_timestamp):
                     except Exception as err:
                         logger.error('error :: %s :: insert_comment failed, err: %s' % (
                             function_str, err))
+                    # @added 20260705 - Feature #5644: ionosphere.learn_self_validation
+                    #                   Feature #5318: common_motifs
+                    # Added self_validated_only
+
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: learn_self_validation :: failed to process fp_id: %s, err: %s' % (

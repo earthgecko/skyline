@@ -554,8 +554,10 @@ def panorama_request():
                 # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                 #                      Task #5628: Build v5.0.0 and test
                 #query = text("""SELECT id FROM algorithms WHERE algorithm LIKE :like_string""")
-                metrics_like_text = f"SELECT id FROM algorithms WHERE algorithm LIKE '{for_algorithm}'"
-                query = text(metrics_like_text)
+                # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                #metrics_like_text = f"SELECT id FROM algorithms WHERE algorithm LIKE '{for_algorithm}'"
+                #query = text(metrics_like_text)
+                query = text("""SELECT id FROM algorithms WHERE algorithm LIKE :like_string""")
 
                 if not engine:
                     try:
@@ -581,7 +583,9 @@ def panorama_request():
                         # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
                         #                      Task #5628: Build v5.0.0 and test
                         #result = connection.execute(query, like_string=str(for_algorithm))
-                        result = connection.execute(query)
+                        # @modified 20260710 - Task #5176: Migrate to sqlalchemy v2 API
+                        #result = connection.execute(query)
+                        result = connection.execute(query, {'like_string': for_algorithm})
 
                         results = [dict(row._mapping) for row in result.fetchall()]
 
