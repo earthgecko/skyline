@@ -19,7 +19,15 @@ from mock import Mock, patch
 import os.path
 import numpy as np
 import pandas as pd
-from tsfresh import extract_features, extract_relevant_features, select_features
+
+# @modified 20260211 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5706: v0.21.91 (earthgecko/tsfresh)
+#from tsfresh import extract_features, extract_relevant_features, select_features
+from importlib.metadata import version
+from tsfresh.feature_extraction import extract_features
+from tsfresh.convenience.relevant_extraction import extract_relevant_features
+from tsfresh.feature_selection import select_features
+
 from tsfresh import __version__ as tsfresh_version
 
 baseline_dir = os.path.dirname(os.path.realpath(__file__))
@@ -55,7 +63,12 @@ if 'post' in TSFRESH_BASELINE_VERSION:
 # @modified 20230111 - Branch #4456: v0.19.1
 #                      Task #4778: v4.0.0 - update dependencies
 # TSFRESH_BASELINE_VERSION = '0.17.9'
-TSFRESH_BASELINE_VERSION = '0.19.1'
+# @added 20250611 - Task #5627: v5.0.0 update dependencies
+#                   Branch #5630: v0.21.9 (earthgecko/tsfresh)
+#TSFRESH_BASELINE_VERSION = '0.19.1'
+# @modified 20260602 - Branch #5750: v0.21.92 (earthgecko/tsfresh)
+#TSFRESH_BASELINE_VERSION = '0.20.3'
+TSFRESH_BASELINE_VERSION = '0.21.91'
 
 python_version = int(sys.version_info[0])
 baseline_dir = os.path.dirname(os.path.realpath(__file__))
@@ -204,7 +217,7 @@ class TestTsfreshBaseline(unittest.TestCase):
             shutil.rmtree(self.test_path)
             ran = True
         # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
+        # Added "nosec" to exclude from bandit tests
         except:  # nosec
             pass
         self.assertTrue(ran, msg=fail_msg)

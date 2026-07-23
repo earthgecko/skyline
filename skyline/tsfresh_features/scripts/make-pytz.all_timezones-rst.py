@@ -15,7 +15,9 @@ import os
 from sys import version_info
 from termcolor import colored
 
-import pkg_resources
+# @modified 20260211 - Task #5627: v5.0.0 update dependencies
+#import pkg_resources
+from importlib.metadata import distribution
 
 from pytz import timezone
 import pytz
@@ -23,7 +25,10 @@ import pytz
 import traceback
 
 python_version = int(version_info[0])
-pytz_version = pkg_resources.get_distribution('pytz').version
+# @modified 20260211 - Task #5627: v5.0.0 update dependencies
+#pytz_version = pkg_resources.get_distribution('pytz').version
+pytz_version = distribution('pytz').version
+
 # pytz_all_timezones = list(pytz.all_timezones)
 pytz_all_timezones = list(pytz.all_timezones)
 
