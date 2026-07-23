@@ -87,8 +87,8 @@ def get_graphite_metric(
     # Commented out colon
     # new_metric_namespace = metric.replace(':', '\:')
     # metric_namespace = new_metric_namespace.replace('(', '\(')
-    metric_namespace = metric.replace('(', '\(')
-    metric = metric_namespace.replace(')', '\)')
+    metric_namespace = metric.replace('(', '\\(')
+    metric = metric_namespace.replace(')', '\\)')
 
     # Graphite timeouts
     connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
@@ -285,23 +285,23 @@ def get_graphite_metric(
                 if matched_graph:
                     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(until_timestamp)))
                     if 'matched.fp_id' in output_object:
-                        tail_piece = re.sub('.*\.fp_id-', '', output_object)
-                        matched_fp_id = re.sub('\..*', '', tail_piece)
+                        tail_piece = re.sub('.*\\.fp_id-', '', output_object)
+                        matched_fp_id = re.sub('\\..*', '', tail_piece)
                         unencoded_graph_title = 'fp_id %s matched - %s at %s hours' % (
                             str(matched_fp_id), str(human_date),
                             str(int_hours))
                         # @added 20210421 - Feature #4014: Ionosphere - inference
                         # Add motif_id to Graph title
                         if 'motif_id-' in output_object:
-                            tail_piece = re.sub('.*\.motif_id-', '', output_object)
-                            motif_id = re.sub('\..*', '', tail_piece)
+                            tail_piece = re.sub('.*\\.motif_id-', '', output_object)
+                            motif_id = re.sub('\\..*', '', tail_piece)
                             unencoded_graph_title = 'fp_id %s (motif_id %s) matched - %s for the trailing period' % (
                                 str(matched_fp_id), str(motif_id), str(human_date))
 
                     if 'matched.layers.fp_id' in output_object:
                         # layers_id
-                        tail_piece = re.sub('.*\.layers_id-', '', output_object)
-                        matched_layers_id = re.sub('\..*', '', tail_piece)
+                        tail_piece = re.sub('.*\\.layers_id-', '', output_object)
+                        matched_layers_id = re.sub('\\..*', '', tail_piece)
                         unencoded_graph_title = 'layers_id %s matched - %s at %s hours' % (
                             str(matched_layers_id), str(human_date),
                             str(int_hours))
@@ -325,7 +325,7 @@ def get_graphite_metric(
         # Use urlretrieve
         # try:
         #     # @modified 20170913 - Task #2160: Test skyline with bandit
-        #     # Added nosec to exclude from bandit tests
+        #     # Added "nosec" to exclude from bandit tests
         #     image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
         #     current_logger.info('url OK - %s' % (image_url))
         # except urllib2.URLError:
@@ -423,7 +423,7 @@ def get_graphite_metric(
                 new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                 converted.append(new_datapoint)
             # @modified 20170913 - Task #2160: Test skyline with bandit
-            # Added nosec to exclude from bandit tests
+            # Added "nosec" to exclude from bandit tests
             except:  # nosec
                 continue
 

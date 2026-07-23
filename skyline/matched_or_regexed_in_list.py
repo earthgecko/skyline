@@ -96,7 +96,7 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug
                         current_skyline_app, base_name, match_namespace))
                 break
 
-            if match_namespace in base_name:
+            if str(match_namespace) in base_name:
                 matched = True
                 # @added 20200425 - Feature #3512: matched_or_regexed_in_list function
                 matched_in_namespace = True

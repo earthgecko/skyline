@@ -157,7 +157,6 @@ def validate_settings_variables(current_skyline_app):
         'GRAPHITE_RENDER_URI': str,
         'GRAPHITE_SOURCE': str,
         'GRAPH_URL': str,
-        'HIPCHAT_ENABLED': bool,
         'HORIZON_IP': str,
         'HORIZON_SHARDS': dict,
         'HORIZON_SHARD_DEBUG': bool,
@@ -268,7 +267,6 @@ def validate_settings_variables(current_skyline_app):
         'OTHER_SKYLINE_REDIS_INSTANCES': list,
         'PAGERDUTY_ENABLED': bool,
         'PAGERDUTY_OPTS': dict,
-        'PANDAS_VERSION': str,
         'PANORAMA_CHECK_INTERVAL': int,
         'PANORAMA_CHECK_MAX_AGE': int,
         'PANORAMA_CHECK_PATH': str,
@@ -950,17 +948,19 @@ def validate_settings_variables(current_skyline_app):
             print('error :: the DATA_UPLOADS_PATH parent directory specificed in settings.py does not exist')
             invalid_variables = True
 
-    settings_tested.append('PANDAS_VERSION')
-    try:
-        if not isinstance(settings.PANDAS_VERSION, str):
-            print('error :: PANDAS_VERSION in settings.py is not a str')
+    check_pandas_setting = False
+    if check_pandas_setting:
+        settings_tested.append('PANDAS_VERSION')
+        try:
+            if not isinstance(settings.PANDAS_VERSION, str):
+                print('error :: PANDAS_VERSION in settings.py is not a str')
+                invalid_variables = True
+        except AttributeError:
+            print('error :: the PANDAS_VERSION str is not defined in settings.py')
             invalid_variables = True
-    except AttributeError:
-        print('error :: the PANDAS_VERSION str is not defined in settings.py')
-        invalid_variables = True
-    except Exception as e:
-        print('error :: the PANDAS_VERSION str in settings.py - %s' % e)
-        invalid_variables = True
+        except Exception as e:
+            print('error :: the PANDAS_VERSION str in settings.py - %s' % e)
+            invalid_variables = True
 
     settings_tested.append('ALERTERS_SETTINGS')
     try:
@@ -1957,7 +1957,7 @@ def validate_settings_variables(current_skyline_app):
                 invalid_variables = True
             if smtp_recipients:
                 if smtp_recipients == ['you@your_domain.com', 'them@your_domain.com']:
-                    print('error :: THUNDER_OPTS[\'alert_via_smtp\'] is True but THUNDER_OPTS[\'smtp_sender\'] has not been set to real emails')
+                    print('error :: THUNDER_OPTS[\'alert_via_smtp\'] is True but THUNDER_OPTS[\'smtp_recipients\'] has not been set to real emails')
                     invalid_variables = True
                 else:
                     thunder_alert_channel_set = True
@@ -2005,6 +2005,8 @@ def validate_settings_variables(current_skyline_app):
             invalid_variables = True
         if alert_via_pagerduty:
             thunder_alert_channel_set = True
+    if not settings.THUNDER_ENABLED:
+        thunder_alert_channel_set = True
     if not thunder_alert_channel_set:
         print('error :: not alert_via_ set in THUNDER_OPTS by defining at least 1 alert_via_')
         invalid_variables = True
@@ -2192,7 +2194,6 @@ def validate_settings_variables(current_skyline_app):
         BOUNDARY_AUTOAGGRERATION_METRICS NOT TESTED
         BOUNDARY_ALERTER_OPTS NOT TESTED
         BOUNDARY_SMTP_OPTS NOT TESTED
-        BOUNDARY_HIPCHAT_OPTS NOT TESTED
         BOUNDARY_PAGERDUTY_OPTS NOT TESTED
         BOUNDARY_SLACK_OPTS NOT TESTED
         ENABLE_CRUCIBLE tested

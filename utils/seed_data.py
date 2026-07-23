@@ -240,6 +240,9 @@ def seed():
                     else:
                         print('error :: failed to send %s data points to Horizon via pickle for %s' % (
                             str(tuples_added), metric))
+                        # @added 20260220 - Task #5711: Test Ubuntu 24.04
+                        #                   Task #5628: Build v5.0.0 and test
+                        sys.exit(1)
             if smallListOfMetricTuples:
                 tuples_to_send = len(smallListOfMetricTuples)
                 pickle_data_sent = pickle_data_to_horizon(settings.HORIZON_IP, settings.PICKLE_PORT, smallListOfMetricTuples)
@@ -253,6 +256,9 @@ def seed():
                 else:
                     print('error :: failed to send the last %s data points to Horizon via pickle for %s' % (
                         str(tuples_to_send), metric))
+                    # @added 20260220 - Task #5711: Test Ubuntu 24.04
+                    #                   Task #5628: Build v5.0.0 and test
+                    sys.exit(1)
 
     if not use_pickle:
         print('notice :: pushing 8665 datapoints over UDP to Horizon')
@@ -340,7 +346,7 @@ def seed():
         # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
         r = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        # r = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        # r = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
     else:
         r = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     time.sleep(3)
@@ -365,8 +371,8 @@ def seed():
             unpacker = msgpack.Unpacker(use_list=False)
             unpacker.feed(x)
             timeseries = list(unpacker)
-            print('info :: %s%s key exists and the time series has %s data points' % (
-                settings.FULL_NAMESPACE, metric, str(len(timeseries))))
+            print('info :: %s%s key exists and the time series has data' % (
+                settings.FULL_NAMESPACE, metric))
 
         # Ignore the mini namespace if OCULUS_HOST isn't set.
         if settings.OCULUS_HOST != "":

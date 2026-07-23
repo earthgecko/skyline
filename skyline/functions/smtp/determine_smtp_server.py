@@ -18,7 +18,7 @@ def determine_smtp_server():
         'port': 25,
         'ssl': False,
         'user': None,
-        'password': None,
+        'password': None,    # nosec
     }
     try:
         smtp_server['host'] = settings.SMTP_OPTS['smtp_server']['host']
