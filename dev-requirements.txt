@@ -651,7 +651,9 @@ pyparsing==3.3.2
 #Pillow==11.3.0
 # @modified 20260616 - Task #5627: v5.0.0 update dependencies
 # Pillow==12.1.1
-Pillow==12.2.0
+# @modified 20260723 - Task #5627: v5.0.0 update dependencies
+#Pillow==12.2.0
+Pillow==12.3.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -1844,3 +1846,7 @@ flask-session==0.8.0
 # declaring the last known non-conflicting version here commented out but for
 # dev reference
 #jupyter==1.1.1
+
+# @added 20260617 - Feature #5756: mariadb TLS/SSL support
+# For testing for when GA/Stable is released
+#mariadb==2.0.0rc2
