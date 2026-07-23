@@ -144,6 +144,7 @@ function fetchDataAndUpdateTable() {
                           const trained = item.trained;
                           const matched = item.matched;
                           const untrainable = item.untrainable;
+                          const learnt = item.learnt;
 
                           const trainButtonUrl = item.training_data_uri + "&api_train_request=true&add_fp=true&learn=false&label=none&format=json";
 
@@ -160,7 +161,7 @@ function fetchDataAndUpdateTable() {
 
 //                  console.log('message:', message);
 //                          if (matched !== true) {
-                          if (matched !== true && item.image != null) {
+                          if (matched !== true && item.image !== null) {
                             const image = document.createElement('img');
                             image.loading = 'lazy';
                             image.src = imageUrl;
@@ -169,7 +170,7 @@ function fetchDataAndUpdateTable() {
     //                          cell2.appendChild(image);
                             cell1.appendChild(image);
                           }
-                          if (item.short_period_image != null) {
+                          if (item.short_period_image !== null) {
                             const short_period_image = document.createElement('img');
                             short_period_image.loading = 'lazy';
                             short_period_image.src = short_period_imageUrl;
@@ -188,7 +189,12 @@ function fetchDataAndUpdateTable() {
                             button.textContent = 'Matched'; // Text displayed on the button
                             button.className = 'btn btn-success'; // Add Bootstrap button classes for styling  
                           } else {
-                            if (trained === true) {
+                            if (learnt === true) {
+                              button.href = training_data_uri;  // Set the URL for the button
+                              button.target = '_blank'; // Open in a new tab
+                              button.textContent = 'Already learnt and trained'; // Text displayed on the button
+                              button.className = 'btn btn-success'; // Add Bootstrap button classes for styling
+                            } else if (trained === true && learnt === false) {
                               button.href = training_data_uri;  // Set the URL for the button
                               button.target = '_blank'; // Open in a new tab
                               button.textContent = 'Already trained'; // Text displayed on the button
@@ -196,7 +202,7 @@ function fetchDataAndUpdateTable() {
                             } else if (untrainable === true) {
                               button.href = training_data_uri;  // Set the URL for the button
                               button.target = '_blank'; // Open in a new tab
-                              button.textContent = 'Insufficient date to train'; // Text displayed on the button
+                              button.textContent = 'Insufficient data to train'; // Text displayed on the button
                               button.className = 'btn btn-warning'; // Add Bootstrap button classes for styling
                             } else {
                               if (matched !== true && item.image != null) {

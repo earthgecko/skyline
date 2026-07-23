@@ -72,7 +72,6 @@ CREATE TABLE IF NOT EXISTS `ionosphere_minmax` (
 # Add resolution to ionosphere table
 */
 ALTER TABLE `ionosphere` ADD COLUMN `resolution` SMALLINT DEFAULT 0 COMMENT 'the resolution of the features profile' AFTER `full_duration`;
-COMMIT;
 
 /* @added 20240610 - Feature #5370: anomalies_updated
 #                    Feature #5352: vista - bigquery
@@ -142,17 +141,35 @@ DEALLOCATE PREPARE stmt;
 
 USE skyline;
 ALTER TABLE `ionosphere` ADD COLUMN `alias_id` INT(11) DEFAULT 0 COMMENT 'the alias_id of the alias_features_profile if it has one' AFTER `validated_user_id`;
-COMMIT;
 
 /*
 # @added 20241021 - Feature #5481: ionosphere.copy_features_profile
 #                   Feature #5479: ionosphere.alias_features_profile
 # Added alias_id to index
 */
+/*
+# @modified 20250122 - Feature #5592: tenant_id column in DB tables
+# No longer required as #5592 creates the index below
 ALTER TABLE `ionosphere` DROP INDEX `features_profile`;
-COMMIT;
 ALTER TABLE `ionosphere` ADD INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`,`validated`,`alias_id`);
-COMMIT;
+*/
+
+/*
+# @added 20250123 - Feature #5592: tenant_id column in DB tables
+# Add the tenant_id columns to tables
+*/
+ALTER TABLE `metrics` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric`;
+ALTER TABLE `metrics` ADD INDEX `tenant_id_idx` (tenant_id, id);
+ALTER TABLE `anomalies` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric_id`;
+ALTER TABLE `anomalies` ADD INDEX `tenant_time_idx` (tenant_id, anomaly_timestamp, id);
+ALTER TABLE `ionosphere` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric_id`;
+ALTER TABLE `ionosphere` ADD INDEX `tenant_id_idx` (tenant_id, id);
+ALTER TABLE `ionosphere_layers` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric_id`;
+ALTER TABLE `ionosphere_layers` ADD INDEX `tenant_id_idx` (tenant_id, id);
+ALTER TABLE `ionosphere_layers_matched` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric_id`;
+ALTER TABLE `ionosphere_layers_matched` ADD INDEX `tenant_time_idx` (tenant_id, anomaly_timestamp, id);
+ALTER TABLE `motifs_matched` ADD COLUMN `tenant_id` INT(11) DEFAULT 0 COMMENT 'the tenant_id that the metric belongs to, if 0 none' AFTER `metric_id`;
+ALTER TABLE `motifs_matched` ADD INDEX `tenant_time_idx` (tenant_id, metric_timestamp, id);
 
 INSERT INTO `sql_versions` (version) VALUES ('4.1.0');
 

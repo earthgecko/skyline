@@ -59,7 +59,7 @@ def alerts_matcher(base_name, pattern, alerter, second_order_resolution_hours):
         # Wildcard namespaces can be used as well
         ('metric4.thing.*.requests', 'stmp', 900),
         # However beware of wildcards as the above wildcard should really be
-        ('metric4.thing\..*.\.requests', 'stmp', 900),
+        ('metric4.thing\\..*.\\.requests', 'stmp', 900),
 
     .. todo: This fully
 

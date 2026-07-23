@@ -108,7 +108,13 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    # @modified 20260709 - Feature #5190: Add custom_algorithm results to Mirage and plots
+    # Set defaults
+    #results = {}
+    results = {
+        'anomalous': anomalous, 'anomalyScore': anomalyScore,
+        'anomalies': {}, 'scores': [], 'anomalyScore_list': [],
+    }
 
     current_logger = None
 
