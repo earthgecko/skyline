@@ -64,8 +64,11 @@ def insert_snab_results_algorithms(current_skyline_app, data):
         #new_row = dict(data)
         with engine.begin() as connection:
             result = connection.execute(ins)
-            _row = result.fetchone()
-            new_row = dict(_row._mapping) if _row is not None else None
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #_row = result.fetchone()
+            #new_row = dict(_row._mapping) if _row is not None else None
+            new_snab_id = result.inserted_primary_key[0]
+            new_row = dict(data)
 
     except Exception as err:
         current_logger.error('error :: %s :: could not insert into snab_results_algorithms_table: %s - %s' % (
