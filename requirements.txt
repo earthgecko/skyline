@@ -24,7 +24,7 @@ types-python-dateutil==2.9.0.20260408
 pytz==2025.2
 cycler==0.12.1
 pyparsing==3.3.2
-Pillow==12.2.0
+Pillow==12.3.0
 matplotlib==3.10.9
 pandas==3.0.2
 patsy==1.0.2
