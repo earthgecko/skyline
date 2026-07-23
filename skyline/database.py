@@ -48,11 +48,22 @@ def get_engine(current_skyline_app):
         if OTEL_ENABLED and current_skyline_app == 'webapp':
             from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
+        # @added 20260621 - Feature #5757: DB TLS/SSL support
+        PANORAMA_DB_SSL = {}
+        if getattr(settings, 'PANORAMA_DB_SSL', {}):
+            PANORAMA_DB_SSL = getattr(settings, 'PANORAMA_DB_SSL', {})
+            if len(PANORAMA_DB_SSL) > 0:
+                if 'use_pure' not in PANORAMA_DB_SSL.keys():
+                    PANORAMA_DB_SSL['use_pure'] = True
+
         engine = create_engine(
             'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (
                 settings.PANORAMA_DBUSER, settings.PANORAMA_DBUSERPASS,
                 settings.PANORAMA_DBHOST, str(settings.PANORAMA_DBPORT),
-                settings.PANORAMA_DATABASE))
+                settings.PANORAMA_DATABASE),
+                # @added 20260621 - Feature #5757: DB TLS/SSL support
+                connect_args=PANORAMA_DB_SSL,
+        )
 
         # @added 20220405 - Task #4514: Integrate opentelemetry
         #                   Feature #4516: flux - opentelemetry traces
@@ -75,7 +86,8 @@ def get_engine(current_skyline_app):
                 SQLAlchemyInstrumentor().instrument(
                     engine=engine,
                 )
-
+        # Note the returned message of 'got MySQL engine' is used in other
+        # places to verify, do not arbitrarily change.
         return engine, 'got MySQL engine', 'none'
     except:
         trace = traceback.format_exc()
