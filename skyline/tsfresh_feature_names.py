@@ -7,7 +7,10 @@ tsfresh_feature_names.py
 # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
 #                      Branch #5534: v0.20.3-skyline
 #TSFRESH_VERSION = '0.19.1'
-TSFRESH_VERSION = '0.20.3'
+# @modified 20250611 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5630: v0.21.9 (earthgecko/tsfresh)
+#TSFRESH_VERSION = '0.20.3'
+TSFRESH_VERSION = '0.21.9'
 """
 :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
     in terms of feature extraction baselines
@@ -20,7 +23,10 @@ TSFRESH_VERSION = '0.20.3'
 # TSFRESH_BASELINE_VERSION = '0.17.9'
 # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
 #                      Branch #5534: v0.20.3-skyline
-TSFRESH_BASELINE_VERSION = '0.19.1'
+# @modified 20250611 - Task #5627: v5.0.0 update dependencies
+#                      Branch #5630: v0.21.9 (earthgecko/tsfresh)
+#TSFRESH_BASELINE_VERSION = '0.19.1'
+TSFRESH_BASELINE_VERSION = '0.20.3'
 
 """
 :var TSFRESH_BASELINE_VERSION: The version of tsfresh that was used to generate
