@@ -24,6 +24,9 @@ import copy
 # @added 20230706 - Feature #4988: Allow snab to return and save results
 import json
 
+# @added 20260624 - Feature #5198: flux - tornado
+import requests
+
 import settings
 from skyline_functions import (
     # @modified 20220726 - Task #2732: Prometheus to Skyline
@@ -537,13 +540,89 @@ class SNAB(Thread):
                     custom_algorithm_dict['return_results'] = return_results
                     custom_algorithm_dict['return_anomalies'] = return_results
 
-                # @modified 20230706 - Feature #4988: Allow snab to return and save results
-                # Allow results to be returned
-                # anomalous, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
-                if return_results:
-                    anomalous, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
-                else:
-                    anomalous, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
+                # @added 20260624 - Feature #5198: flux - tornado
+                results = {}
+                use_tornado = False
+                if 'tornado_url' in custom_algorithm_dict['algorithm_parameters'].keys():
+                    tornado_url = custom_algorithm_dict['algorithm_parameters']['tornado_url']
+                    if 'tornado_api_key' in custom_algorithm_dict['algorithm_parameters'].keys():
+                        use_tornado = True
+                if use_tornado:
+                    try:
+                        logger.info('using tornado for %s' % algorithm)
+                        headers = {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        }
+                        tornado_url = '%s?algorithm=%s' % (str(tornado_url), algorithm)
+                        algorithm_dict = copy.deepcopy(custom_algorithm_dict)
+                        algorithm_parameters = copy.deepcopy(custom_algorithm_dict['algorithm_parameters'])
+                        algorithm_parameters['tornado_url'] = tornado_url
+                        algorithm_parameters['skyline_app'] = skyline_app
+                        flux_tornado_dict = {
+                            'key': custom_algorithm_dict['algorithm_parameters']['tornado_api_key'],
+                            'algorithm': algorithm,
+                            'skyline_app': skyline_app,
+                            'base_name': base_name,
+                            'timeseries': timeseries,
+                            'algorithm_dict': algorithm_dict,
+                            'algorithm_parameters': algorithm_parameters,
+                        }
+                        try:
+                            max_exec_time = int(max_execution_time)
+                        except:
+                            max_exec_time = 15
+                        r = None
+                        try:
+                            use_timeout = (10, max_exec_time)
+                            r = requests.post(tornado_url, data=json.dumps(flux_tornado_dict), headers=headers, timeout=use_timeout)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to get response from %s, err: %s' % (
+                                str(tornado_url), err))
+                            # failover and use the custom_algorithm directly
+                            use_tornado = False
+                            logger.info('%s will be used directly seeing as tornado failed' % algorithm)
+                        response = None
+                        if r:
+                            try:
+                                response = r.json()
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: mirage_algorithms :: failed to parse json response from %s, err: %s' % (
+                                    str(tornado_url), err))
+                                # failover and use the custom_algorithm directly
+                                use_tornado = False
+                                logger.info('%s will be used directly seeing as tornado failed' % algorithm)
+                        if response:
+                            try:
+                                anomalous = response['data']['anomalous']
+                                anomalyScore = response['data']['anomalyScore']
+                                results = response['data']['results']
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to get expected element from response json from %s, err: %s' % (
+                                    str(tornado_url), err))
+                                # failover and use the custom_algorithm directly
+                                use_tornado = False
+                                logger.info('%s will be used directly seeing as tornado failed' % algorithm)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get expected element from response json from %s, err: %s' % (
+                            str(tornado_url), err))
+
+                # @modified 20260624 - Feature #5198: flux - tornado
+                # Only run run_custom_algorithm_on_timeseries if tornado is not
+                # used
+                if not use_tornado:
+
+                    # @modified 20230706 - Feature #4988: Allow snab to return and save results
+                    # Allow results to be returned
+                    # anomalous, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
+                    if return_results:
+                        anomalous, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
+                    else:
+                        anomalous, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, algorithm, custom_algorithm_dict, DEBUG_CUSTOM_ALGORITHMS)
 
                 if anomalous:
                     logger.info('anomaly detected :: with %s on %s with %s at %s' % (

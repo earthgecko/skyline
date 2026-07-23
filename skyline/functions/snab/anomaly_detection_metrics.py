@@ -131,14 +131,14 @@ def anomaly_detection_metrics(current_skyline_app, algorithm=None, tP=None, fP=N
             try:
                 fN_rate = round((fN / (tP + fN)), 4)
             except Exception as err:
-                current_logger.info('%s :: cannot calculate fN_rate for: %s, %s / (%s + %s)' % (
-                    function_str, str(algorithm), str(fN), str(fN), str(tP)))
+                current_logger.info('%s :: cannot calculate fN_rate for: %s, %s / (%s + %s), err: %s' % (
+                    function_str, str(algorithm), str(fN), str(fN), str(tP), err))
                 fN_rate = None
             results['fN_rate'] = fN_rate
         if isinstance(fN, int):
             if fN == 0:
                 fN_rate = 0.0
-                results['fN_rate'] = round(fP_rate, 4)
+                results['fN_rate'] = round(fN_rate, 4)
         current_logger.info('%s :: fN_rate: %s for: %s' % (
             function_str, str(fN_rate), str(algorithm)))
     if isinstance(tP, int):
