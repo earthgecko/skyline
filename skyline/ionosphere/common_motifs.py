@@ -2736,7 +2736,7 @@ class MotifRemoval(Thread):
                 if 'fp_timeseries' in log_work_dict.keys():
                     log_work_dict['fp_timeseries'] = 'fp_timeseries redacted for log'
                 if 'password' in log_work_dict.keys():
-                    log_work_dict['password'] = 'redacted for log'
+                    log_work_dict['password'] = 'redacted for log'  # nosec
 
                 logger.info('%s :: processing work_dict: %s' % (app_module, str(log_work_dict)))
                 del log_work_dict

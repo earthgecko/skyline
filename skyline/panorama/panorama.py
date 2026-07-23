@@ -516,7 +516,7 @@ class Panorama(Thread):
                             # @added 20251009 - Bug #5522: Handle duplicate metric names
                             # Set as active if inactive
                             if row['inactive']:
-                                logger.info('will update %s, metric id: %s to active as is set to inactive' % (
+                                logger.info('will set %s, metric id: %s to active as is set to inactive' % (
                                     metric_name, str(known_metric_id)))
                                 metric_ids_to_reactivate.append(known_metric_id)
 
@@ -2006,6 +2006,25 @@ class Panorama(Thread):
         except Exception as err:
             logger.error('error :: spin_process :: could not get a MySQL engine - %s' % err)
             engine = None
+
+        # @added 20260621 - Feature #5757: DB TLS/SSL support
+        with_ssl = False
+        if getattr(settings, 'PANORAMA_DB_SSL', {}):
+            PANORAMA_DB_SSL = getattr(settings, 'PANORAMA_DB_SSL', {})
+            if len(PANORAMA_DB_SSL) > 0:
+                with_ssl = True
+        logger.info('spin_process :: connected to DB (with_ssl: %s)' % str(with_ssl))
+        if with_ssl:
+            try:
+                with engine.connect() as connection:  
+                    raw_connection = connection.connection  
+                    logger.info('spin_process :: DB connection - is_secure: %s, _ssl_active: %s' % (
+                        str(raw_connection.is_secure), str(raw_connection._ssl_active)))
+            except Exception as err:
+                logger.error(
+                    'error :: spin_process :: failed to determine if DB connection is secure and SSL encrypted, err: %s' % (
+                        err))
+
         hosts_table = None
         apps_table = None
         sources_table = None
