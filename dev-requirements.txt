@@ -1357,7 +1357,9 @@ slack_sdk==3.41.0
 #aiohttp==3.13.3
 # @modified 20260616 - Task #5627: v5.0.0 update dependencies
 #aiohttp==3.13.5
-aiohttp==3.14.1
+# @modified 20260616 - Task #5627: v5.0.0 update dependencies
+#aiohttp==3.14.1
+aiohttp==3.14.3
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
