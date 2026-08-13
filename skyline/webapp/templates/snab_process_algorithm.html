@@ -76,15 +76,16 @@
 	  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">process_algorithm</span></span></h4>
 
     <br>
-    You can run SNAB with a custom_algorithm and reprocess anomalies which have
-    already been evaluated via SNAB.  There must be evaluations on an
-    algorithm_group to be able to do this.  This means SNAB checks must have
-    been run for Analyzer or Mirage and evaluations made for SNAB to be able to
-    run each data set through the algorithm and automatically assign an
-    evaluation for the algorithm based on the result and the previous evaluation.
+    You can run SNAB with a custom_algorithm and process anomalies which have
+    already been evaluated via SNAB with another or new algorithm.  There must
+    be evaluations on an algorithm_group to be able to do this.  This means SNAB
+    checks must have been run for Analyzer or Mirage and evaluations made for
+    SNAB to be able to run each data set through the algorithm and automatically
+    assign an evaluation for the algorithm based on the result and the previous
+    evaluation.
     There are 3 requirements:<br>
     1. The custom_algorithm must be defined in <code>settings.VORTEX_ALGORITHMS</code> to be listed below.<br>
-    2. The custom_algorithm must have been run so that it has an algorithm id<br>
+    2. The custom_algorithm must have been run so that it has an algorithm id, just run it once with Vortex.<br>
     3. SNAB evaluations <strong>must</strong> have been done on at least one algorithm group.
     <br>
 
