@@ -5479,6 +5479,16 @@ class Metrics_Manager(Thread):
                                     if last_known_metric_resolution == 60 and metric_resolution < 60:
                                         metric_resolution = 60
                                         update_value = False
+
+                                    # @added 20260810 - Feature #4148: analyzer.metrics_manager.resolutions
+                                    # Keep the sane value
+                                    if update_value and metric_resolution < 15:
+                                        metric_resolution = 60
+                                        if last_known_metric_resolution == 60:
+                                            update_value = False
+                                    if str(metric_resolution) == str(last_known_metric_resolution):
+                                        update_value = False
+
                                     if update_value:
                                         logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
                                             base_name, str(last_known_metric_resolution),
@@ -5832,6 +5842,15 @@ class Metrics_Manager(Thread):
                             if update_metrics_resolutions_key:
                                 update_metrics_resolutions_key = False
                             metrics_with_unknown_resolution.append(base_name)
+
+                        # @added 20260810 - Feature #4148: analyzer.metrics_manager.resolutions
+                        # Keep the sane value
+                        if update_metrics_resolutions_key:
+                            if last_known_metric_resolution is not None:
+                                if metric_resolution < 15:
+                                    metric_resolution = 60
+                                    if last_known_metric_resolution == 60:
+                                        update_metrics_resolutions_key = False
 
                         if update_metrics_resolutions_key:
                             if last_known_metric_resolution is not None:
