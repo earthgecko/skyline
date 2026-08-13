@@ -802,25 +802,44 @@ class SNAB(Thread):
                 while try_get_snab_id_redis_key_count < check_count:
                     try_get_snab_id_redis_key_count += 1
                     try:
-                        snab_id = int(self.redis_conn_decoded.get(snab_id_redis_key))
+                        # @modified 20260809 - Feature #5588: snab.process_algorithm
+                        # Do not cast as int and update except logic
+                        #snab_id = int(self.redis_conn_decoded.get(snab_id_redis_key))
+                        snab_id = self.redis_conn_decoded.get(snab_id_redis_key)
                         if snab_id:
-                            logger.info('determined snab_id: %s for anomaly_id: %s' % (
-                                str(snab_id), str(anomaly_id)))
-                        break
-                    except:
+                            snab_id = int(snab_id)
+                            logger.info('determined snab_id: %s for anomaly_id: %s from %s' % (
+                                str(snab_id), str(anomaly_id), snab_id_redis_key))
+                            # @added 20260809 - Feature #5588: snab.process_algorithm
+                            # Added the break here and sleep
+                            break
+                        else:
+                            sleep(1)
+                        # @modified 20260809 - Feature #5588: snab.process_algorithm
+                        # Removed this and reverted to the original sleep so
+                        # that the original result is not updated
+                        # break
+                    # @modified 20260809 - Feature #5588: snab.process_algorithm
+                    #except:
+                    except Exception as err:
                         # @modified 20251006 - Feature #5588: snab.process_algorithm
 # THIS CHANGE DID NOT HAVE THE DESIRED RESULTS the things were processed but
 # the process_algorithm function is a reprocess and update results process at the
 # moment not a process a new algorithm
                         #sleep(1)
-                        try:
-                            snab_id = original_check_details['original_snab_result']['id']
-                            if snab_id:
-                                logger.info('determined snab_id: %s for anomaly_id: %s' % (
-                                    str(snab_id), str(anomaly_id)))
-                            break
-                        except:
-                            sleep(1)
+                        # @modified 20260809 - Feature #5588: snab.process_algorithm
+                        # Removed this and reverted to the original sleep so
+                        # that the original result is not updated
+                        #try:
+                        #    snab_id = original_check_details['original_snab_result']['id']
+                        #    if snab_id:
+                        #        logger.info('determined snab_id: %s for anomaly_id: %s' % (
+                        #            str(snab_id), str(anomaly_id)))
+                        #    break
+                        #except:
+                        #    sleep(1)
+                        logger.error('error :: failed to get Redis key - %s to determine snab_id, err:%s' % (
+                            snab_id_redis_key, err))
                 if not snab_id:
                     logger.error('error :: failed to determine snab_id from Redis key - %s' % snab_id_redis_key)
                     if send_to_slack:
