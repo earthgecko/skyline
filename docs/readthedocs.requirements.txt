@@ -245,7 +245,7 @@ MarkupSafe==3.0.3
 # @modified 20260426 - Task #5713: Test CentOS Stream 10
 #                      Task #5627: v5.0.0 update dependencies
 #Werkzeug==3.1.6
-Werkzeug==3.1.8
+Werkzeug==3.1.9
 
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
